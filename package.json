@@ -3,19 +3,28 @@
 	"name": "radicle-vscode-extension",
 	"displayName": "radicle-vscode-extension",
 	"description": "Radicle extension for VS Code",
-	"keywords": ["radicle", "vscode", "extension", "maninak"],
+	"keywords": [
+		"radicle",
+		"vscode",
+		"extension",
+		"maninak"
+	],
 	"publisher": "Radicle IDE Plugins Team",
 	"author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
-  "contributors": ["Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"],
-  "license": "Apache-2.0",
+	"contributors": [
+		"Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
+	],
+	"license": "Apache-2.0",
 	"repository": "https://github.com/cytechmobile/radicle-vscode-extension",
 	"bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
 	"engines": {
 		"vscode": "^1.74.0"
 	},
-	"categories": ["Other"],
+	"categories": [
+		"Other"
+	],
 	"scripts": {
-    "preinstall": "npx -y only-allow pnpm",
+		"preinstall": "npx -y only-allow pnpm",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc",
 		"lint": "eslint \"src/**/*.ts\"",
@@ -37,7 +46,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.42.0",
 		"@typescript-eslint/parser": "^5.42.0",
 		"eslint": "^8.26.0",
-		"typescript": "^4.8.4"
+		"typescript": "^4.9.4"
 	},
 	"private": true
 }
