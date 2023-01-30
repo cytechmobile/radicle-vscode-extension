@@ -17,9 +17,9 @@
 	"scripts": {
     "preinstall": "npx -y only-allow pnpm",
 		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
+		"compile": "tsc",
 		"lint": "eslint \"src/**/*.ts\"",
-		"watch": "tsc -watch -p ./"
+		"watch": "tsc -watch"
 	},
 	"main": "./out/extension.js",
 	"activationEvents": [],

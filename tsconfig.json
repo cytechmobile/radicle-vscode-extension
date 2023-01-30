@@ -2,11 +2,20 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "es2020",
-		"lib": ["es2020"],
-		"outDir": "out",
+    "isolatedModules": true,
 		"sourceMap": true,
-		"strict": true,
-		"rootDir": "src"
+		"outDir": "out",
+		"rootDir": "src",
+		"strict":true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+		"forceConsistentCasingInFileNames": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"importsNotUsedAsValues": "error",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src*"],
+    },
 	},
-	"exclude": ["node_modules", ".vscode-test"]
+	"exclude": ["node_modules", ".vscode-test"],
 }
