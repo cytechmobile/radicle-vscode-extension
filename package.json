@@ -22,6 +22,7 @@
 		]
 	},
 	"scripts": {
+    "preinstall": "npx -y only-allow pnpm",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint \"src/**/*.ts\"",
