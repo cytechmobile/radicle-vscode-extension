@@ -1,5 +1,9 @@
+# build artifacts
 dist
+
+# dependency management
 node_modules
-package-lock.json
+
+# unknown, inherited from starter template
 .vscode-test/
 *.vsix
