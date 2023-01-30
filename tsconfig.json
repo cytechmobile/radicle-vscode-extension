@@ -16,6 +16,8 @@
     "paths": {
       "~/*": ["./src*"],
     },
+    "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
 	},
 	"exclude": ["node_modules", ".vscode-test"],
 }
