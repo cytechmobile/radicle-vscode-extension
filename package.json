@@ -1,18 +1,28 @@
 {
-	"name": "helloworld-sample",
-	"displayName": "helloworld-sample",
-	"description": "HelloWorld example for VS Code",
 	"version": "0.0.1",
-	"publisher": "vscode-samples",
-	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-sample",
+	"name": "radicle-vscode-extension",
+	"displayName": "radicle-vscode-extension",
+	"description": "Radicle extension for VS Code",
+	"keywords": ["radicle", "vscode", "extension", "maninak"],
+	"publisher": "Radicle IDE Plugins Team",
+	"author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
+  "contributors": ["Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"],
+  "license": "Apache-2.0",
+	"repository": "https://github.com/cytechmobile/radicle-vscode-extension",
+	"bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
 	"engines": {
 		"vscode": "^1.74.0"
 	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [],
+	"categories": ["Other"],
+	"scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\"",
+		"watch": "tsc -watch -p ./"
+	},
 	"main": "./out/extension.js",
+	"activationEvents": [],
 	"contributes": {
 		"commands": [
 			{
@@ -21,13 +31,6 @@
 			}
 		]
 	},
-	"scripts": {
-    "preinstall": "npx -y only-allow pnpm",
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"lint": "eslint \"src/**/*.ts\"",
-		"watch": "tsc -watch -p ./"
-	},
 	"devDependencies": {
 		"@types/node": "^16.11.7",
 		"@types/vscode": "^1.73.0",
@@ -35,5 +38,6 @@
 		"@typescript-eslint/parser": "^5.42.0",
 		"eslint": "^8.26.0",
 		"typescript": "^4.8.4"
-	}
+	},
+	"private": true
 }
