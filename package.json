@@ -29,7 +29,7 @@
 		"vscode:prepublish": "npm run verify-deps && npm run test && npm run lint && npm run build",
 		"verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
 		"build": "tsc",
-		"dev": "npm run verify-deps && npm run build -- -watch",
+		"dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
 		"test": "echo \"Testing not yet implemented.\"",
 		"lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
 	},

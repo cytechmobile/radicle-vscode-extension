@@ -3,7 +3,6 @@
 		"module": "commonjs",
 		"target": "es2020",
     "isolatedModules": true,
-		"sourceMap": true,
 		"outDir": "dist",
 		"rootDir": "src",
 		"strict": true,
