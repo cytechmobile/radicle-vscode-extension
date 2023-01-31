@@ -1,60 +1,60 @@
 {
-	"version": "0.0.1",
-	"name": "radicle-vscode-extension",
-	"displayName": "radicle-vscode-extension",
-	"description": "Radicle extension for VS Code",
-	"keywords": [
-		"radicle",
-		"vscode",
-		"extension",
-		"maninak"
-	],
-	"publisher": "Radicle IDE Plugins Team",
-	"author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
-	"contributors": [
-		"Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
-	],
-	"license": "Apache-2.0",
-	"repository": "https://github.com/cytechmobile/radicle-vscode-extension",
-	"bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
-	"engines": {
-		"vscode": "^1.74.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"scripts": {
-		"preinstall": "npx -y only-allow pnpm",
-		"prepare": "husky install",
-		"vscode:prepublish": "npm run verify-deps && npm run test && npm run lint && npm run build",
-		"verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
-		"build": "tsc",
-		"dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
-		"test": "echo \"Testing not yet implemented.\"",
-		"lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
-	},
-	"main": "./dist/extension.js",
-	"activationEvents": [],
-	"contributes": {
-		"commands": [
-			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
-			}
-		]
-	},
-	"lint-staged": {
-		"*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
-	},
-	"devDependencies": {
-		"@types/node": "^18.11.18",
-		"@types/vscode": "^1.74.0",
-		"@typescript-eslint/eslint-plugin": "^5.49.0",
-		"@typescript-eslint/parser": "^5.49.0",
-		"eslint": "^8.33.0",
-		"husky": "^8.0.3",
-		"lint-staged": "^13.1.0",
-		"typescript": "^4.9.4"
-	},
-	"private": true
+  "version": "0.0.1",
+  "name": "radicle-vscode-extension",
+  "displayName": "radicle-vscode-extension",
+  "description": "Radicle extension for VS Code",
+  "keywords": [
+    "radicle",
+    "vscode",
+    "extension",
+    "maninak"
+  ],
+  "publisher": "Radicle IDE Plugins Team",
+  "author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
+  "contributors": [
+    "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
+  ],
+  "license": "Apache-2.0",
+  "repository": "https://github.com/cytechmobile/radicle-vscode-extension",
+  "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+    "prepare": "husky install",
+    "vscode:prepublish": "npm run verify-deps && npm run test && npm run lint && npm run build",
+    "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "build": "tsc",
+    "dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
+    "test": "echo \"Testing not yet implemented.\"",
+    "lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.33.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.0",
+    "typescript": "^4.9.4"
+  },
+  "private": true
 }

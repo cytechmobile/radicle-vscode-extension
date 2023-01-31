@@ -1,22 +1,22 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2020",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
     "isolatedModules": true,
-		"outDir": "dist",
-		"rootDir": "src",
-		"strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
-		"forceConsistentCasingInFileNames": true,
-		"noPropertyAccessFromIndexSignature": true,
-		"importsNotUsedAsValues": "error",
+    "forceConsistentCasingInFileNames": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "importsNotUsedAsValues": "error",
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src*"],
     },
     "incremental": true,
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
-	},
-	"exclude": ["node_modules", ".vscode-test"],
+  },
+  "exclude": ["node_modules", ".vscode-test"],
 }
