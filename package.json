@@ -30,7 +30,7 @@
 		"build": "npm run verify-deps && tsc",
 		"dev": "npm run verify-deps && tsc -watch",
 		"test": "echo \"Testing not yet implemented.\"",
-		"lint": "eslint \"src/**/*.ts\""
+		"lint": "eslint \"src/**/*.ts\" --cache --cache-location node_modules/.cache/eslint"
 	},
 	"main": "./dist/extension.js",
 	"activationEvents": [],
