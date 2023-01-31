@@ -25,10 +25,12 @@
 	],
 	"scripts": {
 		"preinstall": "npx -y only-allow pnpm",
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc",
-		"lint": "eslint \"src/**/*.ts\"",
-		"watch": "tsc -watch"
+		"vscode:prepublish": "npm run build && npm run test && npm run lint",
+		"verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
+		"build": "npm run verify-deps && tsc",
+		"dev": "npm run verify-deps && tsc -watch",
+		"test": "echo \"Testing not yet implemented.\"",
+		"lint": "eslint \"src/**/*.ts\""
 	},
 	"main": "./dist/extension.js",
 	"activationEvents": [],

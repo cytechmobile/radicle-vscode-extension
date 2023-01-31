@@ -5,7 +5,7 @@
 {
 	"version": "0.2.0",
 	"configurations": [{
-			"name": "Run Extension",
+			"name": "Develop Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "npm: dev"
 		}
 	]
 }
