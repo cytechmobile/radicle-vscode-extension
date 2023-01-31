@@ -8,7 +8,11 @@ specifiers:
   eslint: ^8.33.0
   husky: ^8.0.3
   lint-staged: ^13.1.0
+  rimraf: ^4.1.2
   typescript: ^4.9.4
+
+dependencies:
+  rimraf: 4.1.2
 
 devDependencies:
   '@types/node': 18.11.18
@@ -1092,6 +1096,12 @@ packages:
     dependencies:
       glob: 7.2.3
     dev: true
+
+  /rimraf/4.1.2:
+    resolution: {integrity: sha512-BlIbgFryTbw3Dz6hyoWFhKk+unCcHMSkZGrTFVAx2WmttdBSonsdtRlwiuTbDqTKr+UlXIUqJVS4QT5tUzGENQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: false
 
   /run-parallel/1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}

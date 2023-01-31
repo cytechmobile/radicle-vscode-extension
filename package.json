@@ -28,7 +28,7 @@
     "prepare": "husky install",
     "vscode:prepublish": "npm run verify-deps && npm run test && npm run lint && npm run build",
     "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
-    "build": "tsc",
+    "build": "rimraf dist/* && tsc",
     "dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
     "test": "echo \"Testing not yet implemented.\"",
     "lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
@@ -45,6 +45,9 @@
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
+  },
+  "dependencies": {
+    "rimraf": "^4.1.2"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
