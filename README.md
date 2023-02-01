@@ -19,12 +19,12 @@ pnpm install a-new-pkg # if this is what you need to do
 npx pnpm install a-new-pkg # you can achieve it like this
 ```
 
-## Launching for Local Development
+## Launching For Local Development
 
-Run the `Develop Extension` target in the "Run and Debug" view. This will:
+Run the `Develop Extension` configuration in the "Run and Debug" view. This will:
 
-- start the task `npm: dev` to compile the source code and watch it for changes
+- start the task `npm: dev` to compile the source code and watch for code changes
 - launch a new VS Code window with the extension running in it
-- show the console output, including any errors in a new terminal `dev:Task`
+- show the console output, including any errors in a new terminal named `dev`
 
->Tip: Press `F5` to launch again
+>Tip: Or just press `F5` to achieve the same thing
