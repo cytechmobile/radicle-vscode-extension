@@ -14,7 +14,7 @@
   "contributors": [
     "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
   ],
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN ./LICENSE",
   "repository": "https://github.com/cytechmobile/radicle-vscode-extension",
   "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
   "engines": {
