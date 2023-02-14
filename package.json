@@ -38,8 +38,22 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.helloWorld",
-        "title": "Hello World"
+        "command": "extension.push",
+        "title": "Push working copy version to the network",
+        "shortTitle": "Push",
+        "category": "Radicle"
+      },
+      {
+        "command": "extension.pull",
+        "title": "Pull latest version from the network and apply onto working copy",
+        "shortTitle": "Pull",
+        "category": "Radicle"
+      },
+      {
+        "command": "extension.sync",
+        "title": "Synchronize working copy's and network's versions",
+        "shortTitle": "Sync",
+        "category": "Radicle"
       }
     ]
   },

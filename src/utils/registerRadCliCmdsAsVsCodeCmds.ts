@@ -1,0 +1,25 @@
+import * as vscode from 'vscode';
+import { exec } from '.';
+
+/**
+ * Helper for registering multiple rad cli commands as a vscode command to be
+ * available in VS Code's command palette.
+ *
+ * EXAMPLE:
+ * ```ts
+ * registerRadCliCmdsAsVsCodeCmds(['push', 'pull'], context);
+ * ```
+ *
+ * @param {string[]} cmds - string[] - an array of strings, each being a command name
+ * @param context - vscode.ExtensionContext
+ */
+export function registerRadCliCmdsAsVsCodeCmds(
+  cmds: readonly string[],
+  context: vscode.ExtensionContext,
+) {
+  cmds.forEach(cmd =>
+    context.subscriptions.push(
+      vscode.commands.registerCommand(`extension.${cmd}`, () => exec(`rad ${cmd}`))
+    )
+  );
+}
