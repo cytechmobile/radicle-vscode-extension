@@ -9,7 +9,7 @@
       "detail": "Launch extension for local development in a new (host) VS Code window.",
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
-      "presentation": { "reveal": "always" },
+      "presentation": { "reveal": "silent" },
       "group": {
         "kind": "build",
         "isDefault": true,
