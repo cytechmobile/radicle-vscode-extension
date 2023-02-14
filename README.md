@@ -1,6 +1,6 @@
 # radicle-vscode-extension
 
-Radicle extension for VS Code
+A VS Code extension adding support for the Radicle network to your IDE.
 
 ## Contributing
 
