@@ -1,9 +1,10 @@
 import type { ExtensionContext } from 'vscode';
 import { radCliCmdsToRegisterInVsCode } from './constants';
-import { registerRadCliCmdsAsVsCodeCmds } from './utils';
+import { log, registerRadCliCmdsAsVsCodeCmds } from './utils';
+import { version, name } from '../package.json';
 
 export function activate(context: ExtensionContext) {
   registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode, context);
 
-  console.info('radicle-vscode-extension is activated');
+  log(`Extension "${name}" v${version} activated.`, 'info');
 }
