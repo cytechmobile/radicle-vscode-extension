@@ -7,7 +7,7 @@ import { exec } from '.';
  *
  * EXAMPLE:
  * ```ts
- * registerRadCliCmdsAsVsCodeCmds(['push', 'pull'], context);
+ * registerRadCliCmdsAsVsCodeCmds(['push', 'pull'], context)
  * ```
  *
  * @param {string[]} cmds - string[] - an array of strings, each being a command name

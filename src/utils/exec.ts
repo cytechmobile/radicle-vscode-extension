@@ -1,5 +1,6 @@
 import { exec as execNative } from 'child_process';
 import * as vscode from 'vscode';
+import { log } from '.';
 
 function getWorkspaceDir(): string {
   const dir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -27,7 +28,7 @@ function execBase(cmd: string): Promise<string> {
  *
  * EXAMPLE:
  * ```ts
- * exec('echo "hello shell :)"');
+ * exec('echo "hello shell :)"')
  * ```
  *
  * @param {string} cmd - The shell command to execute.
@@ -49,7 +50,9 @@ export async function exec(
 
     const stdOut = await execBase(finalCmd);
 
-    options.shouldLog && vscode.window.showInformationMessage(stdOut);
+    if (options.shouldLog) {
+      log(stdOut, 'info', cmd);
+    }
   } catch (error) {
     const parsedError = typeof error === 'string'
       ? error
@@ -58,8 +61,9 @@ export async function exec(
         : `Failed executing shell command: "${cmd}"`;
 
     if (options.shouldLog) {
-      vscode.window.showErrorMessage(parsedError);
+      log(parsedError, 'error', cmd);
     } else {
+      // will show up in the Debug console during development
       console.error(parsedError);
     }
   }
