@@ -36,23 +36,26 @@ function execBase(cmd: string): Promise<string> {
  */
 export async function exec(
   cmd: string,
-  options: {
+  options?: {
     execInWorkspaceDir?: boolean
     shouldLog?:boolean,
-  } = {
-    execInWorkspaceDir: true,
-    shouldLog: true,
+    onSuccess?: (ctx: { cmd: string, stdOut: string }) => void,
+    onError?: (ctx: { cmd: string, parsedError: string }) => void,
   }): Promise<void> {
+  const opts = options ?? {};
+
   try {
-    const finalCmd = options.execInWorkspaceDir
+    const finalCmd = opts.execInWorkspaceDir ?? true
       ? `cd "${getWorkspaceDir()}" && ${cmd}`
       : cmd;
 
     const stdOut = await execBase(finalCmd);
 
-    if (options.shouldLog) {
+    if (opts.shouldLog ?? true) {
       log(stdOut, 'info', cmd);
     }
+
+    opts.onSuccess?.({ cmd, stdOut});
   } catch (error) {
     const parsedError = typeof error === 'string'
       ? error
@@ -60,11 +63,13 @@ export async function exec(
         ? error.message
         : `Failed executing shell command: "${cmd}"`;
 
-    if (options.shouldLog) {
+    if (opts.shouldLog ?? true) {
       log(parsedError, 'error', cmd);
     } else {
       // will show up in the Debug console during development
       console.error(parsedError);
     }
+
+    opts.onError?.({ cmd, parsedError });
   }
 }

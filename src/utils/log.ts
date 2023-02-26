@@ -31,3 +31,12 @@ export function log(
 
   outputLog.appendLine(logEntry);
 }
+
+/**
+ * Shows the extension's log in VS Code's Output panel.
+ *
+ * @param [shouldFocusOutput=true] - If false, the output window will not be focused.
+ */
+export function showLog(shouldFocusOutput = true) {
+  outputLog.show(!shouldFocusOutput);
+}
