@@ -12,7 +12,7 @@ const showOutput = 'Show output';
  * registerRadCliCmdsAsVsCodeCmds(['push', 'pull'], context)
  * ```
  *
- * @param {string[]} cmds - string[] - an array of strings, each being a command name
+ * @param {string[]} cmds - string[] - a list of a command names
  * @param context - vscode.ExtensionContext
  */
 export function registerRadCliCmdsAsVsCodeCmds(
