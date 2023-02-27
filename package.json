@@ -54,6 +54,12 @@
         "title": "Synchronize working copy's and network's versions",
         "shortTitle": "Sync",
         "category": "Radicle"
+      },
+      {
+        "command": "extension.showExtensionLog",
+        "title": "Show everything the extension has logged",
+        "shortTitle": "Extension log",
+        "category": "Radicle"
       }
     ]
   },

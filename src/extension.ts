@@ -1,10 +1,9 @@
 import type { ExtensionContext } from 'vscode';
-import { radCliCmdsToRegisterInVsCode } from './constants';
-import { log, registerRadCliCmdsAsVsCodeCmds } from './utils';
+import { log, registerAllCommands } from './utils';
 import { version, name } from '../package.json';
 
-export function activate(context: ExtensionContext) {
-  registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode, context);
+export function activate(ctx: ExtensionContext) {
+  registerAllCommands(ctx);
 
   log(`Extension "${name}" v${version} activated.`, 'info');
 }
