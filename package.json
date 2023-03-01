@@ -61,6 +61,30 @@
         "shortTitle": "Extension log",
         "category": "Radicle"
       }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "radicle",
+          "title": "Radicle",
+          "icon": "./assets/radicle-logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "radicle": [
+        {
+          "id": "rad-commands",
+          "name": "rad CLI Commands",
+          "icon": "./assets/radicle-logo.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "rad-commands",
+        "contents": "Use the buttons below to perform basic interactions with the Radicle network.\n[$(repo-push) Push](command:extension.push)\n[$(repo-pull) Pull](command:extension.pull)\n[$(sync) Sync](command:extension.sync)\nNOTE:\nIn order to use Radicle commands you need to have rad CLI installed on your machine and have the current worskpace published on the Radicle network.\nTo learn more, please follow the [Getting Started Guide](https://radicle.xyz/get-started.html)."
+      }
     ]
   },
   "lint-staged": {
