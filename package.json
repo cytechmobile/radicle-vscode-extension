@@ -67,7 +67,7 @@
         {
           "id": "radicle",
           "title": "Radicle",
-          "icon": "./assets/radicle-logo.svg"
+          "icon": "$(radicle-logo)"
         }
       ]
     },
@@ -76,16 +76,53 @@
         {
           "id": "rad-commands",
           "name": "rad CLI Commands",
-          "icon": "./assets/radicle-logo.svg"
+          "icon": "$(radicle-logo)"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "rad-commands",
-        "contents": "Use the buttons below to perform basic interactions with the Radicle network.\n[$(repo-push) Push](command:extension.push)\n[$(repo-pull) Pull](command:extension.pull)\n[$(sync) Sync](command:extension.sync)\nNOTE:\nIn order to use Radicle commands you need to have rad CLI installed on your machine and have the current worskpace published on the Radicle network.\nTo learn more, please follow the [Getting Started Guide](https://radicle.xyz/get-started.html)."
+        "contents": "Use the buttons below to perform basic interactions with the Radicle network.\n[$(rad-push) Push](command:extension.push)\n[$(rad-pull) Pull](command:extension.pull)\n[$(rad-sync) Sync](command:extension.sync)\nNOTE:\nIn order to use Radicle commands you need to have rad CLI installed on your machine and have the current worskpace published on the Radicle network.\nTo learn more, please follow the [Getting Started Guide](https://radicle.xyz/get-started.html)."
       }
-    ]
+    ],
+    "icons": {
+      "radicle-logo": {
+        "description": "Radicle logo",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "A"
+        }
+      },
+      "radicle-logo-encircled": {
+        "description": "Radicle logo as negative space inside a circle",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "B"
+        }
+      },
+      "rad-push": {
+        "description": "Push local state to rad network",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "C"
+        }
+      },
+      "rad-pull": {
+        "description": "Pull state from rad network onto local state",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "D"
+        }
+      },
+      "rad-sync": {
+        "description": "Sync local and rad network state",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "E"
+        }
+      }
+    }
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
