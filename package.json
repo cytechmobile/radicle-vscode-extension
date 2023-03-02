@@ -102,21 +102,21 @@
         }
       },
       "rad-push": {
-        "description": "Push local state to rad network",
+        "description": "Radicle-themed arrow pointing away from user",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
           "fontCharacter": "C"
         }
       },
       "rad-pull": {
-        "description": "Pull state from rad network onto local state",
+        "description": "Radicle-themed arrow pointing towards user",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
           "fontCharacter": "D"
         }
       },
       "rad-sync": {
-        "description": "Sync local and rad network state",
+        "description": "Radicle-themed circulating arrows",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
           "fontCharacter": "E"
