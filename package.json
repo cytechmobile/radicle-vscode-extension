@@ -39,19 +39,19 @@
     "commands": [
       {
         "command": "extension.push",
-        "title": "Push working copy version to the network",
+        "title": "Push local changes to the network",
         "shortTitle": "Push",
         "category": "Radicle"
       },
       {
         "command": "extension.pull",
-        "title": "Pull latest version from the network and apply onto working copy",
+        "title": "Pull latest changes from the network and apply onto working copy",
         "shortTitle": "Pull",
         "category": "Radicle"
       },
       {
         "command": "extension.sync",
-        "title": "Synchronize working copy's and network's versions",
+        "title": "Synchronize local and network changes",
         "shortTitle": "Sync",
         "category": "Radicle"
       },
