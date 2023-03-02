@@ -8,7 +8,7 @@ A VS Code extension adding support for the Radicle network to your IDE.
 
 We use [`pnpm`](https://pnpm.io/motivation) for node package management (but don't worry, if you use an npm or yarn command by mistake there are fail-safes in place to save you from messing up).
 
->Tip: check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
+>Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
 
 #### Usage Without pnpm Globally Installed
 
@@ -23,8 +23,9 @@ npx pnpm install a-new-pkg # you can achieve it like this
 
 Run the `Develop Extension` configuration in the "Run and Debug" view. This will:
 
-- start the task `npm: dev` to compile the source code and watch for code changes
+- ensure you have the required dependencies and auto-align as needed
+- start the task `npm: dev` to compile the source code
 - launch a new VS Code window with the extension running in it
 - show the console output, including any errors in a new terminal named `dev`
 
->Tip: Or just press `F5` to achieve the same thing
+>Tip: Or just press `F5` to achieve the same thing.
