@@ -47,7 +47,7 @@
       },
       {
         "command": "extension.pull",
-        "title": "Pull latest changes from the network and apply onto working copy",
+        "title": "Pull latest changes from the network",
         "shortTitle": "Pull",
         "category": "Radicle",
         "icon": "$(rad-pull)"
