@@ -70,6 +70,10 @@
     "menus": {
       "scm/title": [
         {
+          "command": "extension.sync",
+          "group": "navigation"
+        },
+        {
           "submenu": "submenu-scm-radicle"
         }
       ],
