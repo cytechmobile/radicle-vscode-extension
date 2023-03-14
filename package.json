@@ -42,25 +42,29 @@
         "command": "extension.push",
         "title": "Push local changes to the network",
         "shortTitle": "Push",
-        "category": "Radicle"
+        "category": "Radicle",
+        "icon": "$(rad-push)"
       },
       {
         "command": "extension.pull",
         "title": "Pull latest changes from the network and apply onto working copy",
         "shortTitle": "Pull",
-        "category": "Radicle"
+        "category": "Radicle",
+        "icon": "$(rad-pull)"
       },
       {
         "command": "extension.sync",
         "title": "Synchronize local and network changes",
         "shortTitle": "Sync",
-        "category": "Radicle"
+        "category": "Radicle",
+        "icon": "$(rad-sync)"
       },
       {
         "command": "extension.showExtensionLog",
         "title": "Show everything the extension has logged",
         "shortTitle": "Extension log",
-        "category": "Radicle"
+        "category": "Radicle",
+        "icon": "$(output)"
       }
     ],
     "viewsContainers": {
