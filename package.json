@@ -67,6 +67,31 @@
         "icon": "$(output)"
       }
     ],
+    "menus": {
+      "scm/title": [
+        {
+          "submenu": "submenu-scm-radicle"
+        }
+      ],
+      "submenu-scm-radicle": [
+        {
+          "command": "extension.push"
+        },
+        {
+          "command": "extension.pull"
+        },
+        {
+          "command": "extension.sync"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "submenu-scm-radicle",
+        "label": "Radicle",
+        "icon": "$(radicle-logo)"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
