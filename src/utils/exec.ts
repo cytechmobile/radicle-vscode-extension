@@ -34,15 +34,16 @@ function execNativePromisified(cmd: string): Promise<string> {
  * @param cmd - The shell command to execute. Can be a static or a function resolving
  * the command dynamically.
  * @param options - Optional configuration.
+ * @returns The output of the shell command if successful, otherwise nothing.
  */
 export async function exec(
   cmd: string | (() => string),
   options?: {
     execInWorkspaceDir?: boolean
-    shouldLog?:boolean,
+    shouldLog?:boolean,  // TODO: maninak refactor to false by default
     onSuccess?: (ctx: { cmd: string, stdOut: string }) => void,
     onError?: (ctx: { cmd: string, parsedError: string }) => void,
-  }): Promise<void> {
+  }): Promise<string | undefined> {
   const opts = options ?? {};
   const resolvedCmd = typeof cmd === "function" ? cmd() : cmd;
 
@@ -58,6 +59,8 @@ export async function exec(
     }
 
     opts.onSuccess?.({ cmd: resolvedCmd, stdOut});
+
+    return stdOut;
   } catch (error) {
     const parsedError = typeof error === 'string'
       ? error
@@ -73,5 +76,7 @@ export async function exec(
     }
 
     opts.onError?.({ cmd: resolvedCmd, parsedError });
+
+    return undefined;
   }
 }
