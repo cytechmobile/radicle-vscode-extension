@@ -17,7 +17,7 @@ function registerRadCliCmdsAsVsCodeCmds(
   cmds: string[] | readonly string[],
   ctx: vscode.ExtensionContext,
 ): void {
-  const showOutput = 'Show output';
+  const btnShowOutput = 'Show output';
 
   cmds.forEach((radCliCmd) =>
     ctx.subscriptions.push(
@@ -25,12 +25,12 @@ function registerRadCliCmdsAsVsCodeCmds(
         exec(`${getRadCliRef()} ${radCliCmd}`, {
           onSuccess: ({ cmd }) =>
             vscode.window
-              .showInformationMessage(`Command "${cmd}" succeeded.`, showOutput)
-              .then((selection) => selection === showOutput && showLog()),
+              .showInformationMessage(`Command "${cmd}" succeeded.`, btnShowOutput)
+              .then((selection) => selection === btnShowOutput && showLog()),
           onError: ({ cmd }) =>
             vscode.window
-              .showErrorMessage(`Command "${cmd}" failed.`, showOutput)
-              .then((selection) => selection === showOutput && showLog()),
+              .showErrorMessage(`Command "${cmd}" failed.`, btnShowOutput)
+              .then((selection) => selection === btnShowOutput && showLog()),
         })
       )
     )
