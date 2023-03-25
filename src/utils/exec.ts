@@ -12,7 +12,7 @@ function getWorkspaceDir(): string {
   return dir;
 }
 
-function execBase(cmd: string): Promise<string> {
+function execNativePromisified(cmd: string): Promise<string> {
   return new Promise((resolve, reject) =>
     execNative(
       cmd,
@@ -31,11 +31,12 @@ function execBase(cmd: string): Promise<string> {
  * exec('echo "hello shell :)"')
  * ```
  *
- * @param {string} cmd - The shell command to execute.
- * @param {object} options - Optional configuration.
+ * @param cmd - The shell command to execute. Can be a static or a function resolving
+ * the command dynamically.
+ * @param options - Optional configuration.
  */
 export async function exec(
-  cmd: string,
+  cmd: string | (() => string),
   options?: {
     execInWorkspaceDir?: boolean
     shouldLog?:boolean,
@@ -43,33 +44,34 @@ export async function exec(
     onError?: (ctx: { cmd: string, parsedError: string }) => void,
   }): Promise<void> {
   const opts = options ?? {};
+  const resolvedCmd = typeof cmd === "function" ? cmd() : cmd;
 
   try {
-    const finalCmd = opts.execInWorkspaceDir ?? true
-      ? `cd "${getWorkspaceDir()}" && ${cmd}`
-      : cmd;
+    const cmdToExec = opts.execInWorkspaceDir ?? true
+      ? `cd "${getWorkspaceDir()}" && ${resolvedCmd}`
+      : resolvedCmd;
 
-    const stdOut = await execBase(finalCmd);
+    const stdOut = await execNativePromisified(cmdToExec);
 
     if (opts.shouldLog ?? true) {
-      log(stdOut, 'info', cmd);
+      log(stdOut, 'info', resolvedCmd);
     }
 
-    opts.onSuccess?.({ cmd, stdOut});
+    opts.onSuccess?.({ cmd: resolvedCmd, stdOut});
   } catch (error) {
     const parsedError = typeof error === 'string'
       ? error
       : error instanceof Error
         ? error.message
-        : `Failed executing shell command: "${cmd}"`;
+        : `Failed executing shell command: "${resolvedCmd}"`;
 
     if (opts.shouldLog ?? true) {
-      log(parsedError, 'error', cmd);
+      log(parsedError, 'error', resolvedCmd);
     } else {
       // will show up in the Debug console during development
       console.error(parsedError);
     }
 
-    opts.onError?.({ cmd, parsedError });
+    opts.onError?.({ cmd: resolvedCmd, parsedError });
   }
 }

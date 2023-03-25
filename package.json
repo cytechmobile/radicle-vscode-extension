@@ -1,7 +1,7 @@
 {
   "version": "0.0.1",
   "name": "radicle-vscode-extension",
-  "displayName": "radicle-vscode-extension",
+  "displayName": "Radicle",
   "description": "Radicle extension for VS Code",
   "keywords": [
     "radicle",
@@ -156,7 +156,20 @@
           "fontCharacter": "E"
         }
       }
-    }
+    },
+    "configuration": [
+      {
+        "title": "Radicle",
+        "properties": {
+          "radicle.advanced.pathToBinary": {
+            "scope": "machine-overridable",
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Specifies the absolute path (on your machine) to the rad CLI executable binary. \n\n Leave empty if `rad` is already globaly declared in your terminal, e.g. via your OS's `$path` or `PATH` environment variable."
+          }
+        }
+      }
+    ]
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"

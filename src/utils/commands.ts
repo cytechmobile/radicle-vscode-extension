@@ -1,5 +1,5 @@
-import * as vscode from "vscode";
-import { exec, showLog } from ".";
+import * as vscode from 'vscode';
+import { exec, getRadCliRef, showLog } from '.';
 import { radCliCmdsToRegisterInVsCode } from '../constants';
 
 
@@ -13,16 +13,16 @@ function registerSimpleVsCodeCmd(
   ctx.subscriptions.push(vscode.commands.registerCommand(`extension.${name}`, action));
 }
 
-const showOutput = 'Show output';
-
 function registerRadCliCmdsAsVsCodeCmds(
-  cmds: readonly string[],
+  cmds: string[] | readonly string[],
   ctx: vscode.ExtensionContext,
 ): void {
-  cmds.forEach((cmd) =>
+  const showOutput = 'Show output';
+
+  cmds.forEach((radCliCmd) =>
     ctx.subscriptions.push(
-      vscode.commands.registerCommand(`extension.${cmd}`, () =>
-        exec(`rad ${cmd}`, {
+      vscode.commands.registerCommand(`extension.${radCliCmd}`, () =>
+        exec(`${getRadCliRef()} ${radCliCmd}`, {
           onSuccess: ({ cmd }) =>
             vscode.window
               .showInformationMessage(`Command "${cmd}" succeeded.`, showOutput)
