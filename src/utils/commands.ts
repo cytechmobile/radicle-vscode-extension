@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { ExtensionContext } from 'vscode';
 import { exec, getRadCliRef, showLog } from '.';
 import { radCliCmdsToRegisterInVsCode } from '../constants';
 
@@ -8,14 +9,14 @@ type CmdCallback = Parameters<typeof vscode.commands.registerCommand>['1']
 function registerSimpleVsCodeCmd(
   name: string,
   action: CmdCallback,
-  ctx: vscode.ExtensionContext,
+  ctx: ExtensionContext,
 ): void {
   ctx.subscriptions.push(vscode.commands.registerCommand(`extension.${name}`, action));
 }
 
 function registerRadCliCmdsAsVsCodeCmds(
   cmds: string[] | readonly string[],
-  ctx: vscode.ExtensionContext,
+  ctx: ExtensionContext,
 ): void {
   const btnShowOutput = 'Show output';
 
@@ -42,7 +43,7 @@ function registerRadCliCmdsAsVsCodeCmds(
  *
  * @param ctx The extension's context.
  */
-export function registerAllCommands(ctx: vscode.ExtensionContext): void {
+export function registerAllCommands(ctx: ExtensionContext): void {
   registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode, ctx);
   registerSimpleVsCodeCmd('showExtensionLog', showLog, ctx);
 }
