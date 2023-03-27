@@ -3,8 +3,8 @@ import type { ExtensionContext } from 'vscode';
 import { validateRadCliInstallation } from './radCli';
 
 /**
- * Gets the path to the rad CLI binary, as configured by the user in the extension's
- * settings in VS Code.
+ * Gets the value of the user configured path to the rad CLI binary, as defined in the
+ * extension's settings in VS Code.
  *
  * @returns An empty string if the config isn't set by the user, otherwise the actual
  * value set (after trimming it).
@@ -17,6 +17,18 @@ export function getConfigPathToRadBinary(): string {
   ).trim();
 
   return pathToBinary;
+}
+
+/**
+ * Sets the value of the user configured path to the rad CLI binary, defined in the
+ * extension's settings in VS Code.
+ *
+ * @returns A promise that resolves when the setting has been saved.
+ */
+export async function setConfigPathToRadBinary(newPath: string): Promise<void> {
+  return vscode.workspace
+    .getConfiguration()
+    .update('radicle.advanced.pathToBinary', newPath, vscode.ConfigurationTarget.Global);
 }
 
 function onConfigChange(

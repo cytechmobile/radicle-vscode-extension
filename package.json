@@ -165,7 +165,7 @@
             "scope": "machine-overridable",
             "type": "string",
             "default": "",
-            "markdownDescription": "Specifies the absolute path (on your machine) to the rad CLI executable binary. \n\n Leave empty if `rad` is already globaly declared in your terminal, e.g. via your OS's `$path` or `PATH` environment variable."
+            "markdownDescription": "Specifies the absolute path to the rad CLI executable binary. \n\n Leave empty if `rad` is already globaly declared in your terminal, e.g. via your OS's `$path` or `PATH` environment variable."
           }
         }
       }
