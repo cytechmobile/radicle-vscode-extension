@@ -1,17 +1,17 @@
-import * as vscode from 'vscode';
+import { commands, window } from 'vscode';
 import type { ExtensionContext } from 'vscode';
 import { exec, getRadCliRef, showLog } from '.';
 import { radCliCmdsToRegisterInVsCode } from '../constants';
 
 
-type CmdCallback = Parameters<typeof vscode.commands.registerCommand>['1']
+type CmdCallback = Parameters<typeof commands.registerCommand>['1']
 
 function registerSimpleVsCodeCmd(
   name: string,
   action: CmdCallback,
   ctx: ExtensionContext,
 ): void {
-  ctx.subscriptions.push(vscode.commands.registerCommand(`extension.${name}`, action));
+  ctx.subscriptions.push(commands.registerCommand(`extension.${name}`, action));
 }
 
 function registerRadCliCmdsAsVsCodeCmds(
@@ -22,14 +22,14 @@ function registerRadCliCmdsAsVsCodeCmds(
 
   cmds.forEach((radCliCmd) =>
     ctx.subscriptions.push(
-      vscode.commands.registerCommand(`extension.${radCliCmd}`, () =>
+      commands.registerCommand(`extension.${radCliCmd}`, () =>
         exec(`${getRadCliRef()} ${radCliCmd}`, {
           onSuccess: ({ cmd }) =>
-            vscode.window
+            window
               .showInformationMessage(`Command "${cmd}" succeeded.`, btnShowOutput)
               .then((selection) => selection === btnShowOutput && showLog()),
           onError: ({ cmd }) =>
-            vscode.window
+            window
               .showErrorMessage(`Command "${cmd}" failed.`, btnShowOutput)
               .then((selection) => selection === btnShowOutput && showLog()),
         })

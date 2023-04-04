@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 
 // Accessible in the Output panel's dropdown, under the declared channel name
-const outputLog = vscode.window.createOutputChannel("Radicle");
+const outputLog = window.createOutputChannel("Radicle");
 
 /**
  * Add a new log entry.

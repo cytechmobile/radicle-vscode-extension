@@ -1,16 +1,5 @@
 import { exec as execNative } from 'child_process';
-import * as vscode from 'vscode';
-import { log } from '.';
-
-function getWorkspaceDir(): string {
-  const dir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-
-  if (!dir) {
-    throw 'Failed resolving path of workspace directory.';
-  }
-
-  return dir;
-}
+import { getWorkspaceFolderPaths, log } from '.';
 
 function execNativePromisified(cmd: string): Promise<string> {
   return new Promise((resolve, reject) =>
@@ -39,7 +28,6 @@ function execNativePromisified(cmd: string): Promise<string> {
 export async function exec(
   cmd: string | (() => string),
   options?: {
-    execInWorkspaceDir?: boolean
     shouldLog?:boolean,  // TODO: maninak refactor to false by default
     onSuccess?: (ctx: { cmd: string, stdOut: string }) => void,
     onError?: (ctx: { cmd: string, parsedError: string }) => void,
@@ -48,9 +36,14 @@ export async function exec(
   const resolvedCmd = typeof cmd === "function" ? cmd() : cmd;
 
   try {
-    const cmdToExec = opts.execInWorkspaceDir ?? true
-      ? `cd "${getWorkspaceDir()}" && ${resolvedCmd}`
-      : resolvedCmd;
+    const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0]; // Hack: always use only 0th folder
+    if (!firstWorkspaceDir) {
+      throw `Failed resolving path of workspace directory in order to exec "${
+        resolvedCmd
+      }" in it.`;
+    }
+
+    const cmdToExec = `cd "${firstWorkspaceDir}" && ${resolvedCmd}`;
 
     const stdOut = await execNativePromisified(cmdToExec);
 

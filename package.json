@@ -108,16 +108,44 @@
     "views": {
       "radicle": [
         {
-          "id": "rad-commands",
-          "name": "rad CLI Commands",
-          "icon": "$(radicle-logo)"
+          "id": "getting-started",
+          "name": "Getting Started",
+          "icon": "$(radicle-logo)",
+          "when": "!radicle.isRepoRadPublished"
+        },
+        {
+          "id": "cli-commands",
+          "name": "CLI Commands",
+          "icon": "$(radicle-logo)",
+          "when": "radicle.isRepoRadPublished"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "rad-commands",
-        "contents": "Use the buttons below to perform basic interactions with the Radicle network.\n[$(rad-push) Push](command:extension.push)\n[$(rad-pull) Pull](command:extension.pull)\n[$(rad-sync) Sync](command:extension.sync)\nNOTE:\nIn order to use Radicle commands you need to have rad CLI installed on your machine and have the current worskpace published on the Radicle network.\nTo learn more, please follow the [Getting Started Guide](https://radicle.xyz/get-started.html)."
+        "view": "getting-started",
+        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n",
+        "when": "workspaceFolderCount == 0"
+      },
+      {
+        "view": "getting-started",
+        "contents": "The folder currently opened in your workspace is not a git code repository.\nTo use Radicle, you can initialize the folder as a code repository enabling source control features powered by git.\n[Initialize Repository](command:git.init?%5Btrue%5D)\n[Choose a Different Folder](command:workbench.action.files.openFolder)\nTo learn more about how to use git and source control in VS Code [read the docs](https://code.visualstudio.com/docs/sourcecontrol/overview).",
+        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount == 0"
+      },
+      {
+        "view": "getting-started",
+        "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized, your repository will you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
+        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRepoRadInitialised"
+      },
+      {
+        "view": "getting-started",
+        "contents": "The git repository currently opened in your workspace is not yet published on the Radicle network.\nTo use Radicle, you can run `rad push` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce published, your repository will be hosted publicly on the free, peer-to-peer Radicle network and you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
+        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && radicle.isRepoRadInitialised && !radicle.isRepoRadPublished"
+      },
+      {
+        "view": "cli-commands",
+        "contents": "Use the buttons below to perform common interactions with the Radicle network.\n[$(rad-push) Push](command:extension.push)\n[$(rad-pull) Pull](command:extension.pull)\n[$(rad-sync) Sync](command:extension.sync)",
+        "enablement": "radicle.isRadCliInstalled"
       }
     ],
     "icons": {
@@ -165,7 +193,7 @@
             "scope": "machine-overridable",
             "type": "string",
             "default": "",
-            "markdownDescription": "Specifies the absolute path to the rad CLI executable binary. \n\n Leave empty if `rad` is already globaly declared in your terminal, e.g. via your OS's `$path` or `PATH` environment variable."
+            "markdownDescription": "Specifies the path to the Radicle CLI binary stored on your machine. \n\nLeave empty if command `rad` is already globally available in your shell."
           }
         }
       }
