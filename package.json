@@ -34,7 +34,7 @@
     "test": "echo \"Testing not yet implemented.\"",
     "lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
-  "main": "./dist/src/extension.js",
+  "main": "./dist/extension.js",
   "activationEvents": [],
   "contributes": {
     "commands": [

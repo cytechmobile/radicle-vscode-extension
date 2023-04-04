@@ -27,7 +27,7 @@ export async function isGitInitialised(): Promise<boolean> {
   * otherwise `false`.
   */
  export async function isRepoRadInitialised(): Promise<boolean> {
-  const isRadInitialised = Boolean(await exec('rad inspect'));
+  const isRadInitialised = Boolean(await exec('rad inspect', { shouldLog: false }));
 
   return isRadInitialised;
 }
