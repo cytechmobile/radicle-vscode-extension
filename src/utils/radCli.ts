@@ -159,6 +159,12 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
   }
 }
 
+ // TODO: maninak document
+export async function warnUserRadCliNotResolvedAndMaybeTroubleshoot() {
+  const shouldTroubleshoot = await warnUserRadCliNotResolved();
+  shouldTroubleshoot && troubleshootRadCliInstallation();
+}
+
 /**
  * Will check if Radicle CLI is installed, log either way, and depending on the
  * workspace state and `minimizeUserNotifications` optional param, might display
@@ -182,14 +188,9 @@ export async function validateRadCliInstallation(
 
   log(msg, 'error');
 
-  async function warnUserAndMaybeTroubleshoot() {
-    const shouldTroubleshoot = await warnUserRadCliNotResolved();
-    shouldTroubleshoot && troubleshootRadCliInstallation();
-  }
-
   if (!options.minimizeUserNotifications) {
-    warnUserAndMaybeTroubleshoot();
+    warnUserRadCliNotResolvedAndMaybeTroubleshoot();
   } else if (options.minimizeUserNotifications && await isGitInitialised()) {
-    warnUserAndMaybeTroubleshoot();
+    warnUserRadCliNotResolvedAndMaybeTroubleshoot();
   }
 }

@@ -1,6 +1,6 @@
 import { RelativePattern, Uri, workspace, } from 'vscode';
 import { readFile } from 'fs/promises';
-import { getRepoRootDir, isRadCliInstalled, isRepoRadInitialised, isRepoRadPublished, setWhenClauseContext } from '.';
+import { getRepoRootDir, isGitInitialised, isRadCliInstalled, isRepoRadInitialised, isRepoRadPublished, setWhenClauseContext, warnUserRadCliNotResolvedAndMaybeTroubleshoot } from '.';
 
 /**
  * Returns an array with the paths of each open folder in the workspace or `undefined`
@@ -51,15 +51,25 @@ interface watchFileNotInWorkspaceParam  {
 const notInWorkspaceFileWatchers = [
   {
     glob: async () => new RelativePattern(
-      Uri.file(`${await getRepoRootDir()}/.git/`),
+      // `getRepoRootDir()` will return undefined if user opens the extension on
+      // a non-git-initialized folder, pointing our watcher to the wrong path.
+      // We're doing a best effort using the first workspace folder instead.
+      Uri.file(`${await getRepoRootDir() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
       'config',
     ),
     handler: async () => {
       setWhenClauseContext('radicle.isRepoRadInitialised', await isRepoRadInitialised());
       setWhenClauseContext('radicle.isRepoRadPublished', await isRepoRadPublished());
+
+      if (
+        !(await isRadCliInstalled()) &&
+        !(await isRepoRadPublished()) &&
+        (await isGitInitialised())
+      ) {
+        warnUserRadCliNotResolvedAndMaybeTroubleshoot();
+      }
     },
   },
-  // radicle.isRepoRadPublished
   (() => {
     switch (process.platform) {
       case 'linux': return {
