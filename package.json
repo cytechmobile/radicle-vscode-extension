@@ -1,28 +1,31 @@
 {
   "version": "0.0.1",
-  "name": "radicle-vscode-extension",
+  "name": "radicle",
   "displayName": "Radicle",
-  "description": "Radicle extension for VS Code",
-  "keywords": [
-    "radicle",
-    "vscode",
-    "extension",
-    "maninak"
-  ],
-  "publisher": "Radicle IDE Plugins Team",
+  "description": "A VS Code extension adding Radicle network support to your IDE.",
+  "galleryBanner": {
+    "color": "#0E1625",
+    "theme": "dark"
+  },
+  "icon": "./assets/marketplace-icon.png",
+  "publisher": "radicle-ide-plugins-team",
   "author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
   "contributors": [
     "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
   ],
-  "license": "SEE LICENSE IN ./LICENSE",
+  "license": "./LICENSE",
   "repository": "https://github.com/cytechmobile/radicle-vscode-extension",
   "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
+  "pricing": "Free",
   "engines": {
-    "vscode": "^1.74.0",
+    "vscode": "^1.76.0",
     "npm": "^7"
   },
+  "keywords": [
+    "radicle"
+  ],
   "categories": [
-    "Other"
+    "SCM Providers"
   ],
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
