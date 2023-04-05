@@ -27,7 +27,7 @@
 - Button to execute Sync Radicle command in native Source Control View's title buttons (above commit message input)
 - Options to execute Pull, Push Sync Radicle commands as a "Radicle" submenu in native Source Control View's three-dot-menu
 - User notification on success/failure of executed Radicle commands with the option to view the command's output on failure
-- Commands to execute Pull, Push Sync Radicle commands in VS Code's Command Palette (Opens with Ctrl + Shift + P or Cmd + Shift + P)
+- Commands to execute Pull, Push Sync Radicle commands in VS Code's Command Palette (Opens with Ctrl+Shift+P or Cmd+Shift+P)
 - Log including extension's and Radicle CLI's version in the Output Panel
 - Command to show extension's Log in VS Code's Command Palette
 - Multi-step onboarding flow with dedicated Welcome Views for specific Workspace states
