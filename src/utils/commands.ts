@@ -22,18 +22,17 @@ function registerRadCliCmdsAsVsCodeCmds(
 
   cmds.forEach((radCliCmd) =>
     ctx.subscriptions.push(
-      commands.registerCommand(`extension.${radCliCmd}`, () =>
-        exec(`${getRadCliRef()} ${radCliCmd}`, {
-          onSuccess: ({ cmd }) =>
-            window
-              .showInformationMessage(`Command "${cmd}" succeeded.`, btnShowOutput)
-              .then((selection) => selection === btnShowOutput && showLog()),
-          onError: ({ cmd }) =>
-            window
-              .showErrorMessage(`Command "${cmd}" failed.`, btnShowOutput)
-              .then((selection) => selection === btnShowOutput && showLog()),
-        })
-      )
+      commands.registerCommand(`extension.${radCliCmd}`, async () => {
+        const didCmdSucceed = Boolean(await exec(`${getRadCliRef()} ${radCliCmd}`));
+
+        didCmdSucceed
+          ? window
+              .showInformationMessage(`Command "rad ${radCliCmd}" succeeded.`, btnShowOutput)
+              .then((selection) => selection === btnShowOutput && showLog())
+          : window
+              .showErrorMessage(`Command "rad ${radCliCmd}" failed.`, btnShowOutput)
+              .then((selection) => selection === btnShowOutput && showLog());
+      })
     )
   );
 }
