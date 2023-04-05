@@ -45,7 +45,7 @@ export async function isRepoRadPublished(): Promise<boolean> {
 
   const isRadPublished = await doesFileContainText(
     `${gitRepoRootDir}/.git/config`,
-    'seed =',
+    '[rad]',
   );
 
   return isRadPublished;
