@@ -1,5 +1,16 @@
 # Radicle VS Code Extension Changelog
 
+## v0.1.0
+
+> 🆙 Minor version bump to officially mark the release of the long-awaited MVP! 🥳
+>
+> Please refer to [v0.0.1](#v001) for the shiny features list ✨
+>(bear with us as we work out our versioning/release/changelog/documentation flows)
+
+### 📖 Documentation
+
+- Minor improvements to the documentation of feature lists
+
 ## v0.0.3
 
 ### 📖 Documentation
