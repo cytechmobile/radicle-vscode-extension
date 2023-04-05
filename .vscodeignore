@@ -1,0 +1,8 @@
+.gitignore
+.gitsigners
+.husky/
+.vscode/
+**/*.js.map
+**/*.ts
+package.json
+pnpm-lock.yaml
