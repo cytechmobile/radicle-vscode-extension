@@ -1,5 +1,11 @@
 # Radicle VS Code Extension Changelog
 
+## _(WIP, yet unreleased version)_
+
+### 📖 Documentation
+
+- Typo fix in Welcome View of non-rad-initialized repo (thanks for reporting @bordumb 🙌)
+
 ## v0.1.0
 
 > 🆙 Minor version bump to officially mark the release of the long-awaited MVP! 🥳
