@@ -2,9 +2,12 @@
 
 ## _(WIP, yet unreleased version)_
 
-### 📖 Documentation
+### 🩹 Fixes
 
 - Typo fix in Welcome View of non-rad-initialized repo (thanks for reporting @bordumb 🙌)
+
+### 📖 Documentation
+
 - Polish enhancements list of v0.0.1 on CHANGELOG
 
 ## v0.1.0
