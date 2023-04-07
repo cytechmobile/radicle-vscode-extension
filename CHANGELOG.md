@@ -1,6 +1,6 @@
 # Radicle VS Code Extension Changelog
 
-## _(WIP, yet unreleased version)_
+## v0.1.1
 
 ### 🩹 Fixes
 
