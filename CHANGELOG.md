@@ -1,5 +1,11 @@
 # Radicle VS Code Extension Changelog
 
+## v0.1.2 _(WIP, yet unreleased version)_
+
+### 📖 Documentation
+
+- README add missing reference to integrated logging feature
+
 ## v0.1.1
 
 ### 🩹 Fixes

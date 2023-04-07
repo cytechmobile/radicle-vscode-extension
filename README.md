@@ -15,6 +15,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 - [Notifications](#user-notifications) will inform you of important events or warn you if something is wrong, sometimes even offering assistance to fix the issue (while trying not to spam you)
 - [Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
 - [Configurable path to CLI binary](#configurable-path-to-cli-binary) in the Settings (by default will not sync VS Code instances as other user settings do)
+- [Integrated logging](#integrated-logging) including Radicle command output
 
 ### Integrated Radicle Commands
 
@@ -71,6 +72,10 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 ### Configurable path to CLI binary
 
 ![Configurable path to CLI binary](assets/for-md/rad-path.png)
+
+### Integrated logging
+
+![Integrated logging](assets/for-md/image.png)
 
 ## Contributing
 
