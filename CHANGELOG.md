@@ -4,50 +4,50 @@
 
 ### 📖 Documentation
 
-- README add missing reference to integrated logging feature
+- **readme:** add missing reference to integrated logging feature
+- **changelog:** prefix changes with context and remove quotations formatting
 
 ## v0.1.1
 
 ### 🩹 Fixes
 
-- Use a more minimal UI to notify user of Radicle command success
-- Typo fix in copy of non-rad-initialized repo Welcome View (thanks for reporting @bordumb 🙌)
+- **commands:** use a more minimal UI to notify user of Radicle command success
+- **onboarding:** typo fix in copy of non-rad-initialized repo's Welcome View (thanks for reporting @bordumb 🙌)
 
 ### 📖 Documentation
 
-- README revamp with simpler feature list, visual examples of each and a short definition of the Radicle network
-- Polish enhancements list of v0.0.1 on CHANGELOG
+- **readme:** revamp with simpler feature list, visual examples of each and a short definition of the Radicle network
+- **changelog:** polishing of enhancements list of v0.0.1
 
 ## v0.1.0
 
-> 🆙 Minor version bump to officially mark the release of the long-awaited MVP! 🥳
->
-> Please refer to [v0.0.1](#v001) for the shiny features list ✨
->(bear with us as we work out our versioning/release/changelog/documentation flows)
+🆙 Minor version bump to officially mark the release of the long-awaited MVP! 🥳
+
+Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as we work out our versioning/release/changelog/documentation flows)
 
 ### 📖 Documentation
 
-- Minor improvements to the documentation of feature lists
+- **changelog:** improve copy of features list
 
 ## v0.0.3
 
 ### 📖 Documentation
 
-- Update README and extract content to CONTRIBUTING
+- **readme:** update and partially extract content to CONTRIBUTING
 
 ## v0.0.2
 
 ### 🏡 Chores
 
-- Remove unnecessary files from published artifact
+- **publish:** remove unnecessary files from published artifact
 
 ### 📖 Documentation
 
-- Introduce Changelog
+- **changelog:** introduce Changelog
 
 ## v0.0.1
 
-> An MVP bringing getting-started and troubleshooting flows as well as basic (pre-Heartwood) Radicle integration to VS Code.
+An MVP bringing getting-started and troubleshooting flows as well as basic (pre-Heartwood) Radicle integration to VS Code.
 
 ### 🚀 Enhancements
 
