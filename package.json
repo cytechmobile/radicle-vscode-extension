@@ -22,7 +22,8 @@
     "npm": "^7"
   },
   "keywords": [
-    "radicle"
+    "radicle",
+    "git"
   ],
   "categories": [
     "SCM Providers"

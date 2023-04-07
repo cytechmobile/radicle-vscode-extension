@@ -27,10 +27,9 @@ function registerRadCliCmdsAsVsCodeCmds(
 
         didCmdSucceed
           ? window
-              .showInformationMessage(`Command "rad ${radCliCmd}" succeeded.`, btnShowOutput)
-              .then((selection) => selection === btnShowOutput && showLog())
+              .showInformationMessage(`Command "rad ${radCliCmd}" succeeded`)
           : window
-              .showErrorMessage(`Command "rad ${radCliCmd}" failed.`, btnShowOutput)
+              .showErrorMessage(`Command "rad ${radCliCmd}" failed`, btnShowOutput)
               .then((selection) => selection === btnShowOutput && showLog());
       })
     )

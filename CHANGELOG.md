@@ -4,7 +4,8 @@
 
 ### 🩹 Fixes
 
-- Typo fix in Welcome View of non-rad-initialized repo (thanks for reporting @bordumb 🙌)
+- Use a more minimal UI to notify user of Radicle command success
+- Typo fix in copy of non-rad-initialized repo Welcome View (thanks for reporting @bordumb 🙌)
 
 ### 📖 Documentation
 
