@@ -8,6 +8,7 @@
 
 ### 📖 Documentation
 
+- README revamp with simpler feature list, visual examples of each and a short definition of the Radicle network
 - Polish enhancements list of v0.0.1 on CHANGELOG
 
 ## v0.1.0
@@ -47,7 +48,7 @@
 - Buttons to execute Pull, Push Sync Radicle commands in the main extension View
 - Button to execute Sync Radicle command in native Source Control View's title buttons (above commit message input)
 - Commands to execute Pull, Push Sync Radicle commands in VS Code's Command Palette (Opens with Ctrl+Shift+P or Cmd+Shift+P)
-- List items to execute Pull, Push Sync Radicle commands grouped in a "Radicle" submenu inside native Source Control View's three-dot-menu
+- List items to execute Pull, Push Sync Radicle commands grouped in a "Radicle" submenu inside the native Source Control View's three-dot-menu
 - User notification on success/failure of executed Radicle commands with the option to view the CLI's output
 - Log including extension's and Radicle CLI's version in the Output Panel
 - Command to show extension's Log in VS Code's Command Palette

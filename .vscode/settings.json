@@ -1,3 +1,6 @@
 {
   "npm.packageManager": "npm",
+  "markdown.experimental.copyFiles.destination": {
+    "**/*": "assets/for-md/"
+  },
 }
