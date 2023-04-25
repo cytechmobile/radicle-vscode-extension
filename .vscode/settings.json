@@ -3,4 +3,25 @@
   "markdown.experimental.copyFiles.destination": {
     "**/*": "assets/for-md/"
   },
+  "conventionalCommits.scopes": [
+    "package",
+    "dev",
+    "build",
+    "lint",
+    "git",
+    "deps",
+    "commands",
+    "activity-bar",
+    "repo",
+    "log",
+    "config",
+    "scm",
+    "onboarding",
+    "publish",
+    "marketplace",
+    "icons",
+    "changelog",
+    "readme"
+  ],
+  "conventionalCommits.gitmoji": false,
 }

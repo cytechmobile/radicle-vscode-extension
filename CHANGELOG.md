@@ -6,6 +6,10 @@
 
 - **commands:** hide Radicle commands from UI when they are not applicable
 
+### 🏡 Chores
+
+- **git:** define known scopes for conventionalCommits extension
+
 ### 📖 Documentation
 
 - **readme:** add missing reference to integrated logging feature
