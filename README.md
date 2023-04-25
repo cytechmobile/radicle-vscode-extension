@@ -75,7 +75,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 ### Integrated logging
 
-![Integrated logging](assets/for-md/image.png)
+![Integrated logging](assets/for-md/logs.png)
 
 ## Contributing
 

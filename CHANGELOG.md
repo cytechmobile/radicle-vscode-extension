@@ -14,6 +14,7 @@
 
 - **readme:** add missing reference to integrated logging feature
 - **readme:** fix link to Radicle homepage
+- **readme:** fix broken reference to image showcasing integrated logging feature
 - **changelog:** prefix changes with context and remove quotations formatting
 
 ## v0.1.1
