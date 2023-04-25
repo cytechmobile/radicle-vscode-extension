@@ -13,6 +13,7 @@
 ### 📖 Documentation
 
 - **readme:** add missing reference to integrated logging feature
+- **readme:** fix link to Radicle homepage
 - **changelog:** prefix changes with context and remove quotations formatting
 
 ## v0.1.1
