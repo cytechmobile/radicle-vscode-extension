@@ -47,21 +47,24 @@
         "title": "Push local changes to the network",
         "shortTitle": "Push",
         "category": "Radicle",
-        "icon": "$(rad-push)"
+        "icon": "$(rad-push)",
+        "enablement": "radicle.isRepoRadInitialised"
       },
       {
         "command": "extension.pull",
         "title": "Pull latest changes from the network",
         "shortTitle": "Pull",
         "category": "Radicle",
-        "icon": "$(rad-pull)"
+        "icon": "$(rad-pull)",
+        "enablement": "radicle.isRepoRadInitialised"
       },
       {
         "command": "extension.sync",
         "title": "Synchronize local and network changes",
         "shortTitle": "Sync",
         "category": "Radicle",
-        "icon": "$(rad-sync)"
+        "icon": "$(rad-sync)",
+        "enablement": "radicle.isRepoRadInitialised"
       },
       {
         "command": "extension.showExtensionLog",
@@ -75,21 +78,26 @@
       "scm/title": [
         {
           "command": "extension.sync",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "radicle.isRepoRadInitialised"
         },
         {
-          "submenu": "submenu-scm-radicle"
+          "submenu": "submenu-scm-radicle",
+          "when": "radicle.isRepoRadInitialised"
         }
       ],
       "submenu-scm-radicle": [
         {
-          "command": "extension.push"
+          "command": "extension.push",
+          "when": "radicle.isRepoRadInitialised"
         },
         {
-          "command": "extension.pull"
+          "command": "extension.pull",
+          "when": "radicle.isRepoRadInitialised"
         },
         {
-          "command": "extension.sync"
+          "command": "extension.sync",
+          "when": "radicle.isRepoRadInitialised"
         }
       ]
     },

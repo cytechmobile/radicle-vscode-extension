@@ -2,6 +2,10 @@
 
 ## v0.1.2 _(WIP, yet unreleased version)_
 
+### 🩹 Fixes
+
+- **commands:** hide Radicle commands from UI when they are not applicable
+
 ### 📖 Documentation
 
 - **readme:** add missing reference to integrated logging feature
