@@ -1,5 +1,4 @@
-import { commands, window } from 'vscode'
-import type { ExtensionContext } from 'vscode'
+import { type ExtensionContext, commands, window } from 'vscode'
 import { radCliCmdsToRegisterInVsCode } from '../constants'
 import { exec, getRadCliRef, showLog } from '.'
 

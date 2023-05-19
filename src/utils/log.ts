@@ -1,5 +1,4 @@
-import { window } from 'vscode'
-import type { ExtensionContext } from 'vscode'
+import { type ExtensionContext, window } from 'vscode'
 
 // Accessible in the Output panel's dropdown, under the declared channel name
 const outputLog = window.createOutputChannel('Radicle')

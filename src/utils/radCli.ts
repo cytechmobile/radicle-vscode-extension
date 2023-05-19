@@ -1,5 +1,4 @@
-import { Uri, env, window } from 'vscode'
-import type { QuickPickItem } from 'vscode'
+import { type QuickPickItem, Uri, env, window } from 'vscode'
 import {
   exec,
   getConfigPathToRadBinary,

@@ -5,6 +5,7 @@
 ### 🏡 Chores
 
 - **lint:** massively improve automatic code linting & formatting and update all source code to comply
+- **deps:** migrate to Typescript v5.0
 
 ## v0.1.2
 

@@ -100,6 +100,11 @@ module.exports = {
      * Rules implemented by `@typescript-eslint` follow
      * ========================================================================================
      */
+    '@typescript-eslint/consistent-type-imports': [
+      'warn',
+      { disallowTypeAnnotations: false, fixStyle: 'inline-type-imports' },
+    ],
+    '@typescript-eslint/no-import-type-side-effects': 'error',
     '@typescript-eslint/array-type': ['warn', { default: 'array', readonly: 'array' }],
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],

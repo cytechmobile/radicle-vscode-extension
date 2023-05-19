@@ -1,5 +1,4 @@
-import { ConfigurationTarget, workspace } from 'vscode'
-import type { ExtensionContext } from 'vscode'
+import { ConfigurationTarget, type ExtensionContext, workspace } from 'vscode'
 import { validateRadCliInstallation } from '.'
 
 /**
