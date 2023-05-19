@@ -1,5 +1,11 @@
 # Radicle VS Code Extension Changelog
 
+## _(WIP, yet unreleased version)_
+
+### 🏡 Chores
+
+- **lint:** massively improve automatic code linting & formatting and update all source code to comply
+
 ## v0.1.2
 
 ### 🩹 Fixes

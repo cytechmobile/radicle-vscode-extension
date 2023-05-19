@@ -1,8 +1,8 @@
-import { window } from 'vscode';
-import type { ExtensionContext } from 'vscode';
+import { window } from 'vscode'
+import type { ExtensionContext } from 'vscode'
 
 // Accessible in the Output panel's dropdown, under the declared channel name
-const outputLog = window.createOutputChannel("Radicle");
+const outputLog = window.createOutputChannel('Radicle')
 
 /**
  * Add a new log entry.
@@ -25,12 +25,12 @@ export function log(
   context?: string,
 ): void {
   // timestamp as hh:mm:ss
-  const ts = new Date().toTimeString().split(' ')[0] ?? new Date().toTimeString();
-  const copy = context ? `${context}\n${body}` : body;
+  const ts = new Date().toTimeString().split(' ')[0] ?? new Date().toTimeString()
+  const copy = context ? `${context}\n${body}` : body
 
-  const logEntry = `[${ts} ${severity.padEnd(5).toUpperCase()}] ${copy}`;
+  const logEntry = `[${ts} ${severity.padEnd(5).toUpperCase()}] ${copy}`
 
-  outputLog.appendLine(logEntry);
+  outputLog.appendLine(logEntry)
 }
 
 /**
@@ -39,20 +39,15 @@ export function log(
  * @param [shouldFocusOutput=true] - If false, the output window will not be focused.
  */
 export function showLog(shouldFocusOutput = true): void {
-  outputLog.show(!shouldFocusOutput);
+  outputLog.show(!shouldFocusOutput)
 }
 
 /**
  * Append a new entry to the log with the extension activation event and version.
  */
 export function logExtensionActivated(ctx: ExtensionContext): void {
-  console.log('ctx =', ctx); // TODO: maninak delete
   log(
-    `Extension ${
-      ctx.extension.packageJSON.displayName
-    } v${
-      ctx.extension.packageJSON.version
-    } activated.`,
+    `Extension ${ctx.extension.packageJSON.displayName} v${ctx.extension.packageJSON.version} activated.`,
     'info',
-  );
+  )
 }

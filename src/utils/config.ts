@@ -1,6 +1,6 @@
-import { workspace, ConfigurationTarget } from 'vscode';
-import type { ExtensionContext } from 'vscode';
-import { validateRadCliInstallation } from '.';
+import { ConfigurationTarget, workspace } from 'vscode'
+import type { ExtensionContext } from 'vscode'
+import { validateRadCliInstallation } from '.'
 
 /**
  * Gets the value of the user configured path to the Radicle CLI binary, as defined in the
@@ -11,12 +11,12 @@ import { validateRadCliInstallation } from '.';
  */
 export function getConfigPathToRadBinary(): string {
   const pathToBinary = (
-    (workspace
-      .getConfiguration()
-      .get('radicle.advanced.pathToBinary') as string | undefined) ?? ''
-  ).trim();
+    (workspace.getConfiguration().get('radicle.advanced.pathToBinary') as
+      | string
+      | undefined) ?? ''
+  ).trim()
 
-  return pathToBinary;
+  return pathToBinary
 }
 
 /**
@@ -28,7 +28,7 @@ export function getConfigPathToRadBinary(): string {
 export async function setConfigPathToRadBinary(newPath: string): Promise<void> {
   return workspace
     .getConfiguration()
-    .update('radicle.advanced.pathToBinary', newPath, ConfigurationTarget.Global);
+    .update('radicle.advanced.pathToBinary', newPath, ConfigurationTarget.Global)
 }
 
 function onConfigChange(
@@ -36,14 +36,16 @@ function onConfigChange(
   ctx: ExtensionContext,
   onChangeCallback: Parameters<typeof workspace.onDidChangeConfiguration>['0'],
 ): void {
-  ctx.subscriptions.push(workspace.onDidChangeConfiguration((ev) => {
-    if (ev.affectsConfiguration(configKey)) {
-      onChangeCallback(ev);
-    }
-  }));
+  ctx.subscriptions.push(
+    workspace.onDidChangeConfiguration((ev) => {
+      if (ev.affectsConfiguration(configKey)) {
+        onChangeCallback(ev)
+      }
+    }),
+  )
 }
 
-interface onConfigChangeParam  {
+interface OnConfigChangeParam {
   configKey: Parameters<typeof onConfigChange>['0']
   onChangeCallback: Parameters<typeof onConfigChange>['2']
 }
@@ -53,7 +55,7 @@ const configWatchers = [
     configKey: 'radicle.advanced.pathToBinary',
     onChangeCallback: () => validateRadCliInstallation(),
   },
-] satisfies onConfigChangeParam[];
+] satisfies OnConfigChangeParam[]
 
 /**
  * Registers all handlers to be called whenever the user changes a specific config
@@ -62,5 +64,5 @@ const configWatchers = [
  * @param ctx - The extension's context.
  */
 export function registerAllConfigWatchers(ctx: ExtensionContext): void {
-  configWatchers.forEach((c) => onConfigChange(c.configKey, ctx, c.onChangeCallback));
+  configWatchers.forEach((cw) => onConfigChange(cw.configKey, ctx, cw.onChangeCallback))
 }

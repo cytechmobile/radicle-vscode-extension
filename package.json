@@ -36,7 +36,7 @@
     "build": "tsc",
     "dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
     "test": "echo \"Testing not yet implemented.\"",
-    "lint": "eslint . --ext .js,.ts --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
+    "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "main": "./dist/extension.js",
   "activationEvents": [],
@@ -212,16 +212,19 @@
     ]
   },
   "lint-staged": {
-    "*.{ts,js}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
+    "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^0.39.0",
     "@types/node": "^18.14.6",
     "@types/vscode": "^1.76.0",
-    "@typescript-eslint/eslint-plugin": "^5.54.1",
-    "@typescript-eslint/parser": "^5.54.1",
-    "eslint": "^8.35.0",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier-vue": "^4.2.0",
+    "eslint-plugin-tailwindcss": "^3.12.0",
+    "eslint-plugin-vue-scoped-css": "^2.4.0",
     "husky": "^8.0.3",
-    "lint-staged": "^13.1.2",
+    "lint-staged": "^13.2.2",
     "typescript": "^4.9.5"
   },
   "private": true

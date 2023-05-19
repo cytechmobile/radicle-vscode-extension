@@ -1,15 +1,11 @@
-import { exec as execNative } from 'child_process';
-import { getWorkspaceFolderPaths, log } from '.';
+import { exec as execNative } from 'node:child_process'
+import { getWorkspaceFolderPaths, log } from '.'
 
 function execNativePromisified(cmd: string): Promise<string> {
   return new Promise((resolve, reject) =>
-    execNative(
-      cmd,
-      (_, stdOut, stdErr) => stdErr ? reject(stdErr): resolve(stdOut),
-    )
-  );
+    execNative(cmd, (_, stdOut, stdErr) => (stdErr ? reject(stdErr) : resolve(stdOut))),
+  )
 }
-
 
 /**
  * Executes a shell command and returns a promise that resolves with the stdout of the
@@ -28,48 +24,48 @@ function execNativePromisified(cmd: string): Promise<string> {
 export async function exec(
   cmd: string | (() => string),
   options?: {
-    shouldLog?:boolean,  // TODO: maninak refactor to false by default
-    onSuccess?: (ctx: { cmd: string, stdOut: string }) => void,
-    onError?: (ctx: { cmd: string, parsedError: string }) => void,
-  }): Promise<string | undefined> {
-  const opts = options ?? {};
-  const resolvedCmd = typeof cmd === "function" ? cmd() : cmd;
+    shouldLog?: boolean // TODO: maninak refactor to false by default
+    onSuccess?: (ctx: { cmd: string; stdOut: string }) => void
+    onError?: (ctx: { cmd: string; parsedError: string }) => void
+  },
+): Promise<string | undefined> {
+  const opts = options ?? {}
+  const resolvedCmd = typeof cmd === 'function' ? cmd() : cmd
 
   try {
-    const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0]; // Hack: always use only 0th folder
+    const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
     if (!firstWorkspaceDir) {
-      throw `Failed resolving path of workspace directory in order to exec "${
-        resolvedCmd
-      }" in it.`;
+      throw new Error(
+        `Failed resolving path of workspace directory in order to exec "${resolvedCmd}" in it.`,
+      )
     }
 
-    const cmdToExec = `cd "${firstWorkspaceDir}" && ${resolvedCmd}`;
+    const cmdToExec = `cd "${firstWorkspaceDir}" && ${resolvedCmd}`
 
-    const stdOut = await execNativePromisified(cmdToExec);
+    const stdOut = await execNativePromisified(cmdToExec)
 
     if (opts.shouldLog ?? true) {
-      log(stdOut, 'info', resolvedCmd);
+      log(stdOut, 'info', resolvedCmd)
     }
 
-    opts.onSuccess?.({ cmd: resolvedCmd, stdOut});
+    opts.onSuccess?.({ cmd: resolvedCmd, stdOut })
 
-    return stdOut;
+    return stdOut
   } catch (error) {
-    const parsedError = typeof error === 'string'
-      ? error
-      : error instanceof Error
+    const parsedError =
+      error instanceof Error
         ? error.message
-        : `Failed executing shell command: "${resolvedCmd}"`;
+        : `Failed executing shell command: "${resolvedCmd}"`
 
     if (opts.shouldLog ?? true) {
-      log(parsedError, 'error', resolvedCmd);
+      log(parsedError, 'error', resolvedCmd)
     } else {
       // will show up in the Debug console during development
-      console.error(parsedError);
+      console.error(parsedError)
     }
 
-    opts.onError?.({ cmd: resolvedCmd, parsedError });
+    opts.onError?.({ cmd: resolvedCmd, parsedError })
 
-    return undefined;
+    return undefined
   }
 }

@@ -1,4 +1,4 @@
-import { commands } from 'vscode';
+import { commands } from 'vscode'
 
 /**
  * Definition of custom `when` clause context keys extending the built-in ones
@@ -10,7 +10,6 @@ interface CustomWhenClauseContextKeys {
   'radicle.isRepoRadPublished': boolean
 }
 
-
 /**
  * Sets a custom context key to be used in `when` clauses of package.json definitions.
  *
@@ -21,5 +20,5 @@ export function setWhenClauseContext<K extends keyof CustomWhenClauseContextKeys
   key: K,
   value: CustomWhenClauseContextKeys[K],
 ): void {
-  commands.executeCommand('setContext', key, value);
+  commands.executeCommand('setContext', key, value)
 }
