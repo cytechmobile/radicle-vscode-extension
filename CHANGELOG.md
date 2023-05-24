@@ -4,7 +4,8 @@
 
 ### 🏡 Chores
 
-- **lint:** massively improve automatic code linting & formatting and update all source code to comply
+- **lint:** massively improve code linting ruleset, integrate code formatter and update all source code to comply
+- **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed
 - **deps:** migrate to Typescript v5.0
 
 ## v0.1.2

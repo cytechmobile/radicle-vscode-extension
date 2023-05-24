@@ -26,6 +26,7 @@
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
   "editor.codeActionsOnSave": {
+    "source.addMissingImports": true,
     "source.fixAll.eslint": true
   },
 }
