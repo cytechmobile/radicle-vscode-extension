@@ -47,6 +47,7 @@ module.exports = {
     ],
     'no-var': 'error',
     'vars-on-top': 'off',
+    'no-empty': 'warn',
     'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
     'prefer-exponentiation-operator': 'warn',
     'curly': ['warn', 'all'],
@@ -347,7 +348,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    ecmaVersion: 2022, // TODO: maninak can I increase?
+    ecmaVersion: 2022,
     ecmaFeatures: { jsx: true },
   },
 }
