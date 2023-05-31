@@ -6,8 +6,8 @@ import {
   isRadCliInstalled,
   isRepoRadInitialised,
   isRepoRadPublished,
+  notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
   setWhenClauseContext,
-  warnUserRadCliNotResolvedAndMaybeTroubleshoot,
 } from '.'
 
 /**
@@ -76,7 +76,7 @@ const notInWorkspaceFileWatchers = [
         !(await isRepoRadPublished()) &&
         (await isGitInitialised())
       ) {
-        warnUserRadCliNotResolvedAndMaybeTroubleshoot()
+        notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
       }
     },
   },

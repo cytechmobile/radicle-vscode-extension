@@ -1,14 +1,50 @@
-# Radicle VS Code Extension Changelog
+# Radicle VS Code Extension Change Log
 
 ## _(WIP, yet unreleased version)_
 
+### ✨ Highlights
+
+- ❤️🪵 ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
+
+- 🔐 integrated authentication
+
+### 🚀 Enhancements
+
+- **commands:** wrap Radicle CLI commands (`sync`, etc) with auth requirement
+- **auth:** unlock existing and create new Radicle identities with familiar VS Code UX
+- **auth:** validate passphrase correctness in realtime as the user is typing it
+- **auth:** securely store passphrase after successful user input and later auto-use (if available)
+- **config:** new config `pathToNodeHome` setting `RAD_HOME` env variable
+- **config:** set default value for existing config `pathToRadBinary`
+- **log:** explicitly indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew
+- **log:** log auth status on extension init as well as on `pathToCliBinary` and `pathToNodeHome` configs' change
+
+### 🩹 Fixes
+
+- **config:** use previously ignored config `pathToCliBinary` to resolve Radicle CLI before executing commands
+- **log:** escalate user notification shown when Radicle CLI is not resolved from warning to error
+
+### 💅 Refactors
+
+- **store:** create new global store for extension context and replace func param drilling with new getter
+- **exec:** completely rewrite foundational logic for shell script execution to be simpler, more powerful and result in cleaner client code
+- **config:** use new typesafe getter and setter for accessing VS Code configuration options
+- **config:** rename config `pathToBinary` -> `pathToCliBinary`
+
 ### 🏡 Chores
 
-- **lint:** massively improve code linting ruleset, integrate code formatter and update all source code to comply
+- **lint:** massively improve code linting ruleset, integrate code formatter in it and update all source code to comply
 - **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed
 - **deps:** migrate to Typescript v5.0
 
-## v0.1.2
+### 📖 Documentation
+
+- **readme:** add CTA advertising the change log
+- **changelog:** add release date to title of each version and separators above them
+
+-----
+
+## **v0.1.2** (April 25th, 2023)
 
 ### 🩹 Fixes
 
@@ -25,7 +61,9 @@
 - **readme:** fix broken reference to image showcasing integrated logging feature
 - **changelog:** prefix changes with context and remove quotations formatting
 
-## v0.1.1
+-----
+
+## **v0.1.1** (April 5th, 2023)
 
 ### 🩹 Fixes
 
@@ -37,9 +75,11 @@
 - **readme:** revamp with simpler feature list, visual examples of each and a short definition of the Radicle network
 - **changelog:** polishing of enhancements list of v0.0.1
 
-## v0.1.0
+-----
 
-🆙 Minor version bump to officially mark the release of the long-awaited MVP! 🥳
+## **v0.1.0** (April 5th, 2023)
+
+Minor version bump to officially mark the release of the long-awaited MVP! 🥳
 
 Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as we work out our versioning/release/changelog/documentation flows)
 
@@ -47,13 +87,15 @@ Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as
 
 - **changelog:** improve copy of features list
 
-## v0.0.3
+## **v0.0.3** (April 5th, 2023)
 
 ### 📖 Documentation
 
 - **readme:** update and partially extract content to CONTRIBUTING
 
-## v0.0.2
+-----
+
+## **v0.0.2** (April 5th, 2023)
 
 ### 🏡 Chores
 
@@ -63,7 +105,9 @@ Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as
 
 - **changelog:** introduce Changelog
 
-## v0.0.1
+-----
+
+## **v0.0.1** (April 5th, 2023)
 
 An MVP bringing getting-started and troubleshooting flows as well as basic (pre-Heartwood) Radicle integration to VS Code.
 

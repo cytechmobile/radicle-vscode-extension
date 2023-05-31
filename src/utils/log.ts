@@ -1,4 +1,5 @@
-import { type ExtensionContext, window } from 'vscode'
+import { window } from 'vscode'
+import { getExtensionContext } from '../store'
 
 // Accessible in the Output panel's dropdown, under the declared channel name
 const outputLog = window.createOutputChannel('Radicle')
@@ -44,9 +45,11 @@ export function showLog(shouldFocusOutput = true): void {
 /**
  * Append a new entry to the log with the extension activation event and version.
  */
-export function logExtensionActivated(ctx: ExtensionContext): void {
+export function logExtensionActivated(): void {
+  const ctx = getExtensionContext()
+
   log(
-    `Extension ${ctx.extension.packageJSON.displayName} v${ctx.extension.packageJSON.version} activated.`,
+    `Extension ${ctx.extension.packageJSON.displayName} v${ctx.extension.packageJSON.version} activated`,
     'info',
   )
 }

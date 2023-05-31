@@ -1,3 +1,4 @@
+export * from './assertUnreachable'
 export * from './commands'
 export * from './config'
 export * from './exec'

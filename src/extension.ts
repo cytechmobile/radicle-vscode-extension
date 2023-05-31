@@ -4,14 +4,19 @@ import {
   registerAllCommands,
   registerAllConfigWatchers,
   registerAllFileWatchers,
+  validateRadCliAuthentication,
   validateRadCliInstallation,
 } from './utils'
+import { initExtensionContext } from './store'
 
 export async function activate(ctx: ExtensionContext) {
-  registerAllCommands(ctx)
-  registerAllConfigWatchers(ctx)
+  initExtensionContext(ctx)
+
+  registerAllCommands()
+  registerAllConfigWatchers()
   registerAllFileWatchers()
 
-  logExtensionActivated(ctx)
-  validateRadCliInstallation({ minimizeUserNotifications: true })
+  logExtensionActivated()
+  await validateRadCliInstallation({ minimizeUserNotifications: true })
+  validateRadCliAuthentication({ minimizeUserNotifications: true })
 }

@@ -1,33 +1,32 @@
-import { type ExtensionContext, commands, window } from 'vscode'
+import { commands, window } from 'vscode'
+import { getExtensionContext } from '../store'
 import { radCliCmdsToRegisterInVsCode } from '../constants'
-import { exec, getRadCliRef, showLog } from '.'
+import { authenticate, exec, getRadCliRef, showLog } from '.'
 
 type CmdCallback = Parameters<typeof commands.registerCommand>['1']
 
-function registerSimpleVsCodeCmd(
-  name: string,
-  action: CmdCallback,
-  ctx: ExtensionContext,
-): void {
-  ctx.subscriptions.push(commands.registerCommand(`extension.${name}`, action))
+function registerSimpleVsCodeCmd(name: string, action: CmdCallback): void {
+  getExtensionContext().subscriptions.push(
+    commands.registerCommand(`extension.${name}`, action),
+  )
 }
 
-function registerRadCliCmdsAsVsCodeCmds(
-  cmds: string[] | readonly string[],
-  ctx: ExtensionContext,
-): void {
-  const btnShowOutput = 'Show output'
+function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): void {
+  const button = 'Show output'
 
   cmds.forEach((radCliCmd) =>
-    ctx.subscriptions.push(
+    getExtensionContext().subscriptions.push(
       commands.registerCommand(`extension.${radCliCmd}`, async () => {
-        const didCmdSucceed = Boolean(await exec(`${getRadCliRef()} ${radCliCmd}`))
+        const didAuth = await authenticate()
+        const didCmdSucceed =
+          didAuth &&
+          Boolean(await exec(`${await getRadCliRef()} ${radCliCmd}`, { shouldLog: true }))
 
         didCmdSucceed
           ? window.showInformationMessage(`Command "rad ${radCliCmd}" succeeded`)
           : window
-              .showErrorMessage(`Command "rad ${radCliCmd}" failed`, btnShowOutput)
-              .then((selection) => selection === btnShowOutput && showLog())
+              .showErrorMessage(`Command "rad ${radCliCmd}" failed`, button)
+              .then((userSelection) => userSelection === button && showLog())
       }),
     ),
   )
@@ -35,10 +34,8 @@ function registerRadCliCmdsAsVsCodeCmds(
 
 /**
  * Registers in VS Code all the commands this extension advertises in its manifest.
- *
- * @param ctx The extension's context.
  */
-export function registerAllCommands(ctx: ExtensionContext): void {
-  registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode, ctx)
-  registerSimpleVsCodeCmd('showExtensionLog', showLog, ctx)
+export function registerAllCommands(): void {
+  registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode)
+  registerSimpleVsCodeCmd('showExtensionLog', showLog)
 }

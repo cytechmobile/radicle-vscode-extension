@@ -6,18 +6,16 @@ import { doesFileContainText, exec } from '.'
  * @returns the path to the root directory or `undefined` if not found.
  */
 export async function getRepoRootDir(): Promise<string | undefined> {
-  const gitRepoRootDir = await exec('git rev-parse --show-toplevel', { shouldLog: false })
+  const gitRepoRootDir = await exec('git rev-parse --show-toplevel')
 
-  return gitRepoRootDir?.trim()
+  return gitRepoRootDir
 }
 
 /**
  * Returns `true` if the opened workspace folder is an initialised git repo, otherwise `false`.
  */
 export async function isGitInitialised(): Promise<boolean> {
-  const isInitialised = Boolean(
-    await exec('git rev-parse --is-inside-work-tree', { shouldLog: false }),
-  )
+  const isInitialised = Boolean(await exec('git rev-parse --is-inside-work-tree'))
 
   return isInitialised
 }
@@ -27,7 +25,7 @@ export async function isGitInitialised(): Promise<boolean> {
  * otherwise `false`.
  */
 export async function isRepoRadInitialised(): Promise<boolean> {
-  const isRadInitialised = Boolean(await exec('rad inspect', { shouldLog: false }))
+  const isRadInitialised = Boolean(await exec('rad inspect'))
 
   return isRadInitialised
 }

@@ -6,9 +6,11 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 [Radicle](https://radicle.xyz/) is a Github alternative bringing familiar features (e.g. Pull Requests, Issues, etc) over a free, open-source and peer-to-peer network, built on top of Git.
 
-> **NOTE:** The extension supports the Radicle CLI up to v0.6.x . Support for experimental newer versions of the CLI (codename "Heartwood") is [planned](https://github.com/cytechmobile/radicle-vscode-extension/milestone/2) and coming soon.
+> **NOTE:** The extension supports the Radicle CLI _up to v0.6.x_ . Support for experimental newer versions of the CLI (codename "Heartwood") is [planned](https://github.com/cytechmobile/radicle-vscode-extension/milestone/2) and coming soon.
 
 ## Features
+
+> _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
 - Multiple integrated ways to [execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever fits your workflow best.
 - [Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out

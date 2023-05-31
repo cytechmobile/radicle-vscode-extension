@@ -201,11 +201,22 @@
       {
         "title": "Radicle",
         "properties": {
-          "radicle.advanced.pathToBinary": {
+          "radicle.advanced.pathToRadBinary": {
             "scope": "machine-overridable",
             "type": "string",
             "default": "",
-            "markdownDescription": "Specifies the path to the Radicle CLI binary stored on your machine. \n\nLeave empty if command `rad` is already globally available in your shell."
+            "markdownDescription": "Specifies the path to the Radicle CLI binary stored on your machine. \n\nLeave empty to use the default path or if command `rad` is already globally available in your shell."
+          }
+        }
+      },
+      {
+        "title": "Radicle",
+        "properties": {
+          "radicle.advanced.pathToNodeHome": {
+            "scope": "machine-overridable",
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Specifies the path to the Radicle node's home directory. \n\nLeave empty to use the default path or if environment variable `RAD_HOME` is already globally available in your shell."
           }
         }
       }

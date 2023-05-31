@@ -1,32 +1,48 @@
-import { exec as execNative } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { getWorkspaceFolderPaths, log } from '.'
-
-function execNativePromisified(cmd: string): Promise<string> {
-  return new Promise((resolve, reject) =>
-    execNative(cmd, (_, stdOut, stdErr) => (stdErr ? reject(stdErr) : resolve(stdOut))),
-  )
-}
 
 /**
  * Executes a shell command and returns a promise that resolves with the stdout of the
- * command or rejects with the stderr output.
+ * command.
  *
  * EXAMPLE:
  * ```ts
- * exec('echo "hello shell :)"')
+ * await exec('echo "hello shell :)"')
+ * //> hello shell:)
  * ```
  *
- * @param cmd - The shell command to execute. Can be a static or a function resolving
+ * @param cmd - The shell command to execute. Can be a static string or a function resolving
  * the command dynamically.
  * @param options - Optional configuration.
- * @returns The output of the shell command if successful, otherwise nothing.
+ * @returns The output of the shell command if successful, otherwise `undefined`.
  */
 export async function exec(
   cmd: string | (() => string),
   options?: {
-    shouldLog?: boolean // TODO: maninak refactor to false by default
-    onSuccess?: (ctx: { cmd: string; stdOut: string }) => void
-    onError?: (ctx: { cmd: string; parsedError: string }) => void
+    /**
+     * Specifies whether the output of the shell command should be logged in the Output panel
+     * or not. If set to `false` and a command execution error occurs, then the error will be
+     * logged in the Debug panel regardless (only visible during development).
+     *
+     * @default false
+     */
+    shouldLog?: boolean
+    /**
+     * Specifies the maximum amount of time (in milliseconds) that the shell command is
+     * allowed to run before it is automatically terminated. If the command takes longer than
+     * the specified timeout, it will be forcefully terminated and an error will be thrown.
+     *
+     * @default 5000
+     */
+    timeout?: number
+    /**
+     * If set to `true`, the stdout will be trimmed of any leading or trailing
+     * whitespace before being returned. Otherwise the output will be returned as-is.
+     * Especially useful for removing the common trailing new-line.
+     *
+     * @default true
+     */
+    outputTrimming?: boolean
   },
 ): Promise<string | undefined> {
   const opts = options ?? {}
@@ -36,35 +52,41 @@ export async function exec(
     const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
     if (!firstWorkspaceDir) {
       throw new Error(
-        `Failed resolving path of workspace directory in order to exec "${resolvedCmd}" in it.`,
+        `Failed resolving path of workspace directory in order to exec "${resolvedCmd}" in it`,
       )
     }
 
-    const cmdToExec = `cd "${firstWorkspaceDir}" && ${resolvedCmd}`
-
-    const stdOut = await execNativePromisified(cmdToExec)
-
-    if (opts.shouldLog ?? true) {
-      log(stdOut, 'info', resolvedCmd)
+    const execResult = spawnSync(resolvedCmd, {
+      shell: true,
+      cwd: firstWorkspaceDir,
+      timeout: opts.timeout ?? 5000,
+      encoding: 'utf-8',
+    })
+    if (execResult.error || execResult.status) {
+      throw execResult.error || execResult.stderr || execResult.stdout
     }
 
-    opts.onSuccess?.({ cmd: resolvedCmd, stdOut })
+    const parsedResult =
+      opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
+    if (opts.shouldLog ?? false) {
+      log(parsedResult, 'info', resolvedCmd)
+    }
 
-    return stdOut
+    return parsedResult
   } catch (error) {
     const parsedError =
-      error instanceof Error
+      typeof error === 'string'
+        ? error
+        : error instanceof Error
         ? error.message
         : `Failed executing shell command: "${resolvedCmd}"`
 
-    if (opts.shouldLog ?? true) {
-      log(parsedError, 'error', resolvedCmd)
+    if (opts.shouldLog ?? false) {
+      log(opts.outputTrimming ?? true ? parsedError.trim() : parsedError, 'error', resolvedCmd)
     } else {
-      // will show up in the Debug console during development
+      // will show up only in the Debug console during development
       console.error(parsedError)
     }
-
-    opts.onError?.({ cmd: resolvedCmd, parsedError })
 
     return undefined
   }
