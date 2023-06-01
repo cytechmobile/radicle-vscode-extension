@@ -1,38 +1,12 @@
-import { readFile } from 'node:fs/promises'
 import { RelativePattern, Uri, workspace } from 'vscode'
 import {
-  getRepoRootDir,
-  isGitInitialised,
-  isRadCliInstalled,
-  isRepoRadInitialised,
-  isRepoRadPublished,
-  notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
+  getRepoRoot,
+  getWorkspaceFolderPaths,
+  isGitRepo,
   setWhenClauseContext,
-} from '.'
-
-/**
- * Returns an array with the paths of each open folder in the workspace or `undefined`
- * if no workspace has been opened.
- */
-export function getWorkspaceFolderPaths(): string[] | undefined {
-  const dirs = workspace.workspaceFolders?.map((folder) => folder.uri.fsPath)
-
-  return dirs
-}
-
-/**
- * Checks if a file contains a specific text.
- *
- * @param filePath The path to the file of which the contents are to be checked
- * @param text The text to search for.
- * @returns `true` if text is found in the file, otherwise `false`.
- */
-export async function doesFileContainText(filePath: string, text: string): Promise<boolean> {
-  const contents = await readFile(filePath, 'utf-8')
-  const isTextInFile = contents.includes(text)
-
-  return isTextInFile
-}
+} from '../utils'
+import { notifyUserRadCliNotResolvedAndMaybeTroubleshoot } from '../ux'
+import { isRadCliInstalled, isRepoRadInitialised, isRepoRadPublished } from '.'
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
 // going manual instead of adapting it.
@@ -61,10 +35,10 @@ const notInWorkspaceFileWatchers = [
   {
     glob: async () =>
       new RelativePattern(
-        // `getRepoRootDir()` will return undefined if user opens the extension on
+        // `getRepoRoot()` will return undefined if user opens the extension on
         // a non-git-initialized folder, pointing our watcher to the wrong path.
         // We're doing a best effort using the first workspace folder instead.
-        Uri.file(`${(await getRepoRootDir()) ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
+        Uri.file(`${(await getRepoRoot()) ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'config',
       ),
     handler: async () => {
@@ -74,7 +48,7 @@ const notInWorkspaceFileWatchers = [
       if (
         !(await isRadCliInstalled()) &&
         !(await isRepoRadPublished()) &&
-        (await isGitInitialised())
+        (await isGitRepo())
       ) {
         notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
       }

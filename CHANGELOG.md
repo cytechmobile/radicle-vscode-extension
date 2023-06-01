@@ -30,6 +30,7 @@
 - **exec:** completely rewrite foundational logic for shell script execution to be simpler, more powerful and result in cleaner client code
 - **config:** use new typesafe getter and setter for accessing VS Code configuration options
 - **config:** rename config `pathToBinary` -> `pathToCliBinary`
+- **repo:** move functions out of overgrown `utils` directory and into new `helpers` and `ux` directories
 
 ### 🏡 Chores
 

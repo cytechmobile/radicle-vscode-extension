@@ -1,11 +1,5 @@
 import { ConfigurationTarget, workspace } from 'vscode'
-import { getExtensionContext } from '../store'
-import {
-  assertUnreachable,
-  exec,
-  validateRadCliAuthentication,
-  validateRadCliInstallation,
-} from '.'
+import { assertUnreachable, exec } from '../utils'
 
 /**
  * Lists they keys of configuration options available to the user along with
@@ -14,7 +8,7 @@ import {
  * PRE_CONDITION:
  * Must be kept manually in sync with `contributes.configuration` defined in package.json .
  */
-interface ExtensionConfig {
+export interface ExtensionConfig {
   'radicle.advanced.pathToRadBinary': string
   'radicle.advanced.pathToNodeHome': string
 }
@@ -99,44 +93,4 @@ export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
     getConfig('radicle.advanced.pathToNodeHome') || (await getDefaultPathToNodeHome())
 
   return path
-}
-
-function onConfigChange(
-  configKey: string,
-  onChangeCallback: Parameters<typeof workspace.onDidChangeConfiguration>['0'],
-): void {
-  getExtensionContext().subscriptions.push(
-    workspace.onDidChangeConfiguration((ev) => {
-      if (ev.affectsConfiguration(configKey)) {
-        onChangeCallback(ev)
-      }
-    }),
-  )
-}
-
-interface OnConfigChangeParam {
-  configKey: Parameters<typeof onConfigChange>['0']
-  onChangeCallback: Parameters<typeof onConfigChange>['1']
-}
-
-const configWatchers = [
-  {
-    configKey: 'radicle.advanced.pathToRadBinary',
-    onChangeCallback: async () => {
-      validateRadCliInstallation()
-      validateRadCliAuthentication({ minimizeUserNotifications: true })
-    },
-  },
-  {
-    configKey: 'radicle.advanced.pathToNodeHome',
-    onChangeCallback: () => validateRadCliAuthentication({ minimizeUserNotifications: true }),
-  },
-] satisfies OnConfigChangeParam[]
-
-/**
- * Registers all handlers to be called whenever the user changes a specific config
- * in the extension's settings.
- */
-export function registerAllConfigWatchers(): void {
-  configWatchers.forEach((cw) => onConfigChange(cw.configKey, cw.onChangeCallback))
 }

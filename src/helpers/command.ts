@@ -1,8 +1,15 @@
 import { commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
-import { radCliCmdsToRegisterInVsCode } from '../constants'
-import { authenticate, exec, getRadCliRef, showLog } from '.'
+import { exec, showLog } from '../utils'
+import { authenticate } from '../ux'
+import { getRadCliRef } from '.'
 
+/**
+ * PRECONDITION:
+ *
+ * Each command has a matching entry defined in package.json's `contributes.commands`.
+ */
+const radCliCmdsToRegisterInVsCode = ['push', 'pull', 'sync'] as const
 type CmdCallback = Parameters<typeof commands.registerCommand>['1']
 
 function registerSimpleVsCodeCmd(name: string, action: CmdCallback): void {

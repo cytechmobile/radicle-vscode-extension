@@ -1,13 +1,12 @@
 import type { ExtensionContext } from 'vscode'
+import { initExtensionContext } from './store'
 import {
   logExtensionActivated,
   registerAllCommands,
   registerAllConfigWatchers,
   registerAllFileWatchers,
-  validateRadCliAuthentication,
-  validateRadCliInstallation,
-} from './utils'
-import { initExtensionContext } from './store'
+} from './helpers'
+import { validateRadCliAuthentication, validateRadCliInstallation } from './ux'
 
 export async function activate(ctx: ExtensionContext) {
   initExtensionContext(ctx)
