@@ -6,12 +6,12 @@
 
 - ❤️🪵 ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 
-- 🔐 integrated authentication
+- 🔐 Integrated authentication
 
 ### 🚀 Enhancements
 
 - **commands:** wrap Radicle CLI commands (`sync`, etc) with auth requirement
-- **auth:** unlock existing and create new Radicle identities with familiar VS Code UX
+- **auth:** unlock existing and create new Radicle identities via familiar VS Code UX
 - **auth:** validate passphrase correctness in realtime as the user is typing it
 - **auth:** securely store passphrase after successful user input and later auto-use (if available)
 - **config:** new config `pathToNodeHome` setting `RAD_HOME` env variable
