@@ -31,6 +31,7 @@
 - **config:** use new typesafe getter and setter for accessing VS Code configuration options
 - **config:** rename config `pathToBinary` -> `pathToCliBinary`
 - **repo:** move functions out of overgrown `utils` directory and into new `helpers` and `ux` directories
+- **repo:** add readme files documenting the intended contents of `utils`, `helpers` and `ux` directories
 
 ### 🏡 Chores
 
