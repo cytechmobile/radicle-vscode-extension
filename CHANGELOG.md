@@ -23,6 +23,7 @@
 ### 🩹 Fixes
 
 - **config:** use previously ignored config `pathToCliBinary` to resolve Radicle CLI before executing commands
+- **log:** don't log `body` param if it is empty string
 - **log:** escalate user notification shown when Radicle CLI is not resolved from warning to error
 
 ### 💅 Refactors

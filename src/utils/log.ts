@@ -25,7 +25,7 @@ export function log(
 ): void {
   // timestamp as hh:mm:ss
   const ts = new Date().toTimeString().split(' ')[0] ?? new Date().toTimeString()
-  const copy = context ? `${context}\n${body}` : body
+  const copy = context && body ? `${context}\n${body}` : body || context
 
   const logEntry = `[${ts} ${severity.padEnd(5).toUpperCase()}] ${copy}`
 
