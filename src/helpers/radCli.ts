@@ -76,13 +76,13 @@ export async function isRadCliInstalled(): Promise<boolean> {
  * @returns `true` if authenticated, otherwise `false`.
  */
 export async function isRadCliAuthed(): Promise<boolean> {
-  const radicleId = await getRadNodeSshKey('hash')
+  const sshKey = await getRadNodeSshKey('hash')
   const unlockedIds = await exec('ssh-add -l')
-  if (!radicleId || !unlockedIds) {
+  if (!sshKey || !unlockedIds) {
     return false
   }
 
-  const isAuthed = Boolean(unlockedIds?.includes(radicleId))
+  const isAuthed = Boolean(unlockedIds?.includes(sshKey))
 
   return isAuthed
 }

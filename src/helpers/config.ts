@@ -94,3 +94,22 @@ export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
 
   return path
 }
+
+/**
+ * Composes a text to interpolate into log/notification messages, when there's need
+ * to reference the Radicle node's resolved path, but _only if it's the
+ * non-default path_ (for brevity).
+ *
+ * @return The string ` stored in "${resolvedPathToNodeHome}"` (with preciding space char) if the resolved path is non-default, otherwise the empty string.
+ */
+export async function composeNodePathMsg(): Promise<string> {
+  const resolvedPathToNodeHome = await getResolvedPathToNodeHome()
+  const isResolvedPathToNodeHomeTheDefaultOne =
+    resolvedPathToNodeHome === (await getDefaultPathToNodeHome())
+
+  const nodePathMsg = isResolvedPathToNodeHomeTheDefaultOne
+    ? ''
+    : ` stored in "${resolvedPathToNodeHome}"`
+
+  return nodePathMsg
+}

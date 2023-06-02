@@ -68,10 +68,17 @@
       },
       {
         "command": "radicle.showExtensionLog",
-        "title": "Show everything the extension has logged",
+        "title": "Show everything the extension has logged in the Output Panel",
         "shortTitle": "Extension log",
         "category": "Radicle",
         "icon": "$(output)"
+      },
+      {
+        "command": "radicle.deAuthCurrentIdentity",
+        "title": "De-authenticate / re-lock the currently used Radicle identity",
+        "shortTitle": "De-auth",
+        "category": "Radicle",
+        "icon": "$(sign-out)"
       }
     ],
     "menus": {

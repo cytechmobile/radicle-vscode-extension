@@ -1,7 +1,7 @@
 import { commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
 import { exec, showLog } from '../utils'
-import { authenticate } from '../ux'
+import { authenticate, deAuthCurrentRadicleIdentity } from '../ux'
 import { getRadCliRef } from '.'
 
 /**
@@ -42,5 +42,7 @@ function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): voi
  */
 export function registerAllCommands(): void {
   registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode)
+
   registerSimpleVsCodeCmd('showExtensionLog', showLog)
+  registerSimpleVsCodeCmd('deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
 }

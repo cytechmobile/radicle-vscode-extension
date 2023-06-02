@@ -14,6 +14,7 @@
 - **auth:** unlock existing and create new Radicle identities via familiar VS Code UX
 - **auth:** validate passphrase correctness in realtime as the user is typing it
 - **auth:** securely store passphrase after successful user input and later auto-use (if available)
+- **commands:** VS Code command to de-authenticate / re-lock the currently used Radicle identity and remove the associated passphrase from Secret Storage
 - **config:** new config `pathToNodeHome` setting `RAD_HOME` env variable
 - **config:** set default value for existing config `pathToRadBinary`
 - **log:** explicitly indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew

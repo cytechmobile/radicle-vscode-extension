@@ -1,8 +1,8 @@
 import { window } from 'vscode'
-import { exec, log } from '../utils'
+import { exec, log, showLog } from '../utils'
 import { getExtensionContext } from '../store'
 import {
-  getDefaultPathToNodeHome,
+  composeNodePathMsg,
   getRadCliRef,
   getRadNodeSshKey,
   getRadicleIdentity,
@@ -12,23 +12,16 @@ import {
   isRepoRadInitialised,
 } from '../helpers'
 
-async function getRadAuthSuccessMsg(
+async function composeRadAuthSuccessMsg(
   didAction: 'foundUnlockedId' | 'autoUnlockedId' | 'unlockedId' | 'createdId',
 ): Promise<string> {
-  const resolvedPathToNodeHome = await getResolvedPathToNodeHome()
-  const isResolvedPathToNodeHomeTheDefaultOne =
-    resolvedPathToNodeHome === (await getDefaultPathToNodeHome())
-  const nodePathMsg = isResolvedPathToNodeHomeTheDefaultOne
-    ? ''
-    : ` stored in "${resolvedPathToNodeHome}"`
-
   let msgPrefix: string
   switch (didAction) {
     case 'foundUnlockedId':
       msgPrefix = 'Using already unlocked'
       break
     case 'autoUnlockedId':
-      msgPrefix = 'Auto-unlocked (using securely stored passphrase) the'
+      msgPrefix = 'Auto-unlocked (using associated passphrase already in Secret Storage) the'
       break
     case 'unlockedId':
       msgPrefix = 'Succesfully unlocked'
@@ -39,10 +32,9 @@ async function getRadAuthSuccessMsg(
     default:
       msgPrefix = 'Succesfully authenticated'
   }
-
   const radicleId = await getRadicleIdentity('DID')
 
-  const msg = `${msgPrefix} Radicle identity "${radicleId}"${nodePathMsg}`
+  const msg = `${msgPrefix} Radicle identity "${radicleId}"${await composeNodePathMsg()}`
 
   return msg
 }
@@ -64,14 +56,14 @@ export async function authenticate(
     if (storedPass) {
       const didAuth = await exec(`RAD_PASSPHRASE=${storedPass} ${await getRadCliRef()} auth`)
       if (didAuth) {
-        log(await getRadAuthSuccessMsg('autoUnlockedId'), 'info')
+        log(await composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
 
         return true
       }
 
       secrets.delete(radicleId)
       log(
-        `Deleted stale passphrase (from secure store) previously matching Radicle identity "${radicleId}"`,
+        `Deleted the stored, stale passphrase previously associated with identity "${radicleId}"`,
         'warn',
       )
     }
@@ -106,7 +98,9 @@ export async function authenticate(
           return undefined
         }
 
-        const didAuth = await exec(`RAD_PASSPHRASE=${input} ${await getRadCliRef()} auth`)
+        const didAuth = await exec(
+          `RAD_PASSPHRASE=${input.trim()} ${await getRadCliRef()} auth`,
+        )
         if (!didAuth) {
           return "Current input isn't the correct passphrase to unlock the identity"
         }
@@ -135,7 +129,7 @@ export async function authenticate(
 
   secrets.store((await getRadicleIdentity('DID')) as string, typedInRadPass)
 
-  const authSuccessMsg = await getRadAuthSuccessMsg(radicleId ? 'unlockedId' : 'createdId')
+  const authSuccessMsg = await composeRadAuthSuccessMsg(radicleId ? 'unlockedId' : 'createdId')
   log(authSuccessMsg, 'info')
   window.showInformationMessage(authSuccessMsg)
 
@@ -151,7 +145,7 @@ export async function validateRadCliAuthentication(
   }
 
   if (await isRadCliAuthed()) {
-    const msg = await getRadAuthSuccessMsg('foundUnlockedId')
+    const msg = await composeRadAuthSuccessMsg('foundUnlockedId')
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
@@ -169,4 +163,43 @@ export async function validateRadCliAuthentication(
   }
 
   return false
+}
+
+/**
+ * De-authenticates any currently authed Radicle identity by removing the unlocked key from
+ * the ssh-agent and the associated stored passphrase (if any) from the extension's
+ * Secret Storage.
+ *
+ * @returns `true` if no identity is currently authed any more, otherwise `false`
+ */
+export async function deAuthCurrentRadicleIdentity(): Promise<boolean> {
+  const sshKey = await getRadNodeSshKey('hash')
+  if (!sshKey) {
+    const msg = `Failed de-authenticating current Radicle identity because none was found in "${await getResolvedPathToNodeHome()}"`
+    window.showWarningMessage(msg)
+    log(msg, 'warn')
+
+    return true
+  }
+
+  const didDeAuth = (await exec(`ssh-add -D ${sshKey}`, { shouldLog: true })) !== undefined
+  const radicleId = await getRadicleIdentity('DID')
+  getExtensionContext().secrets.delete(radicleId ?? '')
+
+  if (!didDeAuth) {
+    const button = 'Show output'
+    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${await composeNodePathMsg()}.`
+    window
+      .showErrorMessage(msg, button)
+      .then((userSelection) => userSelection === button && showLog())
+    log(msg, 'error')
+
+    return false
+  }
+
+  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${await composeNodePathMsg()} and removed the associated passphrase from Secret Storage successfully`
+  window.showInformationMessage(msg)
+  log(msg, 'info')
+
+  return true
 }
