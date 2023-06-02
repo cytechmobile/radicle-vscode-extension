@@ -13,9 +13,7 @@ const radCliCmdsToRegisterInVsCode = ['push', 'pull', 'sync'] as const
 type CmdCallback = Parameters<typeof commands.registerCommand>['1']
 
 function registerSimpleVsCodeCmd(name: string, action: CmdCallback): void {
-  getExtensionContext().subscriptions.push(
-    commands.registerCommand(`extension.${name}`, action),
-  )
+  getExtensionContext().subscriptions.push(commands.registerCommand(`radicle.${name}`, action))
 }
 
 function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): void {
@@ -23,7 +21,7 @@ function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): voi
 
   cmds.forEach((radCliCmd) =>
     getExtensionContext().subscriptions.push(
-      commands.registerCommand(`extension.${radCliCmd}`, async () => {
+      commands.registerCommand(`radicle.${radCliCmd}`, async () => {
         const didAuth = await authenticate()
         const didCmdSucceed =
           didAuth &&

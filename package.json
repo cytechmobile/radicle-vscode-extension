@@ -43,7 +43,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.push",
+        "command": "radicle.push",
         "title": "Push local changes to the network",
         "shortTitle": "Push",
         "category": "Radicle",
@@ -51,7 +51,7 @@
         "enablement": "radicle.isRepoRadInitialised"
       },
       {
-        "command": "extension.pull",
+        "command": "radicle.pull",
         "title": "Pull latest changes from the network",
         "shortTitle": "Pull",
         "category": "Radicle",
@@ -59,7 +59,7 @@
         "enablement": "radicle.isRepoRadInitialised"
       },
       {
-        "command": "extension.sync",
+        "command": "radicle.sync",
         "title": "Synchronize local and network changes",
         "shortTitle": "Sync",
         "category": "Radicle",
@@ -67,7 +67,7 @@
         "enablement": "radicle.isRepoRadInitialised"
       },
       {
-        "command": "extension.showExtensionLog",
+        "command": "radicle.showExtensionLog",
         "title": "Show everything the extension has logged",
         "shortTitle": "Extension log",
         "category": "Radicle",
@@ -77,7 +77,7 @@
     "menus": {
       "scm/title": [
         {
-          "command": "extension.sync",
+          "command": "radicle.sync",
           "group": "navigation",
           "when": "radicle.isRepoRadInitialised"
         },
@@ -88,15 +88,15 @@
       ],
       "submenu-scm-radicle": [
         {
-          "command": "extension.push",
+          "command": "radicle.push",
           "when": "radicle.isRepoRadInitialised"
         },
         {
-          "command": "extension.pull",
+          "command": "radicle.pull",
           "when": "radicle.isRepoRadInitialised"
         },
         {
-          "command": "extension.sync",
+          "command": "radicle.sync",
           "when": "radicle.isRepoRadInitialised"
         }
       ]
@@ -156,7 +156,7 @@
       },
       {
         "view": "cli-commands",
-        "contents": "Use the buttons below to perform common interactions with the Radicle network.\n[$(rad-push) Push](command:extension.push)\n[$(rad-pull) Pull](command:extension.pull)\n[$(rad-sync) Sync](command:extension.sync)",
+        "contents": "Use the buttons below to perform common interactions with the Radicle network.\n[$(rad-push) Push](command:radicle.push)\n[$(rad-pull) Pull](command:radicle.pull)\n[$(rad-sync) Sync](command:radicle.sync)",
         "enablement": "radicle.isRadCliInstalled"
       }
     ],
