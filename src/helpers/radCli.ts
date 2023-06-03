@@ -27,7 +27,7 @@ export async function getRadCliRef(): Promise<string> {
 }
 
 /**
- * Returns the absolute path to the _resolved_ Radicle CLI binary.
+ * Resolves the absolute path to the _resolved_ Radicle CLI binary.
  *
  * @returns The path to the rad binary, if successfully resolved.
  */
@@ -45,7 +45,7 @@ export async function getRadCliPath(): Promise<string | undefined> {
 }
 
 /**
- * Gets the version of the resolved Radicle CLI binary, if possible in semver format.
+ * Resolves the version of the resolved Radicle CLI binary, if possible in semver format.
  *
  * @returns The version of the Radicle CLI, if successfully resolved.
  */
@@ -87,6 +87,14 @@ export async function isRadCliAuthed(): Promise<boolean> {
   return isAuthed
 }
 
+/**
+ * Resolves the Radicle identity found in the home directory of a node.
+ *
+ * @param format The format the identity should be in. Can be either
+ * `DID` (e.g.: did:key:z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV) or
+ * `NID` (e.g.: z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV).
+ * @returns The identity if resolved, otherwise `undefined`
+ */
 export async function getRadicleIdentity(format: 'DID' | 'NID'): Promise<string | undefined> {
   const radSelf = await exec(`${await getRadCliRef()} self`)
   if (!radSelf) {
@@ -100,6 +108,15 @@ export async function getRadicleIdentity(format: 'DID' | 'NID'): Promise<string 
   return id
 }
 
+/**
+ * Resolves the cryptographic public key of the Radicle identity found in the resolved
+ * home directory of a node.
+ *
+ * @param format The format the key should be in. Can be either
+ * `hash` (e.g.: SHA256:+ggv51RTNH8KlryICcYCnb67MXDyMjOpxQrIwP68xYU) or `full` (e.g.:
+ * ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlfJT4YlvXMI9h98D4SSswNV5S0voNrQaUZMCq0s0zK).
+ * @returns The key if resolved, otherwise `undefined`
+ */
 export async function getRadNodeSshKey(format: 'hash' | 'full'): Promise<string | undefined> {
   const radSelf = await exec(`${await getRadCliRef()} self`)
   if (!radSelf) {
@@ -113,6 +130,11 @@ export async function getRadNodeSshKey(format: 'hash' | 'full'): Promise<string 
   return key
 }
 
+/**
+ * Resolves the storage path of a Radicle node depending on the node's resolved home path.
+ *
+ * @returns The path if resolved, otherwise `undefined`
+ */
 export async function getRadNodeStoragePath(): Promise<string | undefined> {
   const radSelf = await exec(`${await getRadCliRef()} self`)
   if (!radSelf) {

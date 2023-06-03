@@ -5,8 +5,8 @@ import { assertUnreachable, exec } from '../utils'
  * Lists they keys of configuration options available to the user along with
  * the possible types their values can have.
  *
- * PRE_CONDITION:
- * Must be kept manually in sync with `contributes.configuration` defined in package.json .
+ * PRE-CONDITION:
+ * Each config key has a matching entry in `contributes.configuration` defined in package.json .
  */
 export interface ExtensionConfig {
   'radicle.advanced.pathToRadBinary': string
@@ -51,6 +51,13 @@ export function setConfig<K extends keyof ExtensionConfig>(
   }
 }
 
+/**
+ * Resolves the path where the Radicle CLI binary _is expected to be located_, as per
+ * the installation script.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ * @see https://radicle.xyz/install
+ */
 export async function getDefaultPathToRadBinary(): Promise<string | undefined> {
   const homeDir = await exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle/bin/rad` : undefined
@@ -58,6 +65,12 @@ export async function getDefaultPathToRadBinary(): Promise<string | undefined> {
   return defaultPath
 }
 
+/**
+ * Resolves the default path to the Radicle CLI binary _after having confirmed_ that the binary
+ * is indeed there and accessible for command execution.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ */
 export async function getValidatedDefaultPathToRadBinary(): Promise<string | undefined> {
   const defaultPath = await getDefaultPathToRadBinary()
 
@@ -70,6 +83,12 @@ export async function getValidatedDefaultPathToRadBinary(): Promise<string | und
   return isBinaryAtDefaultPath ? defaultPath : undefined
 }
 
+/**
+ * Resolves the path to which the PATH alias`rad` points, if it is set in the shell and if
+ * it indeed points to a Radicle CLI binary accessible for command execution.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ */
 export async function getValidatedAliasedPathToRadBinary(): Promise<string | undefined> {
   const aliasedPath = await exec('which rad')
   if (!aliasedPath) {
@@ -81,6 +100,13 @@ export async function getValidatedAliasedPathToRadBinary(): Promise<string | und
   return isBinaryAtAliasedPath ? aliasedPath : undefined
 }
 
+/**
+ * Resolves the default path where the home for a Radicle node _is expected to be located_,
+ * as per the installation script.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ * @see https://radicle.xyz/install
+ */
 export async function getDefaultPathToNodeHome(): Promise<string | undefined> {
   const homeDir = await exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle` : undefined
@@ -88,6 +114,14 @@ export async function getDefaultPathToNodeHome(): Promise<string | undefined> {
   return defaultPath
 }
 
+/**
+ * Resolves the _preferred_ path where the home for a Radicle node _is expected to be located_,
+ * prioritizing user-defined configuration.
+ *
+ * If no home is is located at the resolved path, the CLI may create one automatically.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ */
 export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
   const path =
     getConfig('radicle.advanced.pathToNodeHome') || (await getDefaultPathToNodeHome())
@@ -97,10 +131,11 @@ export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
 
 /**
  * Composes a text to interpolate into log/notification messages, when there's need
- * to reference the Radicle node's resolved path, but _only if it's the
+ * to reference the Radicle node's resolved home path, but _only if it's the
  * non-default path_ (for brevity).
  *
- * @return The string ` stored in "${resolvedPathToNodeHome}"` (with preciding space char) if the resolved path is non-default, otherwise the empty string.
+ * @return The string ` stored in "${resolvedPathToNodeHome}"` (with a preceding space char)
+ * if the resolved path is non-default, otherwise the empty string.
  */
 export async function composeNodePathMsg(): Promise<string> {
   const resolvedPathToNodeHome = await getResolvedPathToNodeHome()

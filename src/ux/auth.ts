@@ -39,6 +39,13 @@ async function composeRadAuthSuccessMsg(
   return msg
 }
 
+/**
+ * Attempts to authenticate a Radicle identity using either the the stored (if any) passphrass
+ * or (if `minimizeUserNotifications` options is `false`) the one the user will manually type
+ * in.
+ *
+ * @returns `true` if an identity is authenticated by the end of the call, otherwise `false`.
+ */
 export async function authenticate(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
@@ -136,7 +143,13 @@ export async function authenticate(
   return true
 }
 
-// TODO: maninak document this and ALL other exported funcs without docs
+/**
+ * Will check if a Radicle identity is authenticated, log either way, and depending on the
+ * `minimizeUserNotifications` optional param, might display notifications to the user,
+ * including asking them to type in an authenticating passphrase.
+ *
+ * @returns `true` if an identity is authenticated by the end of the call, otherwise `false`.
+ */
 export async function validateRadCliAuthentication(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {

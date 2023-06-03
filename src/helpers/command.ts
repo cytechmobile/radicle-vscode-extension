@@ -5,7 +5,7 @@ import { authenticate, deAuthCurrentRadicleIdentity } from '../ux'
 import { getRadCliRef } from '.'
 
 /**
- * PRECONDITION:
+ * PRE-CONDITION:
  *
  * Each command has a matching entry defined in package.json's `contributes.commands`.
  */

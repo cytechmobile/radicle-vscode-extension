@@ -106,6 +106,10 @@ async function troubleshootRadCliInstallation(): Promise<void> {
   }
 }
 
+/**
+ * Notifies the user if the Radicle CLI binary is not resolved and, if so, prompts them
+ * to troubleshoot.
+ */
 export async function notifyUserRadCliNotResolvedAndMaybeTroubleshoot(): Promise<void> {
   const shouldTroubleshoot = await notifyUserRadCliNotResolved()
   shouldTroubleshoot && troubleshootRadCliInstallation()
