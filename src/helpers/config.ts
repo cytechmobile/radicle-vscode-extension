@@ -137,7 +137,7 @@ export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
  * @return The string ` stored in "${resolvedPathToNodeHome}"` (with a preceding space char)
  * if the resolved path is non-default, otherwise the empty string.
  */
-export async function composeNodePathMsg(): Promise<string> {
+export async function composeNodeHomePathMsg(): Promise<string> {
   const resolvedPathToNodeHome = await getResolvedPathToNodeHome()
   const isResolvedPathToNodeHomeTheDefaultOne =
     resolvedPathToNodeHome === (await getDefaultPathToNodeHome())

@@ -1,6 +1,6 @@
 import { workspace } from 'vscode'
 import { getExtensionContext } from '../store'
-import { validateRadCliAuthentication, validateRadCliInstallation } from '../ux'
+import { validateRadCliInstallation, validateRadicleIdentityAuthentication } from '../ux'
 import type { ExtensionConfig } from '.'
 
 function onConfigChange(
@@ -26,12 +26,13 @@ const configWatchers = [
     configKey: 'radicle.advanced.pathToRadBinary',
     onChangeCallback: async () => {
       validateRadCliInstallation()
-      validateRadCliAuthentication({ minimizeUserNotifications: true })
+      validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
     },
   },
   {
     configKey: 'radicle.advanced.pathToNodeHome',
-    onChangeCallback: () => validateRadCliAuthentication({ minimizeUserNotifications: true }),
+    onChangeCallback: () =>
+      validateRadicleIdentityAuthentication({ minimizeUserNotifications: true }),
   },
 ] satisfies OnConfigChangeParam[]
 

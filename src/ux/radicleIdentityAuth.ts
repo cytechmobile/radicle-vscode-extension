@@ -2,13 +2,13 @@ import { window } from 'vscode'
 import { exec, log, showLog } from '../utils'
 import { getExtensionContext } from '../store'
 import {
-  composeNodePathMsg,
+  composeNodeHomePathMsg,
   getRadCliRef,
   getRadNodeSshKey,
   getRadicleIdentity,
   getResolvedPathToNodeHome,
-  isRadCliAuthed,
   isRadCliInstalled,
+  isRadicleIdentityAuthed,
   isRepoRadInitialised,
 } from '../helpers'
 
@@ -34,7 +34,7 @@ async function composeRadAuthSuccessMsg(
   }
   const radicleId = await getRadicleIdentity('DID')
 
-  const msg = `${msgPrefix} Radicle identity "${radicleId}"${await composeNodePathMsg()}`
+  const msg = `${msgPrefix} Radicle identity "${radicleId}"${await composeNodeHomePathMsg()}`
 
   return msg
 }
@@ -49,7 +49,7 @@ async function composeRadAuthSuccessMsg(
 export async function authenticate(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
-  if (await isRadCliAuthed()) {
+  if (await isRadicleIdentityAuthed()) {
     return true
   }
 
@@ -88,7 +88,7 @@ export async function authenticate(
     return false
   }
 
-  /* Attempt manual user authentication */
+  /* Attempt manual identity authentication */
   const title = radicleId
     ? `Unlocking Radicle identity "${radicleId}"`
     : 'Creating new Radicle identity'
@@ -150,14 +150,14 @@ export async function authenticate(
  *
  * @returns `true` if an identity is authenticated by the end of the call, otherwise `false`.
  */
-export async function validateRadCliAuthentication(
+export async function validateRadicleIdentityAuthentication(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
   if (await !isRadCliInstalled()) {
     return false
   }
 
-  if (await isRadCliAuthed()) {
+  if (await isRadicleIdentityAuthed()) {
     const msg = await composeRadAuthSuccessMsg('foundUnlockedId')
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
@@ -201,7 +201,7 @@ export async function deAuthCurrentRadicleIdentity(): Promise<boolean> {
 
   if (!didDeAuth) {
     const button = 'Show output'
-    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${await composeNodePathMsg()}.`
+    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${await composeNodeHomePathMsg()}.`
     window
       .showErrorMessage(msg, button)
       .then((userSelection) => userSelection === button && showLog())
@@ -210,7 +210,7 @@ export async function deAuthCurrentRadicleIdentity(): Promise<boolean> {
     return false
   }
 
-  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${await composeNodePathMsg()} and removed the associated passphrase from Secret Storage successfully`
+  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${await composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)
   log(msg, 'info')
 

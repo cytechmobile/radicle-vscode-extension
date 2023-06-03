@@ -1,2 +1,2 @@
-export * from './auth'
-export * from './radCli'
+export * from './radCliInstallation'
+export * from './radicleIdentityAuth'
