@@ -10,49 +10,10 @@ module.exports = {
   ignorePatterns: ['!.*rc.*', '!*.config.js', 'pnpm-lock.yaml', 'dist', 'static'],
   rules: {
     /*
-     * Disable native ESLint rules that don't work well with TypeScript
-     * ========================================================================================
-     */
-    // no-undef does not know about types that are available in TypeScript
-    'no-undef': 'off',
-
-    // no-dupe-class-members cannot handle typescript's function overloading
-    'no-dupe-class-members': 'off',
-
-    /*
      * Rules native to ESLint follow
      * ========================================================================================
      */
-    'no-console': 'warn',
-    'no-debugger': 'warn',
-    'arrow-parens': ['warn', 'always', { requireForBlockBody: false }],
-    'space-before-function-paren': [
-      'warn',
-      {
-        anonymous: 'always',
-        named: 'never',
-        asyncArrow: 'always',
-      },
-    ],
-    'consistent-return': 'warn',
     'no-confusing-arrow': ['warn', { allowParens: true }],
-    'no-unused-expressions': [
-      'warn',
-      {
-        allowShortCircuit: true,
-        allowTernary: true,
-        allowTaggedTemplates: true,
-        enforceForJSX: true,
-      },
-    ],
-    'no-var': 'error',
-    'vars-on-top': 'off',
-    'no-empty': 'warn',
-    'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
-    'prefer-exponentiation-operator': 'warn',
-    'curly': ['warn', 'all'],
-    'spaced-comment': 'warn',
-    'no-multiple-empty-lines': ['warn', { max: 1, maxBOF: 0, maxEOF: 1 }],
     'no-extra-boolean-cast': 'warn',
     'padding-line-between-statements': [
       'warn',
@@ -76,6 +37,20 @@ module.exports = {
         exceptions: ['i', 'j', 'x', 'y', 'z', '_'],
       },
     ],
+
+    // overrides to antfu's config follow (found in his repo with regex search '[^\/]+':)
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-unused-expressions': [
+      'warn',
+      {
+        allowShortCircuit: true,
+        allowTernary: true,
+        allowTaggedTemplates: true,
+        enforceForJSX: true,
+      },
+    ],
+    'curly': ['warn', 'all'],
+    'no-debugger': 'warn',
     'no-restricted-imports': [
       'error',
       {
@@ -95,11 +70,35 @@ module.exports = {
         message:
           "Don't declare enums. See alternative: https://twitter.com/maninak_/status/1448344698704343040",
       },
+      'DebuggerStatement',
+      'LabeledStatement',
+      'WithStatement',
     ],
-
-    // overrides to antfu's config follow
-
+    'space-before-function-paren': [
+      'warn',
+      {
+        anonymous: 'always',
+        named: 'never',
+        asyncArrow: 'always',
+      },
+    ],
+    'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
+    'prefer-exponentiation-operator': 'warn',
+    'arrow-parens': ['warn', 'always', { requireForBlockBody: true }],
+    'spaced-comment': [
+      'warn',
+      'always',
+      {
+        line: { markers: ['/'], exceptions: ['/', '#'] },
+        block: { markers: ['!'], exceptions: ['*'], balanced: true },
+      },
+    ],
+    'consistent-return': 'warn',
+    'complexity': ['warn', 40],
+    // 'require-await': 'warn', // TODO: maninak un-comment and refactor code to comply
     'max-statements-per-line': 'warn',
+    'no-empty': ['warn', { allowEmptyCatch: true }],
+    'no-multiple-empty-lines': ['warn', { max: 1, maxBOF: 0, maxEOF: 1 }],
 
     /*
      * Rules implemented by `@typescript-eslint` follow
