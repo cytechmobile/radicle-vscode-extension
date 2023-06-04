@@ -97,6 +97,10 @@ module.exports = {
       },
     ],
 
+    // overrides to antfu's config follow
+
+    'max-statements-per-line': 'warn',
+
     /*
      * Rules implemented by `@typescript-eslint` follow
      * ========================================================================================
