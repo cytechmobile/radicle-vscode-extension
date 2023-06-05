@@ -6,7 +6,8 @@ import { assertUnreachable, exec } from '../utils'
  * the possible types their values can have.
  *
  * PRE-CONDITION:
- * Each config key has a matching entry in `contributes.configuration` defined in package.json .
+ * Each config key has a matching entry in `contributes.configuration` defined
+ * in package.json .
  */
 export interface ExtensionConfig {
   'radicle.advanced.pathToRadBinary': string

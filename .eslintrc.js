@@ -37,6 +37,17 @@ module.exports = {
         exceptions: ['i', 'j', 'x', 'y', 'z', '_'],
       },
     ],
+    'max-len': [
+      'warn',
+      {
+        code: 95,
+        comments: 95,
+        tabWidth: 2,
+        ignoreTrailingComments: true,
+        ignoreTemplateLiterals: true, // TODO: remove option when prettier resolves https://github.com/prettier/prettier/issues/3368
+        ignoreUrls: true,
+      },
+    ],
 
     // overrides to antfu's config follow (found in his repo with regex search '[^\/]+':)
     'no-console': ['warn', { allow: ['warn', 'error'] }],

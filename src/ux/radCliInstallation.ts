@@ -18,7 +18,10 @@ import { exec, isGitRepo, log, setWhenClauseContext } from '../utils'
 async function notifyUserRadCliNotResolved(): Promise<boolean> {
   const button = 'Troubleshoot'
   const userSelection = await window.showErrorMessage(
-    "Failed resolving Radicle CLI. Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings. Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
+    'Failed resolving Radicle CLI. Please ensure it is installed on your machine and either ' +
+      'that it is globally accessible in the shell as `rad` or that its path is correctly ' +
+      "defined in the extension's settings. Please expect the extention's capabilities to " +
+      'remain severely limited until this issue is resolved.',
     button,
   )
 

@@ -14,7 +14,8 @@
   switch (myLetter: Letter) {
     case: 'a': doSomething()
     case: 'b': doSomethingElse()
-    default: assertUnreachable(myLetter) // Error: Argument of type 'string' is not assignable to parameter of type 'never'.
+    default: assertUnreachable(myLetter)
+    // Error: Argument of type 'string' is not assignable to parameter of type 'never'.
   }
   ```
  * @param {never} x - never
