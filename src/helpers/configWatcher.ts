@@ -24,15 +24,16 @@ interface OnConfigChangeParam {
 const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToRadBinary',
-    onChangeCallback: async () => {
+    onChangeCallback: () => {
       validateRadCliInstallation()
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
     },
   },
   {
     configKey: 'radicle.advanced.pathToNodeHome',
-    onChangeCallback: () =>
-      validateRadicleIdentityAuthentication({ minimizeUserNotifications: true }),
+    onChangeCallback: () => {
+      validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
+    },
   },
 ] satisfies OnConfigChangeParam[]
 
@@ -41,5 +42,7 @@ const configWatchers = [
  * in the extension's settings.
  */
 export function registerAllConfigWatchers(): void {
-  configWatchers.forEach((cw) => onConfigChange(cw.configKey, cw.onChangeCallback))
+  configWatchers.forEach((cw) => {
+    onConfigChange(cw.configKey, cw.onChangeCallback)
+  })
 }

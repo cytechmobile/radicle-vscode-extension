@@ -4,8 +4,8 @@ import { doesFileContainText, exec, getRepoRoot } from '../utils'
  * Returns `true` if the opened workspace folder contains a Radicle initialised repo,
  * otherwise `false`.
  */
-export async function isRepoRadInitialised(): Promise<boolean> {
-  const isRadInitialised = Boolean(await exec('rad inspect'))
+export function isRepoRadInitialised(): boolean {
+  const isRadInitialised = Boolean(exec('rad inspect'))
 
   return isRadInitialised
 }
@@ -15,7 +15,7 @@ export async function isRepoRadInitialised(): Promise<boolean> {
  * otherwise `false`.
  */
 export async function isRepoRadPublished(): Promise<boolean> {
-  const gitRepoRootDir = await getRepoRoot()
+  const gitRepoRootDir = getRepoRoot()
 
   if (!gitRepoRootDir) {
     return false

@@ -24,14 +24,15 @@ function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): voi
       commands.registerCommand(`radicle.${radCliCmd}`, async () => {
         const didAuth = await authenticate()
         const didCmdSucceed =
-          didAuth &&
-          Boolean(await exec(`${await getRadCliRef()} ${radCliCmd}`, { shouldLog: true }))
+          didAuth && Boolean(exec(`${getRadCliRef()} ${radCliCmd}`, { shouldLog: true }))
 
         didCmdSucceed
           ? window.showInformationMessage(`Command "rad ${radCliCmd}" succeeded`)
           : window
               .showErrorMessage(`Command "rad ${radCliCmd}" failed`, button)
-              .then((userSelection) => userSelection === button && showLog())
+              .then((userSelection) => {
+                userSelection === button && showLog()
+              })
       }),
     ),
   )

@@ -92,9 +92,9 @@ async function troubleshootRadCliInstallation(): Promise<void> {
         prompt: 'Please enter the path to the Radicle CLI binary stored on your machine.',
         value: getConfig('radicle.advanced.pathToRadBinary'),
         placeHolder: 'For example: /usr/bin/rad',
-        validateInput: async (input) => {
+        validateInput: (input) => {
           const isPathToRadCli = Boolean(
-            await exec(`${input.trim()} --version`, { shouldLog: true }),
+            exec(`${input.trim()} --version`, { shouldLog: true }),
           )
 
           return isPathToRadCli
@@ -126,14 +126,16 @@ export async function notifyUserRadCliNotResolvedAndMaybeTroubleshoot(): Promise
  * @returns `true` if CLI was installed at calling time, `false` otherwise (regardless if the
  * user ubsequently resolves the issue using the troubleshooting flow)
  */
-export async function validateRadCliInstallation(
+export function validateRadCliInstallation(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
-): Promise<boolean> {
-  const isRadInstalled = await isRadCliInstalled()
+): boolean {
+  const isRadInstalled = isRadCliInstalled()
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
 
   if (isRadInstalled) {
-    const msg = `Using Radicle CLI v${await getRadCliVersion()} from "${await getRadCliPath()}"`
+    const cliVersion = getRadCliVersion()!
+    const cliPath = getRadCliPath()!
+    const msg = `Using Radicle CLI v${cliVersion} from "${cliPath}"`
 
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
@@ -142,11 +144,11 @@ export async function validateRadCliInstallation(
   }
 
   log(
-    `Failed resolving Radicle CLI binary. Tried invoking it in the shell as "${await getRadCliRef()}".`,
+    `Failed resolving Radicle CLI binary. Tried invoking it in the shell as "${getRadCliRef()}".`,
     'error',
   )
 
-  if (!options.minimizeUserNotifications || (await isGitRepo())) {
+  if (!options.minimizeUserNotifications || isGitRepo()) {
     notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
   }
 

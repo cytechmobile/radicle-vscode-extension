@@ -10,15 +10,15 @@ import { isRadCliInstalled, isRepoRadInitialised, isRepoRadPublished } from '.'
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
 // going manual instead of adapting it.
-async function watchFileNotInWorkspace(
+function watchFileNotInWorkspace(
   glob:
     | Parameters<typeof workspace.createFileSystemWatcher>['0']
-    | (() => Promise<Parameters<typeof workspace.createFileSystemWatcher>['0']>),
+    | (() => Parameters<typeof workspace.createFileSystemWatcher>['0']),
   handler: () => unknown,
-): Promise<void> {
+): void {
   handler() // always run once on init
 
-  const resolvedGlobPattern = typeof glob === 'function' ? await glob() : glob
+  const resolvedGlobPattern = typeof glob === 'function' ? glob() : glob
 
   const watcher = workspace.createFileSystemWatcher(resolvedGlobPattern)
   watcher.onDidCreate(handler)
@@ -33,23 +33,19 @@ interface WatchFileNotInWorkspaceParam {
 
 const notInWorkspaceFileWatchers = [
   {
-    glob: async () =>
+    glob: () =>
       new RelativePattern(
         // `getRepoRoot()` will return undefined if user opens the extension on
         // a non-git-initialized folder, pointing our watcher to the wrong path.
         // We're doing a best effort using the first workspace folder instead.
-        Uri.file(`${(await getRepoRoot()) ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
+        Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'config',
       ),
     handler: async () => {
-      setWhenClauseContext('radicle.isRepoRadInitialised', await isRepoRadInitialised())
+      setWhenClauseContext('radicle.isRepoRadInitialised', isRepoRadInitialised())
       setWhenClauseContext('radicle.isRepoRadPublished', await isRepoRadPublished())
 
-      if (
-        !(await isRadCliInstalled()) &&
-        !(await isRepoRadPublished()) &&
-        (await isGitRepo())
-      ) {
+      if (!isRadCliInstalled() && !(await isRepoRadPublished()) && isGitRepo()) {
         notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
       }
     },
@@ -59,14 +55,16 @@ const notInWorkspaceFileWatchers = [
       case 'linux':
         return {
           glob: new RelativePattern(Uri.file('/usr/bin/'), 'rad'),
-          handler: async () =>
-            setWhenClauseContext('radicle.isRadCliInstalled', await isRadCliInstalled()),
+          handler: () => {
+            setWhenClauseContext('radicle.isRadCliInstalled', isRadCliInstalled())
+          },
         }
       case 'darwin':
         return {
           glob: new RelativePattern(Uri.file('~/.cargo/bin/'), 'rad'),
-          handler: async () =>
-            setWhenClauseContext('radicle.isRadCliInstalled', await isRadCliInstalled()),
+          handler: () => {
+            setWhenClauseContext('radicle.isRadCliInstalled', isRadCliInstalled())
+          },
         }
       default:
         return undefined
@@ -78,7 +76,7 @@ const notInWorkspaceFileWatchers = [
  * Registers all handlers to be called whenever specific files get changed.
  */
 export function registerAllFileWatchers(): void {
-  notInWorkspaceFileWatchers.forEach(
-    (fw) => fw && watchFileNotInWorkspace(fw.glob, fw.handler),
-  )
+  notInWorkspaceFileWatchers.forEach((fw) => {
+    fw && watchFileNotInWorkspace(fw.glob, fw.handler)
+  })
 }

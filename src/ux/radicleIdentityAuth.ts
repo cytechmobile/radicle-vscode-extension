@@ -12,9 +12,9 @@ import {
   isRepoRadInitialised,
 } from '../helpers'
 
-async function composeRadAuthSuccessMsg(
+function composeRadAuthSuccessMsg(
   didAction: 'foundUnlockedId' | 'autoUnlockedId' | 'unlockedId' | 'createdId',
-): Promise<string> {
+): string {
   let msgPrefix: string
   switch (didAction) {
     case 'foundUnlockedId':
@@ -32,9 +32,12 @@ async function composeRadAuthSuccessMsg(
     default:
       msgPrefix = 'Succesfully authenticated'
   }
-  const radicleId = await getRadicleIdentity('DID')
+  const radicleId = getRadicleIdentity('DID')
+  if (!radicleId) {
+    throw new Error('Failed resolving radicleId')
+  }
 
-  const msg = `${msgPrefix} Radicle identity "${radicleId}"${await composeNodeHomePathMsg()}`
+  const msg = `${msgPrefix} Radicle identity "${radicleId}"${composeNodeHomePathMsg()}`
 
   return msg
 }
@@ -49,11 +52,11 @@ async function composeRadAuthSuccessMsg(
 export async function authenticate(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
-  if (await isRadicleIdentityAuthed()) {
+  if (isRadicleIdentityAuthed()) {
     return true
   }
 
-  const radicleId = await getRadicleIdentity('DID')
+  const radicleId = getRadicleIdentity('DID')
   const secrets = getExtensionContext().secrets
 
   /* Attempt automatic authentication */
@@ -61,14 +64,14 @@ export async function authenticate(
     const storedPass = await secrets.get(radicleId)
 
     if (storedPass) {
-      const didAuth = await exec(`RAD_PASSPHRASE=${storedPass} ${await getRadCliRef()} auth`)
+      const didAuth = exec(`RAD_PASSPHRASE=${storedPass} ${getRadCliRef()} auth`)
       if (didAuth) {
-        log(await composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
+        log(composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
 
         return true
       }
 
-      secrets.delete(radicleId)
+      await secrets.delete(radicleId)
       log(
         `Deleted the stored, stale passphrase previously associated with identity "${radicleId}"`,
         'warn',
@@ -100,19 +103,17 @@ export async function authenticate(
       title,
       prompt,
       placeHolder: '************',
-      validateInput: async (input) => {
+      validateInput: (input) => {
         if (!radicleId) {
           return undefined
         }
 
-        const didAuth = await exec(
-          `RAD_PASSPHRASE=${input.trim()} ${await getRadCliRef()} auth`,
-        )
+        const didAuth = exec(`RAD_PASSPHRASE=${input.trim()} ${getRadCliRef()} auth`)
         if (!didAuth) {
           return "Current input isn't the correct passphrase to unlock the identity"
         }
 
-        exec(`ssh-add -D ${getRadNodeSshKey('hash')}`)
+        exec(`ssh-add -D ${getRadNodeSshKey('hash')!}`)
 
         return undefined
       },
@@ -129,14 +130,14 @@ export async function authenticate(
   }
 
   /* Authenticate for real now that we have a confirmed passphrase */
-  const didAuth = await exec(`RAD_PASSPHRASE=${typedInRadPass} ${await getRadCliRef()} auth`)
+  const didAuth = exec(`RAD_PASSPHRASE=${typedInRadPass} ${getRadCliRef()} auth`)
   if (!didAuth) {
     return false
   }
 
-  secrets.store((await getRadicleIdentity('DID')) as string, typedInRadPass)
+  secrets.store(getRadicleIdentity('DID')!, typedInRadPass)
 
-  const authSuccessMsg = await composeRadAuthSuccessMsg(radicleId ? 'unlockedId' : 'createdId')
+  const authSuccessMsg = composeRadAuthSuccessMsg(radicleId ? 'unlockedId' : 'createdId')
   log(authSuccessMsg, 'info')
   window.showInformationMessage(authSuccessMsg)
 
@@ -153,25 +154,26 @@ export async function authenticate(
 export async function validateRadicleIdentityAuthentication(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
-  if (await !isRadCliInstalled()) {
+  if (!isRadCliInstalled()) {
     return false
   }
 
-  if (await isRadicleIdentityAuthed()) {
-    const msg = await composeRadAuthSuccessMsg('foundUnlockedId')
+  if (isRadicleIdentityAuthed()) {
+    const msg = composeRadAuthSuccessMsg('foundUnlockedId')
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
     return true
   }
 
-  const radicleId = await getRadicleIdentity('DID')
+  const radicleId = getRadicleIdentity('DID')
+  const pathToNodeHome = getResolvedPathToNodeHome()!
   const msg = radicleId
-    ? `Found non-authenticated identity "${radicleId}" stored in "${await getResolvedPathToNodeHome()}"`
-    : `No Radicle identity is currently stored in "${await getResolvedPathToNodeHome()}"`
+    ? `Found non-authenticated identity "${radicleId}" stored in "${pathToNodeHome}"`
+    : `No Radicle identity is currently stored in "${pathToNodeHome}"`
   log(msg, 'warn')
 
-  if (!options.minimizeUserNotifications || (await isRepoRadInitialised())) {
+  if (!options.minimizeUserNotifications || isRepoRadInitialised()) {
     return await authenticate({ minimizeUserNotifications: options.minimizeUserNotifications })
   }
 
@@ -185,32 +187,32 @@ export async function validateRadicleIdentityAuthentication(
  *
  * @returns `true` if no identity is currently authed any more, otherwise `false`
  */
-export async function deAuthCurrentRadicleIdentity(): Promise<boolean> {
-  const sshKey = await getRadNodeSshKey('hash')
+export function deAuthCurrentRadicleIdentity(): boolean {
+  const sshKey = getRadNodeSshKey('hash')
   if (!sshKey) {
-    const msg = `Failed de-authenticating current Radicle identity because none was found in "${await getResolvedPathToNodeHome()}"`
+    const msg = `Failed de-authenticating current Radicle identity because none was found in "${getResolvedPathToNodeHome()!}"`
     window.showWarningMessage(msg)
     log(msg, 'warn')
 
     return true
   }
 
-  const didDeAuth = (await exec(`ssh-add -D ${sshKey}`, { shouldLog: true })) !== undefined
-  const radicleId = await getRadicleIdentity('DID')
-  getExtensionContext().secrets.delete(radicleId ?? '')
+  const didDeAuth = exec(`ssh-add -D ${sshKey}`, { shouldLog: true }) !== undefined
+  const radicleId = getRadicleIdentity('DID')!
+  getExtensionContext().secrets.delete(radicleId)
 
   if (!didDeAuth) {
     const button = 'Show output'
-    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${await composeNodeHomePathMsg()}.`
-    window
-      .showErrorMessage(msg, button)
-      .then((userSelection) => userSelection === button && showLog())
+    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()}.`
+    window.showErrorMessage(msg, button).then((userSelection) => {
+      userSelection === button && showLog()
+    })
     log(msg, 'error')
 
     return false
   }
 
-  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${await composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
+  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)
   log(msg, 'info')
 

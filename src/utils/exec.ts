@@ -7,7 +7,7 @@ import { getWorkspaceFolderPaths, log } from '.'
  *
  * EXAMPLE:
  * ```ts
- * await exec('echo "hello shell :)"')
+ * exec('echo "hello shell :)"')
  * //> hello shell:)
  * ```
  *
@@ -16,7 +16,7 @@ import { getWorkspaceFolderPaths, log } from '.'
  * @param options - Optional configuration.
  * @returns The output of the shell command if successful, otherwise `undefined`.
  */
-export async function exec(
+export function exec(
   cmd: string | (() => string),
   options?: {
     /**
@@ -44,7 +44,7 @@ export async function exec(
      */
     outputTrimming?: boolean
   },
-): Promise<string | undefined> {
+): string | undefined {
   const opts = options ?? {}
   const resolvedCmd = typeof cmd === 'function' ? cmd() : cmd
 
@@ -63,7 +63,8 @@ export async function exec(
       encoding: 'utf-8',
     })
     if (execResult.error || execResult.status) {
-      throw execResult.error || execResult.stderr || execResult.stdout
+      // eslint-disable-next-line @typescript-eslint/no-throw-literal
+      throw execResult.error ?? (execResult.stderr || execResult.stdout)
     }
 
     const parsedResult =

@@ -3,8 +3,8 @@ import { exec } from '.'
 /**
  * Returns `true` if the opened workspace folder is an initialised git repo, otherwise `false`.
  */
-export async function isGitRepo(): Promise<boolean> {
-  const isInitialised = Boolean(await exec('git rev-parse --is-inside-work-tree'))
+export function isGitRepo(): boolean {
+  const isInitialised = Boolean(exec('git rev-parse --is-inside-work-tree'))
 
   return isInitialised
 }
@@ -14,8 +14,8 @@ export async function isGitRepo(): Promise<boolean> {
  *
  * @returns the path to the root directory or `undefined` if not found.
  */
-export async function getRepoRoot(): Promise<string | undefined> {
-  const gitRepoRootDir = await exec('git rev-parse --show-toplevel')
+export function getRepoRoot(): string | undefined {
+  const gitRepoRootDir = exec('git rev-parse --show-toplevel')
 
   return gitRepoRootDir
 }

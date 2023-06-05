@@ -1,11 +1,21 @@
+const eslintTsconfig = process.env.ESLINT_TSCONFIG ?? 'tsconfig.eslint.json'
+
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   // TODO: can markdown, json, etc file be lintable similarly to how antfu seems to support it?
-  // TODO: what is a tsconfig.eslint.json and would it be useful for me?
   // TODO: ensure eslint-plugin-jest is called with "plugin:jest/recommended"
 
   root: true,
-  extends: ['@antfu', 'prettier'],
+  extends: [
+    '@antfu',
+    'prettier',
+    ...(eslintTsconfig
+      ? [
+          'plugin:@typescript-eslint/recommended-requiring-type-checking',
+          'plugin:@typescript-eslint/strict',
+        ]
+      : []),
+  ],
   plugins: ['unused-imports'],
   ignorePatterns: ['!.*rc.*', '!*.config.js', 'pnpm-lock.yaml', 'dist', 'static'],
   rules: {
@@ -20,9 +30,9 @@ module.exports = {
       { blankLine: 'always', prev: '*', next: 'return' },
       { blankLine: 'always', prev: 'directive', next: '*' },
       { blankLine: 'always', prev: '*', next: 'multiline-block-like' },
-      // relax previous rule a for colocated early return ifs
+      // relax previous rule a for co-located early return ifs
       { blankLine: 'any', prev: '*', next: 'if' },
-      // relax previous rule a for colocated vars set by loops (`const` in case of array.push)
+      // relax previous rule a for co-located vars set by loops (`const` in case of array.push)
       { blankLine: 'any', prev: 'singleline-let', next: 'multiline-block-like' },
       { blankLine: 'any', prev: 'singleline-const', next: 'for' },
       { blankLine: 'any', prev: 'singleline-const', next: 'while' },
@@ -38,14 +48,7 @@ module.exports = {
         ],
       },
     ],
-    'id-length': [
-      'warn',
-      {
-        min: 2,
-        max: 50,
-        exceptions: ['i', 'j', 'x', 'y', 'z', '_'],
-      },
-    ],
+    'id-length': ['warn', { min: 2, max: 50, exceptions: ['i', 'j', 'x', 'y', 'z', '_'] }],
     'max-len': [
       'warn',
       {
@@ -96,11 +99,7 @@ module.exports = {
     ],
     'space-before-function-paren': [
       'warn',
-      {
-        anonymous: 'always',
-        named: 'never',
-        asyncArrow: 'always',
-      },
+      { anonymous: 'always', named: 'never', asyncArrow: 'always' },
     ],
     'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
     'prefer-exponentiation-operator': 'warn',
@@ -115,7 +114,7 @@ module.exports = {
     ],
     'consistent-return': 'warn',
     'complexity': ['warn', 40],
-    // 'require-await': 'warn', // TODO: maninak un-comment and refactor code to comply
+    'require-await': 'warn',
     'max-statements-per-line': 'warn',
     'no-empty': ['warn', { allowEmptyCatch: true }],
     'no-multiple-empty-lines': ['warn', { max: 1, maxBOF: 0, maxEOF: 1 }],
@@ -153,16 +152,27 @@ module.exports = {
       {
         selector: 'interface',
         format: ['PascalCase'],
-        custom: {
-          regex: '^I[A-Z]',
-          match: false,
-        },
+        custom: { regex: '^I[A-Z]', match: false },
       },
+      {
+        selector: 'variable',
+        format: ['camelCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
+        trailingUnderscore: 'allow',
+      },
+      { selector: 'typeLike', format: ['PascalCase'] },
     ],
     '@typescript-eslint/no-extra-non-null-assertion': 'error',
     '@typescript-eslint/consistent-type-assertions': 'warn',
     '@typescript-eslint/unified-signatures': 'error',
     '@typescript-eslint/no-extraneous-class': 'error',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/require-array-sort-compare': 'warn',
+    '@typescript-eslint/promise-function-async': 'warn',
+    '@typescript-eslint/prefer-readonly': 'warn',
+    '@typescript-eslint/no-unnecessary-qualifier': 'warn',
+    '@typescript-eslint/no-duplicate-type-constituents': 'warn',
+    '@typescript-eslint/no-confusing-void-expression': ['warn'],
 
     /*
      * Rules implemented by `eslint-plugin-unused-imports` follow
@@ -171,19 +181,25 @@ module.exports = {
     'unused-imports/no-unused-imports': 'warn',
     'unused-imports/no-unused-vars': [
       'warn',
-      {
-        vars: 'all',
-        varsIgnorePattern: '^_',
-        args: 'after-used',
-        argsIgnorePattern: '^_',
-      },
+      { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
     ],
 
     /*
      * Rules implemented by `eslint-plugin-prettier-vue` follow
      * ========================================================================================
      */
-    'prettier-vue/prettier': 'warn',
+    'prettier-vue/prettier': [
+      'warn',
+      {
+        arrowParens: 'always',
+        printWidth: 95,
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+        quoteProps: 'consistent',
+        htmlWhitespaceSensitivity: 'ignore',
+      },
+    ],
 
     /*
      * Rules implemented by `eslint-plugin-antfu` follow
@@ -290,7 +306,7 @@ module.exports = {
        * Rules specifically for vue composable files
        * ======================================================================================
        */
-      files: ['**/composables/use*.ts'],
+      files: ['*/composables/use*.ts'],
       rules: {},
     },
     {
@@ -323,7 +339,7 @@ module.exports = {
        * Rules specifically for shared utility function files
        * ======================================================================================
        */
-      files: ['**/utils/**/*.ts', '**/util/**/*.ts'],
+      files: ['*/utils/**/*.ts', '*/util/**/*.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'warn',
@@ -373,5 +389,6 @@ module.exports = {
     sourceType: 'module',
     ecmaVersion: 2022,
     ecmaFeatures: { jsx: true },
+    ...(eslintTsconfig ? { project: [eslintTsconfig] } : {}), // TODO: fix this to work when eslintTsconfig is undefined
   },
 }

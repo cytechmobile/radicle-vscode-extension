@@ -25,7 +25,8 @@ export function log(
 ): void {
   // timestamp as hh:mm:ss
   const ts = new Date().toTimeString().split(' ')[0] ?? new Date().toTimeString()
-  const copy = context && body ? `${context}\n${body}` : body || context
+  const copy =
+    (context && body ? `${context}\n${body}` : body || context) ?? '<unresolved message>'
 
   const logEntry = `[${ts} ${severity.padEnd(5).toUpperCase()}] ${copy}`
 

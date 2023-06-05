@@ -9,9 +9,10 @@ import {
  * Resolves a reference to Radicle CLI to be used for executing shell commands.
  *
  * @returns Either the path to the `rad` binary defined manually by the user via
- * config, or otherwise just the string `"rad"`.
+ * config, or otherwise just the string `"rad"`
+ * @throws If the reference to the Radicle Cli binary was not resolved successfully
  */
-export async function getRadCliRef(): Promise<string> {
+export function getRadCliRef(): string {
   const configPathToNodeHome = getConfig('radicle.advanced.pathToNodeHome')
   const envPathToNodeHome = configPathToNodeHome && `RAD_HOME=${configPathToNodeHome}`
   const envVars = [envPathToNodeHome]
@@ -19,8 +20,13 @@ export async function getRadCliRef(): Promise<string> {
 
   const radCliRef =
     getConfig('radicle.advanced.pathToRadBinary') ||
-    (Boolean(await getValidatedAliasedPathToRadBinary()) && 'rad') ||
-    (await getValidatedDefaultPathToRadBinary())
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    (Boolean(getValidatedAliasedPathToRadBinary()) && 'rad') ||
+    getValidatedDefaultPathToRadBinary()
+  if (!radCliRef) {
+    throw new Error('Failed resolving reference to Radicle Cli binary')
+  }
+
   const radCliRefWithEnvVars = `${parsedEnvVars}${radCliRef}`
 
   return radCliRefWithEnvVars
@@ -31,14 +37,14 @@ export async function getRadCliRef(): Promise<string> {
  *
  * @returns The path to the rad binary, if successfully resolved.
  */
-export async function getRadCliPath(): Promise<string | undefined> {
+export function getRadCliPath(): string | undefined {
   let radCliPath: string | undefined
 
-  if (await isRadCliInstalled()) {
+  if (isRadCliInstalled()) {
     radCliPath =
-      getConfig('radicle.advanced.pathToRadBinary') ||
-      (await getValidatedDefaultPathToRadBinary()) ||
-      (await getValidatedAliasedPathToRadBinary())
+      getConfig('radicle.advanced.pathToRadBinary') ??
+      getValidatedDefaultPathToRadBinary() ??
+      getValidatedAliasedPathToRadBinary()
   }
 
   return radCliPath
@@ -49,8 +55,8 @@ export async function getRadCliPath(): Promise<string | undefined> {
  *
  * @returns The version of the Radicle CLI, if successfully resolved.
  */
-export async function getRadCliVersion(): Promise<string | undefined> {
-  const version = await exec(`${await getRadCliRef()} --version`)
+export function getRadCliVersion(): string | undefined {
+  const version = exec(`${getRadCliRef()} --version`)
   const semverRegex = /\d+\.\d+\S*/g // https://regexr.com/7bevi
   const semver = version?.match(semverRegex)?.[0]
 
@@ -62,8 +68,8 @@ export async function getRadCliVersion(): Promise<string | undefined> {
  *
  * @returns `true` if found, otherwise `false`.
  */
-export async function isRadCliInstalled(): Promise<boolean> {
-  const isInstalled = Boolean(await exec(await getRadCliRef()))
+export function isRadCliInstalled(): boolean {
+  const isInstalled = Boolean(exec(getRadCliRef()))
 
   return isInstalled
 }
@@ -75,14 +81,14 @@ export async function isRadCliInstalled(): Promise<boolean> {
  *
  * @returns `true` if authenticated, otherwise `false`.
  */
-export async function isRadicleIdentityAuthed(): Promise<boolean> {
-  const sshKey = await getRadNodeSshKey('hash')
-  const unlockedIds = await exec('ssh-add -l')
+export function isRadicleIdentityAuthed(): boolean {
+  const sshKey = getRadNodeSshKey('hash')
+  const unlockedIds = exec('ssh-add -l')
   if (!sshKey || !unlockedIds) {
     return false
   }
 
-  const isAuthed = Boolean(unlockedIds?.includes(sshKey))
+  const isAuthed = Boolean(unlockedIds.includes(sshKey))
 
   return isAuthed
 }
@@ -95,15 +101,15 @@ export async function isRadicleIdentityAuthed(): Promise<boolean> {
  * `NID` (e.g.: z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV).
  * @returns The identity if resolved, otherwise `undefined`
  */
-export async function getRadicleIdentity(format: 'DID' | 'NID'): Promise<string | undefined> {
-  const radSelf = await exec(`${await getRadCliRef()} self`)
+export function getRadicleIdentity(format: 'DID' | 'NID'): string | undefined {
+  const radSelf = exec(`${getRadCliRef()} self`)
   if (!radSelf) {
     return undefined
   }
 
   const radicleIdFromRadSelfRegex =
     format === 'DID' ? /DID\s+(\S+)/g : /Node ID \(NID\)\s+(\S+)/g // https://regexr.com/7eam1
-  const id = [...radSelf.matchAll(radicleIdFromRadSelfRegex)]?.[0]?.[1]
+  const id = [...radSelf.matchAll(radicleIdFromRadSelfRegex)][0]?.[1]
 
   return id
 }
@@ -117,15 +123,15 @@ export async function getRadicleIdentity(format: 'DID' | 'NID'): Promise<string 
  * ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlfJT4YlvXMI9h98D4SSswNV5S0voNrQaUZMCq0s0zK).
  * @returns The key if resolved, otherwise `undefined`
  */
-export async function getRadNodeSshKey(format: 'hash' | 'full'): Promise<string | undefined> {
-  const radSelf = await exec(`${await getRadCliRef()} self`)
+export function getRadNodeSshKey(format: 'hash' | 'full'): string | undefined {
+  const radSelf = exec(`${getRadCliRef()} self`)
   if (!radSelf) {
     return undefined
   }
 
   const keyFromRadSelfRegex =
     format === 'hash' ? /Key \(hash\)\s+(\S+)/g : /Key \(full\)\s+(\S+ \S+)/g // https://regexr.com/7eaeh
-  const key = [...radSelf.matchAll(keyFromRadSelfRegex)]?.[0]?.[1]
+  const key = [...radSelf.matchAll(keyFromRadSelfRegex)][0]?.[1]
 
   return key
 }
@@ -135,13 +141,13 @@ export async function getRadNodeSshKey(format: 'hash' | 'full'): Promise<string 
  *
  * @returns The path if resolved, otherwise `undefined`
  */
-export async function getRadNodeStoragePath(): Promise<string | undefined> {
-  const radSelf = await exec(`${await getRadCliRef()} self`)
+export function getRadNodeStoragePath(): string | undefined {
+  const radSelf = exec(`${getRadCliRef()} self`)
   if (!radSelf) {
     return undefined
   }
 
-  const radNodeStoragePath = [...radSelf.matchAll(/Storage \(git\)\s+(\S+)/g)]?.[0]?.[1] // https://regexr.com/7eam1
+  const radNodeStoragePath = [...radSelf.matchAll(/Storage \(git\)\s+(\S+)/g)][0]?.[1] // https://regexr.com/7eam1
 
   return radNodeStoragePath
 }

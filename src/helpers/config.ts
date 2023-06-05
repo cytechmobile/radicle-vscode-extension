@@ -28,7 +28,9 @@ export function getConfig<K extends keyof ExtensionConfig>(
   switch (configKey) {
     case 'radicle.advanced.pathToRadBinary':
     case 'radicle.advanced.pathToNodeHome':
-      return config.get<ExtensionConfig[typeof configKey]>(configKey)?.trim()
+      // if the config has the value of the empty string (default) then return `undefined`
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      return config.get<ExtensionConfig[typeof configKey]>(configKey)?.trim() || undefined
     default:
       return assertUnreachable(configKey)
   }
@@ -59,8 +61,8 @@ export function setConfig<K extends keyof ExtensionConfig>(
  * @returns The path if successfully resolved, otherwise `undefined`
  * @see https://radicle.xyz/install
  */
-export async function getDefaultPathToRadBinary(): Promise<string | undefined> {
-  const homeDir = await exec('echo $HOME')
+export function getDefaultPathToRadBinary(): string | undefined {
+  const homeDir = exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle/bin/rad` : undefined
 
   return defaultPath
@@ -72,14 +74,14 @@ export async function getDefaultPathToRadBinary(): Promise<string | undefined> {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export async function getValidatedDefaultPathToRadBinary(): Promise<string | undefined> {
-  const defaultPath = await getDefaultPathToRadBinary()
+export function getValidatedDefaultPathToRadBinary(): string | undefined {
+  const defaultPath = getDefaultPathToRadBinary()
 
   if (!defaultPath) {
     return undefined
   }
 
-  const isBinaryAtDefaultPath = Boolean(await exec(defaultPath))
+  const isBinaryAtDefaultPath = Boolean(exec(defaultPath))
 
   return isBinaryAtDefaultPath ? defaultPath : undefined
 }
@@ -90,13 +92,13 @@ export async function getValidatedDefaultPathToRadBinary(): Promise<string | und
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export async function getValidatedAliasedPathToRadBinary(): Promise<string | undefined> {
-  const aliasedPath = await exec('which rad')
+export function getValidatedAliasedPathToRadBinary(): string | undefined {
+  const aliasedPath = exec('which rad')
   if (!aliasedPath) {
     return undefined
   }
 
-  const isBinaryAtAliasedPath = Boolean(await exec(aliasedPath))
+  const isBinaryAtAliasedPath = Boolean(exec(aliasedPath))
 
   return isBinaryAtAliasedPath ? aliasedPath : undefined
 }
@@ -108,8 +110,8 @@ export async function getValidatedAliasedPathToRadBinary(): Promise<string | und
  * @returns The path if successfully resolved, otherwise `undefined`
  * @see https://radicle.xyz/install
  */
-export async function getDefaultPathToNodeHome(): Promise<string | undefined> {
-  const homeDir = await exec('echo $HOME')
+export function getDefaultPathToNodeHome(): string | undefined {
+  const homeDir = exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle` : undefined
 
   return defaultPath
@@ -123,9 +125,8 @@ export async function getDefaultPathToNodeHome(): Promise<string | undefined> {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
-  const path =
-    getConfig('radicle.advanced.pathToNodeHome') || (await getDefaultPathToNodeHome())
+export function getResolvedPathToNodeHome(): string | undefined {
+  const path = getConfig('radicle.advanced.pathToNodeHome') ?? getDefaultPathToNodeHome()
 
   return path
 }
@@ -138,10 +139,16 @@ export async function getResolvedPathToNodeHome(): Promise<string | undefined> {
  * @return The string ` stored in "${resolvedPathToNodeHome}"` (with a preceding space char)
  * if the resolved path is non-default, otherwise the empty string.
  */
-export async function composeNodeHomePathMsg(): Promise<string> {
-  const resolvedPathToNodeHome = await getResolvedPathToNodeHome()
+export function composeNodeHomePathMsg(): string {
+  const resolvedPathToNodeHome = getResolvedPathToNodeHome()
+  const defaultPathToNodeHome = getDefaultPathToNodeHome()
+
+  if (!resolvedPathToNodeHome) {
+    throw new Error('Failed resolving path to node home')
+  }
+
   const isResolvedPathToNodeHomeTheDefaultOne =
-    resolvedPathToNodeHome === (await getDefaultPathToNodeHome())
+    resolvedPathToNodeHome === defaultPathToNodeHome
 
   const nodePathMsg = isResolvedPathToNodeHomeTheDefaultOne
     ? ''
