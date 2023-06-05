@@ -18,6 +18,15 @@ module.exports = {
     'padding-line-between-statements': [
       'warn',
       { blankLine: 'always', prev: '*', next: 'return' },
+      { blankLine: 'always', prev: 'directive', next: '*' },
+      { blankLine: 'always', prev: '*', next: 'multiline-block-like' },
+      // relax previous rule a for colocated early return ifs
+      { blankLine: 'any', prev: '*', next: 'if' },
+      // relax previous rule a for colocated vars set by loops (`const` in case of array.push)
+      { blankLine: 'any', prev: 'singleline-let', next: 'multiline-block-like' },
+      { blankLine: 'any', prev: 'singleline-const', next: 'for' },
+      { blankLine: 'any', prev: 'singleline-const', next: 'while' },
+      { blankLine: 'any', prev: 'singleline-const', next: 'do' },
     ],
     'sort-imports': ['warn', { ignoreDeclarationSort: true }],
     'import/order': [
