@@ -29,4 +29,5 @@
     "source.addMissingImports": true,
     "source.fixAll.eslint": true
   },
+  "git.alwaysSignOff": true,
 }
