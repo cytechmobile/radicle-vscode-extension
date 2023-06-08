@@ -1,10 +1,10 @@
-name: Lint PR Name
+name: PR linting
 on:
   pull_request:
     types: ['opened', 'edited', 'reopened', 'synchronize']
 
 jobs:
-  lint:
+  lint-pr-title:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1

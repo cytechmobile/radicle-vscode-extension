@@ -1,4 +1,4 @@
-name: Audit Code
+name: Code audit
 on:
   push:
     branches: [ main ]
@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  verify:
+  lint-build-test:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
