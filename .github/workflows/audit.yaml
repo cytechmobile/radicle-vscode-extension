@@ -1,3 +1,4 @@
+name: Audit Code
 on:
   push:
     branches: [ main ]
