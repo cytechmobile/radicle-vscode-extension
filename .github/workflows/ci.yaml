@@ -1,4 +1,4 @@
-name: Code audit
+name: CI
 on:
   push:
     branches: [ main ]

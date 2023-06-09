@@ -21,7 +21,8 @@
     "marketplace",
     "icons",
     "changelog",
-    "readme"
+    "readme",
+    "ci"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
