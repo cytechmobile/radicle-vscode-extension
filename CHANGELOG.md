@@ -41,6 +41,10 @@
 - **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed
 - **deps:** migrate to Typescript v5.0
 
+### 🤖 CI
+
+- **ci:** set-up github actions for pull requests
+
 ### 📖 Documentation
 
 - **readme:** add CTA advertising the change log
