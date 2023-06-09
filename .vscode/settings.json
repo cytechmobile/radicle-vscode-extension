@@ -22,7 +22,8 @@
     "icons",
     "changelog",
     "readme",
-    "ci"
+    "ci",
+    "commit-linting"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
