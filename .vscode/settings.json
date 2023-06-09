@@ -21,7 +21,9 @@
     "marketplace",
     "icons",
     "changelog",
-    "readme"
+    "readme",
+    "ci",
+    "commit-linting"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
@@ -29,4 +31,5 @@
     "source.addMissingImports": true,
     "source.fixAll.eslint": true
   },
+  "git.alwaysSignOff": true,
 }

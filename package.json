@@ -35,7 +35,9 @@
     "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
     "build": "tsc",
     "dev": "npm run verify-deps && npm run build -- --watch --sourceMap",
-    "test": "echo \"Testing not yet implemented.\"",
+    "test": "test:unit && test:e2e",
+    "test:unit": "echo \"Unit testing not yet implemented.\"",
+    "test:e2e": "echo \"End-to-end testing not yet implemented.\"",
     "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "main": "./dist/extension.js",

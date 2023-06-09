@@ -4,5 +4,11 @@
     "incremental": false,
  },
   "extends": "./tsconfig.json",
-  "include": [".eslintrc.js", "./**/*.ts", "./**/*.tsx", "./**/*.mts", "./**/*.cts"]
+  "include": [
+    "./**.js",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.mts",
+    "./**/*.cts"
+  ]
 }
