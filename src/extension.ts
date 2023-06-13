@@ -6,7 +6,11 @@ import {
   registerAllConfigWatchers,
   registerAllFileWatchers,
 } from './helpers'
-import { validateRadCliInstallation, validateRadicleIdentityAuthentication } from './ux'
+import {
+  validateHttpApiEndpointConnection,
+  validateRadCliInstallation,
+  validateRadicleIdentityAuthentication,
+} from './ux'
 
 export function activate(ctx: ExtensionContext) {
   initExtensionContext(ctx)
@@ -18,4 +22,5 @@ export function activate(ctx: ExtensionContext) {
   logExtensionActivated()
   validateRadCliInstallation({ minimizeUserNotifications: true })
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
+  validateHttpApiEndpointConnection({ minimizeUserNotifications: true })
 }
