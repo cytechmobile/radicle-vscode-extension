@@ -146,7 +146,7 @@ export async function authenticate(
 
 /**
  * Will check if a Radicle identity is authenticated, log either way, and depending on the
- * `minimizeUserNotifications` optional param, might display notifications to the user,
+ * `minimizeUserNotifications` optional param, may notify the user of the result,
  * including asking them to type in an authenticating passphrase.
  *
  * @returns `true` if an identity is authenticated by the end of the call, otherwise `false`.

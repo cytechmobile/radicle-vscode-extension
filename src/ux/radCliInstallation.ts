@@ -120,8 +120,8 @@ export async function notifyUserRadCliNotResolvedAndMaybeTroubleshoot(): Promise
 
 /**
  * Will check if Radicle CLI is installed, log either way, and depending on the
- * workspace state and `minimizeUserNotifications` optional param, might display
- * info or warning notification to the user.
+ * workspace state and `minimizeUserNotifications` optional param, may notify the user of
+ * the result.
  *
  * @returns `true` if CLI was installed at calling time, `false` otherwise (regardless if the
  * user ubsequently resolves the issue using the troubleshooting flow)
