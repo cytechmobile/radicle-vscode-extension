@@ -12,6 +12,7 @@ import { assertUnreachable, exec } from '../utils'
 export interface ExtensionConfig {
   'radicle.advanced.pathToRadBinary': string
   'radicle.advanced.pathToNodeHome': string
+  'radicle.advanced.httpApiEndpoint': string
 }
 
 /**
@@ -28,6 +29,7 @@ export function getConfig<K extends keyof ExtensionConfig>(
   switch (configKey) {
     case 'radicle.advanced.pathToRadBinary':
     case 'radicle.advanced.pathToNodeHome':
+    case 'radicle.advanced.httpApiEndpoint':
       // if the config has the value of the empty string (default) then return `undefined`
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       return config.get<ExtensionConfig[typeof configKey]>(configKey)?.trim() || undefined
@@ -48,6 +50,7 @@ export function setConfig<K extends keyof ExtensionConfig>(
   switch (configKey) {
     case 'radicle.advanced.pathToRadBinary':
     case 'radicle.advanced.pathToNodeHome':
+    case 'radicle.advanced.httpApiEndpoint':
       return config.update(configKey, value, ConfigurationTarget.Global)
     default:
       return assertUnreachable(configKey)

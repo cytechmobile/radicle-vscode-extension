@@ -1,6 +1,10 @@
 import { workspace } from 'vscode'
+import {
+  validateHttpApiEndpointConnection,
+  validateRadCliInstallation,
+  validateRadicleIdentityAuthentication,
+} from '../ux/'
 import { getExtensionContext } from '../store'
-import { validateRadCliInstallation, validateRadicleIdentityAuthentication } from '../ux'
 import type { ExtensionConfig } from '.'
 
 function onConfigChange(
@@ -32,7 +36,14 @@ const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToNodeHome',
     onChangeCallback: () => {
+      // no need to notify since we check AND notify on rad command execution
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
+    },
+  },
+  {
+    configKey: 'radicle.advanced.httpApiEndpoint',
+    onChangeCallback: () => {
+      validateHttpApiEndpointConnection()
     },
   },
 ] satisfies OnConfigChangeParam[]
