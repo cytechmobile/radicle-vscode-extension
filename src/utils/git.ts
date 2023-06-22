@@ -4,7 +4,9 @@ import { exec } from '.'
  * Returns `true` if the opened workspace folder is an initialised git repo, otherwise `false`.
  */
 export function isGitRepo(): boolean {
-  const isInitialised = Boolean(exec('git rev-parse --is-inside-work-tree'))
+  const isInitialised = Boolean(
+    exec('git rev-parse --is-inside-work-tree', { cwd: '$workspaceDir' }),
+  )
 
   return isInitialised
 }
@@ -15,7 +17,7 @@ export function isGitRepo(): boolean {
  * @returns the path to the root directory or `undefined` if not found.
  */
 export function getRepoRoot(): string | undefined {
-  const gitRepoRootDir = exec('git rev-parse --show-toplevel')
+  const gitRepoRootDir = exec('git rev-parse --show-toplevel', { cwd: '$workspaceDir' })
 
   return gitRepoRootDir
 }

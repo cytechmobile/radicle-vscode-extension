@@ -43,22 +43,36 @@ export function exec(
      * @default true
      */
     outputTrimming?: boolean
+    /**
+     * Specifies the current working directory in which the shell command will be executed.
+     * Can be either a string representing a specific directory path or the string
+     * literal `'$workspaceDir'` indicating that the VS Code workspace should be used.
+     *
+     * @default undefined
+     * */
+    cwd?: (string & {}) | '$workspaceDir'
   },
 ): string | undefined {
   const opts = options ?? {}
   const resolvedCmd = typeof cmd === 'function' ? cmd() : cmd
 
   try {
-    const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
-    if (!firstWorkspaceDir) {
-      throw new Error(
-        `Failed resolving path of workspace directory in order to exec "${resolvedCmd}" in it`,
-      )
+    let cwd: string | undefined
+    if (opts.cwd === '$workspaceDir') {
+      const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
+      if (!firstWorkspaceDir) {
+        throw new Error(
+          `Failed resolving path of workspace directory in order to exec "${resolvedCmd}" in it`,
+        )
+      }
+      cwd = firstWorkspaceDir
+    } else {
+      cwd = opts.cwd
     }
 
     const execResult = spawnSync(resolvedCmd, {
       shell: true,
-      cwd: firstWorkspaceDir,
+      cwd,
       timeout: opts.timeout ?? 5000,
       encoding: 'utf-8',
     })
