@@ -98,8 +98,7 @@
           "when": "radicle.isRepoRadInitialised"
         },
         {
-          "submenu": "submenu-scm-radicle",
-          "when": "radicle.isRepoRadInitialised"
+          "submenu": "submenu-scm-radicle"
         }
       ],
       "submenu-scm-radicle": [
@@ -114,6 +113,9 @@
         {
           "command": "radicle.sync",
           "when": "radicle.isRepoRadInitialised"
+        },
+        {
+          "command": "radicle.clone"
         }
       ]
     },

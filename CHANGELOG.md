@@ -15,9 +15,10 @@
 - **auth:** validate passphrase correctness in realtime as the user is typing it
 - **auth:** securely store passphrase after successful user input and autotomatically re-use next time (if available)
 - **commands:** new VS Code command to de-authenticate / re-lock the currently used Radicle identity and remove the associated passphrase from Secret Storage
-- **config:** new config `pathToNodeHome` setting the `RAD_HOME` env variable
-- **config:** new config `httpApiEndpoint` useful when reverse-proxies are running in front of `radicle-httpd` etc
+- **config:** new `pathToNodeHome` setting, which sets the `RAD_HOME` env variable
+- **config:**  new `httpApiEndpoint` setting, useful when reverse-proxies are running in front of `radicle-httpd` etc
 - **commands:** new VS Code command to clone a Radicle project from a filterable list of all tracked ones
+- **commands:** list rad clone command in the native Source Control three-dot-menu's Radicle submenu
 - **config:** set default value for existing config `pathToRadBinary`
 - **log:** (explicitly) indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew
 - **log:** log auth status on extension init as well as on `pathToCliBinary` and `pathToNodeHome` configs' change
