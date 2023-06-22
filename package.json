@@ -69,6 +69,13 @@
         "enablement": "radicle.isRepoRadInitialised"
       },
       {
+        "command": "radicle.clone",
+        "title": "Clone a Radicle project as a local git repo",
+        "shortTitle": "Clone",
+        "category": "Radicle",
+        "icon": "repo-pull"
+      },
+      {
         "command": "radicle.showExtensionLog",
         "title": "Show everything the extension has logged in the Output Panel",
         "shortTitle": "Extension log",
