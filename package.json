@@ -154,7 +154,7 @@
     "viewsWelcome": [
       {
         "view": "getting-started",
-        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n",
+        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(radicle-logo)Clone from Radicle](command:radicle.clone)\n",
         "when": "workspaceFolderCount == 0"
       },
       {
