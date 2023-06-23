@@ -2,7 +2,7 @@ import { sep } from 'node:path'
 import { type QuickPickItem, Uri, commands, window } from 'vscode'
 import { fetch } from 'undici'
 import { getConfig, getRadCliRef } from '../helpers'
-import { exec, getWorkspaceFolderPaths, log, showLog } from '../utils'
+import { exec, getRepoRoot, log, showLog } from '../utils'
 
 interface RadicleProject {
   id: string
@@ -75,8 +75,8 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
     return
   }
 
-  const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
-  const oneFolderUpFromFirstWorkspaceDir = firstWorkspaceDir?.split(sep).slice(0, -1).join(sep)
+  const repoRoot = getRepoRoot()
+  const oneFolderUpFromRepoRoot = repoRoot?.split(sep).slice(0, -1).join(sep)
   const cloneTargetDir = (
     await window.showOpenDialog({
       title: `Choose a folder to clone ${projSelection.label} into`,
@@ -84,9 +84,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
       canSelectMany: false,
       canSelectFiles: false,
       canSelectFolders: true,
-      defaultUri: oneFolderUpFromFirstWorkspaceDir
-        ? Uri.file(oneFolderUpFromFirstWorkspaceDir)
-        : undefined,
+      defaultUri: oneFolderUpFromRepoRoot ? Uri.file(oneFolderUpFromRepoRoot) : undefined,
     })
   )?.[0]
   if (!cloneTargetDir) {
