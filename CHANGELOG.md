@@ -5,8 +5,8 @@
 ### ✨ Highlights
 
 - ❤️🪵 initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
-
 - 🔐 Integrated authentication
+- 📥 cloning of tracked Radicle projects
 
 ### 🚀 Enhancements
 
