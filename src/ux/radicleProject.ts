@@ -94,6 +94,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
   const msgSuffix = `project "${projSelection.label}" with Radicle ID (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
   const didClone = exec(`${getRadCliRef()} clone ${selectedRid} --no-confirm`, {
     cwd: cloneTargetDir.fsPath,
+    timeout: 60_000,
     shouldLog: true,
   })
   if (!didClone) {

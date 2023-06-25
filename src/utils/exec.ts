@@ -32,6 +32,8 @@ export function exec(
      * allowed to run before it is automatically terminated. If the command takes longer than
      * the specified timeout, it will be forcefully terminated and an error will be thrown.
      *
+     * Setting it to `0` will disable the timeout.
+     *
      * @default 5000
      */
     timeout?: number
