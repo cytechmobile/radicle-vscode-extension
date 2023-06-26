@@ -69,6 +69,13 @@
         "enablement": "radicle.isRepoRadInitialised"
       },
       {
+        "command": "radicle.clone",
+        "title": "Clone a Radicle project as a local git repo",
+        "shortTitle": "Clone",
+        "category": "Radicle",
+        "icon": "repo-pull"
+      },
+      {
         "command": "radicle.showExtensionLog",
         "title": "Show everything the extension has logged in the Output Panel",
         "shortTitle": "Extension log",
@@ -91,8 +98,7 @@
           "when": "radicle.isRepoRadInitialised"
         },
         {
-          "submenu": "submenu-scm-radicle",
-          "when": "radicle.isRepoRadInitialised"
+          "submenu": "submenu-scm-radicle"
         }
       ],
       "submenu-scm-radicle": [
@@ -107,6 +113,9 @@
         {
           "command": "radicle.sync",
           "when": "radicle.isRepoRadInitialised"
+        },
+        {
+          "command": "radicle.clone"
         }
       ]
     },
@@ -145,7 +154,7 @@
     "viewsWelcome": [
       {
         "view": "getting-started",
-        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n",
+        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(radicle-logo)Clone from Radicle](command:radicle.clone)\n",
         "when": "workspaceFolderCount == 0"
       },
       {

@@ -38,13 +38,19 @@ export async function validateHttpApiEndpointConnection(
 
     return true
   } catch (error) {
-    if (error instanceof Error) {
-      log(error.message, 'error')
-    }
+    const errorMsg =
+      typeof error === 'string'
+        ? error
+        : error instanceof Error
+        ? error.message
+        : `Failed fetching Radicle HTTP API root`
+    log(errorMsg, 'error', `Fetching "${endpoint}"...`)
 
-    const msg = `Failed establishing connection with Radicle HTTP API at "${endpoint}"`
-    log(msg, 'error')
-    !options.minimizeUserNotifications && window.showErrorMessage(msg)
+    !options.minimizeUserNotifications &&
+      window.showErrorMessage(`Failed establishing connection with Radicle HTTP API \
+      at "${endpoint}. \
+      Please ensure that "radicle-httpd" is already running and the address to the API's \
+      root endpoint is correctly set in the extension's settings."`)
 
     return false
   }

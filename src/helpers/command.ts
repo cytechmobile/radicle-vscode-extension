@@ -1,7 +1,11 @@
 import { commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
 import { exec, showLog } from '../utils'
-import { authenticate, deAuthCurrentRadicleIdentity } from '../ux'
+import {
+  authenticate,
+  deAuthCurrentRadicleIdentity,
+  selectAndCloneRadicleProject,
+} from '../ux'
 import { getRadCliRef } from '.'
 
 /**
@@ -9,14 +13,14 @@ import { getRadCliRef } from '.'
  *
  * Each command has a matching entry defined in package.json's `contributes.commands`.
  */
-const radCliCmdsToRegisterInVsCode = ['push', 'pull', 'sync'] as const
+const simpleRadCliCmdsToRegisterInVsCode = ['push', 'pull', 'sync'] as const
 type CmdCallback = Parameters<typeof commands.registerCommand>['1']
 
 function registerSimpleVsCodeCmd(name: string, action: CmdCallback): void {
   getExtensionContext().subscriptions.push(commands.registerCommand(`radicle.${name}`, action))
 }
 
-function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): void {
+function registerSimpleRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): void {
   const button = 'Show output'
 
   cmds.forEach((radCliCmd) =>
@@ -42,8 +46,9 @@ function registerRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): voi
  * Registers in VS Code all the commands this extension advertises in its manifest.
  */
 export function registerAllCommands(): void {
-  registerRadCliCmdsAsVsCodeCmds(radCliCmdsToRegisterInVsCode)
+  registerSimpleRadCliCmdsAsVsCodeCmds(simpleRadCliCmdsToRegisterInVsCode)
 
   registerSimpleVsCodeCmd('showExtensionLog', showLog)
   registerSimpleVsCodeCmd('deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
+  registerSimpleVsCodeCmd('clone', selectAndCloneRadicleProject)
 }
