@@ -75,6 +75,18 @@ export function isRadCliInstalled(): boolean {
 }
 
 /**
+ * Answers whether the currently open workspace folder contains a Radicle initialized
+ * git repository.
+ *
+ * @returns `true` if the workspace is a rad-initialized repo, otherwise `false`.
+ */
+export function isRepoRadInitialised(): boolean {
+  const isRadInitialised = Boolean(exec(`${getRadCliRef()} inspect`, { cwd: '$workspaceDir' }))
+
+  return isRadInitialised
+}
+
+/**
  * Answers whether the Radicle node has a currently authenticated identity or not. The identity
  * must be fully accessible to the Radicle CLI, i.e. the key must have also been added to the
  * ssh-agent.

@@ -1,5 +1,4 @@
 export * from './assertUnreachable'
-export * from './doesFileContainText'
 export * from './exec'
 export * from './git'
 export * from './log'

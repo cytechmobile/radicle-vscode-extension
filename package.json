@@ -142,13 +142,13 @@
           "id": "getting-started",
           "name": "Getting Started",
           "icon": "$(radicle-logo)",
-          "when": "!radicle.isRepoRadPublished"
+          "when": "!radicle.isRepoRadInitialised"
         },
         {
           "id": "cli-commands",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
-          "when": "radicle.isRepoRadPublished"
+          "when": "radicle.isRepoRadInitialised"
         }
       ]
     },
@@ -167,11 +167,6 @@
         "view": "getting-started",
         "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized,you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
         "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRepoRadInitialised"
-      },
-      {
-        "view": "getting-started",
-        "contents": "The git repository currently opened in your workspace is not yet published on the Radicle network.\nTo use Radicle, you can run `rad push` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce published, your repository will be hosted publicly on the free, peer-to-peer Radicle network and you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
-        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && radicle.isRepoRadInitialised && !radicle.isRepoRadPublished"
       },
       {
         "view": "cli-commands",

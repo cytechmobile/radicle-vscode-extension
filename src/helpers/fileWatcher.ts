@@ -6,7 +6,7 @@ import {
   setWhenClauseContext,
 } from '../utils'
 import { notifyUserRadCliNotResolvedAndMaybeTroubleshoot } from '../ux'
-import { isRadCliInstalled, isRepoRadInitialised, isRepoRadPublished } from '.'
+import { isRadCliInstalled, isRepoRadInitialised } from '.'
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
 // going manual instead of adapting it.
@@ -41,11 +41,10 @@ const notInWorkspaceFileWatchers = [
         Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'config',
       ),
-    handler: async () => {
+    handler: () => {
       setWhenClauseContext('radicle.isRepoRadInitialised', isRepoRadInitialised())
-      setWhenClauseContext('radicle.isRepoRadPublished', await isRepoRadPublished())
 
-      if (!isRadCliInstalled() && !(await isRepoRadPublished()) && isGitRepo()) {
+      if (!isRadCliInstalled() && !isRepoRadInitialised() && isGitRepo()) {
         notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
       }
     },
