@@ -27,7 +27,7 @@ jobs:
     - name: Lint code
       run: pnpm run lint
     - name: Test smoke
-      run: pnpm run build
+      run: pnpm run test:smoke
     - name: Test unit
       run: pnpm run test:unit
     - name: Test E2E (Linux)
