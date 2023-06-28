@@ -1,3 +1,4 @@
+export * from './api'
 export * from './command'
 export * from './config'
 export * from './configWatcher'
