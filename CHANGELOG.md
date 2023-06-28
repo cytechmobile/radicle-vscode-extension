@@ -1,60 +1,61 @@
 # Radicle VS Code Extension Change Log
 
-## _(WIP, yet unreleased version)_
+## **v0.2.0** (June 28th, 2023)
 
 ### ✨ Highlights
 
 - ❤️🪵 initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
 - 📥 cloning of tracked Radicle projects
-- 🏗️ Improved development tooling and infrastructure
+- 🏗️ Improved development tooling and infrastructure for maintainers
 
 ### 🚀 Enhancements
 
-- **commands:** wrap Radicle CLI commands (`sync`, etc) with auth requirement
-- **auth:** unlock existing and create new Radicle identities using familiar VS Code UX
-- **auth:** validate passphrase correctness in realtime as the user is typing it
-- **auth:** securely store passphrase after successful user input and autotomatically re-use next time (if available)
-- **commands:** new VS Code command to de-authenticate / re-lock the currently used Radicle identity and remove the associated passphrase from Secret Storage
-- **config:** new `pathToNodeHome` setting, which sets the `RAD_HOME` env variable
-- **config:**  new `httpApiEndpoint` setting, useful when reverse-proxies are running in front of `radicle-httpd` etc
-- **commands:** new VS Code command to clone a Radicle project from a filterable list of all tracked ones
-- **commands:** list rad clone command in the native Source Control three-dot-menu's Radicle submenu
-- **onboarding:** when opening VS Code without any folder in the workspace show in the dedicated Welcome View an additional button to clone from Radicle
-- **config:** set default value for existing config `pathToRadBinary`
-- **log:** (explicitly) indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew
-- **log:** log auth status on extension init as well as on `pathToCliBinary` and `pathToNodeHome` configs' change
+- **commands:** wrap Radicle CLI commands (`sync`, etc) with auth requirement ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **auth:** unlock existing and create new Radicle identities using familiar VS Code UX ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **auth:** validate passphrase correctness in realtime as the user is typing it ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **auth:** securely store passphrase after successful user input and autotomatically re-use next time (if available) ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **commands:** new VS Code command to de-authenticate / re-lock the currently used Radicle identity and remove the associated passphrase from Secret Storage ([#33](https://github.com/cytechmobile/radicle-vscode-extension/issues/33))
+- **log:** indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **config:** new `pathToNodeHome` setting, which sets the `RAD_HOME` env variable ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **config:**  new `httpApiEndpoint` setting, useful when reverse-proxies are running in front of `radicle-httpd` etc ([#26](https://github.com/cytechmobile/radicle-vscode-extension/issues/26))
+- **commands:** new VS Code command to clone a Radicle project from a filterable list of all tracked ones ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
+- **commands:** show rad clone command in the native Source Control three-dot-menu's Radicle submenu ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
+- **onboarding:** when opening VS Code without any folder in the workspace show in the dedicated Welcome View an additional button to clone from Radicle ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
+- **config:** set default value for existing config `pathToRadBinary` ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **log:** log auth status on extension init as well as on `pathToCliBinary` and `pathToNodeHome` configs' change ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 
 ### 🩹 Fixes
 
-- **config:** use previously ignored config `pathToCliBinary` to resolve Radicle CLI before executing commands
+- **config:** use previously ignored config `pathToCliBinary` to resolve Radicle CLI before executing commands ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 - **log:** don't log `body` param if it is empty string
-- **log:** escalate user notification shown when Radicle CLI is not resolved from warning to error
+- **log:** escalate user notification shown when Radicle CLI is not resolved from warning to error ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 
 ### 💅 Refactors
 
-- **store:** create new global store for extension context and replace func param drilling with new getter
-- **exec:** completely rewrite foundational logic for shell script execution to be simpler, more powerful and result in cleaner client code
-- **config:** use new typesafe getter and setter for accessing VS Code configuration options
-- **config:** rename config `pathToBinary` -> `pathToCliBinary`
-- **repo:** move functions out of overgrown `utils` directory and into new `helpers` and `ux` directories
-- **repo:** add readme files documenting the intended contents of `utils`, `helpers` and `ux` directories
+- **store:** create new global store for extension context and replace func param drilling with new getter ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **exec:** completely rewrite foundational logic for shell script execution to be simpler, more powerful and result in cleaner client code ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **config:** use new typesafe getter and setter for accessing VS Code configuration options ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **config:** rename config `pathToBinary` -> `pathToCliBinary` ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **repo:** move functions out of overgrown `utils` directory and into new `helpers` and `ux` directories ([#34](https://github.com/cytechmobile/radicle-vscode-extension/issues/34))
+- **repo:** add readme files documenting the intended contents of `utils`, `helpers` and `ux` directories ([8da729e](https://github.com/cytechmobile/radicle-vscode-extension/commit/8da729ee16726484859cf4c56592c7d7189699f8))
 
 ### 🏡 Chores
 
-- **build:** support runtime dependencies by bundling them and our source code for production using esbuild
-- **lint:** massively improve code linting ruleset, integrate code formatter in it and update all source code to comply
-- **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed
-- **deps:** migrate to Typescript v5.0
+- **build:** support runtime dependencies by bundling them and our source code for production using esbuild ([#41](https://github.com/cytechmobile/radicle-vscode-extension/issues/41))
+- **lint:** massively improve code linting ruleset, integrate code formatter in it and update all source code to comply ([#13](https://github.com/cytechmobile/radicle-vscode-extension/issues/13))
+- **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed ([#13](https://github.com/cytechmobile/radicle-vscode-extension/issues/13))
+- **deps:** migrate to Typescript v5.0 ([1234e06](https://github.com/cytechmobile/radicle-vscode-extension/commit/1234e06112ecc941c213614852bdb53037cd6833))
 
 ### 🤖 CI
 
-- **ci:** set-up github actions for pull requests
+- **ci:** set-up github actions for pull requests ([#1](https://github.com/cytechmobile/radicle-vscode-extension/issues/1))
 
 ### 📖 Documentation
 
-- **readme:** add CTA advertising the change log
-- **changelog:** add release date to title of each version and separators above them
+- **readme:** add CTA advertising the change log ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **changelog:** add release date to title of each version and separators above them ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **changelog:** reference related PRs/commits for each change ([#48](https://github.com/cytechmobile/radicle-vscode-extension/issues/48))
 
 -----
 
@@ -62,11 +63,11 @@
 
 ### 🩹 Fixes
 
-- **commands:** hide Radicle commands from UI when they are not applicable
+- **commands:** hide Radicle commands from UI when they are not applicable ([#25](https://github.com/cytechmobile/radicle-vscode-extension/issues/25))
 
 ### 🏡 Chores
 
-- **git:** define known scopes for conventionalCommits extension
+- **git:** define known scopes for conventionalCommits extension ([ded7fcf](https://github.com/cytechmobile/radicle-vscode-extension/commit/ded7fcf64d7864a95a96bc53df0512d41bfbe0f5))
 
 ### 📖 Documentation
 
