@@ -1,6 +1,6 @@
 import { window } from 'vscode'
 import { fetch } from 'undici'
-import { getConfig } from '../helpers'
+import { getApiRoot } from '../helpers'
 import { log } from '../utils'
 
 /**
@@ -13,26 +13,22 @@ import { log } from '../utils'
 export async function validateHttpApiEndpointConnection(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
-  const endpoint = getConfig('radicle.advanced.httpApiEndpoint')
-
-  if (!endpoint) {
-    throw new Error('No endpoint to the Radicle HTTP API is set')
-  }
+  const apiRoot = getApiRoot()
 
   try {
-    const response = await fetch(endpoint)
+    const response = await fetch(apiRoot)
 
     if (!response.ok) {
       throw new Error(
-        `Received non-OK status "${response.status}" from Radicle HTTP API at "${endpoint}"`,
+        `Received non-OK status "${response.status}" from Radicle HTTP API at "${apiRoot}"`,
       )
     }
 
     if (((await response.json()) as { service?: string }).service !== 'radicle-httpd') {
-      throw new Error(`HTTP API at "${endpoint}" doesn't seem to be a Radicle API`)
+      throw new Error(`HTTP API at "${apiRoot}" doesn't seem to be a Radicle API`)
     }
 
-    const msg = `Connected with Radicle HTTP API at "${endpoint}"`
+    const msg = `Connected with Radicle HTTP API at "${apiRoot}"`
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
@@ -44,11 +40,11 @@ export async function validateHttpApiEndpointConnection(
         : error instanceof Error
         ? error.message
         : `Failed fetching Radicle HTTP API root`
-    log(errorMsg, 'error', `Fetching "${endpoint}"...`)
+    log(errorMsg, 'error', `Fetching "${apiRoot}"...`)
 
     !options.minimizeUserNotifications &&
       window.showErrorMessage(`Failed establishing connection with Radicle HTTP API \
-      at "${endpoint}. \
+      at "${apiRoot}. \
       Please ensure that "radicle-httpd" is already running and the address to the API's \
       root endpoint is correctly set in the extension's settings."`)
 
