@@ -55,7 +55,7 @@ async function troubleshootRadCliInstallation(): Promise<void> {
   )
 
   if (cliInstalledSelection?.label === no) {
-    env.openExternal(Uri.parse('https://radicle.xyz/get-started.html'))
+    env.openExternal(Uri.parse('https://radicle.xyz/#try'))
 
     return
   }
