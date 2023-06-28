@@ -1,49 +1,13 @@
 import { sep } from 'node:path'
 import { type QuickPickItem, Uri, commands, window } from 'vscode'
-import { fetch } from 'undici'
-import { getConfig, getRadCliRef } from '../helpers'
-import { exec, getRepoRoot, log, showLog } from '../utils'
-
-interface RadicleProject {
-  id: string
-  name: string
-  description: string
-  trackings?: number
-}
-
-async function fetchRadicleProjects(options?: {
-  onError?: (apiProjectsUrl: string) => unknown
-}): Promise<RadicleProject[] | undefined> {
-  const apiRoot = getConfig('radicle.advanced.httpApiEndpoint')
-  if (!apiRoot) {
-    throw new Error('No endpoint to the Radicle HTTP API is set')
-  }
-  const apiProjects = `${apiRoot}/projects`
-
-  try {
-    const projects = (await (await fetch(apiProjects)).json()) as RadicleProject[]
-
-    return projects
-  } catch (error) {
-    const errorMsg =
-      typeof error === 'string'
-        ? error
-        : error instanceof Error
-        ? error.message
-        : `Failed fetching Radicle projects`
-
-    log(errorMsg, 'error', `Fetching "${apiProjects}"...`)
-    options?.onError?.(apiProjects)
-
-    return undefined
-  }
-}
+import { fetchRadicleProjects, getRadCliRef } from '../helpers'
+import { exec, getRepoRoot, showLog } from '../utils'
 
 export async function selectAndCloneRadicleProject(): Promise<void> {
   const projects = await fetchRadicleProjects({
-    onError: (endpoint) => {
+    onError: (requestUrl) => {
       window.showErrorMessage(
-        `Failed establishing connection with Radicle HTTP API at "${endpoint}". \
+        `Failed establishing connection with Radicle HTTP API at "${requestUrl}". \
         Please ensure that "radicle-httpd" is already running and the address to the API's \
         root endpoint is correctly set in the extension's settings.`,
       )
