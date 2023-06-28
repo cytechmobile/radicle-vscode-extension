@@ -7,6 +7,7 @@
 - ❤️🪵 initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
 - 📥 cloning of tracked Radicle projects
+- 🏗️ Improved development tooling and infrastructure
 
 ### 🚀 Enhancements
 
@@ -41,6 +42,7 @@
 
 ### 🏡 Chores
 
+- **build:** support runtime dependencies by bundling them and our source code for production using esbuild
 - **lint:** massively improve code linting ruleset, integrate code formatter in it and update all source code to comply
 - **lint:** auto-fix most code linting & formatting issues on save for VS Code users with ESLint extension installed
 - **deps:** migrate to Typescript v5.0
