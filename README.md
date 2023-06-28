@@ -6,18 +6,19 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 [Radicle](https://radicle.xyz/) is a Github alternative bringing familiar features (e.g. Pull Requests, Issues, etc) over a free, open-source and peer-to-peer network, built on top of Git.
 
-> **NOTE:** The extension supports the Radicle CLI _up to v0.6.x_ . Support for experimental newer versions of the CLI (codename "Heartwood") is [planned](https://github.com/cytechmobile/radicle-vscode-extension/milestone/2) and coming soon.
+> **NOTE:** The extension currently offers partial support for the latest version of the Radicle CLI (codename "Heartwood"). Support for Radicle Patch Proposals is [planned and coming soon](https://github.com/cytechmobile/radicle-vscode-extension/milestone/3) and further features like Issues are next on the pipeline.
 
 ## Features
 
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
-- Multiple integrated ways to [execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever fits your workflow best.
+- [🖲️ Execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
+- [🔐 Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
+- [📥 Cloning](#cloning) of tracked Radicle projects
 - [Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
-- [Notifications](#user-notifications) will inform you of important events or warn you if something is wrong, sometimes even offering assistance to fix the issue (while trying not to spam you)
-- [Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
-- [Configurable path to CLI binary](#configurable-path-to-cli-binary) in the Settings (by default will not sync VS Code instances as other user settings do)
-- [Integrated logging](#integrated-logging) including Radicle command output
+- [🕵️‍♂️ Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
+- [🎛️ Configurable](#configurable) via VS Code's native Settings
+- [📜 Integrated logging](#integrated-logging) including Radicle command output
 
 ### Integrated Radicle Commands
 
@@ -37,7 +38,39 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
     ![List items to execute Pull, Push Sync Radicle commands grouped in a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
 
+### Integrated Authentication
+
+- Create a new Radicle identity, if none exists in your configured Radicle home directory
+
+    ![Create new identity](assets/for-md/auth-create-id.png)
+
+- Unlock an existing identity
+
+    ![Unlock existing identity](assets/for-md/auth-unlock-id.png)
+
+- De-authenticate your currently unlocked identity
+
+    ![de-authenticate identity](assets/for-md/auth-lock-id.png)
+
+### Cloning
+
+- Invoke the CLI's `rad clone` command from the Command Palette
+
+    ![rad clone listed in command palette](assets/for-md/rad-clone-palette.png)
+
+- Select from a filterable list of projects that your Radicle node is tracking
+
+    ![rad clone listed projects](assets/for-md/rad-clone-choose.png)
+
+- Open the newly cloned repo in another VS Code window with a single click
+
+    ![rad clone success](assets/for-md/rad-clone-success.png)
+
 ### Onboarding Flow
+
+- No folder opened in Workspace
+
+    ![no folder opened in Workspace](assets/for-md/no-folder-init-welcome-view.png)
 
 - Non-git-initialized folder opened in Workspace
 
@@ -47,39 +80,20 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
     ![Non-radicle-initialized repo opened in Workspace](assets/for-md/non-rad-init-welcome-view.png)
 
-- _etc._
-
-### User Notifications
-
-- Successful execution of Radicle CLI commands
-
-    ![Successful execution of Radicle CLI commands](assets/for-md/rad-exec-success.png)
-
-- Failed execution of Radicle CLI commands
-
-    ![Failed execution of Radicle CLI commands](assets/for-md/rad-exec-fail.png)
-
-- Extension could not resolve Radicle CLI
-
-    ![Extension could not resolve Radicle CLI](assets/for-md/cli-404.png)
-
-- Radicle CLI installation just got fixed
-
-    ![Radicle CLI installation just got fixed](assets/for-md/cli-404-fixed.png)
-
 ### Troubleshooting Flow
 
 ![Troubleshooting Flow](assets/for-md/toubleshoot.png)
 
-### Configurable path to CLI binary
+### Configurable
 
-![Configurable path to CLI binary](assets/for-md/rad-path.png)
+Set environment variables for the Radicle CLI and more from VS Code's settings
+
+![Extension configurations](assets/for-md/configs.png)
 
 ### Integrated logging
 
 ![Integrated logging](assets/for-md/logs.png)
 
 ## Contributing
-
 
 Please see the [Contribution Guide](./CONTRIBUTING.md).

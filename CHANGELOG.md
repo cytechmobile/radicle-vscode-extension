@@ -4,9 +4,9 @@
 
 ### ✨ Highlights
 
-- ❤️🪵 initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
+- ❤️🪵 Initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
-- 📥 cloning of tracked Radicle projects
+- 📥 Cloning of tracked Radicle projects
 - 🏗️ Improved development tooling and infrastructure for maintainers
 
 ### 🚀 Enhancements
@@ -54,6 +54,7 @@
 ### 📖 Documentation
 
 - **readme:** add CTA advertising the change log ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
+- **readme:** bring up to date with latest changes ([#48](https://github.com/cytechmobile/radicle-vscode-extension/issues/48))
 - **changelog:** add release date to title of each version and separators above them ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 - **changelog:** reference related PRs/commits for each change ([#48](https://github.com/cytechmobile/radicle-vscode-extension/issues/48))
 
