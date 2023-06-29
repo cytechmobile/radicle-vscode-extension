@@ -12,6 +12,10 @@
 
 - **when-clause-context:** rename `isRepoRadInitialised` --> `isRadInitialized` ([#52](https://github.com/cytechmobile/radicle-vscode-extension/issues/52))
 
+### 📖 Documentation
+
+- **readme:** use up-to-date screenshot of "non-rad-initialized repo" Welcome View in Onboarding examples ([#52](https://github.com/cytechmobile/radicle-vscode-extension/issues/52))
+
 -----
 
 ## **v0.2.0** (June 28th, 2023)
