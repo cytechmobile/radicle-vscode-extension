@@ -6,7 +6,7 @@ import { commands } from 'vscode'
  */
 interface CustomWhenClauseContextKeys {
   'radicle.isRadCliInstalled': boolean
-  'radicle.isRepoRadInitialised': boolean
+  'radicle.isRadInitialized': boolean
 }
 
 /**

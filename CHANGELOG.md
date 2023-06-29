@@ -6,6 +6,10 @@
 
 - **onboarding:** don't get stuck in "non-rad-initialized repo" Welcome View, despite having a rad-initialized repo open ([#52](https://github.com/cytechmobile/radicle-vscode-extension/issues/52))
 
+### 💅 Refactors
+
+- **when-clause-context:** rename `isRepoRadInitialised` --> `isRadInitialized` ([#52](https://github.com/cytechmobile/radicle-vscode-extension/issues/52))
+
 -----
 
 ## **v0.2.0** (June 28th, 2023)

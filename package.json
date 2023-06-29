@@ -51,7 +51,7 @@
         "shortTitle": "Push",
         "category": "Radicle",
         "icon": "$(rad-push)",
-        "enablement": "radicle.isRepoRadInitialised"
+        "enablement": "radicle.isRadInitialized"
       },
       {
         "command": "radicle.pull",
@@ -59,7 +59,7 @@
         "shortTitle": "Pull",
         "category": "Radicle",
         "icon": "$(rad-pull)",
-        "enablement": "radicle.isRepoRadInitialised"
+        "enablement": "radicle.isRadInitialized"
       },
       {
         "command": "radicle.sync",
@@ -67,7 +67,7 @@
         "shortTitle": "Sync",
         "category": "Radicle",
         "icon": "$(rad-sync)",
-        "enablement": "radicle.isRepoRadInitialised"
+        "enablement": "radicle.isRadInitialized"
       },
       {
         "command": "radicle.clone",
@@ -96,7 +96,7 @@
         {
           "command": "radicle.sync",
           "group": "navigation",
-          "when": "radicle.isRepoRadInitialised"
+          "when": "radicle.isRadInitialized"
         },
         {
           "submenu": "submenu-scm-radicle"
@@ -105,15 +105,15 @@
       "submenu-scm-radicle": [
         {
           "command": "radicle.push",
-          "when": "radicle.isRepoRadInitialised"
+          "when": "radicle.isRadInitialized"
         },
         {
           "command": "radicle.pull",
-          "when": "radicle.isRepoRadInitialised"
+          "when": "radicle.isRadInitialized"
         },
         {
           "command": "radicle.sync",
-          "when": "radicle.isRepoRadInitialised"
+          "when": "radicle.isRadInitialized"
         },
         {
           "command": "radicle.clone"
@@ -142,13 +142,13 @@
           "id": "getting-started",
           "name": "Getting Started",
           "icon": "$(radicle-logo)",
-          "when": "!radicle.isRepoRadInitialised"
+          "when": "!radicle.isRadInitialized"
         },
         {
           "id": "cli-commands",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
-          "when": "radicle.isRepoRadInitialised"
+          "when": "radicle.isRadInitialized"
         }
       ]
     },
@@ -166,7 +166,7 @@
       {
         "view": "getting-started",
         "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized,you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
-        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRepoRadInitialised"
+        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
       },
       {
         "view": "cli-commands",

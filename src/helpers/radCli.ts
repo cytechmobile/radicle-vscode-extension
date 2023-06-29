@@ -80,10 +80,10 @@ export function isRadCliInstalled(): boolean {
  *
  * @returns `true` if the workspace is a rad-initialized repo, otherwise `false`.
  */
-export function isRepoRadInitialised(): boolean {
-  const isRadInitialised = Boolean(exec(`${getRadCliRef()} inspect`, { cwd: '$workspaceDir' }))
+export function isRadInitialized(): boolean {
+  const isInitialized = Boolean(exec(`${getRadCliRef()} inspect`, { cwd: '$workspaceDir' }))
 
-  return isRadInitialised
+  return isInitialized
 }
 
 /**
