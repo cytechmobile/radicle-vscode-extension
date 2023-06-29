@@ -8,8 +8,8 @@ import {
   getRadicleIdentity,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
+  isRadInitialized,
   isRadicleIdentityAuthed,
-  isRepoRadInitialised,
 } from '../helpers'
 
 function composeRadAuthSuccessMsg(
@@ -173,7 +173,7 @@ export async function validateRadicleIdentityAuthentication(
     : `No Radicle identity is currently stored in "${pathToNodeHome}"`
   log(msg, 'warn')
 
-  if (!options.minimizeUserNotifications || isRepoRadInitialised()) {
+  if (!options.minimizeUserNotifications || isRadInitialized()) {
     return await authenticate({ minimizeUserNotifications: options.minimizeUserNotifications })
   }
 
