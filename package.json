@@ -165,7 +165,7 @@
       },
       {
         "view": "getting-started",
-        "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized,you'll have access to advanced source control and project management features powered by git and Radicle.\nFor more help, please read the [Getting Started Guide](https://radicle.xyz/get-started.html).",
+        "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized,you'll have access to advanced source control and project management features powered by git and Radicle.",
         "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
       },
       {
