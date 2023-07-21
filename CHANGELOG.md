@@ -1,5 +1,13 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🩹 Fixes
+
+- **commands:** replace pre-heartwood, now deprecated rad pull/push commands with fetch/announce across multiple UI locations ([#42](https://github.com/cytechmobile/radicle-vscode-extension/issues/42))
+
+-----
+
 ## **v0.2.1** (June 29th, 2023)
 
 ### 🩹 Fixes

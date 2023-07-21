@@ -46,27 +46,27 @@
   "contributes": {
     "commands": [
       {
-        "command": "radicle.push",
-        "title": "Push local changes to the network",
-        "shortTitle": "Push",
-        "category": "Radicle",
-        "icon": "$(rad-push)",
-        "enablement": "radicle.isRadInitialized"
-      },
-      {
-        "command": "radicle.pull",
-        "title": "Pull latest changes from the network",
-        "shortTitle": "Pull",
-        "category": "Radicle",
-        "icon": "$(rad-pull)",
-        "enablement": "radicle.isRadInitialized"
-      },
-      {
         "command": "radicle.sync",
         "title": "Synchronize local and network changes",
         "shortTitle": "Sync",
         "category": "Radicle",
         "icon": "$(rad-sync)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.fetch",
+        "title": "Fetch latest changes from the network",
+        "shortTitle": "Fetch",
+        "category": "Radicle",
+        "icon": "$(rad-pull)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.announce",
+        "title": "Announce local changes to the network",
+        "shortTitle": "Announce",
+        "category": "Radicle",
+        "icon": "$(rad-push)",
         "enablement": "radicle.isRadInitialized"
       },
       {
@@ -104,15 +104,15 @@
       ],
       "submenu-scm-radicle": [
         {
-          "command": "radicle.push",
-          "when": "radicle.isRadInitialized"
-        },
-        {
-          "command": "radicle.pull",
-          "when": "radicle.isRadInitialized"
-        },
-        {
           "command": "radicle.sync",
+          "when": "radicle.isRadInitialized"
+        },
+        {
+          "command": "radicle.fetch",
+          "when": "radicle.isRadInitialized"
+        },
+        {
+          "command": "radicle.announce",
           "when": "radicle.isRadInitialized"
         },
         {
@@ -170,7 +170,7 @@
       },
       {
         "view": "cli-commands",
-        "contents": "Use the buttons below to perform common interactions with the Radicle network.\n[$(rad-push) Push](command:radicle.push)\n[$(rad-pull) Pull](command:radicle.pull)\n[$(rad-sync) Sync](command:radicle.sync)",
+        "contents": "Use the buttons below to perform common interactions with the Radicle network.\n[$(rad-sync) Sync](command:radicle.sync)\n[$(rad-pull) Fetch](command:radicle.fetch)\n[$(rad-push) Announce](command:radicle.announce)",
         "enablement": "radicle.isRadCliInstalled"
       }
     ],
