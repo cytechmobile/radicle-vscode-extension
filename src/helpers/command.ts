@@ -8,32 +8,64 @@ import {
 } from '../ux'
 import { getRadCliRef } from '.'
 
-/**
- * PRE-CONDITION:
- *
- * Each command has a matching entry defined in package.json's `contributes.commands`.
- */
-const simpleRadCliCmdsToRegisterInVsCode = ['push', 'pull', 'sync'] as const
-type CmdCallback = Parameters<typeof commands.registerCommand>['1']
-
-function registerSimpleVsCodeCmd(name: string, action: CmdCallback): void {
-  getExtensionContext().subscriptions.push(commands.registerCommand(`radicle.${name}`, action))
+interface RadCliCmdMappedToVscodeCmdId {
+  /**
+   * The ID used within the app's source code to reference the VS Code command.
+   *
+   * PRE-CONDITIONS:
+   * - Must match an entry defined in package.json's `contributes.commands`
+   *
+   * @example 'radicle.fetch'
+   */
+  vscodeCmdId: `radicle.${string}`
+  /**
+   * The actual sub-command to be run by the Radicle CLI. Value will be appended to a
+   * reference to the rad binary before executing it in the shell:
+   *
+   * @example 'sync --fetch' // `rad sync --fetch`
+   */
+  radCliCmdSuffix: string
 }
 
-function registerSimpleRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]): void {
+const simpleRadCliCmdsToRegisterInVsCode: Parameters<
+  typeof registerSimpleRadCliCmdsAsVsCodeCmds
+>['0'] = [
+  { vscodeCmdId: 'radicle.sync', radCliCmdSuffix: 'sync' },
+  { vscodeCmdId: 'radicle.fetch', radCliCmdSuffix: 'sync --fetch' },
+  { vscodeCmdId: 'radicle.announce', radCliCmdSuffix: 'sync --announce' },
+] as const
+
+function registerSimpleVsCodeCmd(
+  vscodeCmdId: RadCliCmdMappedToVscodeCmdId['vscodeCmdId'],
+  action: Parameters<typeof commands.registerCommand>['1'],
+): void {
+  getExtensionContext().subscriptions.push(commands.registerCommand(vscodeCmdId, action))
+}
+
+function registerSimpleRadCliCmdsAsVsCodeCmds(
+  cmdConfigs: readonly RadCliCmdMappedToVscodeCmdId[],
+): void {
   const button = 'Show output'
 
-  cmds.forEach((radCliCmd) =>
+  cmdConfigs.forEach((cmdConfig) =>
     getExtensionContext().subscriptions.push(
-      commands.registerCommand(`radicle.${radCliCmd}`, async () => {
+      commands.registerCommand(cmdConfig.vscodeCmdId, async () => {
         const didAuth = await authenticate()
         const didCmdSucceed =
-          didAuth && Boolean(exec(`${getRadCliRef()} ${radCliCmd}`, { shouldLog: true }))
+          didAuth &&
+          Boolean(
+            exec(`${getRadCliRef()} ${cmdConfig.radCliCmdSuffix}`, {
+              cwd: '$workspaceDir',
+              shouldLog: true,
+            }),
+          )
 
         didCmdSucceed
-          ? window.showInformationMessage(`Command "rad ${radCliCmd}" succeeded`)
+          ? window.showInformationMessage(
+              `Command "rad ${cmdConfig.radCliCmdSuffix}" succeeded`,
+            )
           : window
-              .showErrorMessage(`Command "rad ${radCliCmd}" failed`, button)
+              .showErrorMessage(`Command "rad ${cmdConfig.radCliCmdSuffix}" failed`, button)
               .then((userSelection) => {
                 userSelection === button && showLog()
               })
@@ -48,7 +80,7 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(cmds: string[] | readonly string[]
 export function registerAllCommands(): void {
   registerSimpleRadCliCmdsAsVsCodeCmds(simpleRadCliCmdsToRegisterInVsCode)
 
-  registerSimpleVsCodeCmd('showExtensionLog', showLog)
-  registerSimpleVsCodeCmd('deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
-  registerSimpleVsCodeCmd('clone', selectAndCloneRadicleProject)
+  registerSimpleVsCodeCmd('radicle.showExtensionLog', showLog)
+  registerSimpleVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
+  registerSimpleVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
 }

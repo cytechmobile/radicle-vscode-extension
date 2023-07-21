@@ -5,8 +5,8 @@ import { assertUnreachable, exec } from '../utils'
  * Lists they keys of configuration options available to the user along with
  * the possible types their values can have.
  *
- * PRE-CONDITION:
- * Each config key has a matching entry in `contributes.configuration` defined
+ * PRE-CONDITIONS:
+ * - Each config key has a matching entry in `contributes.configuration` defined
  * in package.json .
  */
 export interface ExtensionConfig {

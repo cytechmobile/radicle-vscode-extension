@@ -12,31 +12,31 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
-- [🖲️ Execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
-- [🔐 Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
-- [📥 Cloning](#cloning) of tracked Radicle projects
-- [🗺️ Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
-- [🕵️‍♂️ Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
-- [🎛️ Configurable](#configurable) via VS Code's native Settings
-- [📜 Integrated logging](#integrated-logging) including Radicle command output
+- 🖲️ [Execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
+- 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
+- 📥 [Cloning](#cloning) of tracked Radicle projects
+- 🗺️ [Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
+- 🕵️‍♂️ [Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
+- 🎛️ [Configurable](#configurable) via VS Code's native Settings
+- 📜 [Integrated logging](#integrated-logging) including Radicle command output
 
 ### Integrated Radicle Commands
 
-- Buttons to execute Pull, Push Sync Radicle commands in the main extension View
+- Execute common Radicle commands with dedicated buttons from within the main extension View
 
-    ![Buttons to execute Pull, Push Sync Radicle commands in the main extension View](assets/for-md/rad-cmds-in-main-view.png)
+    ![Buttons to execute Radicle commands in the main extension View](assets/for-md/rad-cmds-in-main-view.png)
 
-- Commands to execute Pull, Push Sync Radicle commands in VS Code's Command Palette
+- Execute Radicle commands from within VS Code's Command Palette
 
-    ![Commands to execute Pull, Push Sync Radicle commands in VS Code's Command Palette](assets/for-md/rad-cmds-in-palette.png)
+    ![Execute Radicle commands from within VS Code's Command Palette](assets/for-md/rad-cmds-in-palette.png)
 
-- Button to execute Sync Radicle command in native Source Control View's title buttons (above commit message input)
+- Sync with the Radicle network with a dedicated button among the native Source Control View's title buttons (above commit message input)
 
-    ![Button to execute Sync Radicle command in native Source Control View's title buttons (above commit message input)](assets/for-md/rad-cmds-in-scm-title.png)
+    ![Sync with the Radicle network with a dedicated button among the native Source Control View's title buttons (above commit message input)](assets/for-md/rad-cmds-in-scm-title.png)
 
-- List items to execute Pull, Push Sync Radicle commands grouped in a "Radicle" submenu inside the native Source Control View's three-dot-menu
+- Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu
 
-    ![List items to execute Pull, Push Sync Radicle commands grouped in a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
+    ![Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
 
 ### Integrated Authentication
 
