@@ -4,7 +4,7 @@
   "displayName": "Radicle",
   "description": "Bring support for the Radicle network to your VS code.",
   "galleryBanner": {
-    "color": "#0E1625",
+    "color": "#0A0D10",
     "theme": "dark"
   },
   "icon": "./assets/marketplace-icon.png",
@@ -74,7 +74,7 @@
         "title": "Clone a Radicle project as a local git repo",
         "shortTitle": "Clone",
         "category": "Radicle",
-        "icon": "repo-clone"
+        "icon": "$(rad-clone)"
       },
       {
         "command": "radicle.showExtensionLog",
@@ -155,7 +155,7 @@
     "viewsWelcome": [
       {
         "view": "getting-started",
-        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(radicle-logo)Clone from Radicle](command:radicle.clone)\n",
+        "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(rad-clone)Clone from Radicle](command:radicle.clone)\n",
         "when": "workspaceFolderCount == 0"
       },
       {
@@ -182,32 +182,39 @@
           "fontCharacter": "A"
         }
       },
-      "radicle-logo-encircled": {
-        "description": "Radicle logo as negative space inside a circle",
-        "default": {
-          "fontPath": "./assets/radicle-icons.woff",
-          "fontCharacter": "B"
-        }
-      },
       "rad-push": {
         "description": "Radicle-themed arrow pointing away from user",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
-          "fontCharacter": "C"
+          "fontCharacter": "B"
         }
       },
       "rad-pull": {
         "description": "Radicle-themed arrow pointing towards user",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
-          "fontCharacter": "D"
+          "fontCharacter": "C"
         }
       },
       "rad-sync": {
         "description": "Radicle-themed circulating arrows",
         "default": {
           "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "D"
+        }
+      },
+      "rad-spread": {
+        "description": "Radicle-themed node propagating to further nodes",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
           "fontCharacter": "E"
+        }
+      },
+      "rad-clone": {
+        "description": "Radicle-themed book with a copy of it on the side",
+        "default": {
+          "fontPath": "./assets/radicle-icons.woff",
+          "fontCharacter": "F"
         }
       }
     },
