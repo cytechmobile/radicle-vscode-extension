@@ -52,7 +52,7 @@ export function exec(
      *
      * @default undefined
      * */
-    cwd?: (string & {}) | '$workspaceDir'
+    cwd?: (string & {}) | '$workspaceDir' // eslint-disable-line @typescript-eslint/ban-types
   },
 ): string | undefined {
   const opts = options ?? {}

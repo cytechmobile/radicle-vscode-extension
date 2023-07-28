@@ -133,8 +133,8 @@ export function validateRadCliInstallation(
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
 
   if (isRadInstalled) {
-    const cliVersion = getRadCliVersion()!
-    const cliPath = getRadCliPath()!
+    const cliVersion = getRadCliVersion()
+    const cliPath = getRadCliPath()
     const msg = `Using Radicle CLI v${cliVersion} from "${cliPath}"`
 
     log(msg, 'info')
