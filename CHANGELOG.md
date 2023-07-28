@@ -11,6 +11,11 @@
 
 - **cli:** leverage new `rad self` calling options in place of the former brittle char-based string parsing of Radicle CLI's output ([#64](https://github.com/cytechmobile/radicle-vscode-extension/issues/64))
 
+### 🏡 Chores
+
+- **ts:** forbid implementing runtime logic in .d.ts files [2ccd94b](https://github.com/cytechmobile/radicle-vscode-extension/commit/2ccd94be1c42fafa1a39f1db90bb4d65199f8624)
+- **ts:** skip checking npm module grammar for a ~40% compilation speedup [55d4811](https://github.com/cytechmobile/radicle-vscode-extension/commit/55d48119b21f030c42432f765e187a3c13f4e649)
+
 ### 📖 Documentation
 
 - **readme:** update screenshots to show the UI updated with the new branding ([#56](https://github.com/cytechmobile/radicle-vscode-extension/issues/56))
