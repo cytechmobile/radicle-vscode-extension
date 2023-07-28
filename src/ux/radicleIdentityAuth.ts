@@ -113,7 +113,7 @@ export async function authenticate(
           return "Current input isn't the correct passphrase to unlock the identity"
         }
 
-        exec(`ssh-add -D ${getRadNodeSshKey('hash')!}`)
+        exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')!}`)
 
         return undefined
       },
@@ -188,7 +188,7 @@ export async function validateRadicleIdentityAuthentication(
  * @returns `true` if no identity is currently authed any more, otherwise `false`
  */
 export function deAuthCurrentRadicleIdentity(): boolean {
-  const sshKey = getRadNodeSshKey('hash')
+  const sshKey = getRadNodeSshKey('fingerprint')
   if (!sshKey) {
     const msg = `Failed de-authenticating current Radicle identity because none was found in "${getResolvedPathToNodeHome()!}"`
     window.showWarningMessage(msg)

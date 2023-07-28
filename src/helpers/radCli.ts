@@ -1,4 +1,4 @@
-import { exec } from '../utils'
+import { assertUnreachable, exec } from '../utils'
 import {
   getConfig,
   getValidatedAliasedPathToRadBinary,
@@ -94,7 +94,7 @@ export function isRadInitialized(): boolean {
  * @returns `true` if authenticated, otherwise `false`.
  */
 export function isRadicleIdentityAuthed(): boolean {
-  const sshKey = getRadNodeSshKey('hash')
+  const sshKey = getRadNodeSshKey('fingerprint')
   const unlockedIds = exec('ssh-add -l')
   if (!sshKey || !unlockedIds) {
     return false
@@ -109,21 +109,29 @@ export function isRadicleIdentityAuthed(): boolean {
  * Resolves the Radicle identity found in the home directory of a node.
  *
  * @param format The format the identity should be in. Can be either
- * `DID` (e.g.: did:key:z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV) or
- * `NID` (e.g.: z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV).
+ * `DID` representing a Decentrilized Identity of a Radicle user
+ * (e.g.: did:key:z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV)
+ * or `NID` representing the identifier of the Radicle Node of that user
+ * (e.g.: z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV).
+ *
  * @returns The identity if resolved, otherwise `undefined`
  */
 export function getRadicleIdentity(format: 'DID' | 'NID'): string | undefined {
-  const radSelf = exec(`${getRadCliRef()} self`)
-  if (!radSelf) {
-    return undefined
+  let flag: string
+  switch (format) {
+    case 'DID':
+      flag = '--did'
+      break
+    case 'NID':
+      flag = '--nid'
+      break
+    default:
+      assertUnreachable(format)
   }
 
-  const radicleIdFromRadSelfRegex =
-    format === 'DID' ? /DID\s+(\S+)/g : /Node ID \(NID\)\s+(\S+)/g // https://regexr.com/7eam1
-  const id = [...radSelf.matchAll(radicleIdFromRadSelfRegex)][0]?.[1]
+  const radicleIdentity = exec(`${getRadCliRef()} self ${flag}`)
 
-  return id
+  return radicleIdentity
 }
 
 /**
@@ -135,31 +143,20 @@ export function getRadicleIdentity(format: 'DID' | 'NID'): string | undefined {
  * ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlfJT4YlvXMI9h98D4SSswNV5S0voNrQaUZMCq0s0zK).
  * @returns The key if resolved, otherwise `undefined`
  */
-export function getRadNodeSshKey(format: 'hash' | 'full'): string | undefined {
-  const radSelf = exec(`${getRadCliRef()} self`)
-  if (!radSelf) {
-    return undefined
+export function getRadNodeSshKey(format: 'fingerprint' | 'full'): string | undefined {
+  let flag: string
+  switch (format) {
+    case 'fingerprint':
+      flag = '--ssh-fingerprint'
+      break
+    case 'full':
+      flag = '--ssh-key'
+      break
+    default:
+      assertUnreachable(format)
   }
 
-  const keyFromRadSelfRegex =
-    format === 'hash' ? /Key \(hash\)\s+(\S+)/g : /Key \(full\)\s+(\S+ \S+)/g // https://regexr.com/7eaeh
-  const key = [...radSelf.matchAll(keyFromRadSelfRegex)][0]?.[1]
+  const nodeSshKey = exec(`${getRadCliRef()} self ${flag}`)
 
-  return key
-}
-
-/**
- * Resolves the storage path of a Radicle node depending on the node's resolved home path.
- *
- * @returns The path if resolved, otherwise `undefined`
- */
-export function getRadNodeStoragePath(): string | undefined {
-  const radSelf = exec(`${getRadCliRef()} self`)
-  if (!radSelf) {
-    return undefined
-  }
-
-  const radNodeStoragePath = [...radSelf.matchAll(/Storage \(git\)\s+(\S+)/g)][0]?.[1] // https://regexr.com/7eam1
-
-  return radNodeStoragePath
+  return nodeSshKey
 }
