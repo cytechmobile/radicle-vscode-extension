@@ -20,7 +20,6 @@ export function getRadCliRef(): string {
 
   const radCliRef =
     getConfig('radicle.advanced.pathToRadBinary') ||
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     (Boolean(getValidatedAliasedPathToRadBinary()) && 'rad') ||
     getValidatedDefaultPathToRadBinary()
   if (!radCliRef) {

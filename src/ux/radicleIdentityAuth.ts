@@ -113,7 +113,7 @@ export async function authenticate(
           return "Current input isn't the correct passphrase to unlock the identity"
         }
 
-        exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')!}`)
+        exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')}`)
 
         return undefined
       },
@@ -135,9 +135,10 @@ export async function authenticate(
     return false
   }
 
-  secrets.store(getRadicleIdentity('DID')!, typedInRadPass)
+  const newRadicleId = getRadicleIdentity('DID')
+  newRadicleId && secrets.store(newRadicleId, typedInRadPass)
 
-  const authSuccessMsg = composeRadAuthSuccessMsg(radicleId ? 'unlockedId' : 'createdId')
+  const authSuccessMsg = composeRadAuthSuccessMsg(newRadicleId ? 'unlockedId' : 'createdId')
   log(authSuccessMsg, 'info')
   window.showInformationMessage(authSuccessMsg)
 
@@ -167,7 +168,7 @@ export async function validateRadicleIdentityAuthentication(
   }
 
   const radicleId = getRadicleIdentity('DID')
-  const pathToNodeHome = getResolvedPathToNodeHome()!
+  const pathToNodeHome = getResolvedPathToNodeHome()
   const msg = radicleId
     ? `Found non-authenticated identity "${radicleId}" stored in "${pathToNodeHome}"`
     : `No Radicle identity is currently stored in "${pathToNodeHome}"`
@@ -190,7 +191,7 @@ export async function validateRadicleIdentityAuthentication(
 export function deAuthCurrentRadicleIdentity(): boolean {
   const sshKey = getRadNodeSshKey('fingerprint')
   if (!sshKey) {
-    const msg = `Failed de-authenticating current Radicle identity because none was found in "${getResolvedPathToNodeHome()!}"`
+    const msg = `Failed de-authenticating current Radicle identity because none was found in "${getResolvedPathToNodeHome()}"`
     window.showWarningMessage(msg)
     log(msg, 'warn')
 
@@ -198,9 +199,7 @@ export function deAuthCurrentRadicleIdentity(): boolean {
   }
 
   const didDeAuth = exec(`ssh-add -D ${sshKey}`, { shouldLog: true }) !== undefined
-  const radicleId = getRadicleIdentity('DID')!
-  getExtensionContext().secrets.delete(radicleId)
-
+  const radicleId = getRadicleIdentity('DID')
   if (!didDeAuth) {
     const button = 'Show output'
     const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()}.`
@@ -211,6 +210,8 @@ export function deAuthCurrentRadicleIdentity(): boolean {
 
     return false
   }
+
+  radicleId && getExtensionContext().secrets.delete(radicleId)
 
   const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)

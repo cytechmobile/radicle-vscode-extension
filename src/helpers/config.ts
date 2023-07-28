@@ -31,7 +31,6 @@ export function getConfig<K extends keyof ExtensionConfig>(
     case 'radicle.advanced.pathToNodeHome':
     case 'radicle.advanced.httpApiEndpoint':
       // if the config has the value of the empty string (default) then return `undefined`
-      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       return config.get<ExtensionConfig[typeof configKey]>(configKey)?.trim() || undefined
     default:
       return assertUnreachable(configKey)
