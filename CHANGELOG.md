@@ -15,6 +15,7 @@
 
 - **ts:** forbid implementing runtime logic in .d.ts files [2ccd94b](https://github.com/cytechmobile/radicle-vscode-extension/commit/2ccd94be1c42fafa1a39f1db90bb4d65199f8624)
 - **ts:** skip checking npm module grammar for a ~40% compilation speedup [55d4811](https://github.com/cytechmobile/radicle-vscode-extension/commit/55d48119b21f030c42432f765e187a3c13f4e649)
+- **deps:** upgrade all dependencies to latest version [5227b70](https://github.com/cytechmobile/radicle-vscode-extension/commit/5227b709f2d19426f04a43f6f75cb26b2326756f)
 
 ### 📖 Documentation
 
