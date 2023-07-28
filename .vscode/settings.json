@@ -4,7 +4,6 @@
     "**/*": "assets/for-md/"
   },
   "conventionalCommits.scopes": [
-    "package",
     "dev",
     "build",
     "lint",
@@ -22,8 +21,7 @@
     "icons",
     "changelog",
     "readme",
-    "ci",
-    "commit-linting"
+    "ci"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
