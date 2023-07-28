@@ -18,7 +18,7 @@
   "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.79.1",
+    "vscode": "^1.80.0",
     "npm": "^7"
   },
   "keywords": [
@@ -261,18 +261,18 @@
     "undici": "^5.22.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.0",
-    "@types/node": "^20.2.1",
-    "@types/vscode": "^1.79.1",
-    "esbuild": "^0.18.6",
-    "eslint": "^8.40.0",
-    "eslint-config-prettier": "^8.8.0",
+    "@antfu/eslint-config": "^0.39.8",
+    "@types/node": "^20.4.5",
+    "@types/vscode": "^1.80.0",
+    "esbuild": "^0.18.17",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.9.0",
     "eslint-plugin-prettier-vue": "^4.2.0",
-    "eslint-plugin-tailwindcss": "^3.12.0",
-    "eslint-plugin-vue-scoped-css": "^2.4.0",
+    "eslint-plugin-tailwindcss": "^3.13.0",
+    "eslint-plugin-vue-scoped-css": "^2.5.0",
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.2",
-    "typescript": "^5.0.4"
+    "lint-staged": "^13.2.3",
+    "typescript": "^5.1.6"
   },
   "private": true
 }
