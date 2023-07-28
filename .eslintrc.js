@@ -163,7 +163,6 @@ module.exports = {
       { selector: 'typeLike', format: ['PascalCase'] },
     ],
     '@typescript-eslint/no-extra-non-null-assertion': 'error',
-    '@typescript-eslint/consistent-type-assertions': 'warn',
     '@typescript-eslint/unified-signatures': 'error',
     '@typescript-eslint/no-extraneous-class': 'error',
     '@typescript-eslint/no-floating-promises': 'off',
@@ -173,6 +172,12 @@ module.exports = {
     '@typescript-eslint/no-unnecessary-qualifier': 'warn',
     '@typescript-eslint/no-duplicate-type-constituents': 'warn',
     '@typescript-eslint/no-confusing-void-expression': ['warn'],
+
+    // overrides to antfu's config follow (not all overrides may have been moved below)
+    '@typescript-eslint/consistent-type-assertions': [
+      'warn',
+      { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow-as-parameter' },
+    ],
 
     /*
      * Rules implemented by `eslint-plugin-unused-imports` follow
@@ -217,6 +222,13 @@ module.exports = {
      */
     // overrides to antfu's config follow
     'jsx-quotes': ['warn', 'prefer-double'],
+
+    /*
+     * Rules implemented by `eslint-plugin-n` follow
+     * ========================================================================================
+     */
+    // overrides to antfu's config follow
+    'n/prefer-global/process': ['warn', 'always'],
   },
   overrides: [
     {
@@ -387,7 +399,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
-    ecmaVersion: 2022,
+    ecmaVersion: 2024,
     ecmaFeatures: { jsx: true },
     ...(eslintTsconfig ? { project: [eslintTsconfig] } : {}), // TODO: fix this to work when eslintTsconfig is undefined
   },
