@@ -1,6 +1,6 @@
 # Radicle VS Code Extension Change Log
 
-## _(WIP, yet unreleased version)_
+## **v0.2.2** (July 29th, 2023)
 
 ### 🩹 Fixes
 
