@@ -7,7 +7,7 @@
     "color": "#0A0D10",
     "theme": "dark"
   },
-  "icon": "./assets/marketplace-icon.png",
+  "icon": "assets/marketplace-icon.png",
   "publisher": "radicle-ide-plugins-team",
   "author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
   "contributors": [
