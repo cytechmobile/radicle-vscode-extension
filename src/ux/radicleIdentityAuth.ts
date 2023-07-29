@@ -57,9 +57,11 @@ export async function authenticate(
   }
 
   const radicleId = getRadicleIdentity('DID')
+  const radicleIdAlreadyExists = Boolean(radicleId)
   const secrets = getExtensionContext().secrets
 
   /* Attempt automatic authentication */
+  // a.k.a. `if (radicleIdAlreadyExists)`, but TS ain't understanding it's the same
   if (radicleId) {
     const storedPass = await secrets.get(radicleId)
 
@@ -92,10 +94,24 @@ export async function authenticate(
   }
 
   /* Attempt manual identity authentication */
-  const title = radicleId
+  const title = radicleIdAlreadyExists
     ? `Unlocking Radicle identity "${radicleId}"`
     : 'Creating new Radicle identity'
-  const prompt = radicleId
+
+  // TODO: maninak must be part of a multistep https://code.visualstudio.com/api/references/vscode-api#InputBox https://github.com/microsoft/vscode-extension-samples/tree/main/quickinput-sample
+  const alias =
+    !radicleIdAlreadyExists &&
+    (
+      await window.showInputBox({
+        title,
+        prompt: 'Please enter the alias of your new identity',
+        value: process.env['USER'],
+        validateInput: (input) => (input ? undefined : 'The input cannot be empty'),
+        ignoreFocusOut: true,
+      })
+    )?.trim()
+
+  const prompt = radicleIdAlreadyExists
     ? `Please enter the passphrase used to unlock your Radicle identity.`
     : 'Please enter a passphrase used to protect your new Radicle identity.'
   const typedInRadPass = (
@@ -104,7 +120,7 @@ export async function authenticate(
       prompt,
       placeHolder: '************',
       validateInput: (input) => {
-        if (!radicleId) {
+        if (!radicleIdAlreadyExists) {
           return undefined
         }
 
@@ -130,7 +146,10 @@ export async function authenticate(
   }
 
   /* Authenticate for real now that we have a confirmed passphrase */
-  const didAuth = exec(`RAD_PASSPHRASE=${typedInRadPass} ${getRadCliRef()} auth`)
+  const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
+  const didAuth = exec(
+    `RAD_PASSPHRASE=${typedInRadPass} ${getRadCliRef()} auth ${radAuthCmdSuffix}`,
+  )
   if (!didAuth) {
     return false
   }

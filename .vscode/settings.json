@@ -21,7 +21,8 @@
     "icons",
     "changelog",
     "readme",
-    "ci"
+    "ci",
+    "auth"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,

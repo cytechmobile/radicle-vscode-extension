@@ -6,6 +6,7 @@
 
 - **commands:** replace pre-heartwood, now deprecated rad pull/push commands with fetch/announce across multiple UI locations ([#42](https://github.com/cytechmobile/radicle-vscode-extension/issues/42))
 - update from from old (seedling) to new (alien) Radicle logo and branding ([#56](https://github.com/cytechmobile/radicle-vscode-extension/issues/56))
+- **auth:** fix cration of new Radicle identity which now requires a mandatory alias ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
 ### 💅 Refactors
 
