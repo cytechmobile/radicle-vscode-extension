@@ -1,5 +1,5 @@
 import { window } from 'vscode'
-import { exec, log, showLog } from '../utils'
+import { askUser, exec, log, showLog } from '../utils'
 import { getExtensionContext } from '../store'
 import {
   composeNodeHomePathMsg,
@@ -42,14 +42,34 @@ function composeRadAuthSuccessMsg(
   return msg
 }
 
+function authenticate({ alias, passphrase }: { alias?: string; passphrase: string }): boolean {
+  const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
+  const didAuth = exec(
+    `RAD_PASSPHRASE=${passphrase} ${getRadCliRef()} auth ${radAuthCmdSuffix}`,
+    { shouldLog: false },
+  )
+  if (!didAuth) {
+    return false
+  }
+
+  const newRadicleId = getRadicleIdentity('DID')
+  newRadicleId && getExtensionContext().secrets.store(newRadicleId, passphrase)
+
+  const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'createdId' : 'unlockedId')
+  log(authSuccessMsg, 'info')
+  window.showInformationMessage(authSuccessMsg)
+
+  return true
+}
+
 /**
- * Attempts to authenticate a Radicle identity using either the the stored (if any) passphrass
+ * Attempts to authenticate a Radicle identity using either the the stored (if any) passphrasse
  * or (if `minimizeUserNotifications` options is `false`) the one the user will manually type
  * in.
  *
  * @returns `true` if an identity is authenticated by the end of the call, otherwise `false`.
  */
-export async function authenticate(
+export async function launchAuthenticationFlow(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
   if (isRadicleIdentityAuthed()) {
@@ -61,12 +81,15 @@ export async function authenticate(
   const secrets = getExtensionContext().secrets
 
   /* Attempt automatic authentication */
+
   // a.k.a. `if (radicleIdAlreadyExists)`, but TS ain't understanding it's the same
   if (radicleId) {
     const storedPass = await secrets.get(radicleId)
 
     if (storedPass) {
-      const didAuth = exec(`RAD_PASSPHRASE=${storedPass} ${getRadCliRef()} auth`)
+      const didAuth = exec(`RAD_PASSPHRASE=${storedPass} ${getRadCliRef()} auth`, {
+        shouldLog: false,
+      })
       if (didAuth) {
         log(composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
 
@@ -85,7 +108,8 @@ export async function authenticate(
     return false
   }
 
-  /* Notify that authentication is required */
+  /* Notify user that authentication is required */
+
   const button = 'Authenticate'
   const authStatusMsg = 'You need to be authenticated before performing this action'
   const userSelection = await window.showErrorMessage(authStatusMsg, button)
@@ -93,75 +117,79 @@ export async function authenticate(
     return false
   }
 
-  /* Attempt manual identity authentication */
-  const title = radicleIdAlreadyExists
-    ? `Unlocking Radicle identity "${radicleId}"`
-    : 'Creating new Radicle identity'
+  /* Collect credentials and attempt authentication */
 
-  // TODO: maninak must be part of a multistep https://code.visualstudio.com/api/references/vscode-api#InputBox https://github.com/microsoft/vscode-extension-samples/tree/main/quickinput-sample
-  const alias =
-    !radicleIdAlreadyExists &&
-    (
-      await window.showInputBox({
-        title,
-        prompt: 'Please enter the alias of your new identity',
-        value: process.env['USER'],
-        validateInput: (input) => (input ? undefined : 'The input cannot be empty'),
-        ignoreFocusOut: true,
-      })
-    )?.trim()
+  if (radicleIdAlreadyExists) {
+    const answers = await askUser([
+      {
+        key: 'passphrase',
+        title: `Unlocking Radicle identity "${radicleId}"`,
+        prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
+        placeHolder: '************',
+        validateInput: (input) => {
+          const didAuth = exec(`RAD_PASSPHRASE=${input} ${getRadCliRef()} auth`, {
+            shouldLog: false,
+          })
+          if (!didAuth) {
+            return "Current input isn't the correct passphrase to unlock the identity."
+          }
 
-  const prompt = radicleIdAlreadyExists
-    ? `Please enter the passphrase used to unlock your Radicle identity.`
-    : 'Please enter a passphrase used to protect your new Radicle identity.'
-  const typedInRadPass = (
-    await window.showInputBox({
-      title,
-      prompt,
-      placeHolder: '************',
-      validateInput: (input) => {
-        if (!radicleIdAlreadyExists) {
+          exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')}`)
+
           return undefined
-        }
-
-        const didAuth = exec(`RAD_PASSPHRASE=${input.trim()} ${getRadCliRef()} auth`)
-        if (!didAuth) {
-          return "Current input isn't the correct passphrase to unlock the identity"
-        }
-
-        exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')}`)
-
-        return undefined
+        },
+        password: true,
+        ignoreFocusOut: true,
+        kind: 'text',
       },
-      password: true,
-      ignoreFocusOut: true,
-    })
-  )?.trim()
-  if (typedInRadPass === undefined) {
-    const msg = 'Radicle authentication was aborted'
-    log(msg, 'info')
-    window.showWarningMessage(msg)
+    ])
+    if (!answers) {
+      const msg = 'Radicle authentication got aborted by the user'
+      log(msg, 'info')
+      window.showWarningMessage(msg)
 
-    return false
+      return false
+    }
+
+    const didAuth = authenticate(answers)
+
+    return didAuth
+  } else {
+    const title = 'Creating new Radicle identity'
+    const answers = await askUser([
+      {
+        key: 'alias',
+        title,
+        prompt: 'Please enter the alias of your new identity.',
+        value: process.env['USER'],
+        validateInput: (input) => {
+          return input ? undefined : 'The input cannot be empty.'
+        },
+        ignoreFocusOut: true,
+        kind: 'text',
+      },
+      {
+        key: 'passphrase',
+        title,
+        prompt: 'Please enter a passphrase used to protect your new Radicle identity.',
+        placeHolder: '************',
+        password: true,
+        ignoreFocusOut: true,
+        kind: 'text',
+      },
+    ])
+    if (!answers) {
+      const msg = 'Radicle authentication got aborted by the user'
+      log(msg, 'info')
+      window.showWarningMessage(msg)
+
+      return false
+    }
+
+    const didAuth = authenticate(answers)
+
+    return didAuth
   }
-
-  /* Authenticate for real now that we have a confirmed passphrase */
-  const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
-  const didAuth = exec(
-    `RAD_PASSPHRASE=${typedInRadPass} ${getRadCliRef()} auth ${radAuthCmdSuffix}`,
-  )
-  if (!didAuth) {
-    return false
-  }
-
-  const newRadicleId = getRadicleIdentity('DID')
-  newRadicleId && secrets.store(newRadicleId, typedInRadPass)
-
-  const authSuccessMsg = composeRadAuthSuccessMsg(newRadicleId ? 'unlockedId' : 'createdId')
-  log(authSuccessMsg, 'info')
-  window.showInformationMessage(authSuccessMsg)
-
-  return true
 }
 
 /**
@@ -194,7 +222,9 @@ export async function validateRadicleIdentityAuthentication(
   log(msg, 'warn')
 
   if (!options.minimizeUserNotifications || isRadInitialized()) {
-    return await authenticate({ minimizeUserNotifications: options.minimizeUserNotifications })
+    return await launchAuthenticationFlow({
+      minimizeUserNotifications: options.minimizeUserNotifications,
+    })
   }
 
   return false

@@ -1,12 +1,30 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🚀 Enhancements
+
+- **ux:** convert existing flows with series of user input steps into a cohesive experience indicating total step count and completion progress, as well as allowing editing of already submitted answers of the same flow ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+
+### 🩹 Fixes
+
+- **auth:** don't allow the user to submit an empty string as an alias when creating a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **auth:** show "created new" instead of "unlocked" in the notification and logs when creating a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **auth:** cancel the whole flow, warn and notify user when pressing escape _at any step of the flow_ (previously only applied for the passphrase question) when user is asked for his input in order to create a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+
+### 💅 Refactors
+
+- **ux:** wrap VS Code's lackluster [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) resulting in procedural, verbose and brittle client code, with a new custom-built sensible wrapper ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+
+-----
+
 ## **v0.2.2** (July 29th, 2023)
 
 ### 🩹 Fixes
 
 - **commands:** replace pre-heartwood, now deprecated rad pull/push commands with fetch/announce across multiple UI locations ([#42](https://github.com/cytechmobile/radicle-vscode-extension/issues/42))
-- update from from old (seedling) to new (alien) Radicle logo and branding ([#56](https://github.com/cytechmobile/radicle-vscode-extension/issues/56))
-- **auth:** fix cration of new Radicle identity which now requires a mandatory alias ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- update from old (seedling) to new (alien) Radicle logo and branding ([#56](https://github.com/cytechmobile/radicle-vscode-extension/issues/56))
+- **auth:** fix creation of new Radicle identity which now requires a mandatory alias ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
 ### 💅 Refactors
 

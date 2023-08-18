@@ -2,8 +2,8 @@ import { commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
 import { exec, showLog } from '../utils'
 import {
-  authenticate,
   deAuthCurrentRadicleIdentity,
+  launchAuthenticationFlow,
   selectAndCloneRadicleProject,
 } from '../ux'
 import { getRadCliRef } from '.'
@@ -50,7 +50,7 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
   cmdConfigs.forEach((cmdConfig) =>
     getExtensionContext().subscriptions.push(
       commands.registerCommand(cmdConfig.vscodeCmdId, async () => {
-        const didAuth = await authenticate()
+        const didAuth = await launchAuthenticationFlow()
         const didCmdSucceed =
           didAuth &&
           Boolean(
