@@ -37,3 +37,9 @@ If you _don't_ already have `pnpm` globally installed and don't want to do that,
 pnpm install a-new-pkg # if this is what you need to do
 npx pnpm install a-new-pkg # you can achieve it like this
 ```
+
+## Conventions
+
+### Getting user input
+
+Use custom wrapper `askUser()` instead of the native [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) which would result in procedural, verbose and brittle client code.
