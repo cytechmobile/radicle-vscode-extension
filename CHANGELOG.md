@@ -6,6 +6,10 @@
 
 - **ux:** convert existing flows with series of user input steps into a cohesive experience indicating total step count and completion progress, as well as allowing editing of already submitted answers of the same flow ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
+### 🛡️ Security Fixes
+
+- **auth:** : prevent potential leaking of `RAD_PASSPHRASE` into the JavaScript console ([#70](https://github.com/cytechmobile/radicle-vscode-extension/issues/70))
+
 ### 🩹 Fixes
 
 - **auth:** don't allow the user to submit an empty string as an alias when creating a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))

@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { type SpawnSyncOptionsWithStringEncoding, spawnSync } from 'node:child_process'
 import { getWorkspaceFolderPaths, log } from '.'
 
 /**
@@ -53,6 +53,7 @@ export function exec(
      * @default undefined
      * */
     cwd?: (string & {}) | '$workspaceDir' // eslint-disable-line @typescript-eslint/ban-types
+    env?: SpawnSyncOptionsWithStringEncoding['env']
   },
 ): string | undefined {
   const opts = options ?? {}
@@ -77,6 +78,7 @@ export function exec(
       cwd,
       timeout: opts.timeout ?? 5000,
       encoding: 'utf-8',
+      env: { ...process.env, ...opts.env },
     })
     if (execResult.error || execResult.status) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal

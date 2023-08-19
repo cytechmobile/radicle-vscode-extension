@@ -44,10 +44,9 @@ function composeRadAuthSuccessMsg(
 
 function authenticate({ alias, passphrase }: { alias?: string; passphrase: string }): boolean {
   const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
-  const didAuth = exec(
-    `RAD_PASSPHRASE=${passphrase} ${getRadCliRef()} auth ${radAuthCmdSuffix}`,
-    { shouldLog: false },
-  )
+  const didAuth = exec(`${getRadCliRef()} auth ${radAuthCmdSuffix}`, {
+    env: { RAD_PASSPHRASE: passphrase },
+  })
   if (!didAuth) {
     return false
   }
@@ -87,9 +86,7 @@ export async function launchAuthenticationFlow(
     const storedPass = await secrets.get(radicleId)
 
     if (storedPass) {
-      const didAuth = exec(`RAD_PASSPHRASE=${storedPass} ${getRadCliRef()} auth`, {
-        shouldLog: false,
-      })
+      const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: storedPass } })
       if (didAuth) {
         log(composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
 
@@ -127,9 +124,7 @@ export async function launchAuthenticationFlow(
         prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
         placeHolder: '************',
         validateInput: (input) => {
-          const didAuth = exec(`RAD_PASSPHRASE=${input} ${getRadCliRef()} auth`, {
-            shouldLog: false,
-          })
+          const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: input } })
           if (!didAuth) {
             return "Current input isn't the correct passphrase to unlock the identity."
           }
