@@ -1,4 +1,10 @@
-import { type Disposable, type InputBoxOptions, QuickInputButtons, window } from 'vscode'
+import {
+  type Disposable,
+  type InputBoxOptions,
+  InputBoxValidationSeverity,
+  QuickInputButtons,
+  window,
+} from 'vscode'
 import type { ArrayMinLength, Prettify } from '../types'
 import { log } from './log'
 
@@ -20,6 +26,10 @@ export type Question = Prettify<
      * - 'single-select' and 'multi-select' will show filterable list of available options
      */
     kind: 'text' // '| 'single-select' | 'multi-select'` to be implemented later, replacing QuickPick API
+    validateInputUsingPreviousAnswers?: (
+      input: string,
+      answers: Record<PropertyKey, string>,
+    ) => ReturnType<NonNullable<InputBoxOptions['validateInput']>>
   } & Omit<InputBoxOptions, 'valueSelection'>
 >
 
@@ -89,8 +99,14 @@ export async function askUser<
         inputBox.buttons = qIndex > 0 ? [QuickInputButtons.Back] : []
         inputBox.onDidChangeValue(
           async (newVal) => {
-            inputBox.validationMessage =
-              (await question.validateInput?.(newVal.trim())) ?? undefined
+            if (question.validateInput) {
+              inputBox.validationMessage =
+                (await question.validateInput(newVal.trim())) ?? undefined
+            } else if (question.validateInputUsingPreviousAnswers) {
+              inputBox.validationMessage =
+                (await question.validateInputUsingPreviousAnswers(newVal.trim(), answers)) ??
+                undefined
+            }
           },
           null,
           disposables,
@@ -99,10 +115,17 @@ export async function askUser<
           async () => {
             inputBox.enabled = false
             inputBox.busy = true
+
             const trimmedValue = inputBox.value.trim()
-            if (!(await question.validateInput?.(trimmedValue))) {
-              resolve(trimmedValue)
-            }
+            const validationResult =
+              (await question.validateInput?.(trimmedValue)) ??
+              (await question.validateInputUsingPreviousAnswers?.(trimmedValue, answers))
+            const isValid =
+              typeof validationResult !== 'string' &&
+              validationResult?.severity !== InputBoxValidationSeverity.Error
+
+            isValid && resolve(trimmedValue)
+
             inputBox.enabled = true
             inputBox.busy = false
           },

@@ -1,4 +1,4 @@
-import { window } from 'vscode'
+import { InputBoxValidationSeverity, window } from 'vscode'
 import { askUser, exec, log, showLog } from '../utils'
 import { getExtensionContext } from '../store'
 import {
@@ -139,7 +139,7 @@ export async function launchAuthenticationFlow(
       },
     ])
     if (!answers) {
-      const msg = 'Radicle authentication got aborted by the user'
+      const msg = 'Radicle authentication was aborted by the user'
       log(msg, 'info')
       window.showWarningMessage(msg)
 
@@ -155,7 +155,7 @@ export async function launchAuthenticationFlow(
       {
         key: 'alias',
         title,
-        prompt: 'Please enter the alias of your new identity.',
+        prompt: 'Please enter the alias of your new identity. You can always change it later.',
         value: process.env['USER'],
         validateInput: (input) => {
           return input ? undefined : 'The input cannot be empty.'
@@ -166,8 +166,32 @@ export async function launchAuthenticationFlow(
       {
         key: 'passphrase',
         title,
-        prompt: 'Please enter a passphrase used to protect your new Radicle identity.',
+        prompt:
+          'Please enter a passphrase used to protect your new Radicle identity.' +
+          ' Leaving this blank will keep your Radicle key unencrypted.',
+        validateInput: (input) => {
+          return input
+            ? undefined
+            : {
+                message: 'Leaving this blank will keep your Radicle key unencrypted!',
+                severity: InputBoxValidationSeverity.Warning,
+              }
+        },
         placeHolder: '************',
+        password: true,
+        ignoreFocusOut: true,
+        kind: 'text',
+      },
+      {
+        key: 'passphrase-repeat',
+        title,
+        prompt: 'Please enter the same passphrase once again.',
+        placeHolder: '************',
+        validateInputUsingPreviousAnswers: (input, answers) => {
+          return input === answers['passphrase']
+            ? undefined
+            : "Current input isn't matching the passphrase entered in the previous step."
+        },
         password: true,
         ignoreFocusOut: true,
         kind: 'text',
