@@ -22,7 +22,8 @@
     "changelog",
     "readme",
     "ci",
-    "auth"
+    "auth",
+    "ux"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
