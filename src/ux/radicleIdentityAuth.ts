@@ -185,7 +185,7 @@ export async function launchAuthenticationFlow(
       {
         key: 'passphrase-repeat',
         title,
-        prompt: 'Please enter the same passphrase once again.',
+        prompt: 'Please re-enter the same passphrase.',
         placeHolder: '************',
         validateInputUsingPreviousAnswers: (input, answers) => {
           return input === answers['passphrase']

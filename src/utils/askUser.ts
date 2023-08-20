@@ -2,7 +2,9 @@ import {
   type Disposable,
   type InputBoxOptions,
   InputBoxValidationSeverity,
+  type QuickInputButton,
   QuickInputButtons,
+  ThemeIcon,
   window,
 } from 'vscode'
 import type { ArrayMinLength, Prettify } from '../types'
@@ -78,11 +80,32 @@ export async function askUser<
   const answers: Record<PropertyKey, string> = {}
   const disposables: Disposable[] = []
 
+  const buttonRevealPassword: QuickInputButton = {
+    iconPath: new ThemeIcon('eye'),
+    tooltip: 'Reveal password',
+  }
+  const buttonHidePassword: QuickInputButton = {
+    iconPath: new ThemeIcon('eye-closed'),
+    tooltip: 'Hide password',
+  }
+  let shouldRevealPassword: boolean | undefined
+
   let qIndex = 0
   let question = questions[0]
   while (qIndex < questions.length) {
     const inputBox = window.createInputBox()
     disposables.push(inputBox)
+
+    function getInputBoxButtons(): QuickInputButton[] {
+      return [
+        ...(qIndex > 0 ? [QuickInputButtons.Back] : []),
+        ...(question.password
+          ? shouldRevealPassword
+            ? [buttonHidePassword]
+            : [buttonRevealPassword]
+          : []),
+      ]
+    }
 
     try {
       const answer = await new Promise<string>((resolve, reject) => {
@@ -94,9 +117,9 @@ export async function askUser<
         inputBox.prompt = question.prompt
         inputBox.placeholder = question.placeHolder
         inputBox.value = answers[question.key] ?? question.value ?? ''
-        inputBox.password = Boolean(question.password)
+        inputBox.password = Boolean(question.password) && !shouldRevealPassword
         inputBox.ignoreFocusOut = Boolean(question.ignoreFocusOut)
-        inputBox.buttons = qIndex > 0 ? [QuickInputButtons.Back] : []
+        inputBox.buttons = getInputBoxButtons()
         inputBox.onDidChangeValue(
           async (newVal) => {
             if (question.validateInput) {
@@ -136,6 +159,11 @@ export async function askUser<
           (button) => {
             if (button === QuickInputButtons.Back) {
               reject(FLOW_INTERRUPT.BACKTRACK)
+            } else if (button === buttonRevealPassword || button === buttonHidePassword) {
+              shouldRevealPassword = !shouldRevealPassword
+
+              inputBox.password = !shouldRevealPassword
+              inputBox.buttons = getInputBoxButtons()
             }
           },
           undefined,
