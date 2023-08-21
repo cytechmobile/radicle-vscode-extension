@@ -1,6 +1,7 @@
 import { assertUnreachable, exec } from '../utils'
 import {
   getConfig,
+  getResolvedPathToNodeHome,
   getValidatedAliasedPathToRadBinary,
   getValidatedDefaultPathToRadBinary,
 } from '.'
@@ -86,8 +87,35 @@ export function isRadInitialized(): boolean {
 }
 
 /**
+ * Answers whether the Radicle node has an identity with an encrypted key.
+ *
+ * An unencrypted Radicle identity can be the result of a user deciding to use a blank
+ * passphrase when creating it.
+ *
+ * @returns `true` if encrypted, `false` if unencrypted, or `undefined` if execution
+ * is unsuccessful.
+ */
+export function isRadicleIdentityKeyEncrypted(): boolean | undefined {
+  const pathToNodeHome = getResolvedPathToNodeHome()
+  if (!pathToNodeHome) {
+    return undefined
+  }
+
+  const keyInfo = exec(`openssl base64 -d -in ${pathToNodeHome}/keys/radicle | strings`)
+  if (!keyInfo) {
+    return undefined
+  }
+
+  const isEncrypted = keyInfo.includes('aes256') // the CLI's chosen cypher as of coding this
+  const isUnencrypted = keyInfo.includes('none') // if the above fails, this should work enough
+  const verdict = isEncrypted || !isUnencrypted
+
+  return verdict
+}
+
+/**
  * Answers whether the Radicle node has a currently authenticated identity or not. The identity
- * must be fully accessible to the Radicle CLI, i.e. the key must have also been added to the
+ * must be fully accessible to the Radicle CLI, i.e. its key must have also been added to the
  * ssh-agent.
  *
  * @returns `true` if authenticated, otherwise `false`.
