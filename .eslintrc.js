@@ -178,6 +178,7 @@ module.exports = {
       'warn',
       { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow-as-parameter' },
     ],
+    '@typescript-eslint/restrict-template-expressions': 'off',
 
     /*
      * Rules implemented by `eslint-plugin-unused-imports` follow
