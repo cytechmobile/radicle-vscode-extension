@@ -133,7 +133,10 @@ export function isRadicleIdentityAuthed(): boolean {
 }
 
 /**
- * Resolves the Radicle identity found in the home directory of a node.
+ * Resolves the Radicle identity and associated alias found in the home directory of a node.
+ *
+ * POST-CONDITIONS:
+ * - the returned identity will be keyed with the value of `format` param
  *
  * @param format The format the identity should be in. Can be either
  * `DID` representing a Decentrilized Identity of a Radicle user
@@ -141,9 +144,21 @@ export function isRadicleIdentityAuthed(): boolean {
  * or `NID` representing the identifier of the Radicle Node of that user
  * (e.g.: z6MkvAFBkdph6yXSZDkkVqf9FfCcvkG29JD4KbwwnGphDRLV).
  *
- * @returns The identity if resolved, otherwise `undefined`
+ * @returns An object containing both the identity and alias if resolved,
+ * otherwise `undefined`. The object implements it's own `toString()` in the format
+ * ```ts
+ * `"${alias}" "${id}"`
+ * ```
  */
-export function getRadicleIdentity(format: 'DID' | 'NID'): string | undefined {
+/* eslint-disable padding-line-between-statements */
+export function getRadicleIdentity(
+  format: 'DID',
+): { DID: string; alias: string; toString: () => string } | undefined
+export function getRadicleIdentity(
+  format: 'NID',
+): { NID: string; alias: string; toString: () => string } | undefined
+export function getRadicleIdentity(format: 'DID' | 'NID') {
+  /* eslint-enable padding-line-between-statements */
   let flag: string
   switch (format) {
     case 'DID':
@@ -156,9 +171,15 @@ export function getRadicleIdentity(format: 'DID' | 'NID'): string | undefined {
       assertUnreachable(format)
   }
 
-  const radicleIdentity = exec(`${getRadCliRef()} self ${flag}`)
+  const id = exec(`${getRadCliRef()} self ${flag}`)
+  const alias = exec(`${getRadCliRef()} self --alias`)
 
-  return radicleIdentity
+  if (!id || !alias) {
+    // assumes each Radicle identity always comes with an associated alias
+    return undefined
+  }
+
+  return { [format]: id, alias, toString: () => `"${alias}" "${id}"` } as const
 }
 
 /**
