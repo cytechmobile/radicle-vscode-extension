@@ -21,6 +21,5 @@
  * @param {never} x - never
  */
 export function assertUnreachable(x: never): never {
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   throw new Error(`Execution reached no man's land for value ${x}.`)
 }
