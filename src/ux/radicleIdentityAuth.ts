@@ -177,12 +177,13 @@ export async function launchAuthenticationFlow(
         title,
         prompt:
           'Please enter a passphrase used to protect your new Radicle identity.' +
-          ' Leaving this blank will keep your Radicle key unencrypted.',
+          " Leaving this blank will leave your Radicle identity's key unencrypted.",
         validateInput: (input) => {
           return input
             ? undefined
             : {
-                message: 'Leaving this blank will keep your Radicle key unencrypted!',
+                message:
+                  "Leaving this blank will leave your Radicle identity's key unencrypted!",
                 severity: InputBoxValidationSeverity.Warning,
               }
         },
@@ -196,8 +197,8 @@ export async function launchAuthenticationFlow(
         title,
         prompt: 'Please re-enter the same passphrase.',
         placeHolder: '************',
-        validateInputUsingPreviousAnswers: (input, answers) => {
-          return input === answers['passphrase']
+        validateInputUsingPreviousAnswers: (input, previousAnswers) => {
+          return input === previousAnswers['passphrase']
             ? undefined
             : "Current input isn't matching the passphrase entered in the previous step."
         },
@@ -207,7 +208,7 @@ export async function launchAuthenticationFlow(
       },
     ])
     if (!answers) {
-      const msg = 'Radicle authentication got aborted by the user'
+      const msg = 'Radicle authentication was aborted by the user'
       log(msg, 'info')
       window.showWarningMessage(msg)
 

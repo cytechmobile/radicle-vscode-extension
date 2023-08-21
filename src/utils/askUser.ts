@@ -30,7 +30,7 @@ export type Question = Prettify<
     kind: 'text' // '| 'single-select' | 'multi-select'` to be implemented later, replacing QuickPick API
     validateInputUsingPreviousAnswers?: (
       input: string,
-      answers: Record<PropertyKey, string>,
+      previousAnswers: Record<PropertyKey, string>,
     ) => ReturnType<NonNullable<InputBoxOptions['validateInput']>>
   } & Omit<InputBoxOptions, 'valueSelection'>
 >
