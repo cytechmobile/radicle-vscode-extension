@@ -13,7 +13,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
 - 🖲️ [Execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
-- 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
+- 🔐 [Integrated authentication](#integrated-authentication) eases your Radicle Identity management
 - 📥 [Cloning](#cloning) of tracked Radicle projects
 - 🗺️ [Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
 - 🕵️‍♂️ [Troubleshooting flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
