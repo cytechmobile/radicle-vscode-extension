@@ -5,6 +5,7 @@
 ### 🚀 Enhancements
 
 - **ux:** convert existing flows with series of user input steps into a bespoke, cohesive experience indicating total step count and completion progress, allow editing of already submitted answers of the same flow, as well enable show/hiding of typed-in passwords, among other improvements ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **auth:** additionally show the alias associated with a Radicle identity whenever showing the latter
 
 ### 🛡️ Security Fixes
 

@@ -41,12 +41,12 @@ function composeRadAuthSuccessMsg(
     default:
       msgPrefix = 'Succesfully authenticated'
   }
+
   const radicleId = getRadicleIdentity('DID')
   if (!radicleId) {
     throw new Error('Failed resolving radicleId')
   }
-
-  const msg = `${msgPrefix} Radicle identity "${radicleId}"${composeNodeHomePathMsg()}`
+  const msg = `${msgPrefix} Radicle identity ${radicleId}${composeNodeHomePathMsg()}`
 
   return msg
 }
@@ -61,7 +61,7 @@ function authenticate({ alias, passphrase }: { alias?: string; passphrase: strin
   }
 
   const radicleId = getRadicleIdentity('DID')
-  radicleId && getExtensionContext().secrets.store(radicleId, passphrase)
+  radicleId && getExtensionContext().secrets.store(radicleId.DID, passphrase)
 
   const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'didCreatedId' : 'didUnlockId')
   log(authSuccessMsg, 'info')
@@ -85,14 +85,13 @@ export async function launchAuthenticationFlow(
   }
 
   const radicleId = getRadicleIdentity('DID')
-  const radicleIdAlreadyExists = Boolean(radicleId)
   const secrets = getExtensionContext().secrets
 
   /* Attempt automatic authentication */
 
-  // a.k.a. `if (radicleIdAlreadyExists)`, but TS ain't understanding it's the same
+  // a.k.a. if radicleId already exists
   if (radicleId) {
-    const storedPass = await secrets.get(radicleId)
+    const storedPass = await secrets.get(radicleId.DID)
 
     if (storedPass) {
       const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: storedPass } })
@@ -102,9 +101,9 @@ export async function launchAuthenticationFlow(
         return true
       }
 
-      await secrets.delete(radicleId)
+      await secrets.delete(radicleId.DID)
       log(
-        `Deleted the stored, stale passphrase previously associated with identity "${radicleId}"`,
+        `Deleted the stored, stale passphrase previously associated with identity ${radicleId}`,
         'warn',
       )
     }
@@ -125,11 +124,12 @@ export async function launchAuthenticationFlow(
 
   /* Collect credentials and attempt authentication */
 
-  if (radicleIdAlreadyExists) {
+  if (radicleId) {
     const answers = await askUser([
       {
         key: 'passphrase',
-        title: `Unlocking Radicle identity "${radicleId}"`,
+
+        title: `Unlocking Radicle identity ${radicleId}`,
         prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
         placeHolder: '************',
         validateInput: (input) => {
@@ -247,7 +247,7 @@ export async function validateRadicleIdentityAuthentication(
   const radicleId = getRadicleIdentity('DID')
   const pathToNodeHome = getResolvedPathToNodeHome()
   const msg = radicleId
-    ? `Found non-authenticated identity "${radicleId}" stored in "${pathToNodeHome}"`
+    ? `Found non-authenticated identity ${radicleId} stored in "${pathToNodeHome}"`
     : `No Radicle identity is currently stored in "${pathToNodeHome}"`
   log(msg, 'warn')
 
@@ -281,7 +281,8 @@ export function deAuthCurrentRadicleIdentity(): boolean {
   const radicleId = getRadicleIdentity('DID')
   if (!didDeAuth) {
     const button = 'Show output'
-    const msg = `Failed de-authenticating Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()}.`
+
+    const msg = `Failed de-authenticating Radicle identity ${radicleId}${composeNodeHomePathMsg()}.`
     window.showErrorMessage(msg, button).then((userSelection) => {
       userSelection === button && showLog()
     })
@@ -290,9 +291,9 @@ export function deAuthCurrentRadicleIdentity(): boolean {
     return false
   }
 
-  radicleId && getExtensionContext().secrets.delete(radicleId)
+  radicleId && getExtensionContext().secrets.delete(radicleId.DID)
 
-  const msg = `De-authenticated Radicle identity (DID) "${radicleId}"${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
+  const msg = `De-authenticated Radicle identity ${radicleId}${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)
   log(msg, 'info')
 
