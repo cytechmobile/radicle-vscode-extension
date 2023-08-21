@@ -10,23 +10,32 @@ import {
   isRadCliInstalled,
   isRadInitialized,
   isRadicleIdentityAuthed,
+  isRadicleIdentityKeyEncrypted,
 } from '../helpers'
 
 function composeRadAuthSuccessMsg(
-  didAction: 'foundUnlockedId' | 'autoUnlockedId' | 'unlockedId' | 'createdId',
+  didAction:
+    | 'foundUnprotectedId'
+    | 'foundUnlockedId'
+    | 'didAutoUnlockId'
+    | 'didUnlockId'
+    | 'didCreatedId',
 ): string {
   let msgPrefix: string
   switch (didAction) {
+    case 'foundUnprotectedId':
+      msgPrefix = 'Using non-password-protected'
+      break
     case 'foundUnlockedId':
       msgPrefix = 'Using already unlocked'
       break
-    case 'autoUnlockedId':
+    case 'didAutoUnlockId':
       msgPrefix = 'Auto-unlocked (using associated passphrase already in Secret Storage) the'
       break
-    case 'unlockedId':
+    case 'didUnlockId':
       msgPrefix = 'Succesfully unlocked'
       break
-    case 'createdId':
+    case 'didCreatedId':
       msgPrefix = 'Succesfully created new'
       break
     default:
@@ -51,10 +60,10 @@ function authenticate({ alias, passphrase }: { alias?: string; passphrase: strin
     return false
   }
 
-  const newRadicleId = getRadicleIdentity('DID')
-  newRadicleId && getExtensionContext().secrets.store(newRadicleId, passphrase)
+  const radicleId = getRadicleIdentity('DID')
+  radicleId && getExtensionContext().secrets.store(radicleId, passphrase)
 
-  const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'createdId' : 'unlockedId')
+  const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'didCreatedId' : 'didUnlockId')
   log(authSuccessMsg, 'info')
   window.showInformationMessage(authSuccessMsg)
 
@@ -71,7 +80,7 @@ function authenticate({ alias, passphrase }: { alias?: string; passphrase: strin
 export async function launchAuthenticationFlow(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): Promise<boolean> {
-  if (isRadicleIdentityAuthed()) {
+  if (isRadicleIdentityAuthed() || isRadicleIdentityKeyEncrypted() === false) {
     return true
   }
 
@@ -88,7 +97,7 @@ export async function launchAuthenticationFlow(
     if (storedPass) {
       const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: storedPass } })
       if (didAuth) {
-        log(composeRadAuthSuccessMsg('autoUnlockedId'), 'info')
+        log(composeRadAuthSuccessMsg('didAutoUnlockId'), 'info')
 
         return true
       }
@@ -225,8 +234,10 @@ export async function validateRadicleIdentityAuthentication(
     return false
   }
 
-  if (isRadicleIdentityAuthed()) {
-    const msg = composeRadAuthSuccessMsg('foundUnlockedId')
+  const isIdAuthed = isRadicleIdentityAuthed()
+  const isIdentityUnprotected = isRadicleIdentityKeyEncrypted() === false
+  if (isIdAuthed || isIdentityUnprotected) {
+    const msg = composeRadAuthSuccessMsg(isIdAuthed ? 'foundUnlockedId' : 'foundUnprotectedId')
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
