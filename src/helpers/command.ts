@@ -45,7 +45,7 @@ function registerSimpleVsCodeCmd(
 function registerSimpleRadCliCmdsAsVsCodeCmds(
   cmdConfigs: readonly RadCliCmdMappedToVscodeCmdId[],
 ): void {
-  const button = 'Show output'
+  const button = 'Show Output'
 
   cmdConfigs.forEach((cmdConfig) =>
     getExtensionContext().subscriptions.push(
