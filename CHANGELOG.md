@@ -4,12 +4,12 @@
 
 ### 🚀 Enhancements
 
-- **ux:** convert existing flows with series of user input steps into a bespoke, cohesive experience indicating total step count and completion progress, allow editing of already submitted answers of the same flow, as well enable show/hiding of typed-in passwords, among other improvements ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
-- **auth:** additionally show the alias associated with a Radicle identity whenever showing the latter
+- **ux:** convert existing flows with series of user input steps into a bespoke, cohesive experience indicating total step count and completion progress, allow editing of already submitted answers of the same flow, as well reveal-toggling of typed-in passwords, among other improvements ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **auth:** additionally show the alias associated with a Radicle identity whenever showing the latter ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
 ### 🛡️ Security Fixes
 
-- **auth:** : prevent potential leaking of `RAD_PASSPHRASE` into the JavaScript console ([#70](https://github.com/cytechmobile/radicle-vscode-extension/issues/70))
+- **auth:** prevent potential leaking of `RAD_PASSPHRASE` into the JavaScript console ([#70](https://github.com/cytechmobile/radicle-vscode-extension/issues/70))
 
 ### 🩹 Fixes
 
