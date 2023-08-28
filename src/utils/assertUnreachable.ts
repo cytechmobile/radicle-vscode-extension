@@ -19,6 +19,7 @@
   }
   ```
  * @param {never} x - never
+ * @throws Every time it is called.
  */
 export function assertUnreachable(x: never): never {
   throw new Error(`Execution reached no man's land for value ${x}.`)

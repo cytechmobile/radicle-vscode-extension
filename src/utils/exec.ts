@@ -76,7 +76,7 @@ export function exec(
     const execResult = spawnSync(resolvedCmd, {
       shell: true,
       cwd,
-      timeout: opts.timeout ?? 5000,
+      timeout: opts.timeout ?? 30_000,
       encoding: 'utf-8',
       env: { ...process.env, ...opts.env },
     })

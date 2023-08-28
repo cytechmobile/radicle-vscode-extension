@@ -1,19 +1,14 @@
 import { sep } from 'node:path'
 import { type QuickPickItem, Uri, commands, window } from 'vscode'
-import { fetchRadicleProjects, getRadCliRef } from '../helpers'
+import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import { exec, getRepoRoot, showLog } from '../utils'
+import { notifyUserAboutFetchError } from './httpdConnection'
 
 export async function selectAndCloneRadicleProject(): Promise<void> {
-  const projects = await fetchRadicleProjects({
-    onError: (requestUrl) => {
-      window.showErrorMessage(
-        `Failed establishing connection with Radicle HTTP API at "${requestUrl}". \
-        Please ensure that "radicle-httpd" is already running and the address to the API's \
-        root endpoint is correctly set in the extension's settings.`,
-      )
-    },
-  })
+  const { data: projects, error } = await fetchFromHttpd('/projects')
   if (!projects) {
+    notifyUserAboutFetchError(error)
+
     return
   }
 

@@ -24,7 +24,8 @@
     "ci",
     "auth",
     "ux",
-    "contributing"
+    "contributing",
+    "httpd"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,

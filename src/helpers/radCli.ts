@@ -150,15 +150,14 @@ export function isRadicleIdentityAuthed(): boolean {
  * `"${alias}" "${id}"`
  * ```
  */
-/* eslint-disable padding-line-between-statements */
 export function getRadicleIdentity(
   format: 'DID',
 ): { DID: string; alias: string; toString: () => string } | undefined
 export function getRadicleIdentity(
   format: 'NID',
 ): { NID: string; alias: string; toString: () => string } | undefined
+
 export function getRadicleIdentity(format: 'DID' | 'NID') {
-  /* eslint-enable padding-line-between-statements */
   let flag: string
   switch (format) {
     case 'DID':
