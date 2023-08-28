@@ -23,7 +23,8 @@
     "readme",
     "ci",
     "auth",
-    "ux"
+    "ux",
+    "contributing"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,

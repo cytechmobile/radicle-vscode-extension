@@ -40,6 +40,10 @@ npx pnpm install a-new-pkg # you can achieve it like this
 
 ## Conventions
 
+### Paths
+
+Because of module resolution restrictions, all paths must be relative. e.g. instead of `src/utils` (even if import auto-completion writes that) it should be corrected to `../utils`.
+
 ### Getting user input
 
 Use custom wrapper `askUser()` instead of the native [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) which would result in procedural, verbose and brittle client code.
