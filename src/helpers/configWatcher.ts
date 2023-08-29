@@ -1,11 +1,11 @@
 import { workspace } from 'vscode'
 import {
-  validateHttpApiEndpointConnection,
+  validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from '../ux/'
 import { getExtensionContext } from '../store'
-import type { ExtensionConfig } from '.'
+import { type ExtensionConfig, resetHttpdConnection } from '.'
 
 function onConfigChange(
   configKey: keyof ExtensionConfig,
@@ -43,7 +43,8 @@ const configWatchers = [
   {
     configKey: 'radicle.advanced.httpApiEndpoint',
     onChangeCallback: () => {
-      validateHttpApiEndpointConnection()
+      resetHttpdConnection()
+      validateHttpdConnection()
     },
   },
 ] satisfies OnConfigChangeParam[]

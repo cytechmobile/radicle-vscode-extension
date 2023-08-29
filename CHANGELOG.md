@@ -19,10 +19,12 @@
 - **auth:** ask the user to re-enter their chosen passphrase when creating a new radicle identity to protect agains typos and align with Radicle CLI's UX ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 - **auth:** show "created new" instead of "unlocked" in the notification and logs when creating a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 - **auth:** cancel the whole flow, warn and notify user when pressing escape _at any step of the flow_ (previously only applied for the passphrase question) when user is asked for his input in order to create a new radicle identity ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **httpd:** show buttons opening Output or the related configuration option in Settings in the event of Fetch Error ([#39](https://github.com/cytechmobile/radicle-vscode-extension/issues/39))
 
 ### 💅 Refactors
 
 - **ux:** wrap VS Code's lackluster [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) resulting in procedural, verbose and brittle client code, with a new custom-built sensible wrapper ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
+- **httpd:** design and implement architecture for idiomatic code interacting with the Radicle HTTP API ([#39](https://github.com/cytechmobile/radicle-vscode-extension/issues/39))
 
 ### 📖 Documentation
 
