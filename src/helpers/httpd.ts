@@ -82,6 +82,11 @@ function getResolvedHttpdRootUrl(): string {
  *
  * @example
  * ```ts
+ * (await fetchFromHttpd('/')).data?.service // "radicle-httpd"
+ * ```
+ *
+ * @example
+ * ```ts
  * const { data: projects, error } = await fetchFromHttpd('/projects')
  * if (error) {
  *   notifyUserAboutFetchError(error) // optionally
@@ -99,8 +104,9 @@ function getResolvedHttpdRootUrl(): string {
  * )
  * if (error) {
  *   notifyUserAboutFetchError(error)
- *   return
+ *   return false
  * }
+ * return true
  * ```
  *
  * @param path The relative path (as seen from the API's root) to the resource we
