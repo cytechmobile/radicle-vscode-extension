@@ -1,14 +1,14 @@
 import { exec } from '.'
 
 /**
- * Returns `true` if the opened workspace folder is an initialised git repo, otherwise `false`.
+ * Returns `true` if the opened workspace folder is an initialized git repo, otherwise `false`.
  */
 export function isGitRepo(): boolean {
-  const isInitialised = Boolean(
+  const isInitialized = Boolean(
     exec('git rev-parse --is-inside-work-tree', { cwd: '$workspaceDir' }),
   )
 
-  return isInitialised
+  return isInitialized
 }
 
 /**
