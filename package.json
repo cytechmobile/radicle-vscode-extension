@@ -149,6 +149,12 @@
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
           "when": "radicle.isRadInitialized"
+        },
+        {
+          "id": "patches-view",
+          "name": "Patches",
+          "icon": "$(git-pull-request)",
+          "when": "radicle.isRadInitialized"
         }
       ]
     },
@@ -218,6 +224,68 @@
         }
       }
     },
+    "colors": [
+      {
+        "id": "issue.open",
+        "defaults": {
+          "dark": "#3FB950",
+          "light": "#3FB950",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Issue is open."
+      },
+      {
+        "id": "issue.closed",
+        "defaults": {
+          "dark": "#cb2431",
+          "light": "#cb2431",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Issue is closed."
+      },
+      {
+        "id": "patch.draft",
+        "defaults": {
+          "dark": "#6e7681",
+          "light": "#6e7681",
+          "highContrast": "editor.background",
+          "highContrastLight": "editor.background"
+        },
+        "description": "The color used for indicating that a Radicle Patch is a draft."
+      },
+      {
+        "id": "patch.open",
+        "defaults": {
+          "dark": "issue.open",
+          "light": "issue.open",
+          "highContrast": "editor.background",
+          "highContrastLight": "editor.background"
+        },
+        "description": "The color used for indicating that a Radicle Patch is open."
+      },
+      {
+        "id": "patch.archived",
+        "defaults": {
+          "dark": "issue.closed",
+          "light": "issue.closed",
+          "highContrast": "editor.background",
+          "highContrastLight": "editor.background"
+        },
+        "description": "The color used for indicating that a Radicle Patch is archived."
+      },
+      {
+        "id": "patch.merged",
+        "defaults": {
+          "dark": "#8957e5",
+          "light": "#8957e5",
+          "highContrast": "editor.background",
+          "highContrastLight": "editor.background"
+        },
+        "description": "The color used for indicating that a Radicle Patch is merged."
+      }
+    ],
     "configuration": [
       {
         "title": "Radicle",
@@ -262,6 +330,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",
+    "@total-typescript/ts-reset": "^0.5.1",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
     "esbuild": "^0.18.17",

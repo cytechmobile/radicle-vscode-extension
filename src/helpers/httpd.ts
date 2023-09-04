@@ -1,9 +1,26 @@
 import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import type { XOR } from 'ts-xor'
+import type { ArrayMinLength } from 'src/types'
 import { log } from '../utils'
 import { getConfig } from './config'
 
-// Must manually be kept in sync with the shape returned by httpd
+// NOTE: all types must be _manually_ kept in sync with the shape returned by httpd
+
+// TODO: maninak move types somewhere else? How could I clean up this file? Should I?
+
+/**
+ * Decentralized Identifier, commonly used for Radicle Identities
+ */
+export type Did = `did:key:${string}`[]
+
+/**
+ * a.k.a. RID
+ */
+export interface RadicleIdentity {
+  id: Did
+  alias: string
+}
+
 interface Root {
   message: string
   service: string
@@ -17,18 +34,88 @@ interface Root {
   }[]
 }
 
-// Must manually be kept in sync with the shape returned by httpd
-interface RadicleProject {
+export interface Project {
   id: string
   name: string
   description: string
-  trackings?: number
+  defaultBranch: string
+  head: string
+  delegates: Did[]
+  patches: { [K in PatchStatus]: number }
+  issues: { open: number; closed: number }
+  trackings: number
 }
 
-interface HttpdPathMappedToResponseShape {
+export interface Merge {
+  author: RadicleIdentity
+  revision: string
+  commit: string
+  timestamp: number
+}
+
+export type PatchStatus = 'draft' | 'open' | 'archived' | 'merged'
+
+export interface Patch {
+  id: string
+  title: string
+  author: RadicleIdentity
+  state: { status: PatchStatus }
+  target: string
+  labels: string[]
+  merges: Merge[]
+  assignees: string[]
+  /**
+   * POST-CONDITIONS:
+   * - items are sorted by ascending timestamp (most recent item has highest array index)
+   * - there will always be at least one item in the array
+   */
+  revisions: ArrayMinLength<Revision, 1>
+}
+
+export interface Comment {
+  id: string
+  author: RadicleIdentity
+  body: string
+  reactions: [string, string][]
+  timestamp: number
+  replyTo: string | null
+}
+
+export type ReviewVerdict = 'accept' | 'reject' | null
+
+export interface Review {
+  author: RadicleIdentity
+  verdict?: ReviewVerdict
+  summary: string | null
+  comments: string[]
+  timestamp: number
+}
+
+export interface Revision {
+  id: string
+  author: RadicleIdentity
+  description: string
+  base: string
+  /**
+   * a.k.a. Object Identifier
+   */
+  oid: string
+  discussions: Comment[]
+  reviews: Review[]
+  refs: string[]
+  timestamp: number
+}
+
+type HttpdPathMappedToResponseShape = {
+  // expand definition with new pairs here below as needed...
   '/': Root
-  '/projects': RadicleProject[]
-  // add new pairs here as needed
+  '/projects': Project[]
+} & {
+  [K: `/projects/rad:${string}`]: Project
+} & {
+  [K: `/projects/rad:${string}/patches`]: Patch[]
+} & {
+  [K: `/projects/rad:${string}/patches/${string}`]: Patch
 }
 
 type FetchFromHttpdReturn<P extends keyof HttpdPathMappedToResponseShape> = Promise<
@@ -51,7 +138,14 @@ let doFetch: $Fetch
  * Should be run each time any of the dependencies get updated for them to take effect.
  */
 export function resetHttpdConnection(): void {
-  doFetch = ofetch.create({ baseURL: getResolvedHttpdRootUrl(), timeout: 30_000 })
+  doFetch = ofetch.create({ baseURL: getResolvedHttpdRootUrl(), query: { perPage: 100 } })
+}
+
+export function removeTrailingSlashes(str: string): string {
+  const trailingSlashesRegex = /\/*$/
+  const strWithoutTrailingSlashes = str.replace(trailingSlashesRegex, '')
+
+  return strWithoutTrailingSlashes
 }
 
 /**
@@ -65,14 +159,13 @@ export function resetHttpdConnection(): void {
  * @returns a string value representing the root URL of the Radicle API.
  */
 function getResolvedHttpdRootUrl(): string {
-  const trailingSlashesRegex = /\/*$/
   const apiRootPath = '/api/v1'
-  const httpEndpoint = (
+  const httpEndpoint = removeTrailingSlashes(
     getConfig('radicle.advanced.httpApiEndpoint') ??
-    '<vscode-settings.radicle.advanced.httpApiEndpoint must not be empty!>'
-  ).replace(trailingSlashesRegex, '')
+      '<vscode-settings.radicle.advanced.httpApiEndpoint must not be empty!>',
+  )
 
-  const resolvedUrl = `${httpEndpoint}${apiRootPath}`.replace(trailingSlashesRegex, '')
+  const resolvedUrl = removeTrailingSlashes(`${httpEndpoint}${apiRootPath}`)
 
   return resolvedUrl
 }
@@ -154,11 +247,16 @@ export async function fetchFromHttpd<P extends keyof HttpdPathMappedToResponseSh
   }
 
   try {
-    const response = await doFetch.raw<HttpdPathMappedToResponseShape[P]>(path, {
-      method,
-      body,
-      ...(options ?? {}),
-    })
+    const response = await doFetch.raw<HttpdPathMappedToResponseShape[P]>(
+      removeTrailingSlashes(path), // httpd paths don't support trailing slashes
+      {
+        method,
+        body,
+        ...(path === '/'
+          ? { ...(options ?? {}), query: { perPage: undefined } } // unset `perPage` for '/'
+          : options ?? {}),
+      },
+    )
 
     return { data: response._data as Exclude<typeof response._data, undefined>, response }
   } catch (error) {

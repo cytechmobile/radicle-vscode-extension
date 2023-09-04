@@ -17,7 +17,14 @@ module.exports = {
       : []),
   ],
   plugins: ['unused-imports'],
-  ignorePatterns: ['!.*rc.*', '!*.config.js', 'pnpm-lock.yaml', 'dist', 'static'],
+  ignorePatterns: [
+    'static',
+
+    // overrides to antfu's config follow
+    '!.*rc.*',
+    '!*.config.js',
+    '!*.d.ts',
+  ],
   rules: {
     /*
      * Rules native to ESLint follow

@@ -13,6 +13,9 @@ devDependencies:
   '@antfu/eslint-config':
     specifier: ^0.39.8
     version: 0.39.8(eslint@8.45.0)(typescript@5.1.6)
+  '@total-typescript/ts-reset':
+    specifier: ^0.5.1
+    version: 0.5.1
   '@types/node':
     specifier: ^20.4.5
     version: 20.4.5
@@ -509,6 +512,10 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+    dev: true
+
+  /@total-typescript/ts-reset@0.5.1:
+    resolution: {integrity: sha512-AqlrT8YA1o7Ff5wPfMOL0pvL+1X+sw60NN6CcOCqs658emD6RfiXhF7Gu9QcfKBH7ELY2nInLhKSCWVoNL70MQ==}
     dev: true
 
   /@types/json-schema@7.0.12:

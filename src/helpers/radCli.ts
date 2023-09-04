@@ -121,7 +121,7 @@ export function isRadicleIdentityKeyEncrypted(): boolean | undefined {
  * @returns `true` if authenticated, otherwise `false`.
  */
 export function isRadicleIdentityAuthed(): boolean {
-  const sshKey = getRadNodeSshKey('fingerprint')
+  const sshKey = getNodeSshKey('fingerprint')
   const unlockedIds = exec('ssh-add -l')
   if (!sshKey || !unlockedIds) {
     return false
@@ -182,15 +182,30 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
 }
 
 /**
+ * Resolves the Repository Identifier (RID) of the currently open workspace directory.
+ *
+ * @returns The RID if resolved, otherwise `undefined`.
+ */
+export function getRepoId(): `rad:${string}` | undefined {
+  const maybeRid = exec(`${getRadCliRef()} inspect --id`, { cwd: '$workspaceDir' })
+
+  function isStrARid(str: string | undefined): str is `rad:${string}` {
+    return Boolean(str?.startsWith('rad:'))
+  }
+
+  return isStrARid(maybeRid) ? maybeRid : undefined
+}
+
+/**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved
  * home directory of a node.
  *
  * @param format The format the key should be in. Can be either
  * `hash` (e.g.: SHA256:+ggv51RTNH8KlryICcYCnb67MXDyMjOpxQrIwP68xYU) or `full` (e.g.:
  * ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOlfJT4YlvXMI9h98D4SSswNV5S0voNrQaUZMCq0s0zK).
- * @returns The key if resolved, otherwise `undefined`
+ * @returns The key if resolved, otherwise `undefined`.
  */
-export function getRadNodeSshKey(format: 'fingerprint' | 'full'): string | undefined {
+export function getNodeSshKey(format: 'fingerprint' | 'full'): string | undefined {
   let flag: string
   switch (format) {
     case 'fingerprint':

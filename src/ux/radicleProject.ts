@@ -14,7 +14,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
 
   const qPickItems: QuickPickItem[] = projects.map((proj) => ({
     label: proj.name,
-    description: `${proj.trackings ? `$(radio-tower) ${proj.trackings} | ` : ''}${proj.id}`,
+    description: `$(radio-tower) ${proj.trackings} | ${proj.id}`,
     detail: proj.description,
     icon: 'repo',
   }))
