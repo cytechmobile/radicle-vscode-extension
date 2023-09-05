@@ -89,6 +89,14 @@
         "shortTitle": "De-auth",
         "category": "Radicle",
         "icon": "$(sign-out)"
+      },
+      {
+        "command": "radicle.refreshPatches",
+        "title": "Refresh Patches list",
+        "shortTitle": "Refresh Patches",
+        "category": "Radicle",
+        "icon": "$(refresh)",
+        "enablement": "radicle.isRadInitialized"
       }
     ],
     "menus": {
@@ -100,6 +108,13 @@
         },
         {
           "submenu": "submenu-scm-radicle"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "radicle.refreshPatches",
+          "when": "view == patches-view",
+          "group": "navigation"
         }
       ],
       "submenu-scm-radicle": [

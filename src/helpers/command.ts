@@ -4,6 +4,7 @@ import { exec, showLog } from '../utils'
 import {
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
+  patchesRefreshEventEmitter,
   selectAndCloneRadicleProject,
 } from '../ux'
 import { getRadCliRef } from '.'
@@ -83,4 +84,7 @@ export function registerAllCommands(): void {
   registerSimpleVsCodeCmd('radicle.showExtensionLog', showLog)
   registerSimpleVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
   registerSimpleVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
+  registerSimpleVsCodeCmd('radicle.refreshPatches', () => {
+    patchesRefreshEventEmitter.fire(undefined)
+  })
 }
