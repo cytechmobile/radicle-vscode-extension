@@ -22,7 +22,9 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 // - loading indicator while fetching and preparing to render items
 // - a button to refresh the list of patches is shown on hover of the Patches view title
 // - a command to refresh the list of patches is added to VS Code's Command Palette
-// - on item hover, a tooltip with plenty more info is shown
+// - when the http api endpoint config in the settings changes the patches automatically
+//   re-fetched
+// - on list item hover, a tooltip with plenty more info is shown
 //   - tooltip supports HTML too
 //   - any html gets sanitized for security before rendered ([see allowed tags](https://github.com/microsoft/vscode/blob/6d2920473c6f13759c978dd89104c4270a83422d/src/vs/base/browser/markdownRenderer.ts#L296)).
 //   - will additionally show "Last Revised by ${alias} on ${date}" if the revision commit
@@ -34,8 +36,6 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 
 // TODO: maninak make tooltip not go away on hover
 // TODO: maninak show colored icon on tooltip
-// TODO: maninak ensure that when the http api endpoint config changes the patches
-// are re-fetched
 // TODO: maninak add "Copy Patch ID to clipboard" on r-click (and on hover?)
 // TODO: maninak show `(${timeAgo})` after dates on tooltip
 // TODO: maninak list all patch authors (or just their count?) and their
