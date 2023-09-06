@@ -50,7 +50,7 @@ export async function notifyUserAboutFetchError(
 ): Promise<void> {
   const requestUrl = error?.request?.toString()
   const buttonOutput = 'Show Output'
-  const buttonSettings = 'Show Settings'
+  const buttonSettings = 'Review Setting'
   let userSelection: typeof buttonOutput | typeof buttonSettings | undefined
 
   if (error?.message.includes('ECONNREFUSED')) {
@@ -85,7 +85,7 @@ export async function notifyUserAboutFetchError(
 
   if (userSelection === 'Show Output') {
     showLog()
-  } else if (userSelection === 'Show Settings') {
+  } else if (userSelection === 'Review Setting') {
     commands.executeCommand(
       'workbench.action.openSettings',
       'radicle.advanced.httpApiEndpoint' as const satisfies keyof ExtensionConfig,
