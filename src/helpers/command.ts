@@ -2,12 +2,13 @@ import { commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
 import { exec, showLog } from '../utils'
 import {
+  copyToClipboardAndNotifify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
   patchesRefreshEventEmitter,
   selectAndCloneRadicleProject,
 } from '../ux'
-import { getRadCliRef } from '.'
+import { type Patch, getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -36,7 +37,7 @@ const simpleRadCliCmdsToRegisterInVsCode: Parameters<
   { vscodeCmdId: 'radicle.announce', radCliCmdSuffix: 'sync --announce' },
 ] as const
 
-function registerSimpleVsCodeCmd(
+function registerVsCodeCmd(
   vscodeCmdId: RadCliCmdMappedToVscodeCmdId['vscodeCmdId'],
   action: Parameters<typeof commands.registerCommand>['1'],
 ): void {
@@ -81,10 +82,13 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
 export function registerAllCommands(): void {
   registerSimpleRadCliCmdsAsVsCodeCmds(simpleRadCliCmdsToRegisterInVsCode)
 
-  registerSimpleVsCodeCmd('radicle.showExtensionLog', showLog)
-  registerSimpleVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
-  registerSimpleVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
-  registerSimpleVsCodeCmd('radicle.refreshPatches', () => {
+  registerVsCodeCmd('radicle.showExtensionLog', showLog)
+  registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
+  registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
+  registerVsCodeCmd('radicle.refreshPatches', () => {
     patchesRefreshEventEmitter.fire(undefined)
+  })
+  registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
+    typeof patch?.id === 'string' && (await copyToClipboardAndNotifify(patch.id))
   })
 }

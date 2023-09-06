@@ -22,6 +22,7 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 // - loading indicator while fetching and preparing to render items
 // - a button to refresh the list of patches is shown on hover of the Patches view title
 // - a command to refresh the list of patches is added to VS Code's Command Palette
+// - a button to copy the patch id to clipboard is show on list-item hover
 // - when the http api endpoint config in the settings changes the patches automatically
 //   re-fetched
 // - on list item hover, a tooltip with plenty more info is shown
@@ -34,18 +35,16 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //     is bad UX!)
 // - indicates to the user when no patches were found or a request failed
 
+// TODO: use global state management (pinia) to map dependencies and effects of changing
 // TODO: maninak make tooltip not go away on hover
 // TODO: maninak show colored icon on tooltip
-// TODO: maninak add "Copy Patch ID to clipboard" on r-click (and on hover?)
-// TODO: maninak show `(${timeAgo})` after dates on tooltip
+// TODO: maninak show full id on alias hover?
+// TODO: maninak show `(${timeAgo})` after dates on tooltip (show full UTC date on hover?)
 // TODO: maninak list all patch authors (or just their count?) and their
 // abbreviated hash on tooltip
 // TODO: maninak add "View Patch on web-app" on r-click (and on hover?)
 // TODO: maninak sort by "Status of Patch", "Alias of creator", "Alias of most recent
 // revision author", "Date of most recent revision"
-// TODO: use global state management (pinia) to map dependencies and effects of changing
-// httpd root config, doFetch, etc (use onConfigChange to update our global state and
-// put effects in watcher)
 export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
@@ -124,6 +123,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
       label,
       description,
       tooltip,
+      contextValue: 'patch',
     } satisfies TreeItem
 
     return treeItem

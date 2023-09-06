@@ -97,6 +97,14 @@
         "category": "Radicle",
         "icon": "$(refresh)",
         "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.copyPatchId",
+        "title": "Copy Patch identifier to clipboard",
+        "shortTitle": "Copy id",
+        "category": "Radicle",
+        "icon": "$(copy)",
+        "enablement": "view == patches-view && viewItem == patch"
       }
     ],
     "menus": {
@@ -115,6 +123,13 @@
           "command": "radicle.refreshPatches",
           "when": "view == patches-view",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "radicle.copyPatchId",
+          "when": "view == patches-view && viewItem == patch",
+          "group": "inline"
         }
       ],
       "submenu-scm-radicle": [

@@ -1,3 +1,4 @@
+export * from './clipboard'
 export * from './httpdConnection'
 export * from './patches'
 export * from './radCliInstallation'
