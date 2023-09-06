@@ -130,6 +130,10 @@
           "command": "radicle.copyPatchId",
           "when": "view == patches-view && viewItem == patch",
           "group": "inline"
+        },
+        {
+          "command": "radicle.copyPatchId",
+          "when": "view == patches-view && viewItem == patch"
         }
       ],
       "submenu-scm-radicle": [

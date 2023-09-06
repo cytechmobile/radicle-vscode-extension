@@ -22,7 +22,8 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 // - loading indicator while fetching and preparing to render items
 // - a button to refresh the list of patches is shown on hover of the Patches view title
 // - a command to refresh the list of patches is added to VS Code's Command Palette
-// - a button to copy the patch id to clipboard is show on list-item hover
+// - a button to copy the patch id to clipboard is shown on list-item hover
+// - an option to copy the patch id to clipboard is shown on list-item right click
 // - when the http api endpoint config in the settings changes the patches automatically
 //   re-fetched
 // - on list item hover, a tooltip with plenty more info is shown
