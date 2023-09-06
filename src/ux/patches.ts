@@ -49,7 +49,7 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
-      return { label: elem }
+      return { description: elem }
     }
 
     const icon = getIconForPatch(elem)
