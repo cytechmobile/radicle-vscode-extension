@@ -6,8 +6,6 @@ import { getConfig } from './config'
 
 // NOTE: all types must be _manually_ kept in sync with the shape returned by httpd
 
-// TODO: maninak move types somewhere else? How could I clean up this file? Should I?
-
 /**
  * Decentralized Identifier, commonly used for Radicle Identities
  */

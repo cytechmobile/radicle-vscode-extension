@@ -35,6 +35,10 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //   - patch status is denoted by dedicated icon + color (both, relying just on color only
 //     is bad UX!)
 // - indicates to the user when no patches were found or a request failed
+// - improve copy of http-connection-error notification's button
+// - when opening the Settings UI focused at a specific config, the correct scope,
+//   `User` or `Workspace`, will be automatically selected based on which is actually
+//   being evaluated as the result.
 
 // TODO: use global state management (pinia) to map dependencies and effects of changing
 // TODO: maninak make tooltip not go away on hover

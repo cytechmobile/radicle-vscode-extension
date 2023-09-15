@@ -1,7 +1,8 @@
-import { commands, window } from 'vscode'
+import { window } from 'vscode'
 import { FetchError } from 'ofetch'
-import { type ExtensionConfig, fetchFromHttpd } from '../helpers'
+import { fetchFromHttpd } from '../helpers'
 import { log, showLog } from '../utils'
+import { openSettingsFocusedAtConfig } from './settings'
 
 const unknownApiErrorMarker = 'EUNKONWNSERVICENAME'
 
@@ -86,9 +87,7 @@ export async function notifyUserAboutFetchError(
   if (userSelection === 'Show Output') {
     showLog()
   } else if (userSelection === 'Review Setting') {
-    commands.executeCommand(
-      'workbench.action.openSettings',
-      'radicle.advanced.httpApiEndpoint' as const satisfies keyof ExtensionConfig,
-    )
+    // TODO: maninak offer to do that for other configs when throwing error tooltips?
+    openSettingsFocusedAtConfig('radicle.advanced.httpApiEndpoint')
   }
 }
