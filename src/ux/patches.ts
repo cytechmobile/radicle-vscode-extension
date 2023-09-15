@@ -39,6 +39,8 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 // - when opening the Settings UI focused at a specific config, the correct scope,
 //   `User` or `Workspace`, will be automatically selected based on which is actually
 //   being evaluated as the result.
+// - make available options during onboarding's troubleshooting flow easier to select
+//   at a glance
 
 // TODO: use global state management (pinia) to map dependencies and effects of changing
 // TODO: maninak make tooltip not go away on hover

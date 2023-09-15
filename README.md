@@ -83,7 +83,7 @@ TODO: maninak add entry about list of patches
 
 ### Troubleshooting Flow
 
-![Troubleshooting Flow](assets/for-md/toubleshoot.png)
+<img src="./assets/for-md/troubleshoot.png" alt="Troubleshooting Flow">
 
 ### Configurable
 

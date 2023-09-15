@@ -87,7 +87,6 @@ export async function notifyUserAboutFetchError(
   if (userSelection === 'Show Output') {
     showLog()
   } else if (userSelection === 'Review Setting') {
-    // TODO: maninak offer to do that for other configs when throwing error tooltips?
     openSettingsFocusedAtConfig('radicle.advanced.httpApiEndpoint')
   }
 }

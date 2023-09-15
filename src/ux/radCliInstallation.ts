@@ -10,32 +10,13 @@ import {
 import { exec, isGitRepo, log, setWhenClauseContext } from '../utils'
 
 /**
- * Warns the user of failure in resolving Radicle CLI and asks them if they want to resolve the
- * issue.
- *
- * @returns `true` if user opted to resolve the issue, otherwise `false`.
- */
-async function notifyUserRadCliNotResolved(): Promise<boolean> {
-  const button = 'Troubleshoot'
-  const userSelection = await window.showErrorMessage(
-    'Failed resolving Radicle CLI. Please ensure it is installed on your machine and either ' +
-      'that it is globally accessible in the shell as `rad` or that its path is correctly ' +
-      "defined in the extension's settings. Please expect the extention's capabilities to " +
-      'remain severely limited until this issue is resolved.',
-    button,
-  )
-
-  return userSelection === button
-}
-
-/**
  * Launches a branching flow of interactive steps helping the user troubleshoot their
  * Radicle CLI installation.
  */
 async function troubleshootRadCliInstallation(): Promise<void> {
   const title = 'Radicle CLI Installation Troubleshooter'
-  const no = "No, I haven't"
-  const yes = 'Yes, I have'
+  const no = "No, I haven't installed Radicle"
+  const yes = 'Yes, I have already installed Radicle'
   const cliInstalledSelection = await window.showQuickPick(
     [
       {
@@ -114,8 +95,18 @@ async function troubleshootRadCliInstallation(): Promise<void> {
  * to troubleshoot.
  */
 export async function notifyUserRadCliNotResolvedAndMaybeTroubleshoot(): Promise<void> {
-  const shouldTroubleshoot = await notifyUserRadCliNotResolved()
-  shouldTroubleshoot && troubleshootRadCliInstallation()
+  const button = 'Troubleshoot'
+  const userSelection = await window.showErrorMessage(
+    'Failed resolving Radicle CLI. Please ensure it is installed on your machine and either ' +
+      'that it is globally accessible in the shell as `rad` or that its path is correctly ' +
+      "defined in the extension's settings. Please expect the extention's capabilities to " +
+      'remain severely limited until this issue is resolved.',
+    button,
+  )
+
+  if (userSelection === button) {
+    troubleshootRadCliInstallation()
+  }
 }
 
 /**
