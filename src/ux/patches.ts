@@ -51,23 +51,12 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
       'mini-minute-now',
     )} ${bullet} ${latestRevision.author.alias} ${bullet} ${shortenHash(elem.id)}`
 
-    /**
-     * Gives special markdown formatting to a string value, further indicating that
-     * it is data received from the API and not fixed tooltip copy.
-     */
-    function dat(str: string): string {
-      const formatingMarker = '_'
-
-      return `${formatingMarker}${str}${formatingMarker}`
-    }
-
-    const topSection = [
+    const tooltipTopSection = [
       `${getHtmlIconForPatch(elem)} ${dat(
         capitalizeFirstLetter(elem.state.status),
       )} ${emDash} ${dat(elem.id)}`,
     ].join(lineBreak)
-
-    const middleSection = [
+    const tooltipMiddleSection = [
       `**${elem.title}**`,
       `${firstRevision.description}`,
       `${elem.labels.reduce(
@@ -75,7 +64,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
         '',
       )}`,
     ].join(lineBreak)
-    const bottomSection = [
+    const tooltipBottomSection = [
       ...(elem.revisions.length > 1
         ? [
             `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
@@ -87,9 +76,8 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
         getFormattedDate(firstRevision.timestamp),
       )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
     ].join(lineBreak)
-
     const tooltip = new MarkdownString(
-      [topSection, middleSection, bottomSection].join(sectionDivider),
+      [tooltipTopSection, tooltipMiddleSection, tooltipBottomSection].join(sectionDivider),
       true,
     )
     tooltip.supportHtml = true
@@ -153,6 +141,16 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   },
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
 } as const
+
+/**
+ * Gives special Markdown formatting to a string value, further indicating that
+ * it is data received from the API and not fixed tooltip copy.
+ */
+function dat(str: string): string {
+  const formatingMarker = '_'
+
+  return `${formatingMarker}${str}${formatingMarker}`
+}
 
 function getPatchesOfStatusSortedByLatestRevisionFirst(
   patches: Patch[],
