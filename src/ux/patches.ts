@@ -8,7 +8,7 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { type Patch, fetchFromHttpd } from '../helpers'
+import { type Patch, fetchFromHttpd, getRepoId } from '../helpers'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
 
 /**
@@ -18,37 +18,6 @@ export const patchesRefreshEventEmitter = new EventEmitter<
   string | Patch | (string | Patch)[] | undefined
 >()
 
-// TODO: maninak report what's done
-// - new Patches view lists all patches of all statuses
-//   - view will only be shown if repo is rad-initialized
-//   - each item shows revision title, relative time since latest revision, author
-//   of latest revision, abbreviated hash of patchId
-//   - list items are sorted by patch status (first sorting level) and
-//     subsequently by latest revision date (most recent first)
-// - indicates to the user when no patches were found or a request failed
-// - loading indicator while fetching and preparing to render items
-// - a button to refresh the list of patches is shown on hover of the Patches view title
-// - a command to refresh the list of patches is added to VS Code's Command Palette
-// - a button to copy the patch id to clipboard is shown on list-item hover
-// - an option to copy the patch id to clipboard is shown on list-item right click
-// - when the http api endpoint config in the settings changes the patches automatically
-//   re-fetched
-// - on list item hover, a tooltip with plenty more info is shown
-//   - tooltip supports HTML too
-//   - any html gets sanitized for security before rendered ([see allowed tags](https://github.com/microsoft/vscode/blob/6d2920473c6f13759c978dd89104c4270a83422d/src/vs/base/browser/markdownRenderer.ts#L296)).
-//   - will additionally show "Last Revised by ${alias} on ${date}" if the revision commit
-//     repo rad-initialized)is different than the creation commit
-//   - shows localized date format including relative "time ago" (e.g. 2 days ago)
-//   - patch status is denoted by dedicated icon _and_ color (both, relying just on color only
-//     is bad UX!)
-// - improve copy of http-connection-error notification's button
-// - when opening the Settings UI focused at a specific config, the correct scope,
-//   `User` or `Workspace`, will be automatically selected based on which is actually
-//   being evaluated as the result.
-// - make available options during onboarding's troubleshooting flow easier to select
-//   at a glance
-
-// TODO: use global state management (pinia) to map dependencies and effects of changing
 export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
@@ -137,7 +106,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   },
   getChildren: async (el) => {
     if (!el) {
-      const rid = 'rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5' // getRepoId()  // TODO: maninak restore
+      const rid = getRepoId()
       if (!rid) {
         // this branch should theoretically never be reached
         // because `patches.view` has `"when": "radicle.isRadInitialized"`
