@@ -262,8 +262,8 @@
       {
         "id": "issue.open",
         "defaults": {
-          "dark": "#3FB950",
-          "light": "#3FB950",
+          "dark": "#57ab5a",
+          "light": "#4c954f",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -272,8 +272,8 @@
       {
         "id": "issue.closed",
         "defaults": {
-          "dark": "#8957e5",
-          "light": "#8957e5",
+          "dark": "#986ee2",
+          "light": "#825ec0",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -282,8 +282,8 @@
       {
         "id": "patch.draft",
         "defaults": {
-          "dark": "#6e7681",
-          "light": "#6e7681",
+          "dark": "#8999a8",
+          "light": "#768390",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -302,8 +302,8 @@
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "#cb2431",
-          "light": "#cb2431",
+          "dark": "#e5534b",
+          "light": "#cf4c45",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
