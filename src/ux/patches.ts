@@ -20,9 +20,11 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 
 // TODO: maninak report what's done
 // - new Patches view lists all patches of all statuses
-//   - will only be shown if repo rad-initialized
+//   - view will only be shown if repo is rad-initialized
 //   - each item shows revision title, relative time since latest revision, author
 //   of latest revision, abbreviated hash of patchId
+//   - list items are sorted by patch status (first sorting level) and
+//     subsequently by latest revision date (most recent first)
 // - indicates to the user when no patches were found or a request failed
 // - loading indicator while fetching and preparing to render items
 // - a button to refresh the list of patches is shown on hover of the Patches view title
@@ -167,13 +169,44 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
         return [`0 Radicle Patches found`]
       }
 
-      return patches
+      const patchesSortedByRevisionTsPerStatus = [
+        ...getPatchesOfStatusSortedByLatestRevisionFirst(patches, 'draft'),
+        ...getPatchesOfStatusSortedByLatestRevisionFirst(patches, 'open'),
+        ...getPatchesOfStatusSortedByLatestRevisionFirst(patches, 'archived'),
+        ...getPatchesOfStatusSortedByLatestRevisionFirst(patches, 'merged'),
+      ]
+
+      return patchesSortedByRevisionTsPerStatus
     }
 
     return undefined
   },
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
 } as const
+
+function getPatchesOfStatusSortedByLatestRevisionFirst(
+  patches: Patch[],
+  patchStatus: Patch['state']['status'],
+): Patch[] {
+  const sortedPatches = patches
+    .filter((patch) => patch.state.status === patchStatus)
+    .sort((p1, p2) => {
+      const p1RevisionsSorted = [...p1.revisions].sort((p1, p2) => p1.timestamp - p2.timestamp)
+      const p2RevisionsSorted = [...p2.revisions].sort((p1, p2) => p1.timestamp - p2.timestamp)
+      const latestP1Revision = p1RevisionsSorted.at(-1) as Exclude<
+        Patch['revisions'][number],
+        undefined
+      >
+      const latestP2Revision = p2RevisionsSorted.at(-1) as Exclude<
+        Patch['revisions'][number],
+        undefined
+      >
+
+      return latestP2Revision.timestamp - latestP1Revision.timestamp
+    })
+
+  return sortedPatches
+}
 
 // eslint-disable-next-line consistent-return
 function getThemeIconForPatch(patch: Patch): ThemeIcon {
