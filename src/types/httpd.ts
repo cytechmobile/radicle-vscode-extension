@@ -58,11 +58,6 @@ export interface Patch {
   labels: string[]
   merges: Merge[]
   assignees: string[]
-  /**
-   * POST-CONDITIONS:
-   * - items are sorted by ascending timestamp (most recent item has highest array index)
-   * - there will always be at least one item in the array
-   */
   revisions: ArrayMinLength<Revision, 1>
 }
 
