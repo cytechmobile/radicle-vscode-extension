@@ -86,9 +86,9 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
     }
 
     const topSection = [
-      `$(${icon.id}) ${dat(capitalizeFirstLetter(elem.state.status))} ${emDash} ${dat(
-        elem.id,
-      )}`,
+      `<span style="color:${getCssColor(icon.color)};">$(${icon.id})</span> ${dat(
+        capitalizeFirstLetter(elem.state.status),
+      )} ${emDash} ${dat(elem.id)}`,
     ].join(lineBreak)
 
     const middleSection = [
@@ -185,6 +185,11 @@ function getIconForPatch(patch: Patch): ThemeIcon {
     default:
       assertUnreachable(patch.state.status)
   }
+}
+
+function getCssColor(themeColor: ThemeColor | undefined): string {
+  // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
+  return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
 }
 
 function getFormattedDate(unixTimestamp: number): string {
