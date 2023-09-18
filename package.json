@@ -272,8 +272,8 @@
       {
         "id": "issue.closed",
         "defaults": {
-          "dark": "#cb2431",
-          "light": "#cb2431",
+          "dark": "#8957e5",
+          "light": "#8957e5",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -284,8 +284,8 @@
         "defaults": {
           "dark": "#6e7681",
           "light": "#6e7681",
-          "highContrast": "editor.background",
-          "highContrastLight": "editor.background"
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
         },
         "description": "The color used for indicating that a Radicle Patch is a draft."
       },
@@ -294,28 +294,28 @@
         "defaults": {
           "dark": "issue.open",
           "light": "issue.open",
-          "highContrast": "editor.background",
-          "highContrastLight": "editor.background"
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
         },
         "description": "The color used for indicating that a Radicle Patch is open."
       },
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "issue.closed",
-          "light": "issue.closed",
-          "highContrast": "editor.background",
-          "highContrastLight": "editor.background"
+          "dark": "#cb2431",
+          "light": "#cb2431",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
         },
         "description": "The color used for indicating that a Radicle Patch is archived."
       },
       {
         "id": "patch.merged",
         "defaults": {
-          "dark": "#8957e5",
-          "light": "#8957e5",
-          "highContrast": "editor.background",
-          "highContrastLight": "editor.background"
+          "dark": "issue.closed",
+          "light": "issue.closed",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
         },
         "description": "The color used for indicating that a Radicle Patch is merged."
       }
