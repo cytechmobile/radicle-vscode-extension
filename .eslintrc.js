@@ -110,6 +110,10 @@ module.exports = {
     ],
     'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
     'prefer-exponentiation-operator': 'warn',
+    'prefer-rest-params': 'warn',
+    'prefer-spread': 'warn',
+    'prefer-template': 'warn',
+    'template-curly-spacing': 'warn',
     'arrow-parens': ['warn', 'always', { requireForBlockBody: true }],
     'spaced-comment': [
       'warn',
