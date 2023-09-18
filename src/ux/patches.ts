@@ -6,7 +6,7 @@ import {
   type TreeDataProvider,
   type TreeItem,
 } from 'vscode'
-import TimeAgo from 'javascript-time-ago'
+import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import { type Patch, fetchFromHttpd } from '../helpers'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
@@ -19,8 +19,11 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 >()
 
 // TODO: maninak report what's done
-// - new Patches view lists all patches of all statuses (will only be shown if
-//   repo rad-initialized)
+// - new Patches view lists all patches of all statuses
+//   - will only be shown if repo rad-initialized
+//   - each item shows revision title, relative time since latest revision, author
+//   of latest revision, abbreviated hash of patchId
+// - indicates to the user when no patches were found or a request failed
 // - loading indicator while fetching and preparing to render items
 // - a button to refresh the list of patches is shown on hover of the Patches view title
 // - a command to refresh the list of patches is added to VS Code's Command Palette
@@ -34,9 +37,8 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //   - will additionally show "Last Revised by ${alias} on ${date}" if the revision commit
 //     repo rad-initialized)is different than the creation commit
 //   - shows localized date format including relative "time ago" (e.g. 2 days ago)
-//   - patch status is denoted by dedicated icon + color (both, relying just on color only
+//   - patch status is denoted by dedicated icon _and_ color (both, relying just on color only
 //     is bad UX!)
-// - indicates to the user when no patches were found or a request failed
 // - improve copy of http-connection-error notification's button
 // - when opening the Settings UI focused at a specific config, the correct scope,
 //   `User` or `Workspace`, will be automatically selected based on which is actually
@@ -45,14 +47,13 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //   at a glance
 
 // TODO: use global state management (pinia) to map dependencies and effects of changing
-// TODO: maninak show colored icon on tooltip
 export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
       return { description: elem }
     }
 
-    const icon = getIconForPatch(elem)
+    const icon = getThemeIconForPatch(elem)
 
     const bullet = '•'
     const emDash = '—'
@@ -73,7 +74,10 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
 
     const label = elem.title
 
-    const description = `${latestRevision.author.alias} ${bullet} ${shortenHash(elem.id)}`
+    const description = `${getTimeAgo(
+      latestRevision.timestamp,
+      'mini-minute-now',
+    )} ${bullet} ${latestRevision.author.alias} ${bullet} ${shortenHash(elem.id)}`
 
     /**
      * Gives special markdown formatting to a string value, further indicating that
@@ -86,7 +90,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
     }
 
     const topSection = [
-      `<span style="color:${getCssColor(icon.color)};">$(${icon.id})</span> ${dat(
+      `${getHtmlIconForPatch(elem)} ${dat(
         capitalizeFirstLetter(elem.state.status),
       )} ${emDash} ${dat(elem.id)}`,
     ].join(lineBreak)
@@ -172,7 +176,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
 } as const
 
 // eslint-disable-next-line consistent-return
-function getIconForPatch(patch: Patch): ThemeIcon {
+function getThemeIconForPatch(patch: Patch): ThemeIcon {
   switch (patch.state.status) {
     case 'draft':
       return new ThemeIcon('git-pull-request-draft', new ThemeColor('patch.draft'))
@@ -185,6 +189,12 @@ function getIconForPatch(patch: Patch): ThemeIcon {
     default:
       assertUnreachable(patch.state.status)
   }
+}
+
+function getHtmlIconForPatch(patch: Patch): string {
+  const icon = getThemeIconForPatch(patch)
+
+  return `<span style="color:${getCssColor(icon.color)};">$(${icon.id})</span>`
 }
 
 function getCssColor(themeColor: ThemeColor | undefined): string {
@@ -206,6 +216,6 @@ function getFormattedDate(unixTimestamp: number): string {
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
 
-function getTimeAgo(unixTimestamp: number): string {
-  return timeAgo.format(unixTimestamp * 1000)
+function getTimeAgo(unixTimestamp: number, style: FormatStyleName = 'round-minute'): string {
+  return timeAgo.format(unixTimestamp * 1000, style)
 }
