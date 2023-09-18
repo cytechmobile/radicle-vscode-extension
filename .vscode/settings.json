@@ -25,7 +25,8 @@
     "auth",
     "ux",
     "contributing",
-    "httpd"
+    "httpd",
+    "patches"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,

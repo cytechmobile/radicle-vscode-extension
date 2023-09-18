@@ -5,6 +5,7 @@ import {
   registerAllCommands,
   registerAllConfigWatchers,
   registerAllFileWatchers,
+  registerAllViews,
 } from './helpers'
 import {
   validateHttpdConnection,
@@ -16,6 +17,7 @@ export function activate(ctx: ExtensionContext) {
   initExtensionContext(ctx)
 
   registerAllCommands()
+  registerAllViews()
   registerAllConfigWatchers()
   registerAllFileWatchers()
 

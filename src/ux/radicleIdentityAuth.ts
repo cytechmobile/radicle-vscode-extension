@@ -3,8 +3,8 @@ import { askUser, exec, log, showLog } from '../utils'
 import { getExtensionContext } from '../store'
 import {
   composeNodeHomePathMsg,
+  getNodeSshKey,
   getRadCliRef,
-  getRadNodeSshKey,
   getRadicleIdentity,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
@@ -138,7 +138,7 @@ export async function launchAuthenticationFlow(
             return "Current input isn't the correct passphrase to unlock the identity."
           }
 
-          exec(`ssh-add -D ${getRadNodeSshKey('fingerprint')}`)
+          exec(`ssh-add -D ${getNodeSshKey('fingerprint')}`)
 
           return undefined
         },
@@ -269,7 +269,7 @@ export async function validateRadicleIdentityAuthentication(
  * @returns `true` if no identity is currently authed any more, otherwise `false`
  */
 export function deAuthCurrentRadicleIdentity(): boolean {
-  const sshKey = getRadNodeSshKey('fingerprint')
+  const sshKey = getNodeSshKey('fingerprint')
   if (!sshKey) {
     const msg = `Failed de-authenticating current Radicle identity because none was found in "${getResolvedPathToNodeHome()}"`
     window.showWarningMessage(msg)

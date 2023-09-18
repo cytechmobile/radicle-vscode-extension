@@ -1,5 +1,6 @@
 import { workspace } from 'vscode'
 import {
+  patchesRefreshEventEmitter,
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
@@ -45,6 +46,7 @@ const configWatchers = [
     onChangeCallback: () => {
       resetHttpdConnection()
       validateHttpdConnection()
+      patchesRefreshEventEmitter.fire(undefined)
     },
   },
 ] satisfies OnConfigChangeParam[]

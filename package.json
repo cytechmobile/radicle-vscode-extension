@@ -89,6 +89,22 @@
         "shortTitle": "De-auth",
         "category": "Radicle",
         "icon": "$(sign-out)"
+      },
+      {
+        "command": "radicle.refreshPatches",
+        "title": "Refresh Patches list",
+        "shortTitle": "Refresh Patches",
+        "category": "Radicle",
+        "icon": "$(refresh)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.copyPatchId",
+        "title": "Copy Patch identifier to clipboard",
+        "shortTitle": "Copy id",
+        "category": "Radicle",
+        "icon": "$(copy)",
+        "enablement": "view == patches-view && viewItem == patch"
       }
     ],
     "menus": {
@@ -100,6 +116,24 @@
         },
         {
           "submenu": "submenu-scm-radicle"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "radicle.refreshPatches",
+          "when": "view == patches-view",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "radicle.copyPatchId",
+          "when": "view == patches-view && viewItem == patch",
+          "group": "inline"
+        },
+        {
+          "command": "radicle.copyPatchId",
+          "when": "view == patches-view && viewItem == patch"
         }
       ],
       "submenu-scm-radicle": [
@@ -148,6 +182,12 @@
           "id": "cli-commands",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
+          "when": "radicle.isRadInitialized"
+        },
+        {
+          "id": "patches-view",
+          "name": "Patches",
+          "icon": "$(git-pull-request)",
           "when": "radicle.isRadInitialized"
         }
       ]
@@ -218,6 +258,68 @@
         }
       }
     },
+    "colors": [
+      {
+        "id": "issue.open",
+        "defaults": {
+          "dark": "#57ab5a",
+          "light": "#4c954f",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Issue is open."
+      },
+      {
+        "id": "issue.closed",
+        "defaults": {
+          "dark": "#986ee2",
+          "light": "#825ec0",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Issue is closed."
+      },
+      {
+        "id": "patch.draft",
+        "defaults": {
+          "dark": "#8999a8",
+          "light": "#768390",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Patch is a draft."
+      },
+      {
+        "id": "patch.open",
+        "defaults": {
+          "dark": "issue.open",
+          "light": "issue.open",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Patch is open."
+      },
+      {
+        "id": "patch.archived",
+        "defaults": {
+          "dark": "#e5534b",
+          "light": "#cf4c45",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Patch is archived."
+      },
+      {
+        "id": "patch.merged",
+        "defaults": {
+          "dark": "issue.closed",
+          "light": "issue.closed",
+          "highContrast": "editor.foreground",
+          "highContrastLight": "editor.foreground"
+        },
+        "description": "The color used for indicating that a Radicle Patch is merged."
+      }
+    ],
     "configuration": [
       {
         "title": "Radicle",
@@ -258,10 +360,13 @@
     "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "dependencies": {
+    "javascript-time-ago": "^2.5.9",
     "ofetch": "^1.2.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/javascript-time-ago": "^2.0.4",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
     "esbuild": "^0.18.17",

@@ -17,7 +17,14 @@ module.exports = {
       : []),
   ],
   plugins: ['unused-imports'],
-  ignorePatterns: ['!.*rc.*', '!*.config.js', 'pnpm-lock.yaml', 'dist', 'static'],
+  ignorePatterns: [
+    'static',
+
+    // overrides to antfu's config follow
+    '!.*rc.*',
+    '!*.config.js',
+    '!*.d.ts',
+  ],
   rules: {
     /*
      * Rules native to ESLint follow
@@ -53,10 +60,11 @@ module.exports = {
       'warn',
       {
         code: 95,
-        comments: 95,
         tabWidth: 2,
+        ignoreComments: true,
         ignoreTrailingComments: true,
         ignoreTemplateLiterals: true, // TODO: remove option when prettier resolves https://github.com/prettier/prettier/issues/3368
+        ignoreRegExpLiterals: true,
         ignoreUrls: true,
       },
     ],
@@ -103,6 +111,10 @@ module.exports = {
     ],
     'prefer-const': ['warn', { destructuring: 'all', ignoreReadBeforeAssign: true }],
     'prefer-exponentiation-operator': 'warn',
+    'prefer-rest-params': 'warn',
+    'prefer-spread': 'warn',
+    'prefer-template': 'warn',
+    'template-curly-spacing': 'warn',
     'arrow-parens': ['warn', 'always', { requireForBlockBody: true }],
     'spaced-comment': [
       'warn',

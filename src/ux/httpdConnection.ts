@@ -1,7 +1,8 @@
-import { commands, window } from 'vscode'
+import { window } from 'vscode'
 import { FetchError } from 'ofetch'
-import { type ExtensionConfig, fetchFromHttpd } from '../helpers'
+import { fetchFromHttpd } from '../helpers'
 import { log, showLog } from '../utils'
+import { openSettingsFocusedAtConfig } from './settings'
 
 const unknownApiErrorMarker = 'EUNKONWNSERVICENAME'
 
@@ -45,12 +46,10 @@ export async function validateHttpdConnection(
  *
  * @param error The error that was thrown when the recuest to httpd failed.
  */
-export async function notifyUserAboutFetchError(
-  error: Exclude<Awaited<ReturnType<typeof fetchFromHttpd>>['error'], undefined>,
-): Promise<void> {
+export async function notifyUserAboutFetchError(error: FetchError): Promise<void> {
   const requestUrl = error?.request?.toString()
   const buttonOutput = 'Show Output'
-  const buttonSettings = 'Show Settings'
+  const buttonSettings = 'Review Setting'
   let userSelection: typeof buttonOutput | typeof buttonSettings | undefined
 
   if (error?.message.includes('ECONNREFUSED')) {
@@ -85,10 +84,7 @@ export async function notifyUserAboutFetchError(
 
   if (userSelection === 'Show Output') {
     showLog()
-  } else if (userSelection === 'Show Settings') {
-    commands.executeCommand(
-      'workbench.action.openSettings',
-      'radicle.advanced.httpApiEndpoint' as const satisfies keyof ExtensionConfig,
-    )
+  } else if (userSelection === 'Review Setting') {
+    openSettingsFocusedAtConfig('radicle.advanced.httpApiEndpoint')
   }
 }
