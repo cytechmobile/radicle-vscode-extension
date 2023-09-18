@@ -6,6 +6,8 @@ import {
   type TreeDataProvider,
   type TreeItem,
 } from 'vscode'
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
 import { type Patch, fetchFromHttpd } from '../helpers'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
 
@@ -31,7 +33,7 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //   - any html gets sanitized for security before rendered ([see allowed tags](https://github.com/microsoft/vscode/blob/6d2920473c6f13759c978dd89104c4270a83422d/src/vs/base/browser/markdownRenderer.ts#L296)).
 //   - will additionally show "Last Revised by ${alias} on ${date}" if the revision commit
 //     repo rad-initialized)is different than the creation commit
-//   - shows localized date format
+//   - shows localized date format including relative "time ago" (e.g. 2 days ago)
 //   - patch status is denoted by dedicated icon + color (both, relying just on color only
 //     is bad UX!)
 // - indicates to the user when no patches were found or a request failed
@@ -43,15 +45,7 @@ export const patchesRefreshEventEmitter = new EventEmitter<
 //   at a glance
 
 // TODO: use global state management (pinia) to map dependencies and effects of changing
-// TODO: maninak make tooltip not go away on hover
 // TODO: maninak show colored icon on tooltip
-// TODO: maninak show full id on alias hover?
-// TODO: maninak show `(${timeAgo})` after dates on tooltip (show full UTC date on hover?)
-// TODO: maninak list all patch authors (or just their count?) and their
-// abbreviated hash on tooltip
-// TODO: maninak add "View Patch on web-app" on r-click (and on hover?)
-// TODO: maninak sort by "Status of Patch", "Alias of creator", "Alias of most recent
-// revision author", "Date of most recent revision"
 export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
@@ -109,13 +103,13 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
       ...(elem.revisions.length > 1
         ? [
             `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
-              getFormattedDateFromTs(latestRevision.timestamp),
-            )}`,
+              getFormattedDate(latestRevision.timestamp),
+            )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
           ]
         : []),
       `Created by ${dat(elem.author.alias)} on ${dat(
-        getFormattedDateFromTs(firstRevision.timestamp),
-      )}`,
+        getFormattedDate(firstRevision.timestamp),
+      )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
     ].join(lineBreak)
 
     const tooltip = new MarkdownString(
@@ -144,6 +138,7 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
         return ['Unable to fetch Radicle Patches for Radicle-initialized workspace']
       }
 
+      // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
       const responses = await Promise.all([
         fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
           query: { state: 'draft' },
@@ -192,7 +187,7 @@ function getIconForPatch(patch: Patch): ThemeIcon {
   }
 }
 
-function getFormattedDateFromTs(unixTimestamp: number): string {
+function getFormattedDate(unixTimestamp: number): string {
   return new Date(unixTimestamp * 1000).toLocaleDateString(undefined, {
     weekday: 'short',
     month: 'short',
@@ -201,4 +196,11 @@ function getFormattedDateFromTs(unixTimestamp: number): string {
     hour: 'numeric',
     minute: 'numeric',
   })
+}
+
+TimeAgo.addDefaultLocale(en)
+const timeAgo = new TimeAgo('en-US')
+
+function getTimeAgo(unixTimestamp: number): string {
+  return timeAgo.format(unixTimestamp * 1000)
 }
