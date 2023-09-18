@@ -12,8 +12,8 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
-TODO: maninak add entry about list of patches
 - 🖲️ [Execute Radicle commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
+- 📋 [Patches list](#patches-list) offers a quick glance at the status of code changes in your project
 - 🔐 [Integrated authentication](#integrated-authentication) eases your Radicle Identity management
 - 📥 [Cloning](#cloning) of tracked Radicle projects
 - 🗺️ [Onboarding flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
@@ -38,6 +38,10 @@ TODO: maninak add entry about list of patches
 - Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu
 
     ![Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
+
+### Patches list
+
+<img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-huge.png" height="500">
 
 ### Integrated Authentication
 
@@ -83,7 +87,7 @@ TODO: maninak add entry about list of patches
 
 ### Troubleshooting Flow
 
-<img src="./assets/for-md/troubleshoot.png" alt="Troubleshooting Flow">
+<img src="./assets/for-md/troubleshoot.png" alt="Troubleshooting Flow" style="max-height:150px;" height="150">
 
 ### Configurable
 

@@ -6,7 +6,7 @@
 
 - New Patches view
 
-    <img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-huge.png" height="400">
+    <img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-huge.png" height="350">
 
 ### 🚀 Enhancements
 
