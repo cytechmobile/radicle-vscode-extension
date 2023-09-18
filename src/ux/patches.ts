@@ -8,7 +8,8 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { type Patch, fetchFromHttpd, getRepoId } from '../helpers'
+import { fetchFromHttpd, getRepoId } from '../helpers'
+import type { Patch } from '../types'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
 
 /**

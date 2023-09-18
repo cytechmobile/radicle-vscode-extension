@@ -46,9 +46,7 @@ export async function validateHttpdConnection(
  *
  * @param error The error that was thrown when the recuest to httpd failed.
  */
-export async function notifyUserAboutFetchError(
-  error: Exclude<Awaited<ReturnType<typeof fetchFromHttpd>>['error'], undefined>,
-): Promise<void> {
+export async function notifyUserAboutFetchError(error: FetchError): Promise<void> {
   const requestUrl = error?.request?.toString()
   const buttonOutput = 'Show Output'
   const buttonSettings = 'Review Setting'

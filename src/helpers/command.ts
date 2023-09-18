@@ -8,7 +8,8 @@ import {
   patchesRefreshEventEmitter,
   selectAndCloneRadicleProject,
 } from '../ux'
-import { type Patch, getRadCliRef } from '.'
+import type { Patch } from '../types'
+import { getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
