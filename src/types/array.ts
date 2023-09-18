@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 type BuildArrayMinLength<
   T,
   N extends number,
