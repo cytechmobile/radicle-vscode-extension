@@ -60,10 +60,11 @@ module.exports = {
       'warn',
       {
         code: 95,
-        comments: 95,
         tabWidth: 2,
+        ignoreComments: true,
         ignoreTrailingComments: true,
         ignoreTemplateLiterals: true, // TODO: remove option when prettier resolves https://github.com/prettier/prettier/issues/3368
+        ignoreRegExpLiterals: true,
         ignoreUrls: true,
       },
     ],
