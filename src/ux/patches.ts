@@ -25,69 +25,13 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
       return { description: elem }
     }
 
-    const icon = getThemeIconForPatch(elem)
-
-    const bullet = '•'
-    const emDash = '—'
-    const lineBreak = '\n\n'
-    const sectionDivider = `${lineBreak}-----${lineBreak}`
-
-    const revisionsSortedEarliestFirst = [...elem.revisions].sort(
-      (p1, p2) => p1.timestamp - p2.timestamp,
-    )
-    const firstRevision = revisionsSortedEarliestFirst[0] as Exclude<
-      (typeof elem.revisions)[number],
-      undefined
-    >
-    const latestRevision = revisionsSortedEarliestFirst.at(-1) as Exclude<
-      (typeof elem.revisions)[number],
-      undefined
-    >
-
-    const label = elem.title
-
-    const description = `${getTimeAgo(
-      latestRevision.timestamp,
-      'mini-minute-now',
-    )} ${bullet} ${latestRevision.author.alias} ${bullet} ${shortenHash(elem.id)}`
-
-    const tooltipTopSection = [
-      `${getHtmlIconForPatch(elem)} ${dat(
-        capitalizeFirstLetter(elem.state.status),
-      )} ${emDash} ${dat(elem.id)}`,
-    ].join(lineBreak)
-    const tooltipMiddleSection = [
-      `**${elem.title}**`,
-      `${firstRevision.description}`,
-      `${elem.labels.reduce(
-        (joinedLabels, label) => `${joinedLabels}${joinedLabels ? ' ' : ''}\`${label}\``,
-        '',
-      )}`,
-    ].join(lineBreak)
-    const tooltipBottomSection = [
-      ...(elem.revisions.length > 1
-        ? [
-            `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
-              getFormattedDate(latestRevision.timestamp),
-            )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
-          ]
-        : []),
-      `Created by ${dat(elem.author.alias)} on ${dat(
-        getFormattedDate(firstRevision.timestamp),
-      )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
-    ].join(lineBreak)
-    const tooltip = new MarkdownString(
-      [tooltipTopSection, tooltipMiddleSection, tooltipBottomSection].join(sectionDivider),
-      true,
-    )
-    tooltip.supportHtml = true
-
+    const edgeRevisions = getFirstAndLatestRevisions(elem)
     const treeItem = {
       id: elem.id,
-      iconPath: icon,
-      label,
-      description,
-      tooltip,
+      iconPath: getThemeIconForPatch(elem),
+      label: elem.title,
+      description: getPatchTreeItemDescription(elem, edgeRevisions),
+      tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
       contextValue: 'patch',
     } satisfies TreeItem
 
@@ -142,6 +86,63 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
 } as const
 
+function getPatchTreeItemDescription(
+  patch: Patch,
+  { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
+) {
+  const bullet = '•'
+  const description = `${getTimeAgo(latestRevision.timestamp, 'mini-minute-now')} ${bullet} ${
+    latestRevision.author.alias
+  } ${bullet} ${shortenHash(patch.id)}`
+
+  return description
+}
+
+function getPatchTreeItemTooltip(
+  patch: Patch,
+  { firstRevision, latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
+) {
+  const emDash = '—'
+  const lineBreak = '\n\n'
+  const sectionDivider = `${lineBreak}-----${lineBreak}`
+
+  const tooltipTopSection = [
+    `${getHtmlIconForPatch(patch)} ${dat(
+      capitalizeFirstLetter(patch.state.status),
+    )} ${emDash} ${dat(patch.id)}`,
+  ].join(lineBreak)
+
+  const tooltipMiddleSection = [
+    `**${patch.title}**`,
+    `${firstRevision.description}`,
+    `${patch.labels.reduce(
+      (joinedLabels, label) => `${joinedLabels}${joinedLabels ? ' ' : ''}\`${label}\``,
+      '',
+    )}`,
+  ].join(lineBreak)
+
+  const tooltipBottomSection = [
+    ...(patch.revisions.length > 1
+      ? [
+          `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
+            getFormattedDate(latestRevision.timestamp),
+          )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
+        ]
+      : []),
+    `Created by ${dat(patch.author.alias)} on ${dat(
+      getFormattedDate(firstRevision.timestamp),
+    )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
+  ].join(lineBreak)
+
+  const tooltip = new MarkdownString(
+    [tooltipTopSection, tooltipMiddleSection, tooltipBottomSection].join(sectionDivider),
+    true,
+  )
+  tooltip.supportHtml = true
+
+  return tooltip
+}
+
 /**
  * Gives special Markdown formatting to a string value, further indicating that
  * it is data received from the API and not fixed tooltip copy.
@@ -159,21 +160,29 @@ function getPatchesOfStatusSortedByLatestRevisionFirst(
   const sortedPatches = patches
     .filter((patch) => patch.state.status === patchStatus)
     .sort((p1, p2) => {
-      const p1RevisionsSorted = [...p1.revisions].sort((p1, p2) => p1.timestamp - p2.timestamp)
-      const p2RevisionsSorted = [...p2.revisions].sort((p1, p2) => p1.timestamp - p2.timestamp)
-      const latestP1Revision = p1RevisionsSorted.at(-1) as Exclude<
-        Patch['revisions'][number],
-        undefined
-      >
-      const latestP2Revision = p2RevisionsSorted.at(-1) as Exclude<
-        Patch['revisions'][number],
-        undefined
-      >
+      const { latestRevision: latestP1Revision } = getFirstAndLatestRevisions(p1)
+      const { latestRevision: latestP2Revision } = getFirstAndLatestRevisions(p2)
 
       return latestP2Revision.timestamp - latestP1Revision.timestamp
     })
 
   return sortedPatches
+}
+
+function getFirstAndLatestRevisions(patch: Patch) {
+  const revisionsSortedOldestFirst = [...patch.revisions].sort(
+    (p1, p2) => p1.timestamp - p2.timestamp,
+  )
+  const firstRevision = revisionsSortedOldestFirst[0] as Exclude<
+    (typeof patch.revisions)[number],
+    undefined
+  >
+  const latestRevision = revisionsSortedOldestFirst.at(-1) as Exclude<
+    (typeof patch.revisions)[number],
+    undefined
+  >
+
+  return { firstRevision, latestRevision }
 }
 
 // eslint-disable-next-line consistent-return
