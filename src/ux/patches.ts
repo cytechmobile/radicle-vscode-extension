@@ -1,3 +1,4 @@
+import Path from 'node:path'
 import {
   EventEmitter,
   MarkdownString,
@@ -5,12 +6,27 @@ import {
   ThemeIcon,
   type TreeDataProvider,
   type TreeItem,
+  TreeItemCollapsibleState,
+  Uri,
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { fetchFromHttpd, getRepoId } from '../helpers'
-import type { Patch } from '../types'
+import { fetchFromHttpd } from '../helpers'
+import { type Patch, isPatch } from '../types'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
+
+const bullet = '•'
+// TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
+// TODO: maninak show `+${A} ~${M} -${D}` (colored) on the tooltip of each Patch treeitem
+// TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
+// TODO: maninak add a "collapse all" button on the right of the refresh button
+// TODO: maninak add checkbox next to each item which on hover shows tooltip "Mark file as viewed". A check should be keyed to each `revision.id+file.resolvedPath`. Sync state across vscode instances.
+// TODO: maninak add button to "diff against default project branch" (try to name it! e.g. master) button on fileTreeItem
+// TODO: maninak if patch is not merged diff against current master (if possible), else against latestRevision.base
+// TODO: maninak add command on right click to "Open Original File"
+// TODO: maninak add command on right click to "Open Modified File"
+// TODO: maninak add command on right click to "Open Changes since Revision..." and show a selection list of all revisions. On selection open diff with that as base
+// TODO: maninak add command on right click to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base.
 
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.
@@ -19,27 +35,45 @@ export const patchesRefreshEventEmitter = new EventEmitter<
   string | Patch | (string | Patch)[] | undefined
 >()
 
-export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
+// TODO: maninak clean-up
+interface FilechangeNode {
+  resolvedPath: string
+  getTreeItem: () => TreeItem
+}
+
+export const patchesTreeDataProvider: TreeDataProvider<string | Patch | FilechangeNode> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
       return { description: elem }
+    } else if (isPatch(elem)) {
+      const edgeRevisions = getFirstAndLatestRevisions(elem)
+      const treeItem: TreeItem = {
+        id: elem.id,
+        iconPath: getThemeIconForPatch(elem),
+        label: elem.title,
+        description: getPatchTreeItemDescription(elem, edgeRevisions), // TODO: maninak prefix `✓` if branch is checked out
+        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions), // TODO: maninak prefix `(✓ Current Branch)` if branch is checked out
+        contextValue: 'patch',
+        collapsibleState: TreeItemCollapsibleState.Expanded, // TODO: maninak restore to `Collapsed` by default except if branch is checked out
+      }
+
+      return treeItem
+    }
+    // elem is FilechangeNode
+    else {
+      return elem.getTreeItem()
+    }
+  },
+  getChildren: async (elem) => {
+    const rid = 'rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5' // getRepoId()  // TODO: maninak restore
+    if (!rid) {
+      // this branch should theoretically never be reached
+      // because `patches.view` has `"when": "radicle.isRadInitialized"`
+      return ['Unable to fetch Radicle Patches for non-Radicle-initialized workspace']
     }
 
-    const edgeRevisions = getFirstAndLatestRevisions(elem)
-    const treeItem = {
-      id: elem.id,
-      iconPath: getThemeIconForPatch(elem),
-      label: elem.title,
-      description: getPatchTreeItemDescription(elem, edgeRevisions),
-      tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
-      contextValue: 'patch',
-    } satisfies TreeItem
-
-    return treeItem
-  },
-  getChildren: async (el) => {
-    if (!el) {
-      const rid = getRepoId()
+    // get children of root
+    if (!elem) {
       if (!rid) {
         // this branch should theoretically never be reached
         // because `patches.view` has `"when": "radicle.isRadInitialized"`
@@ -81,6 +115,63 @@ export const patchesTreeDataProvider: TreeDataProvider<Patch | string> = {
       return patchesSortedByRevisionTsPerStatus
     }
 
+    // get children of patch
+    else if (isPatch(elem)) {
+      const { latestRevision } = getFirstAndLatestRevisions(elem)
+      const { data, error } = await fetchFromHttpd(
+        `/projects/${rid}/diff/${latestRevision.base}/${latestRevision.oid}`,
+      )
+
+      if (error) {
+        return ['Patch details could not be resolved due to an error!']
+      }
+
+      const filechangeNodes: FilechangeNode[] = [
+        ...(['added', 'deleted', 'modified'] as const).flatMap((filechangeKind) =>
+          data.diff[filechangeKind].map((filechange) => ({
+            resolvedPath: filechange.path,
+            getTreeItem: () => {
+              const parsedPath = Path.parse(filechange.path)
+
+              const treeItem: TreeItem = {
+                id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.path}`,
+                label: parsedPath.base,
+                description: parsedPath.dir,
+                tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
+                  filechangeKind,
+                )}`,
+                resourceUri: Uri.file(filechange.path),
+              }
+
+              return treeItem
+            },
+          })),
+        ),
+        ...(['copied', 'moved'] as const).flatMap((filechangeKind) =>
+          data.diff[filechangeKind].map((filechange) => ({
+            resolvedPath: filechange.newPath,
+            getTreeItem: () => {
+              const parsedPath = Path.parse(filechange.newPath)
+
+              const treeItem: TreeItem = {
+                id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
+                label: parsedPath.base,
+                description: parsedPath.dir,
+                tooltip: `${filechange.oldPath} ➟ ${
+                  filechange.newPath
+                } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
+                resourceUri: Uri.file(filechange.newPath),
+              }
+
+              return treeItem
+            },
+          })),
+        ),
+      ].sort((n1, n2) => n1.resolvedPath.localeCompare(n2.resolvedPath))
+
+      return filechangeNodes
+    }
+
     return undefined
   },
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
@@ -90,7 +181,6 @@ function getPatchTreeItemDescription(
   patch: Patch,
   { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
 ) {
-  const bullet = '•'
   const description = `${getTimeAgo(latestRevision.timestamp, 'mini-minute-now')} ${bullet} ${
     latestRevision.author.alias
   } ${bullet} ${shortenHash(patch.id)}`
