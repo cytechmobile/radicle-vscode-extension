@@ -16,17 +16,35 @@ import { type Patch, isPatch } from '../types'
 import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
 
 const bullet = '•'
+
+// DONE tasks
+// - each Patch item in the Patches list can now be expanded
+//   - shows a sub-list of the files changed in the latest Revision of that Patch when compared to the Revision base commit
+//   - the files are sorted by directory first and then by filename
+// - each file item in the sub-list of files
+//   - shows the filename
+//   - shows the path to the filename if that changeset contains multiple files with the same name
+//   - automatically uses the File Icon matching that file according to the user's selected File Icon Theme in VS Code settings (if any)
+// - on file item hove a tooltip is shown
+//   - with the relative path starting from project root (including the filename)
+//   - with the kind of change that this file had (e.g. `added`, `modified`, `moved`, etc)
+//   - if the file was `moved` or `copied` then both the `oldPath` and `newPath` are shown with an arrow between them
+
+// TODO tasks
+// TODO: maninak add a "collapse all" button on the right of the refresh button
 // TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
 // TODO: maninak show `+${A} ~${M} -${D}` (colored) on the tooltip of each Patch treeitem
 // TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
-// TODO: maninak add a "collapse all" button on the right of the refresh button
 // TODO: maninak add checkbox next to each item which on hover shows tooltip "Mark file as viewed". A check should be keyed to each `revision.id+file.resolvedPath`. Sync state across vscode instances.
+// TODO: maninak prefix each Patch item description with `✓` (or put on the far right as icon) if branch is checked out and in tooltip with `(✓ Current Branch)`.
 // TODO: maninak add button to "diff against default project branch" (try to name it! e.g. master) button on fileTreeItem
 // TODO: maninak if patch is not merged diff against current master (if possible), else against latestRevision.base
-// TODO: maninak add command on right click to "Open Original File"
+// TODO: maninak show Gravatar or stable randomly generated avatar (use the one from `radilce-interface`) on Patch list item tooltip. Prefix PR name with status e.g. `Draft:`. Add a new `radicle.patches.icon` config with options [`Status icon`, `Gr(avatar)`, `None`] https://github.com/microsoft/vscode-pull-request-github/blob/d53cc2e3f22d47cc009a686dc56f1827dda4e897/src/view/treeNodes/pullRequestNode.ts#L315
+// TODO: maninak add button to `Open Modified File`
+// TODO: maninak add button when holding `alt` to `Open Modified File to the Side`
 // TODO: maninak add command on right click to "Open Modified File"
-// TODO: maninak add command on right click to "Open Changes since Revision..." and show a selection list of all revisions. On selection open diff with that as base
-// TODO: maninak add command on right click to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base.
+// TODO: maninak add command on right click to "Open Original File"
+// TODO: maninak make a new ticket to create a new expandable level of all Revisions inside a Patch and outside the files list. Expanding the Patch should auto-expand the most recent revision. Expanding a revision should collapse all other revisions of a Patch. On right-click there should be an option to "Open Diff since Revision..." and show a list of all revisions of this Patch for the user to select one. On selection open diff with that as base On right-click there should be an option to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base. If both of the above are implemented, then make a sublist "Open Changes since" with the above as sub-items.
 
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.
@@ -35,9 +53,10 @@ export const patchesRefreshEventEmitter = new EventEmitter<
   string | Patch | (string | Patch)[] | undefined
 >()
 
-// TODO: maninak clean-up
 interface FilechangeNode {
   resolvedPath: string
+  filename: string
+  enableShowingPathInDescription: () => void
   getTreeItem: () => TreeItem
 }
 
@@ -51,8 +70,8 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
         id: elem.id,
         iconPath: getThemeIconForPatch(elem),
         label: elem.title,
-        description: getPatchTreeItemDescription(elem, edgeRevisions), // TODO: maninak prefix `✓` if branch is checked out
-        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions), // TODO: maninak prefix `(✓ Current Branch)` if branch is checked out
+        description: getPatchTreeItemDescription(elem, edgeRevisions),
+        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
         contextValue: 'patch',
         collapsibleState: TreeItemCollapsibleState.Expanded, // TODO: maninak restore to `Collapsed` by default except if branch is checked out
       }
@@ -128,46 +147,79 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
       const filechangeNodes: FilechangeNode[] = [
         ...(['added', 'deleted', 'modified'] as const).flatMap((filechangeKind) =>
-          data.diff[filechangeKind].map((filechange) => ({
-            resolvedPath: filechange.path,
-            getTreeItem: () => {
-              const parsedPath = Path.parse(filechange.path)
+          data.diff[filechangeKind].map((filechange) => {
+            const filename = Path.basename(filechange.path)
 
-              const treeItem: TreeItem = {
-                id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.path}`,
-                label: parsedPath.base,
-                description: parsedPath.dir,
-                tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
-                  filechangeKind,
-                )}`,
-                resourceUri: Uri.file(filechange.path),
-              }
+            let shouldShowPathInDescription = false
+            function enableShowingPathInDescription() {
+              shouldShowPathInDescription = true
+            }
 
-              return treeItem
-            },
-          })),
+            const node: FilechangeNode = {
+              resolvedPath: filechange.path,
+              filename,
+              enableShowingPathInDescription,
+              getTreeItem: () =>
+                ({
+                  id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.path}`,
+                  label: filename,
+                  description: shouldShowPathInDescription
+                    ? Path.dirname(filechange.path)
+                    : undefined,
+                  tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
+                    filechangeKind,
+                  )}`,
+                  resourceUri: Uri.file(filechange.path),
+                } satisfies TreeItem),
+            }
+
+            return node
+          }),
         ),
         ...(['copied', 'moved'] as const).flatMap((filechangeKind) =>
-          data.diff[filechangeKind].map((filechange) => ({
-            resolvedPath: filechange.newPath,
-            getTreeItem: () => {
-              const parsedPath = Path.parse(filechange.newPath)
+          data.diff[filechangeKind].map((filechange) => {
+            const filename = Path.basename(filechange.newPath)
 
-              const treeItem: TreeItem = {
-                id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
-                label: parsedPath.base,
-                description: parsedPath.dir,
-                tooltip: `${filechange.oldPath} ➟ ${
-                  filechange.newPath
-                } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
-                resourceUri: Uri.file(filechange.newPath),
-              }
+            let shouldShowPathInDescription = false
+            function enableShowingPathInDescription() {
+              shouldShowPathInDescription = true
+            }
 
-              return treeItem
-            },
-          })),
+            const node: FilechangeNode = {
+              resolvedPath: filechange.newPath,
+              filename,
+              enableShowingPathInDescription,
+              getTreeItem: () =>
+                ({
+                  id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
+                  label: filename,
+                  description: shouldShowPathInDescription
+                    ? Path.dirname(filechange.newPath)
+                    : undefined,
+                  tooltip: `${filechange.oldPath} ➟ ${
+                    filechange.newPath
+                  } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
+                  resourceUri: Uri.file(filechange.newPath),
+                } satisfies TreeItem),
+            }
+
+            return node
+          }),
         ),
-      ].sort((n1, n2) => n1.resolvedPath.localeCompare(n2.resolvedPath))
+      ]
+        .map((filechangeNode, _, nodes) => {
+          const nodesExcludingFileChangeNode = nodes.filter((node) => node !== filechangeNode)
+          const hasSameFilenameWithAnotherFile = Boolean(
+            nodesExcludingFileChangeNode.find(
+              (node) => node.filename === filechangeNode.filename,
+            ),
+          )
+
+          hasSameFilenameWithAnotherFile && filechangeNode.enableShowingPathInDescription()
+
+          return filechangeNode
+        })
+        .sort((n1, n2) => n1.resolvedPath.localeCompare(n2.resolvedPath))
 
       return filechangeNodes
     }
