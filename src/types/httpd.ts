@@ -103,7 +103,7 @@ export interface Revision {
   description: string
   base: string
   /**
-   * a.k.a. Object Identifier
+   * a.k.a. Object Identifier. The value is the commit hash.
    */
   oid: string
   discussions: Comment[]
@@ -126,24 +126,11 @@ export interface DiffResponse {
 }
 
 export interface Changeset {
-  added: {
-    diff: Diff
-    new: FilechangeMeta
-    path: string
-  }[]
-  deleted: {
-    diff: Diff
-    old: FilechangeMeta
-    path: string
-  }[]
+  added: { diff: Diff; new: FileRef; path: string }[]
+  deleted: { diff: Diff; old: FileRef; path: string }[]
   moved: MovedOrCopiedFilechange[]
   copied: MovedOrCopiedFilechange[]
-  modified: {
-    diff: Diff
-    new: FilechangeMeta
-    old: FilechangeMeta
-    path: string
-  }[]
+  modified: { diff: Diff; new: FileRef; old: FileRef; path: string }[]
   stats: {
     filesChanged: number
     insertions: number
@@ -164,7 +151,10 @@ export function isMovedOrCopiedFilechange(x: unknown): x is MovedOrCopiedFilecha
   return Boolean(isMoved)
 }
 
-export interface FilechangeMeta {
+export interface FileRef {
+  /**
+   * Can be used as key to resolve a file under `DiffResponse.files`
+   */
   oid: string
   mode: 'blob' | 'blobExecutable' | 'tree' | 'link' | 'commit'
 }

@@ -1,7 +1,10 @@
-import Path from 'node:path'
+import Path, { sep } from 'node:path'
+import { tmpdir } from 'node:os'
+import * as fs from 'node:fs/promises'
 import {
   EventEmitter,
   MarkdownString,
+  type TextDocumentShowOptions,
   ThemeColor,
   ThemeIcon,
   type TreeDataProvider,
@@ -12,8 +15,8 @@ import {
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import { fetchFromHttpd } from '../helpers'
-import { type Patch, isPatch } from '../types'
-import { assertUnreachable, capitalizeFirstLetter, shortenHash } from '../utils'
+import { type Patch, type Unarray, isPatch } from '../types'
+import { assertUnreachable, capitalizeFirstLetter, log, shortenHash } from '../utils'
 
 const bullet = '•'
 
@@ -25,10 +28,11 @@ const bullet = '•'
 //   - shows the filename
 //   - shows the path to the filename if that changeset contains multiple files with the same name
 //   - automatically uses the File Icon matching that file according to the user's selected File Icon Theme in VS Code settings (if any)
-// - on file item hove a tooltip is shown
+// - on file item hover a tooltip is shown
 //   - with the relative path starting from project root (including the filename)
 //   - with the kind of change that this file had (e.g. `added`, `modified`, `moved`, etc)
 //   - if the file was `moved` or `copied` then both the `oldPath` and `newPath` are shown with an arrow between them
+// - on file item click an editor opens showing the diff between the file's version in the latest revision of that Patch and the version in that revision's base. (works only for "added" and "modified" FilechangeKinds)
 
 // TODO tasks
 // TODO: maninak add a "collapse all" button on the right of the refresh button
@@ -39,12 +43,20 @@ const bullet = '•'
 // TODO: maninak prefix each Patch item description with `✓` (or put on the far right as icon) if branch is checked out and in tooltip with `(✓ Current Branch)`.
 // TODO: maninak add button to "diff against default project branch" (try to name it! e.g. master) button on fileTreeItem
 // TODO: maninak if patch is not merged diff against current master (if possible), else against latestRevision.base
-// TODO: maninak show Gravatar or stable randomly generated avatar (use the one from `radilce-interface`) on Patch list item tooltip. Prefix PR name with status e.g. `Draft:`. Add a new `radicle.patches.icon` config with options [`Status icon`, `Gr(avatar)`, `None`] https://github.com/microsoft/vscode-pull-request-github/blob/d53cc2e3f22d47cc009a686dc56f1827dda4e897/src/view/treeNodes/pullRequestNode.ts#L315
+// TODO: maninak open the diff editor in read-only (opening a diff of an old commit via the native git plugin shows "Editor is read-only because the file system of the file is read-only." which means we could perhaps have the files in-memory instead of using temp files??! Maybe this is related https://github.com/microsoft/vscode-extension-samples/tree/69333818a412353487f0f445a80a36dcb7b6c2ab/source-control-sample or maybe a URI with custom scheme https://code.visualstudio.com/api/extension-guides/virtual-documents#textdocumentcontentprovider)
+// TODO: maninak show Gravatar or stable randomly generated avatar (use the one from `radilce-interface`) on Patch list item tooltip. Prefix PR name with status e.g. `Draft •` or `[Draft]`. Add a new `radicle.patches.icon` config with options [`Status icon`, `Gr(avatar)`, `None`] https://github.com/microsoft/vscode-pull-request-github/blob/d53cc2e3f22d47cc009a686dc56f1827dda4e897/src/view/treeNodes/pullRequestNode.ts#L315
 // TODO: maninak add button to `Open Modified File`
 // TODO: maninak add button when holding `alt` to `Open Modified File to the Side`
 // TODO: maninak add command on right click to "Open Modified File"
 // TODO: maninak add command on right click to "Open Original File"
 // TODO: maninak make a new ticket to create a new expandable level of all Revisions inside a Patch and outside the files list. Expanding the Patch should auto-expand the most recent revision. Expanding a revision should collapse all other revisions of a Patch. On right-click there should be an option to "Open Diff since Revision..." and show a list of all revisions of this Patch for the user to select one. On selection open diff with that as base On right-click there should be an option to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base. If both of the above are implemented, then make a sublist "Open Changes since" with the above as sub-items.
+
+interface FilechangeNode {
+  resolvedPath: string
+  filename: string
+  enableShowingPathInDescription: () => void
+  getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
+}
 
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.
@@ -52,13 +64,6 @@ const bullet = '•'
 export const patchesRefreshEventEmitter = new EventEmitter<
   string | Patch | (string | Patch)[] | undefined
 >()
-
-interface FilechangeNode {
-  resolvedPath: string
-  filename: string
-  enableShowingPathInDescription: () => void
-  getTreeItem: () => TreeItem
-}
 
 export const patchesTreeDataProvider: TreeDataProvider<string | Patch | FilechangeNode> = {
   getTreeItem: (elem) => {
@@ -80,14 +85,19 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     }
     // elem is FilechangeNode
     else {
+      // We can't put the code to construct the filechange TreeItem inside getTreeItem()
+      // because we need to perform operations on the whole collection (e.g. sort, search for
+      // and handle items with same filename differently, etc). Thus we define a "constructor"
+      // inside getChildren() and call it in here.
       return elem.getTreeItem()
     }
   },
   getChildren: async (elem) => {
     const rid = 'rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5' // getRepoId()  // TODO: maninak restore
+    // TODO: maninak validate and clean-up this duplicated `if (!rid)` check
     if (!rid) {
-      // this branch should theoretically never be reached
-      // because `patches.view` has `"when": "radicle.isRadInitialized"`
+      // This branch should theoretically never be reached,
+      // because `patches.view` has `"when": "radicle.isRadInitialized"`.
       return ['Unable to fetch Radicle Patches for non-Radicle-initialized workspace']
     }
 
@@ -137,7 +147,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     // get children of patch
     else if (isPatch(elem)) {
       const { latestRevision } = getFirstAndLatestRevisions(elem)
-      const { data, error } = await fetchFromHttpd(
+      const { data: diffResponse, error } = await fetchFromHttpd(
         `/projects/${rid}/diff/${latestRevision.base}/${latestRevision.oid}`,
       )
 
@@ -145,9 +155,35 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
         return ['Patch details could not be resolved due to an error!']
       }
 
+      // create a placeholder empty file used to diff added or removed files
+      const tempFileLocationPrefix = `${tmpdir()}${sep}radicle`
+      const emptyFileLocation = `${tempFileLocationPrefix}${sep}empty`
+
+      try {
+        await fs.mkdir(Path.dirname(emptyFileLocation), { recursive: true })
+        await fs.writeFile(emptyFileLocation, '')
+      } catch (error) {
+        log(
+          "Failed saving placeholder empty file to enable diff for Patch's changed files.",
+          'error',
+          (error as Partial<Error | undefined>)?.message,
+        )
+      }
+
+      type FileChangeKindWithSourceFileAvailable = keyof Pick<
+        (typeof diffResponse)['diff'],
+        'added' | 'deleted' | 'modified'
+      >
+      type FileChangeKindWithoutSourceFileAvailable = keyof Pick<
+        (typeof diffResponse)['diff'],
+        'copied' | 'moved'
+      >
       const filechangeNodes: FilechangeNode[] = [
-        ...(['added', 'deleted', 'modified'] as const).flatMap((filechangeKind) =>
-          data.diff[filechangeKind].map((filechange) => {
+        ...(
+          ['added', 'deleted', 'modified'] satisfies FileChangeKindWithSourceFileAvailable[]
+        ).flatMap((filechangeKind) =>
+          diffResponse.diff[filechangeKind].map((filechange) => {
+            const fileLocation = Path.dirname(filechange.path)
             const filename = Path.basename(filechange.path)
 
             let shouldShowPathInDescription = false
@@ -159,52 +195,141 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
               resolvedPath: filechange.path,
               filename,
               enableShowingPathInDescription,
-              getTreeItem: () =>
-                ({
+              getTreeItem: async () => {
+                const oldVersionFileLocation = `${tempFileLocationPrefix}${sep}${shortenHash(
+                  latestRevision.base,
+                )}${sep}${fileLocation}${sep}${filename}`
+                const newVersionFileLocation = `${tempFileLocationPrefix}${sep}${shortenHash(
+                  latestRevision.oid,
+                )}${sep}${fileLocation}${sep}${filename}`
+
+                // TODO: maninak consider how to clean up httpd types so that infering those is easier or move them to the types file
+                type AddedFileChange = Unarray<(typeof diffResponse)['diff']['added']>
+                type DeletedFileChange = Unarray<(typeof diffResponse)['diff']['deleted']>
+                type ModifiedFileChange = Unarray<(typeof diffResponse)['diff']['modified']>
+                type FileContent = (typeof diffResponse)['files'][string]['content']
+
+                try {
+                  switch (filechangeKind) {
+                    // TODO: maninak do all other cases too!
+                    case 'added':
+                      await fs.mkdir(Path.dirname(newVersionFileLocation), {
+                        recursive: true,
+                      })
+                      await fs.writeFile(
+                        newVersionFileLocation,
+                        diffResponse.files[(filechange as AddedFileChange).new.oid]
+                          ?.content as FileContent,
+                      )
+                      break
+                    case 'deleted':
+                      await fs.mkdir(Path.dirname(oldVersionFileLocation), {
+                        recursive: true,
+                      })
+                      await fs.writeFile(
+                        oldVersionFileLocation,
+                        diffResponse.files[(filechange as DeletedFileChange).old.oid]
+                          ?.content as FileContent,
+                      )
+                      break
+                    case 'modified':
+                      await Promise.all([
+                        fs.mkdir(Path.dirname(oldVersionFileLocation), { recursive: true }),
+                        fs.mkdir(Path.dirname(newVersionFileLocation), { recursive: true }),
+                      ])
+                      await Promise.all([
+                        fs.writeFile(
+                          oldVersionFileLocation,
+                          diffResponse.files[(filechange as ModifiedFileChange).old.oid]
+                            ?.content as FileContent,
+                        ),
+                        fs.writeFile(
+                          newVersionFileLocation,
+                          diffResponse.files[(filechange as ModifiedFileChange).new.oid]
+                            ?.content as FileContent,
+                        ),
+                      ])
+                      break
+                    default:
+                      assertUnreachable(filechangeKind)
+                  }
+                } catch (error) {
+                  log(
+                    "Failed saving temp files to enable diff for Patch's changed files.",
+                    'error',
+                    (error as Partial<Error | undefined>)?.message,
+                  )
+                }
+
+                const filechangeTreeItem: TreeItem = {
                   id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.path}`,
                   label: filename,
-                  description: shouldShowPathInDescription
-                    ? Path.dirname(filechange.path)
-                    : undefined,
+                  description: shouldShowPathInDescription ? fileLocation : undefined,
                   tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
                     filechangeKind,
                   )}`,
                   resourceUri: Uri.file(filechange.path),
-                } satisfies TreeItem),
+                  command: {
+                    command: 'vscode.diff',
+                    title: `Open changes`,
+                    tooltip: `Show this file's changes between its \
+before-the-Patch version and its latest version committed in the Radicle Patch`,
+                    arguments: [
+                      Uri.file(
+                        (filechange as Partial<ModifiedFileChange>).old?.oid
+                          ? oldVersionFileLocation
+                          : emptyFileLocation,
+                      ),
+                      Uri.file(
+                        (filechange as Partial<ModifiedFileChange>).new?.oid
+                          ? newVersionFileLocation
+                          : emptyFileLocation,
+                      ),
+                      `${filename} (${shortenHash(latestRevision.base)} ⟷ ${shortenHash(
+                        latestRevision.oid,
+                      )}) ${capitalizeFirstLetter(filechangeKind)}`,
+                      { preview: true } satisfies TextDocumentShowOptions,
+                    ],
+                  },
+                }
+
+                return filechangeTreeItem
+              },
             }
 
             return node
           }),
         ),
-        ...(['copied', 'moved'] as const).flatMap((filechangeKind) =>
-          data.diff[filechangeKind].map((filechange) => {
-            const filename = Path.basename(filechange.newPath)
+        ...(['copied', 'moved'] satisfies FileChangeKindWithoutSourceFileAvailable[]).flatMap(
+          (filechangeKind) =>
+            diffResponse.diff[filechangeKind].map((filechange) => {
+              const filename = Path.basename(filechange.newPath)
 
-            let shouldShowPathInDescription = false
-            function enableShowingPathInDescription() {
-              shouldShowPathInDescription = true
-            }
+              let shouldShowPathInDescription = false
+              function enableShowingPathInDescription() {
+                shouldShowPathInDescription = true
+              }
 
-            const node: FilechangeNode = {
-              resolvedPath: filechange.newPath,
-              filename,
-              enableShowingPathInDescription,
-              getTreeItem: () =>
-                ({
-                  id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
-                  label: filename,
-                  description: shouldShowPathInDescription
-                    ? Path.dirname(filechange.newPath)
-                    : undefined,
-                  tooltip: `${filechange.oldPath} ➟ ${
-                    filechange.newPath
-                  } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
-                  resourceUri: Uri.file(filechange.newPath),
-                } satisfies TreeItem),
-            }
+              const node: FilechangeNode = {
+                resolvedPath: filechange.newPath,
+                filename,
+                enableShowingPathInDescription,
+                getTreeItem: () =>
+                  ({
+                    id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
+                    label: filename,
+                    description: shouldShowPathInDescription
+                      ? Path.dirname(filechange.newPath)
+                      : undefined,
+                    tooltip: `${filechange.oldPath} ➟ ${
+                      filechange.newPath
+                    } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
+                    resourceUri: Uri.file(filechange.newPath),
+                  } satisfies TreeItem),
+              }
 
-            return node
-          }),
+              return node
+            }),
         ),
       ]
         .map((filechangeNode, _, nodes) => {
