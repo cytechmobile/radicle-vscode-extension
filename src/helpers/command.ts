@@ -86,6 +86,9 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
   registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
+  registerVsCodeCmd('radicle.collapsePatches', () => {
+    commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
+  })
   registerVsCodeCmd('radicle.refreshPatches', () => {
     patchesRefreshEventEmitter.fire(undefined)
   })

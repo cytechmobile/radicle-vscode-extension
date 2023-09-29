@@ -21,10 +21,10 @@ import { assertUnreachable, capitalizeFirstLetter, log, shortenHash } from '../u
 const bullet = '•'
 
 // DONE tasks
-// - each Patch item in the Patches list can now be expanded
+// - each Patch item in the Patches view can now be expanded
 //   - shows a sub-list of the files changed in the latest Revision of that Patch when compared to the Revision base commit
 //   - the files are sorted by directory first and then by filename
-// - each file item in the sub-list of files
+// - each file item in the changed-files list
 //   - shows the filename
 //   - shows the path to the filename if that changeset contains multiple files with the same name
 //   - automatically uses the File Icon matching that file according to the user's selected File Icon Theme in VS Code settings (if any)
@@ -33,9 +33,13 @@ const bullet = '•'
 //   - with the kind of change that this file had (e.g. `added`, `modified`, `moved`, etc)
 //   - if the file was `moved` or `copied` then both the `oldPath` and `newPath` are shown with an arrow between them
 // - on file item click an editor opens showing the diff between the file's version in the latest revision of that Patch and the version in that revision's base. (works only for "added" and "modified" FilechangeKinds)
+// - the Patches view title-bar has a new "Collapse All Items in Patches View" button to the right of the refresh button
+// - the Command Palette has a new command to "Collapse All Items in Patches View"
+// OTHER DONE tasks
+// - copy of all commands is now (consistently) in Title Case as per the VS Code UX Guidelines
 
 // TODO tasks
-// TODO: maninak add a "collapse all" button on the right of the refresh button
+// TODO: maninak compare with master by default and with revision.base on right-click
 // TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
 // TODO: maninak show `+${A} ~${M} -${D}` (colored) on the tooltip of each Patch treeitem
 // TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
