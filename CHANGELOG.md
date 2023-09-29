@@ -10,7 +10,8 @@
 
 ### 🚀 Enhancements
 
-- **patches**: show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to quickly copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
+- **patches**: show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to easily copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
+- **patches**:  each item in the list of Radicle Patches can be expanded to show a sub-list of files changed. A left click on a filechange item will open a diff between the original and patched file versions. A right-click allows opening either the original or changed file versions (as applicable) without the diffing visual noise.
 - **commands**: new VS Code command to refresh the list of Radicle Patches ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
 - **ux:** convert existing flows with series of user input steps into a bespoke, cohesive experience indicating total step count and completion progress, allow editing of already submitted answers of the same flow, as well reveal-toggling of typed-in passwords, among other improvements ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 - **auth:** additionally show the alias associated with a Radicle identitifier whenever showing the latter ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))

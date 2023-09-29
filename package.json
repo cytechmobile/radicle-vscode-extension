@@ -111,11 +111,38 @@
         "title": "Copy Patch Identifier to Clipboard",
         "shortTitle": "Copy id",
         "category": "Radicle",
-        "icon": "$(copy)",
-        "enablement": "view == patches-view && viewItem == patch"
+        "icon": "$(copy)"
+      },
+      {
+        "command": "radicle.openOriginalVersionOfPatchedFile",
+        "title": "Open Original Version",
+        "shortTitle": "Open Original",
+        "category": "Radicle",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "radicle.openChangedVersionOfPatchedFile",
+        "title": "Open Changed Version",
+        "shortTitle": "Open Changed",
+        "category": "Radicle",
+        "icon": "$(go-to-file)"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "radicle.copyPatchId",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openOriginalVersionOfPatchedFile",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openChangedVersionOfPatchedFile",
+          "when": "false"
+        }
+      ],
       "scm/title": [
         {
           "command": "radicle.sync",
@@ -145,8 +172,14 @@
           "group": "inline"
         },
         {
-          "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem == patch"
+          "command": "radicle.openOriginalVersionOfPatchedFile",
+          "when": "view == patches-view && viewItem =~ /filechange:(deleted|modified)/",
+          "group": "contextMenu.diff@1"
+        },
+        {
+          "command": "radicle.openChangedVersionOfPatchedFile",
+          "when": "view == patches-view && viewItem =~ /filechange:(added|modified)/",
+          "group": "contextMenu.diff@2"
         }
       ],
       "submenu-scm-radicle": [

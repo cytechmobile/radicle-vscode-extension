@@ -24,40 +24,43 @@ const bullet = '•'
 // - each Patch item in the Patches view can now be expanded
 //   - shows a sub-list of the files changed in the latest Revision of that Patch when compared to the Revision base commit
 //   - the files are sorted by directory first and then by filename
-// - each file item in the changed-files list
+// - each filechange item in the list
 //   - shows the filename
-//   - shows the path to the filename if that changeset contains multiple files with the same name
-//   - automatically uses the File Icon matching that file according to the user's selected File Icon Theme in VS Code settings (if any)
-// - on file item hover a tooltip is shown
+//   - shows the path to the filename if that Patch contains multiple changed files with the same name
+//   - automatically uses the File Icon matching that file according to the user's selected File Icon Theme set in VS Code settings (if any)
+// - on filechange item hover a tooltip is shown
 //   - with the relative path starting from project root (including the filename)
 //   - with the kind of change that this file had (e.g. `added`, `modified`, `moved`, etc)
 //   - if the file was `moved` or `copied` then both the `oldPath` and `newPath` are shown with an arrow between them
-// - on file item click an editor opens showing the diff between the file's version in the latest revision of that Patch and the version in that revision's base. (works only for "added" and "modified" FilechangeKinds)
+// - on filechange item left-click an editor opens showing the diff between the file's version in the latest revision of that Patch and the version in that revision's base.
+// - on filechange item right-click the context menu has
+//   - a command to "Open Original Version" available only to items with filechange kinds "deleted" or "modified"
+//   - a command to "Open Changed Version" available only to items with filechange kinds "added" or "modified"
 // - the Patches view title-bar has a new "Collapse All Items in Patches View" button to the right of the refresh button
 // - the Command Palette has a new command to "Collapse All Items in Patches View"
 // OTHER DONE tasks
 // - copy of all commands is now (consistently) in Title Case as per the VS Code UX Guidelines
 
 // TODO tasks
+// TODO: maninak update readme and changelog regarding file diff
+// TODO: maninak check what happens when diffing non-text file like images
 // TODO: maninak compare with master by default and with revision.base on right-click
-// TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
-// TODO: maninak show `+${A} ~${M} -${D}` (colored) on the tooltip of each Patch treeitem
-// TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
-// TODO: maninak add checkbox next to each item which on hover shows tooltip "Mark file as viewed". A check should be keyed to each `revision.id+file.resolvedPath`. Sync state across vscode instances.
-// TODO: maninak prefix each Patch item description with `✓` (or put on the far right as icon) if branch is checked out and in tooltip with `(✓ Current Branch)`.
 // TODO: maninak add button to "diff against default project branch" (try to name it! e.g. master) button on fileTreeItem
 // TODO: maninak if patch is not merged diff against current master (if possible), else against latestRevision.base
-// TODO: maninak open the diff editor in read-only (opening a diff of an old commit via the native git plugin shows "Editor is read-only because the file system of the file is read-only." which means we could perhaps have the files in-memory instead of using temp files??! Maybe this is related https://github.com/microsoft/vscode-extension-samples/tree/69333818a412353487f0f445a80a36dcb7b6c2ab/source-control-sample or maybe a URI with custom scheme https://code.visualstudio.com/api/extension-guides/virtual-documents#textdocumentcontentprovider)
+// TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
+// TODO: maninak show lines added | removed on changefile item tooltip
+// TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
+// TODO: maninak add checkbox next to each item which on hover shows tooltip "Mark file as viewed". A check should be keyed to each `revision.id+file.resolvedPath`. Sync state across vscode instances. Add a config to toggle showing it.
+// TODO: maninak prefix each Patch item description with `✓` (or put on the far right as icon) if branch is checked out and in tooltip with `(✓ Current Branch)`.
+// TODO: maninak open the diff editor in read-only (opening a diff of an old commit via the native git plugin shows "Editor is read-only because the file system of the file is read-only." which means we could perhaps have the files in-memory instead of using temp files??! Maybe this is related https://github.com/microsoft/vscode-extension-samples/tree/69333818a412353487f0f445a80a36dcb7b6c2ab/source-control-sample or maybe a URI with custom scheme https://code.visualstudio.com/api/extension-guides/virtual-documents#textdocumentcontentprovider) or by making a Repository https://stackoverflow.com/questions/54952188/showing-differences-from-vs-code-source-control-extension/54986747#54986747
 // TODO: maninak show Gravatar or stable randomly generated avatar (use the one from `radilce-interface`) on Patch list item tooltip. Prefix PR name with status e.g. `Draft •` or `[Draft]`. Add a new `radicle.patches.icon` config with options [`Status icon`, `Gr(avatar)`, `None`] https://github.com/microsoft/vscode-pull-request-github/blob/d53cc2e3f22d47cc009a686dc56f1827dda4e897/src/view/treeNodes/pullRequestNode.ts#L315
-// TODO: maninak add button to `Open Modified File`
-// TODO: maninak add button when holding `alt` to `Open Modified File to the Side`
-// TODO: maninak add command on right click to "Open Modified File"
-// TODO: maninak add command on right click to "Open Original File"
 // TODO: maninak make a new ticket to create a new expandable level of all Revisions inside a Patch and outside the files list. Expanding the Patch should auto-expand the most recent revision. Expanding a revision should collapse all other revisions of a Patch. On right-click there should be an option to "Open Diff since Revision..." and show a list of all revisions of this Patch for the user to select one. On selection open diff with that as base On right-click there should be an option to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base. If both of the above are implemented, then make a sublist "Open Changes since" with the above as sub-items.
 
-interface FilechangeNode {
-  resolvedPath: string
+export interface FilechangeNode {
   filename: string
+  relativeInRepoUrl: string
+  oldVersionUrl?: string
+  newVersionUrl?: string
   enableShowingPathInDescription: () => void
   getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
 }
@@ -77,12 +80,12 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
       const edgeRevisions = getFirstAndLatestRevisions(elem)
       const treeItem: TreeItem = {
         id: elem.id,
+        contextValue: 'patch',
         iconPath: getThemeIconForPatch(elem),
         label: elem.title,
         description: getPatchTreeItemDescription(elem, edgeRevisions),
         tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
-        contextValue: 'patch',
-        collapsibleState: TreeItemCollapsibleState.Expanded, // TODO: maninak restore to `Collapsed` by default except if branch is checked out
+        collapsibleState: TreeItemCollapsibleState.Collapsed, // TODO: maninak restore to `Collapsed` by default except if branch is checked out
       }
 
       return treeItem
@@ -151,21 +154,23 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     // get children of patch
     else if (isPatch(elem)) {
       const { latestRevision } = getFirstAndLatestRevisions(elem)
-      const { data: diffResponse, error } = await fetchFromHttpd(
-        `/projects/${rid}/diff/${latestRevision.base}/${latestRevision.oid}`,
-      )
+      const oldVersionCommitSha = latestRevision.base
+      const newVersionCommitSha = latestRevision.oid
 
+      const { data: diffResponse, error } = await fetchFromHttpd(
+        `/projects/${rid}/diff/${oldVersionCommitSha}/${newVersionCommitSha}`,
+      )
       if (error) {
         return ['Patch details could not be resolved due to an error!']
       }
 
       // create a placeholder empty file used to diff added or removed files
-      const tempFileLocationPrefix = `${tmpdir()}${sep}radicle`
-      const emptyFileLocation = `${tempFileLocationPrefix}${sep}empty`
+      const tempFileUrlPrefix = `${tmpdir()}${sep}radicle`
+      const emptyFileUrl = `${tempFileUrlPrefix}${sep}empty`
 
       try {
-        await fs.mkdir(Path.dirname(emptyFileLocation), { recursive: true })
-        await fs.writeFile(emptyFileLocation, '')
+        await fs.mkdir(Path.dirname(emptyFileUrl), { recursive: true })
+        await fs.writeFile(emptyFileUrl, '')
       } catch (error) {
         log(
           "Failed saving placeholder empty file to enable diff for Patch's changed files.",
@@ -187,8 +192,16 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
           ['added', 'deleted', 'modified'] satisfies FileChangeKindWithSourceFileAvailable[]
         ).flatMap((filechangeKind) =>
           diffResponse.diff[filechangeKind].map((filechange) => {
-            const fileLocation = Path.dirname(filechange.path)
+            const fileDir = Path.dirname(filechange.path)
             const filename = Path.basename(filechange.path)
+
+            const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+              oldVersionCommitSha,
+            )}${sep}${fileDir}${sep}${filename}`
+            // TODO: maninak should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
+            const newVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+              newVersionCommitSha,
+            )}${sep}${fileDir}${sep}${filename}`
 
             let shouldShowPathInDescription = false
             function enableShowingPathInDescription() {
@@ -196,17 +209,12 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
             }
 
             const node: FilechangeNode = {
-              resolvedPath: filechange.path,
               filename,
+              relativeInRepoUrl: filechange.path,
+              oldVersionUrl,
+              newVersionUrl,
               enableShowingPathInDescription,
               getTreeItem: async () => {
-                const oldVersionFileLocation = `${tempFileLocationPrefix}${sep}${shortenHash(
-                  latestRevision.base,
-                )}${sep}${fileLocation}${sep}${filename}`
-                const newVersionFileLocation = `${tempFileLocationPrefix}${sep}${shortenHash(
-                  latestRevision.oid,
-                )}${sep}${fileLocation}${sep}${filename}`
-
                 // TODO: maninak consider how to clean up httpd types so that infering those is easier or move them to the types file
                 type AddedFileChange = Unarray<(typeof diffResponse)['diff']['added']>
                 type DeletedFileChange = Unarray<(typeof diffResponse)['diff']['deleted']>
@@ -215,40 +223,40 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
                 try {
                   switch (filechangeKind) {
-                    // TODO: maninak do all other cases too!
+                    // TODO: maninak verify "deleted" works, do all other cases too and refactor!
                     case 'added':
-                      await fs.mkdir(Path.dirname(newVersionFileLocation), {
+                      await fs.mkdir(Path.dirname(newVersionUrl), {
                         recursive: true,
                       })
                       await fs.writeFile(
-                        newVersionFileLocation,
+                        newVersionUrl,
                         diffResponse.files[(filechange as AddedFileChange).new.oid]
                           ?.content as FileContent,
                       )
                       break
                     case 'deleted':
-                      await fs.mkdir(Path.dirname(oldVersionFileLocation), {
+                      await fs.mkdir(Path.dirname(oldVersionUrl), {
                         recursive: true,
                       })
                       await fs.writeFile(
-                        oldVersionFileLocation,
+                        oldVersionUrl,
                         diffResponse.files[(filechange as DeletedFileChange).old.oid]
                           ?.content as FileContent,
                       )
                       break
                     case 'modified':
                       await Promise.all([
-                        fs.mkdir(Path.dirname(oldVersionFileLocation), { recursive: true }),
-                        fs.mkdir(Path.dirname(newVersionFileLocation), { recursive: true }),
+                        fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
+                        fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
                       ])
                       await Promise.all([
                         fs.writeFile(
-                          oldVersionFileLocation,
+                          oldVersionUrl,
                           diffResponse.files[(filechange as ModifiedFileChange).old.oid]
                             ?.content as FileContent,
                         ),
                         fs.writeFile(
-                          newVersionFileLocation,
+                          newVersionUrl,
                           diffResponse.files[(filechange as ModifiedFileChange).new.oid]
                             ?.content as FileContent,
                         ),
@@ -259,38 +267,39 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
                   }
                 } catch (error) {
                   log(
-                    "Failed saving temp files to enable diff for Patch's changed files.",
+                    `Failed saving temp files to enable diff for ${filechange.path}.`,
                     'error',
                     (error as Partial<Error | undefined>)?.message,
                   )
                 }
 
                 const filechangeTreeItem: TreeItem = {
-                  id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.path}`,
+                  id: `${elem.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.path}`,
+                  contextValue: `filechange:${filechangeKind}`,
                   label: filename,
-                  description: shouldShowPathInDescription ? fileLocation : undefined,
+                  description: shouldShowPathInDescription ? fileDir : undefined,
                   tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
                     filechangeKind,
                   )}`,
                   resourceUri: Uri.file(filechange.path),
                   command: {
-                    command: 'vscode.diff',
+                    command: 'radicle.openDiff',
                     title: `Open changes`,
                     tooltip: `Show this file's changes between its \
 before-the-Patch version and its latest version committed in the Radicle Patch`,
                     arguments: [
                       Uri.file(
                         (filechange as Partial<ModifiedFileChange>).old?.oid
-                          ? oldVersionFileLocation
-                          : emptyFileLocation,
+                          ? oldVersionUrl
+                          : emptyFileUrl,
                       ),
                       Uri.file(
                         (filechange as Partial<ModifiedFileChange>).new?.oid
-                          ? newVersionFileLocation
-                          : emptyFileLocation,
+                          ? newVersionUrl
+                          : emptyFileUrl,
                       ),
-                      `${filename} (${shortenHash(latestRevision.base)} ⟷ ${shortenHash(
-                        latestRevision.oid,
+                      `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
+                        newVersionCommitSha,
                       )}) ${capitalizeFirstLetter(filechangeKind)}`,
                       { preview: true } satisfies TextDocumentShowOptions,
                     ],
@@ -315,12 +324,12 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
               }
 
               const node: FilechangeNode = {
-                resolvedPath: filechange.newPath,
                 filename,
+                relativeInRepoUrl: filechange.newPath,
                 enableShowingPathInDescription,
                 getTreeItem: () =>
                   ({
-                    id: `${elem.id} ${latestRevision.base}..${latestRevision.oid} ${filechange.newPath}`,
+                    id: `${elem.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.newPath}`,
                     label: filename,
                     description: shouldShowPathInDescription
                       ? Path.dirname(filechange.newPath)
@@ -348,7 +357,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
 
           return filechangeNode
         })
-        .sort((n1, n2) => n1.resolvedPath.localeCompare(n2.resolvedPath))
+        .sort((n1, n2) => n1.relativeInRepoUrl.localeCompare(n2.relativeInRepoUrl))
 
       return filechangeNodes
     }
