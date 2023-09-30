@@ -277,7 +277,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
                   id: `${elem.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.path}`,
                   contextValue: `filechange:${filechangeKind}`,
                   label: filename,
-                  description: shouldShowPathInDescription ? fileDir : undefined,
+                  description: shouldShowPathInDescription ? true : undefined,
                   tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
                     filechangeKind,
                   )}`,
