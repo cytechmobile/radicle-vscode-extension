@@ -41,7 +41,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 ### Patches View
 
-<img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-huge.png" height="500">
+<img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-diff.png"  style="height: 500px; width: auto;">
 
 ### Integrated Authentication
 
@@ -87,7 +87,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 ### Troubleshooting Flow
 
-<img src="./assets/for-md/troubleshoot.png" alt="Troubleshooting Flow" style="max-height:150px;" height="150">
+<img src="./assets/for-md/troubleshoot.png" alt="Troubleshooting Flow" style="max-height:150px;"  style="height: 150px; width: auto;">
 
 ### Configurable
 
