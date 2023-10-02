@@ -24,6 +24,7 @@ const bullet = '•'
 // - each Patch item in the Patches view can now be expanded
 //   - shows a sub-list of the files changed in the latest Revision of that Patch when compared to the Revision base commit
 //   - the files are sorted by directory first and then by filename
+//   - a hint to the user as to why there are no filechanges, if that's the case
 // - each filechange item in the list
 //   - shows the filename
 //   - shows the path to the filename if that Patch contains multiple changed files with the same name
@@ -44,15 +45,12 @@ const bullet = '•'
 // TODO tasks
 // TODO: maninak update readme and changelog regarding file diff
 // TODO: maninak check what happens when diffing non-text file like images
-// TODO: maninak compare with master by default and with revision.base on right-click
-// TODO: maninak add button to "diff against default project branch" (try to name it! e.g. master) button on fileTreeItem
-// TODO: maninak if patch is not merged diff against current master (if possible), else against latestRevision.base
 // TODO: maninak as first treeItem if an expanded patch show files changed `+${A} ~${M} -${D}` (colored) and/or lines changed
 // TODO: maninak show lines added | removed on changefile item tooltip
 // TODO: maninak show M or A or D (colored!) at the right-most side of each file treeitem signifying modified, added or deleted
 // TODO: maninak add checkbox next to each item which on hover shows tooltip "Mark file as viewed". A check should be keyed to each `revision.id+file.resolvedPath`. Sync state across vscode instances. Add a config to toggle showing it.
 // TODO: maninak prefix each Patch item description with `✓` (or put on the far right as icon) if branch is checked out and in tooltip with `(✓ Current Branch)`.
-// TODO: maninak open the diff editor in read-only (opening a diff of an old commit via the native git plugin shows "Editor is read-only because the file system of the file is read-only." which means we could perhaps have the files in-memory instead of using temp files??! Maybe this is related https://github.com/microsoft/vscode-extension-samples/tree/69333818a412353487f0f445a80a36dcb7b6c2ab/source-control-sample or maybe a URI with custom scheme https://code.visualstudio.com/api/extension-guides/virtual-documents#textdocumentcontentprovider) or by making a Repository https://stackoverflow.com/questions/54952188/showing-differences-from-vs-code-source-control-extension/54986747#54986747
+// TODO: maninak open the diff editor using the actual path and in unchangeable read-only (opening a diff of an old commit via the native git plugin shows "Editor is read-only because the file system of the file is read-only." which means we could perhaps have the files in-memory instead of using temp files??! Maybe this is related https://github.com/microsoft/vscode-extension-samples/tree/69333818a412353487f0f445a80a36dcb7b6c2ab/source-control-sample or maybe a URI with custom scheme https://code.visualstudio.com/api/extension-guides/virtual-documents#textdocumentcontentprovider) or by making a Repository https://stackoverflow.com/questions/54952188/showing-differences-from-vs-code-source-control-extension/54986747#54986747
 // TODO: maninak show Gravatar or stable randomly generated avatar (use the one from `radilce-interface`) on Patch list item tooltip. Prefix PR name with status e.g. `Draft •` or `[Draft]`. Add a new `radicle.patches.icon` config with options [`Status icon`, `Gr(avatar)`, `None`] https://github.com/microsoft/vscode-pull-request-github/blob/d53cc2e3f22d47cc009a686dc56f1827dda4e897/src/view/treeNodes/pullRequestNode.ts#L315
 // TODO: maninak make a new ticket to create a new expandable level of all Revisions inside a Patch and outside the files list. Expanding the Patch should auto-expand the most recent revision. Expanding a revision should collapse all other revisions of a Patch. On right-click there should be an option to "Open Diff since Revision..." and show a list of all revisions of this Patch for the user to select one. On selection open diff with that as base On right-click there should be an option to "Open Changes since Commit..." and show a selection list of all commits on that revisions up until one marked "base". On selection open diff with that as base. If both of the above are implemented, then make a sublist "Open Changes since" with the above as sub-items.
 
@@ -223,7 +221,6 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
                 try {
                   switch (filechangeKind) {
-                    // TODO: maninak verify "deleted" works, do all other cases too and refactor!
                     case 'added':
                       await fs.mkdir(Path.dirname(newVersionUrl), {
                         recursive: true,
@@ -359,7 +356,13 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
         })
         .sort((n1, n2) => n1.relativeInRepoUrl.localeCompare(n2.relativeInRepoUrl))
 
-      return filechangeNodes
+      return filechangeNodes.length
+        ? filechangeNodes
+        : [
+            `No changes between latest revision's base "${shortenHash(
+              latestRevision.base,
+            )}" and head "${shortenHash(latestRevision.oid)}"`,
+          ]
     }
 
     return undefined
