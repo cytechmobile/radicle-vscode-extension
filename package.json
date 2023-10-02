@@ -47,7 +47,7 @@
     "commands": [
       {
         "command": "radicle.sync",
-        "title": "Synchronize local and network changes",
+        "title": "Synchronize Local and Network Changes",
         "shortTitle": "Sync",
         "category": "Radicle",
         "icon": "$(rad-sync)",
@@ -55,7 +55,7 @@
       },
       {
         "command": "radicle.fetch",
-        "title": "Fetch latest changes from the network",
+        "title": "Fetch Latest Changes from the Network",
         "shortTitle": "Fetch",
         "category": "Radicle",
         "icon": "$(rad-pull)",
@@ -63,7 +63,7 @@
       },
       {
         "command": "radicle.announce",
-        "title": "Announce local changes to the network",
+        "title": "Announce Local Changes to the Network",
         "shortTitle": "Announce",
         "category": "Radicle",
         "icon": "$(rad-push)",
@@ -71,28 +71,36 @@
       },
       {
         "command": "radicle.clone",
-        "title": "Clone a Radicle project as a local git repo",
+        "title": "Clone a Radicle Project Locally",
         "shortTitle": "Clone",
         "category": "Radicle",
         "icon": "$(rad-clone)"
       },
       {
         "command": "radicle.showExtensionLog",
-        "title": "Show everything the extension has logged in the Output Panel",
+        "title": "Show Everything Logged in the Output Panel",
         "shortTitle": "Extension log",
         "category": "Radicle",
         "icon": "$(output)"
       },
       {
         "command": "radicle.deAuthCurrentIdentity",
-        "title": "De-authenticate / re-lock the currently used Radicle identity",
+        "title": "De-authenticate / Re-lock the Currently Used Radicle Identity",
         "shortTitle": "De-auth",
         "category": "Radicle",
         "icon": "$(sign-out)"
       },
       {
+        "command": "radicle.collapsePatches",
+        "title": "Collapse All Items in Patches View",
+        "shortTitle": "Collapse Patches",
+        "category": "Radicle",
+        "icon": "$(collapse-all)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
         "command": "radicle.refreshPatches",
-        "title": "Refresh Patches list",
+        "title": "Refresh Patches View",
         "shortTitle": "Refresh Patches",
         "category": "Radicle",
         "icon": "$(refresh)",
@@ -100,14 +108,41 @@
       },
       {
         "command": "radicle.copyPatchId",
-        "title": "Copy Patch identifier to clipboard",
+        "title": "Copy Patch Identifier to Clipboard",
         "shortTitle": "Copy id",
         "category": "Radicle",
-        "icon": "$(copy)",
-        "enablement": "view == patches-view && viewItem == patch"
+        "icon": "$(copy)"
+      },
+      {
+        "command": "radicle.openOriginalVersionOfPatchedFile",
+        "title": "Open Original Version",
+        "shortTitle": "Open Original",
+        "category": "Radicle",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "radicle.openChangedVersionOfPatchedFile",
+        "title": "Open Changed Version",
+        "shortTitle": "Open Changed",
+        "category": "Radicle",
+        "icon": "$(go-to-file)"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "radicle.copyPatchId",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openOriginalVersionOfPatchedFile",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openChangedVersionOfPatchedFile",
+          "when": "false"
+        }
+      ],
       "scm/title": [
         {
           "command": "radicle.sync",
@@ -119,6 +154,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "radicle.collapsePatches",
+          "when": "view == patches-view",
+          "group": "navigation@1"
+        },
         {
           "command": "radicle.refreshPatches",
           "when": "view == patches-view",
@@ -132,8 +172,14 @@
           "group": "inline"
         },
         {
-          "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem == patch"
+          "command": "radicle.openOriginalVersionOfPatchedFile",
+          "when": "view == patches-view && viewItem =~ /filechange:(deleted|modified)/",
+          "group": "contextMenu.diff@1"
+        },
+        {
+          "command": "radicle.openChangedVersionOfPatchedFile",
+          "when": "view == patches-view && viewItem =~ /filechange:(added|modified)/",
+          "group": "contextMenu.diff@2"
         }
       ],
       "submenu-scm-radicle": [

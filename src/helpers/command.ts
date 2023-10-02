@@ -1,7 +1,8 @@
-import { commands, window } from 'vscode'
+import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
 import { getExtensionContext } from '../store'
-import { exec, showLog } from '../utils'
+import { exec, log, showLog } from '../utils'
 import {
+  type FilechangeNode,
   copyToClipboardAndNotifify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
@@ -86,10 +87,55 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
   registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
+  registerVsCodeCmd('radicle.collapsePatches', () => {
+    commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
+  })
   registerVsCodeCmd('radicle.refreshPatches', () => {
     patchesRefreshEventEmitter.fire(undefined)
   })
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
     typeof patch?.id === 'string' && (await copyToClipboardAndNotifify(patch.id))
   })
+  registerVsCodeCmd(
+    'radicle.openDiff',
+    async (
+      original: Uri,
+      changed: Uri,
+      label: string,
+      columnOrOptions: number | TextDocumentShowOptions,
+    ) => {
+      await commands.executeCommand('vscode.diff', original, changed, label, columnOrOptions)
+      commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+    },
+  )
+  registerVsCodeCmd(
+    'radicle.openOriginalVersionOfPatchedFile',
+    async (node: FilechangeNode | undefined) => {
+      if (node?.oldVersionUrl) {
+        await commands.executeCommand('vscode.open', Uri.file(node.oldVersionUrl))
+        commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+      } else {
+        log(
+          'Failed opening editor with old version of patched file.',
+          'error',
+          `Error: Command "radicle.openOriginalVersionOfPatchedFile" was called with wrong "node" param value.`,
+        )
+      }
+    },
+  )
+  registerVsCodeCmd(
+    'radicle.openChangedVersionOfPatchedFile',
+    async (node: FilechangeNode | undefined) => {
+      if (node?.newVersionUrl) {
+        await commands.executeCommand('vscode.open', Uri.file(node.newVersionUrl))
+        commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+      } else {
+        log(
+          'Failed opening editor with changed version of patched file.',
+          'error',
+          `Error: Command "radicle.openChangedVersionOfPatchedFile" was called with wrong "node" param value.`,
+        )
+      }
+    },
+  )
 }

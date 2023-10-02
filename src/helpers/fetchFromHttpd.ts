@@ -1,6 +1,6 @@
 import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import type { XOR } from 'ts-xor'
-import type { HttpdRoot, Patch, PatchStatus, Project } from '../types'
+import type { DiffResponse, HttpdRoot, Patch, PatchStatus, Project } from '../types'
 import { log } from '../utils'
 import { getConfig } from './config'
 
@@ -88,6 +88,12 @@ export async function fetchFromHttpd(
   body?: object,
   options?: object,
 ): FetchFromHttpdReturn<Patch[]>
+export async function fetchFromHttpd<RevBase extends string, RevOid extends string>(
+  path: `/projects/rad:${string}/diff/${RevBase}/${RevOid}`,
+  method?: 'GET',
+  body?: object,
+  options?: object,
+): FetchFromHttpdReturn<DiffResponse>
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}`,
   method?: 'GET',
