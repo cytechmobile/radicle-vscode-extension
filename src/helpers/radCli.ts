@@ -187,7 +187,7 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
  * @returns The RID if resolved, otherwise `undefined`.
  */
 export function getRepoId(): `rad:${string}` | undefined {
-  const maybeRid = exec(`${getRadCliRef()} inspect --id`, { cwd: '$workspaceDir' })
+  const maybeRid = exec(`${getRadCliRef()} inspect --rid`, { cwd: '$workspaceDir' })
 
   function isStrARid(str: string | undefined): str is `rad:${string}` {
     return Boolean(str?.startsWith('rad:'))
