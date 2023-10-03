@@ -4,7 +4,7 @@
 
 ### 🩹 Fixes
 
-- **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change that resulted in Patches View to get stuck with `Unable to fetch Radicle Patches for non-Radicle-initialized workspace`.
+- **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change, resulting in Patches View getting stuck with `Unable to fetch Radicle Patches for non-Radicle-initialized workspace`. ([#90](https://github.com/cytechmobile/radicle-vscode-extension/issues/90))
 
 -----
 
