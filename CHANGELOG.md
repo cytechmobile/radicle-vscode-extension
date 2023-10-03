@@ -1,5 +1,13 @@
 # Radicle VS Code Extension Change Log
 
+## **v0.3.1** (Oct 3rd, 2023)
+
+### 🩹 Fixes
+
+- **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change that resulted in Patches View to get stuck with `Unable to fetch Radicle Patches for non-Radicle-initialized workspace`.
+
+-----
+
 ## **v0.3.0** (Oct 2nd, 2023)
 
 ### ✨ Highlights
