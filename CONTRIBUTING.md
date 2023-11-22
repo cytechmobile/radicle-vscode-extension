@@ -25,7 +25,7 @@ Run the `Develop Extension` configuration in the "Run and Debug" View. This will
 
 ## Package Management
 
-We use [`pnpm`](https://pnpm.io/motivation) for node package management (but don't worry, if you use an npm or yarn command by mistake there are fail-safes in place to save you from messing up).
+We use [`pnpm`](https://pnpm.io/motivation) for node package management (f you use npm or yarn by mistake, no worries, there are fail-safes in place to save you from breaking something).
 
 >Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
 
