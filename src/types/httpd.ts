@@ -5,11 +5,8 @@ import type { ArrayMinLength } from '.'
 /**
  * Decentralized Identifier, commonly used for Radicle Identities
  */
-export type Did = `did:key:${string}`[]
+export type Did = `did:key:${string}`
 
-/**
- * a.k.a. RID
- */
 export interface RadicleIdentity {
   id: Did
   alias: string

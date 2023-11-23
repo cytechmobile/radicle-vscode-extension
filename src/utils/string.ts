@@ -1,7 +1,10 @@
+import type { Did, RadicleIdentity } from '../types'
+
 /**
  * Truncates a string, if needed, replacing its middle chars with an ellipses (`…`).
+ *
  * @param {string} str The string to potentialy truncate
- * @default 8
+ * @default 12
  * @param {number} maxTotalCharsToShow The count of maximmum total chars
  * that`str` can have (excluding the ellipses). If `str` is longer than that number,
  * it will be truncated.
@@ -9,7 +12,7 @@
  * `Math.floor(maxTotalCharsToShow/2)` count of original chars and an ellipses in the middle.
  * Otherwise, the original `str`.
  */
-export function truncateMiddle(str: string, maxTotalCharsToShow: number = 8): string {
+export function truncateMiddle(str: string, maxTotalCharsToShow: number = 12): string {
   if (str.length <= maxTotalCharsToShow) {
     return str
   }
@@ -53,4 +56,40 @@ export function shortenHash(hash: string): string {
  */
 export function capitalizeFirstLetter(str: string): string {
   return `${str.charAt(0).toUpperCase()}${str.slice(1)}`
+}
+
+/**
+ * Truncates a Radicle Identity id's hash, replacing its middle chars with an ellipses (`…`).
+ * @param {Did} did The string to potentialy truncate
+ * @default 8
+ * @param {number} maxTotalCharsToShow The count of maximmum total chars
+ * that`str` can have (excluding the ellipses). If `str` is longer than that number,
+ * it will be truncated.
+ * @returns If truncated, the `str` the beginning and ending of which will contain
+ * `Math.floor(maxTotalCharsToShow/2)` count of original chars and an ellipses in the middle.
+ * Otherwise, the original `str`.
+ */
+
+/**
+ * Truncates a Radicle Identity id's hash, replacing its middle chars with an ellipses (`…`).
+ *
+ * @param {Did} did
+ * @return {Did} `did` truncated
+ */
+export function truncateDid(did: Did): Did {
+  const matchDidHashRegex = /(did:key:)(.*)/
+  const didPrefix = did.match(matchDidHashRegex)?.[1]
+  const nid = did.match(matchDidHashRegex)?.[2] as string
+
+  const truncatedDid = `${didPrefix}${truncateMiddle(nid)}`
+
+  return truncatedDid as Did
+}
+
+/**
+ * Resolves the alias of a Radicle identity if it exists, otherwise a truncated version of
+ * the identity's identifier.
+ */
+export function getIdentityAliasOrId(identity: RadicleIdentity): string {
+  return identity.alias ?? truncateDid(identity.id)
 }

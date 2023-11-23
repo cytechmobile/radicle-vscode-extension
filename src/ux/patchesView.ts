@@ -24,6 +24,7 @@ import {
   assertUnreachable,
   capitalizeFirstLetter,
   getCurrentGitBranch,
+  getIdentityAliasOrId,
   log,
   memoizeWithDebouncedCacheClear,
   shortenHash,
@@ -365,9 +366,12 @@ function getPatchTreeItemDescription(
   patch: Patch,
   { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
 ) {
-  const description = `${getTimeAgo(latestRevision.timestamp, 'mini-minute-now')} ${bullet} ${
-    latestRevision.author.alias
-  } ${bullet} ${shortenHash(patch.id)}`
+  const description = `${getTimeAgo(
+    latestRevision.timestamp,
+    'mini-minute-now',
+  )} ${bullet} ${getIdentityAliasOrId(latestRevision.author)} ${bullet} ${shortenHash(
+    patch.id,
+  )}`
 
   return description
 }
@@ -401,12 +405,12 @@ function getPatchTreeItemTooltip(
   const tooltipBottomSection = [
     ...(patch.revisions.length > 1
       ? [
-          `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
+          `Last revised by ${dat(getIdentityAliasOrId(latestRevision.author))} on ${dat(
             getFormattedDate(latestRevision.timestamp),
           )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
         ]
       : []),
-    `Created by ${dat(patch.author.alias)} on ${dat(
+    `Created by ${dat(getIdentityAliasOrId(patch.author))} on ${dat(
       getFormattedDate(firstRevision.timestamp),
     )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
   ].join(lineBreak)
