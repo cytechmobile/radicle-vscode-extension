@@ -1,5 +1,13 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🚀 Enhancements
+
+- **patches:** use new better-fitting icon for merged patches
+
+-----
+
 ## **v0.3.1** (Oct 3rd, 2023)
 
 ### 🩹 Fixes

@@ -437,7 +437,7 @@ function getThemeIconForPatch(patch: Patch): ThemeIcon {
     case 'archived':
       return new ThemeIcon('git-pull-request-closed', new ThemeColor('patch.archived'))
     case 'merged':
-      return new ThemeIcon('merge', new ThemeColor('patch.merged'))
+      return new ThemeIcon('git-merge', new ThemeColor('patch.merged'))
     default:
       assertUnreachable(patch.state.status)
   }
