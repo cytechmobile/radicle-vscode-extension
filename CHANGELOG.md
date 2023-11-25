@@ -4,7 +4,10 @@
 
 ### 🚀 Enhancements
 
-- **patches:** use new better-fitting icon for merged patches
+- **patches:** show a button to check out a Radicle Patch's asossiated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - show an indicator on the Patch's title and tooltip if its asossiated branch is the currently checked out git branch
+  - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
+- **patches:** use new better-fitting icon for merged patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
 -----
 

@@ -1,4 +1,5 @@
-import { assertUnreachable, exec } from '../utils'
+import { assertUnreachable, exec, getCurrentGitBranch, shortenHash } from '../utils'
+import type { Patch } from '../types'
 import {
   getConfig,
   getResolvedPathToNodeHome,
@@ -194,6 +195,17 @@ export function getRepoId(): `rad:${string}` | undefined {
   }
 
   return isStrARid(maybeRid) ? maybeRid : undefined
+}
+
+/**
+ * Answers whether the associated branch of the provided radicle `patch` is the
+ * currenctly checked out git branch.
+ */
+export function isPatchCheckedOut(patch: Pick<Patch, 'id'>): boolean {
+  const branchName = getCurrentGitBranch()
+  const isCheckedOut = Boolean(branchName?.includes(shortenHash(patch.id)))
+
+  return isCheckedOut
 }
 
 /**

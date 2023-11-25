@@ -14,11 +14,12 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { fetchFromHttpd, getRepoId } from '../helpers'
+import { fetchFromHttpd, getRepoId, isPatchCheckedOut } from '../helpers'
 import { type Patch, type Unarray, isPatch } from '../types'
 import { assertUnreachable, capitalizeFirstLetter, log, shortenHash } from '../utils'
 
 const bullet = '•'
+const checkmark = '✓'
 
 export interface FilechangeNode {
   filename: string
@@ -41,12 +42,13 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     if (typeof elem === 'string') {
       return { description: elem }
     } else if (isPatch(elem)) {
+      const isCheckedOut = isPatchCheckedOut(elem)
       const edgeRevisions = getFirstAndLatestRevisions(elem)
       const treeItem: TreeItem = {
         id: elem.id,
-        contextValue: 'patch',
+        contextValue: `patch:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(elem),
-        label: elem.title,
+        label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${elem.title}`,
         description: getPatchTreeItemDescription(elem, edgeRevisions),
         tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
         collapsibleState: TreeItemCollapsibleState.Collapsed,
@@ -344,14 +346,18 @@ function getPatchTreeItemTooltip(
   patch: Patch,
   { firstRevision, latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
 ) {
-  const emDash = '—'
+  const separator = '—'
   const lineBreak = '\n\n'
   const sectionDivider = `${lineBreak}-----${lineBreak}`
+
+  const isCheckedOut = isPatchCheckedOut(patch)
+    ? dat(`${separator} ${checkmark} Checked out`)
+    : ''
 
   const tooltipTopSection = [
     `${getHtmlIconForPatch(patch)} ${dat(
       capitalizeFirstLetter(patch.state.status),
-    )} ${emDash} ${dat(patch.id)}`,
+    )} ${separator} ${dat(patch.id)} ${isCheckedOut}`,
   ].join(lineBreak)
 
   const tooltipMiddleSection = [

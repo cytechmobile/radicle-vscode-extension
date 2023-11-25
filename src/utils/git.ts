@@ -12,12 +12,24 @@ export function isGitRepo(): boolean {
 }
 
 /**
- * Gets the root directory of the git repo of the opened workspace folder.
- *
- * @returns the path to the root directory or `undefined` if not found.
+ * Resolves the root directory of the git repo of the opened workspace folder.
  */
 export function getRepoRoot(): string | undefined {
   const gitRepoRootDir = exec('git rev-parse --show-toplevel', { cwd: '$workspaceDir' })
 
   return gitRepoRootDir
+}
+
+/**
+ * Resolves the current branch name if in a Git repository.
+ *
+ * @example
+ * ```ts
+ * getCurrentGitBranch() // 'feat/75_checkout-patch'
+ * ```
+ */
+export function getCurrentGitBranch(): string | undefined {
+  const currentBranch = exec('git rev-parse --abbrev-ref HEAD', { cwd: '$workspaceDir' })
+
+  return currentBranch
 }
