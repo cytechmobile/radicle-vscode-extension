@@ -345,7 +345,7 @@
         "id": "patch.draft",
         "defaults": {
           "dark": "#8999a8",
-          "light": "#768390",
+          "light": "#75828f",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -364,8 +364,8 @@
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "#e5534b",
-          "light": "#cf4c45",
+          "dark": "#eb554d",
+          "light": "#c74942",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
