@@ -20,6 +20,10 @@
 - **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patches:** improved the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
+### 📖 Documentation
+
+- **contributing:** document how to package locally from source and import into VS Code
+
 -----
 
 ## **v0.3.1** (Oct 3rd, 2023)
