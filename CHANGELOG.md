@@ -1,5 +1,32 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🚀 Enhancements
+
+- **patches:** show a button to check out a Radicle Patch's asossiated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - show an indicator on the Patch's title and tooltip if its asossiated branch is the currently checked out git branch
+  - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
+
+### 🔥 Performance
+
+- **app:** heavily speed up most procedures by memoizing the resolution of the reference to the rad CLI ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patches:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - measured ~50x faster against a real-world Project with >50 Patches, with the benefit increasing proportionally with the count of Patches on a project
+
+### 🩹 Fixes
+
+- **patches:** fall back to showing their DID if the revision author's alias isn't defined
+- **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patches:** improved the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+
+### 📖 Documentation
+
+- **contributing:** document how to package locally from source and import into VS Code
+- fix some screenshots that were getting stretched to incorrect ratios
+
+-----
+
 ## **v0.3.1** (Oct 3rd, 2023)
 
 ### 🩹 Fixes
@@ -14,7 +41,7 @@
 
 - New Patches view
 
-    <img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-diff.png" style="height: 350px; width: auto;">
+    ![screenshot of Radicle Patches view](./assets/for-md/patches-diff.png)
 
 ### 🚀 Enhancements
 

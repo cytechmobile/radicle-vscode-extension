@@ -3,6 +3,7 @@ import { getExtensionContext } from '../store'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
+  checkoutPatch,
   copyToClipboardAndNotifify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
@@ -93,6 +94,7 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.refreshPatches', () => {
     patchesRefreshEventEmitter.fire(undefined)
   })
+  registerVsCodeCmd('radicle.checkoutPatch', checkoutPatch)
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
     typeof patch?.id === 'string' && (await copyToClipboardAndNotifify(patch.id))
   })

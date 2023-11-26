@@ -107,6 +107,13 @@
         "enablement": "radicle.isRadInitialized"
       },
       {
+        "command": "radicle.checkoutPatch",
+        "title": "Check Out Patch Branch",
+        "shortTitle": "Check Out",
+        "category": "Radicle",
+        "icon": "$(check)"
+      },
+      {
         "command": "radicle.copyPatchId",
         "title": "Copy Patch Identifier to Clipboard",
         "shortTitle": "Copy id",
@@ -130,6 +137,10 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "radicle.checkoutPatch",
+          "when": "false"
+        },
         {
           "command": "radicle.copyPatchId",
           "when": "false"
@@ -167,8 +178,13 @@
       ],
       "view/item/context": [
         {
+          "command": "radicle.checkoutPatch",
+          "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
+          "group": "inline"
+        },
+        {
           "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem == patch",
+          "when": "view == patches-view && viewItem =~ /patch/",
           "group": "inline"
         },
         {
@@ -329,7 +345,7 @@
         "id": "patch.draft",
         "defaults": {
           "dark": "#8999a8",
-          "light": "#768390",
+          "light": "#75828f",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -348,8 +364,8 @@
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "#e5534b",
-          "light": "#cf4c45",
+          "dark": "#eb554d",
+          "light": "#c74942",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
         },
@@ -407,12 +423,14 @@
   },
   "dependencies": {
     "javascript-time-ago": "^2.5.9",
+    "lodash": "^4.17.21",
     "ofetch": "^1.2.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/javascript-time-ago": "^2.0.4",
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
     "esbuild": "^0.18.17",

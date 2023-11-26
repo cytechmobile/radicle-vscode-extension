@@ -5,7 +5,11 @@ import {
   isGitRepo,
   setWhenClauseContext,
 } from '../utils'
-import { notifyUserRadCliNotResolvedAndMaybeTroubleshoot } from '../ux'
+import {
+  notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
+  patchesRefreshEventEmitter,
+} from '../ux'
+import { getExtensionContext } from '../store'
 import { isRadCliInstalled, isRadInitialized } from '.'
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
@@ -24,6 +28,8 @@ function watchFileNotInWorkspace(
   watcher.onDidCreate(handler)
   watcher.onDidChange(handler)
   watcher.onDidDelete(handler)
+
+  getExtensionContext().subscriptions.push(watcher)
 }
 
 interface WatchFileNotInWorkspaceParam {
@@ -37,7 +43,8 @@ const notInWorkspaceFileWatchers = [
       new RelativePattern(
         // `getRepoRoot()` will return undefined if user opens the extension on
         // a non-git-initialized folder, pointing our watcher to the wrong path.
-        // We're doing a best effort using the first workspace folder instead.
+        // We're doing a best effort using the first workspace folder instead
+        // in case it is created later.
         Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'config',
       ),
@@ -47,6 +54,20 @@ const notInWorkspaceFileWatchers = [
       if (!isRadCliInstalled() && !isRadInitialized() && isGitRepo()) {
         notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
       }
+    },
+  },
+  {
+    glob: () =>
+      new RelativePattern(
+        // `getRepoRoot()` will return undefined if user opens the extension on
+        // a non-git-initialized folder, pointing our watcher to the wrong path.
+        // We're doing a best effort using the first workspace folder instead
+        // in case it is created later.
+        Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
+        'HEAD',
+      ),
+    handler: () => {
+      patchesRefreshEventEmitter.fire(undefined)
     },
   },
   (() => {

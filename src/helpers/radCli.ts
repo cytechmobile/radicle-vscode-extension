@@ -1,4 +1,4 @@
-import { assertUnreachable, exec } from '../utils'
+import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../utils'
 import {
   getConfig,
   getResolvedPathToNodeHome,
@@ -7,13 +7,11 @@ import {
 } from '.'
 
 /**
- * Resolves a reference to Radicle CLI to be used for executing shell commands.
+ * Non-debounced variant of `getRadCliRef()`.
  *
- * @returns Either the path to the `rad` binary defined manually by the user via
- * config, or otherwise just the string `"rad"`
- * @throws If the reference to the Radicle Cli binary was not resolved successfully
+ * @see {@link getRadCliRef()} for more info
  */
-export function getRadCliRef(): string {
+export function getRadCliRefNow(): string {
   const configPathToNodeHome = getConfig('radicle.advanced.pathToNodeHome')
   const envPathToNodeHome = configPathToNodeHome && `RAD_HOME=${configPathToNodeHome}`
   const envVars = [envPathToNodeHome]
@@ -30,6 +28,26 @@ export function getRadCliRef(): string {
   const radCliRefWithEnvVars = `${parsedEnvVars}${radCliRef}`
 
   return radCliRefWithEnvVars
+}
+const {
+  memoizedFunc: memoizedGetRadCliRef,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetRadCliRefCache,
+} = memoizeWithDebouncedCacheClear(getRadCliRefNow, 1_000)
+
+/**
+ * Resolves a reference to Radicle CLI to be used for executing shell commands.
+ *
+ * Debounced!
+ *
+ * @returns Either the path to the `rad` binary defined manually by the user via
+ * config, or otherwise just the string `"rad"`
+ * @throws If the reference to the Radicle Cli binary was not resolved successfully
+ */
+export function getRadCliRef() {
+  debouncedClearMemoizedGetRadCliRefCache()
+  const cliRef = memoizedGetRadCliRef()
+
+  return cliRef
 }
 
 /**
@@ -195,6 +213,10 @@ export function getRepoId(): `rad:${string}` | undefined {
 
   return isStrARid(maybeRid) ? maybeRid : undefined
 }
+export const {
+  memoizedFunc: memoizedGetRepoId,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedgetRepoIdCache,
+} = memoizeWithDebouncedCacheClear(getRepoId, 10_000)
 
 /**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved

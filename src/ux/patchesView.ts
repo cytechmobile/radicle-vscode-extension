@@ -14,11 +14,24 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { fetchFromHttpd, getRepoId } from '../helpers'
+import {
+  debouncedClearMemoizedgetRepoIdCache,
+  fetchFromHttpd,
+  memoizedGetRepoId,
+} from '../helpers'
 import { type Patch, type Unarray, isPatch } from '../types'
-import { assertUnreachable, capitalizeFirstLetter, log, shortenHash } from '../utils'
+import {
+  assertUnreachable,
+  capitalizeFirstLetter,
+  getCurrentGitBranch,
+  getIdentityAliasOrId,
+  log,
+  memoizeWithDebouncedCacheClear,
+  shortenHash,
+} from '../utils'
 
 const bullet = '•'
+const checkmark = '✓'
 
 export interface FilechangeNode {
   filename: string
@@ -41,14 +54,16 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     if (typeof elem === 'string') {
       return { description: elem }
     } else if (isPatch(elem)) {
+      const isCheckedOut = isPatchCheckedOut(elem)
       const edgeRevisions = getFirstAndLatestRevisions(elem)
+
       const treeItem: TreeItem = {
         id: elem.id,
-        contextValue: 'patch',
+        contextValue: `patch:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(elem),
-        label: elem.title,
+        label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${elem.title}`,
         description: getPatchTreeItemDescription(elem, edgeRevisions),
-        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
+        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions, isCheckedOut),
         collapsibleState: TreeItemCollapsibleState.Collapsed,
       }
 
@@ -64,7 +79,8 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     }
   },
   getChildren: async (elem) => {
-    const rid = getRepoId()
+    debouncedClearMemoizedgetRepoIdCache()
+    const rid = memoizedGetRepoId()
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
@@ -329,13 +345,33 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
 } as const
 
+const {
+  memoizedFunc: memoizedGetCurrentGitBranch,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentGitBranchCache,
+} = memoizeWithDebouncedCacheClear(getCurrentGitBranch, 200)
+
+/**
+ * Answers whether the associated branch of the provided radicle `patch` is the
+ * currenctly checked out git branch.
+ */
+function isPatchCheckedOut(patch: Pick<Patch, 'id'>): boolean {
+  debouncedClearMemoizedGetCurrentGitBranchCache()
+  const branchName = memoizedGetCurrentGitBranch()
+  const isCheckedOut = Boolean(branchName?.includes(shortenHash(patch.id)))
+
+  return isCheckedOut
+}
+
 function getPatchTreeItemDescription(
   patch: Patch,
   { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
 ) {
-  const description = `${getTimeAgo(latestRevision.timestamp, 'mini-minute-now')} ${bullet} ${
-    latestRevision.author.alias
-  } ${bullet} ${shortenHash(patch.id)}`
+  const description = `${getTimeAgo(
+    latestRevision.timestamp,
+    'mini-minute-now',
+  )} ${bullet} ${getIdentityAliasOrId(latestRevision.author)} ${bullet} ${shortenHash(
+    patch.id,
+  )}`
 
   return description
 }
@@ -343,15 +379,18 @@ function getPatchTreeItemDescription(
 function getPatchTreeItemTooltip(
   patch: Patch,
   { firstRevision, latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
+  isCheckedOut: boolean,
 ) {
-  const emDash = '—'
+  const separator = '—'
   const lineBreak = '\n\n'
   const sectionDivider = `${lineBreak}-----${lineBreak}`
+
+  const checkedOutIndicator = isCheckedOut ? dat(`${separator} ${checkmark} Checked out`) : ''
 
   const tooltipTopSection = [
     `${getHtmlIconForPatch(patch)} ${dat(
       capitalizeFirstLetter(patch.state.status),
-    )} ${emDash} ${dat(patch.id)}`,
+    )} ${separator} ${dat(patch.id)} ${checkedOutIndicator}`,
   ].join(lineBreak)
 
   const tooltipMiddleSection = [
@@ -366,12 +405,12 @@ function getPatchTreeItemTooltip(
   const tooltipBottomSection = [
     ...(patch.revisions.length > 1
       ? [
-          `Last revised by ${dat(latestRevision.author.alias)} on ${dat(
+          `Last revised by ${dat(getIdentityAliasOrId(latestRevision.author))} on ${dat(
             getFormattedDate(latestRevision.timestamp),
           )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
         ]
       : []),
-    `Created by ${dat(patch.author.alias)} on ${dat(
+    `Created by ${dat(getIdentityAliasOrId(patch.author))} on ${dat(
       getFormattedDate(firstRevision.timestamp),
     )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
   ].join(lineBreak)
@@ -437,7 +476,7 @@ function getThemeIconForPatch(patch: Patch): ThemeIcon {
     case 'archived':
       return new ThemeIcon('git-pull-request-closed', new ThemeColor('patch.archived'))
     case 'merged':
-      return new ThemeIcon('merge', new ThemeColor('patch.merged'))
+      return new ThemeIcon('git-merge', new ThemeColor('patch.merged'))
     default:
       assertUnreachable(patch.state.status)
   }

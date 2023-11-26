@@ -23,6 +23,16 @@ Run the `Develop Extension` configuration in the "Run and Debug" View. This will
 
 >Tip: Or just press `F5` to achieve the same thing.
 
+## Package locally from source
+
+After cloning run in your terminal:
+
+```sh
+npx vsce package --no-dependencies
+```
+
+This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` +  "install vsix").
+
 ## Package Management
 
 We use [`pnpm`](https://pnpm.io/motivation) for node package management (f you use npm or yarn by mistake, no worries, there are fail-safes in place to save you from breaking something).
