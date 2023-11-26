@@ -16,7 +16,7 @@
 
 ### 🩹 Fixes
 
-- **patches:** fall back to showing their DID if the revision author's alias isn't defined
+- **patches:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patches:** improved the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
