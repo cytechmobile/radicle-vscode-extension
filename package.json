@@ -108,10 +108,10 @@
       },
       {
         "command": "radicle.checkoutPatch",
-        "title": "Checkout Patch Branch",
-        "shortTitle": "Checkout Patch",
+        "title": "Check Out Patch Branch",
+        "shortTitle": "Check Out",
         "category": "Radicle",
-        "icon": "$(arrow-right)"
+        "icon": "$(check)"
       },
       {
         "command": "radicle.copyPatchId",
