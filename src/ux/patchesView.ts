@@ -14,9 +14,16 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { fetchFromHttpd, getRepoId, isPatchCheckedOut } from '../helpers'
+import { fetchFromHttpd, getRepoId } from '../helpers'
 import { type Patch, type Unarray, isPatch } from '../types'
-import { assertUnreachable, capitalizeFirstLetter, log, shortenHash } from '../utils'
+import {
+  assertUnreachable,
+  capitalizeFirstLetter,
+  getCurrentGitBranch,
+  log,
+  memoizeWithDebouncedCacheClear,
+  shortenHash,
+} from '../utils'
 
 const bullet = '•'
 const checkmark = '✓'
@@ -44,13 +51,14 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     } else if (isPatch(elem)) {
       const isCheckedOut = isPatchCheckedOut(elem)
       const edgeRevisions = getFirstAndLatestRevisions(elem)
+
       const treeItem: TreeItem = {
         id: elem.id,
         contextValue: `patch:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(elem),
         label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${elem.title}`,
         description: getPatchTreeItemDescription(elem, edgeRevisions),
-        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions),
+        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions, isCheckedOut),
         collapsibleState: TreeItemCollapsibleState.Collapsed,
       }
 
@@ -331,6 +339,23 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
   onDidChangeTreeData: patchesRefreshEventEmitter.event,
 } as const
 
+const {
+  memoizedFunc: memoizedGetCurrentGitBranch,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentGitBranchCache,
+} = memoizeWithDebouncedCacheClear(getCurrentGitBranch, 200)
+
+/**
+ * Answers whether the associated branch of the provided radicle `patch` is the
+ * currenctly checked out git branch.
+ */
+function isPatchCheckedOut(patch: Pick<Patch, 'id'>): boolean {
+  debouncedClearMemoizedGetCurrentGitBranchCache()
+  const branchName = memoizedGetCurrentGitBranch()
+  const isCheckedOut = Boolean(branchName?.includes(shortenHash(patch.id)))
+
+  return isCheckedOut
+}
+
 function getPatchTreeItemDescription(
   patch: Patch,
   { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
@@ -345,19 +370,18 @@ function getPatchTreeItemDescription(
 function getPatchTreeItemTooltip(
   patch: Patch,
   { firstRevision, latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
+  isCheckedOut: boolean,
 ) {
   const separator = '—'
   const lineBreak = '\n\n'
   const sectionDivider = `${lineBreak}-----${lineBreak}`
 
-  const isCheckedOut = isPatchCheckedOut(patch)
-    ? dat(`${separator} ${checkmark} Checked out`)
-    : ''
+  const checkedOutIndicator = isCheckedOut ? dat(`${separator} ${checkmark} Checked out`) : ''
 
   const tooltipTopSection = [
     `${getHtmlIconForPatch(patch)} ${dat(
       capitalizeFirstLetter(patch.state.status),
-    )} ${separator} ${dat(patch.id)} ${isCheckedOut}`,
+    )} ${separator} ${dat(patch.id)} ${checkedOutIndicator}`,
   ].join(lineBreak)
 
   const tooltipMiddleSection = [
