@@ -1,4 +1,4 @@
-import { assertUnreachable, exec } from '../utils'
+import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../utils'
 import {
   getConfig,
   getResolvedPathToNodeHome,
@@ -195,6 +195,10 @@ export function getRepoId(): `rad:${string}` | undefined {
 
   return isStrARid(maybeRid) ? maybeRid : undefined
 }
+export const {
+  memoizedFunc: memoizedGetRepoId,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedgetRepoIdCache,
+} = memoizeWithDebouncedCacheClear(getRepoId, 10_000)
 
 /**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved

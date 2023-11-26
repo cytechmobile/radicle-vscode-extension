@@ -14,7 +14,11 @@ import {
 } from 'vscode'
 import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
-import { fetchFromHttpd, getRepoId } from '../helpers'
+import {
+  debouncedClearMemoizedgetRepoIdCache,
+  fetchFromHttpd,
+  memoizedGetRepoId,
+} from '../helpers'
 import { type Patch, type Unarray, isPatch } from '../types'
 import {
   assertUnreachable,
@@ -74,7 +78,8 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
     }
   },
   getChildren: async (elem) => {
-    const rid = getRepoId()
+    debouncedClearMemoizedgetRepoIdCache()
+    const rid = memoizedGetRepoId()
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
