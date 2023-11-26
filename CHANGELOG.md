@@ -4,9 +4,11 @@
 
 ### 🚀 Enhancements
 
-- **patches:** show a button to check out a Radicle Patch's asossiated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-  - show an indicator on the Patch's title and tooltip if its asossiated branch is the currently checked out git branch
+- **patches:** show a button to check out a Radicle Patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - show an indicator on the Patch's title and tooltip if its associated branch is the currently checked-out git branch
   - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
+  - notify user of uncommitted changes when trying to check out a Patch
+  - don't show check-out-button for the currently checked-out Patch on the list
 
 ### 🔥 Performance
 
