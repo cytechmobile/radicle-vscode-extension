@@ -23,6 +23,7 @@
 ### 📖 Documentation
 
 - **contributing:** document how to package locally from source and import into VS Code
+- fix some screenshots that were getting stretched to incorrect ratios
 
 -----
 
@@ -40,7 +41,7 @@
 
 - New Patches view
 
-    <img alt="screenshot of Radicle Patches view" src="./assets/for-md/patches-diff.png" style="height: 350px; width: auto;">
+    ![screenshot of Radicle Patches view](./assets/for-md/patches-diff.png)
 
 ### 🚀 Enhancements
 
