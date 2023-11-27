@@ -12,22 +12,22 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](CHANGELOG.md)._
 
-- 🖲️ [Execute Radicle Commands](#integrated-radicle-commands) right from your IDE. Use whichever of the multiple integrated ways fits your workflow best.
-- 📋 [Patches View](#patches-view) offers a quick glance at the status of code changes in your project
+- 🖲️ [Radicle Commands](#integrated-radicle-commands) everywhere you need them
+- 📋 [Patches View](#patches-view) offers a glance at the status of code changes in your project
 - 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
 - 📥 [Cloning](#cloning) of tracked Radicle projects
-- 🗺️ [Onboarding Flow](#onboarding-flow) with tips specialized to whichever state your Workspace is in when starting out
+- 🗺️ [Onboarding Flow](#onboarding-flow) with tips tuned to whichever state your Workspace is in when starting out
 - 🕵️‍♂️ [Troubleshooting Flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
 - 🎛️ [Configurable](#configurable) via VS Code's native Settings
-- 📜 [Integrated Logging](#integrated-logging) including Radicle command output
+- 📜 [Integrated Logging](#integrated-logging) including Radicle CLI's command output
 
 ### Integrated Radicle Commands
 
-- Execute common Radicle commands with dedicated buttons from within the main extension View
+- Run common Radicle commands with dedicated buttons from within the main extension View
 
     ![Buttons to execute Radicle commands in the main extension View](assets/for-md/rad-cmds-in-main-view.png)
 
-- Execute Radicle commands from within VS Code's Command Palette
+- Run Radicle commands from within VS Code's Command Palette
 
     ![Execute Radicle commands from within VS Code's Command Palette](assets/for-md/rad-cmds-in-palette.png)
 
@@ -40,6 +40,8 @@ A VS Code extension bringing support for the Radicle network to your IDE.
     ![Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
 
 ### Patches View
+
+Browse Radicle Patches, check out their associated git branches and inspect their file changes and diffs.
 
 ![screenshot of Radicle Patches view](./assets/for-md/patches-diff.png)
 
