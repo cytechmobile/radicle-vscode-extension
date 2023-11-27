@@ -9,18 +9,16 @@
   - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
   - notify user of uncommitted changes when trying to check out a Patch
   - don't show check-out-button for the currently checked-out Patch on the list
+- **patches:** use a hint-text that radicle-httpd may not be running as the placeholder in Patches list, if that seems the case
+- **patches:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patches:** improve the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
 ### 🔥 Performance
 
 - **app:** heavily speed up most procedures by memoizing the resolution of the reference to the rad CLI ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patches:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
   - measured ~50x faster against a real-world Project with >50 Patches, with the benefit increasing proportionally with the count of Patches on a project
-
-### 🩹 Fixes
-
-- **patches:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patches:** improved the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
 ### 📖 Documentation
 

@@ -104,12 +104,15 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
           query: { state: 'merged' },
         }),
       ])
-      const errorOccured = Boolean(responses.find((response) => response.error))
+      const errors = responses.map((response) => response.error).filter(Boolean)
       const patches = responses.flatMap((response) => response.data).filter(Boolean)
 
-      if (errorOccured) {
-        return ['Not all patches may be listed due to an error!', ...patches]
+      if (errors.length) {
+        return errors.length === responses.length
+          ? ['Please ensure "radicle-httpd" is running and accessible!']
+          : ['Not all patches may be listed due to an error!', ...patches]
       }
+
       if (!patches.length) {
         return [`0 Radicle Patches found`]
       }
