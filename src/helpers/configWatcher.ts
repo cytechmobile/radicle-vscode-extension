@@ -1,6 +1,6 @@
 import { workspace } from 'vscode'
 import {
-  patchesRefreshEventEmitter,
+  refreshPatchesEventEmitter,
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
@@ -39,6 +39,7 @@ const configWatchers = [
     onChangeCallback: () => {
       // no need to notify since we check AND notify on rad command execution
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
+      refreshPatchesEventEmitter.fire(undefined)
     },
   },
   {
@@ -46,7 +47,7 @@ const configWatchers = [
     onChangeCallback: () => {
       resetHttpdConnection()
       validateHttpdConnection()
-      patchesRefreshEventEmitter.fire(undefined)
+      refreshPatchesEventEmitter.fire(undefined)
     },
   },
 ] satisfies OnConfigChangeParam[]

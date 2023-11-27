@@ -55,7 +55,7 @@ export async function notifyUserAboutFetchError(error: FetchError): Promise<void
   if (error?.message.includes('ECONNREFUSED')) {
     userSelection = await window.showErrorMessage(
       `Failed establishing connection with Radicle HTTP API at "${requestUrl}". \
-      Please ensure that "radicle-httpd" is already running, that it is accessible from \
+      Please ensure that \`radicle-httpd\` is already running, that it is accessible from \
       your network and that the address to the API's root endpoint is correctly set \
       in the extension's settings.`,
       buttonSettings,

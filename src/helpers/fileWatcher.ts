@@ -7,7 +7,7 @@ import {
 } from '../utils'
 import {
   notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
-  patchesRefreshEventEmitter,
+  refreshPatchesEventEmitter,
 } from '../ux'
 import { getExtensionContext } from '../store'
 import { isRadCliInstalled, isRadInitialized } from '.'
@@ -67,7 +67,7 @@ const notInWorkspaceFileWatchers = [
         'HEAD',
       ),
     handler: () => {
-      patchesRefreshEventEmitter.fire(undefined)
+      refreshPatchesEventEmitter.fire(undefined)
     },
   },
   (() => {

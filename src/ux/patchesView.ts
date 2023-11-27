@@ -45,7 +45,7 @@ export interface FilechangeNode {
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.
  */
-export const patchesRefreshEventEmitter = new EventEmitter<
+export const refreshPatchesEventEmitter = new EventEmitter<
   string | Patch | (string | Patch)[] | undefined
 >()
 
@@ -109,7 +109,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
       if (errors.length) {
         return errors.length === responses.length
-          ? ['Please ensure "radicle-httpd" is running and accessible!']
+          ? ['Please ensure `radicle-httpd` is running and accessible!']
           : ['Not all patches may be listed due to an error!', ...patches]
       }
 
@@ -345,7 +345,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
 
     return undefined
   },
-  onDidChangeTreeData: patchesRefreshEventEmitter.event,
+  onDidChangeTreeData: refreshPatchesEventEmitter.event,
 } as const
 
 const {

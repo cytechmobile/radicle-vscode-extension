@@ -7,7 +7,7 @@ import {
   copyToClipboardAndNotifify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
-  patchesRefreshEventEmitter,
+  refreshPatchesEventEmitter,
   selectAndCloneRadicleProject,
 } from '../ux'
 import type { Patch } from '../types'
@@ -92,7 +92,7 @@ export function registerAllCommands(): void {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
   registerVsCodeCmd('radicle.refreshPatches', () => {
-    patchesRefreshEventEmitter.fire(undefined)
+    refreshPatchesEventEmitter.fire(undefined)
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkoutPatch)
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
