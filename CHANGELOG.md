@@ -2,6 +2,8 @@
 
 ## _(WIP, yet unreleased version)_
 
+## **v0.3.2** (Nov 29th, 2023)
+
 ### 🚀 Enhancements
 
 - **patches:** show a button to check out a Radicle Patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
