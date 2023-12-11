@@ -33,11 +33,12 @@
     "prepare": "husky install",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
     "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
-    "build": "esbuild ./src/extension.ts --bundle --minify --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
-    "dev": "npm run verify-deps && tsc --watch --sourceMap",
+    "compile": "node ./esbuild.js",
+    "build": "NODE_ENV=production npm run compile",
+    "dev": "npm run verify-deps && npm run compile -- --watch",
     "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
-    "test": "npm run test:smoke && npm run test:unit && npm run test:e2e",
-    "test:smoke": "tsc --noEmit",
+    "test": "npm run test:typings && npm run test:unit && npm run test:e2e",
+    "test:typings": "tsc --noEmit",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
     "test:e2e": "echo \"End-to-end testing not yet implemented.\""
   },
@@ -429,6 +430,7 @@
     "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
     "javascript-time-ago": "^2.5.9",
     "lodash": "^4.17.21",
     "ofetch": "^1.2.1"
@@ -440,7 +442,7 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
-    "esbuild": "^0.18.17",
+    "esbuild": "^0.19.9",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.9.0",
     "eslint-plugin-prettier-vue": "^4.2.0",

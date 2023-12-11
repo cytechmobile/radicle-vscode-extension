@@ -1,0 +1,15 @@
+{
+  // Please make sure you have the following extensions installed and
+  // enabled *for this workspace*
+  "recommendations": [
+    "DavidAnson.vscode-markdownlint",
+    "wayou.vscode-todo-highlight",
+    "dbaeumer.vscode-eslint",
+    "vivaxy.vscode-conventional-commits",
+    "connor4312.esbuild-problem-matchers",
+  ],
+  // Please make sure you disable the following extensions *for this workspace*
+  "unwantedRecommendations": [
+    "esbenp.prettier-vscode",
+  ]
+}

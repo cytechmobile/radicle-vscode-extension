@@ -7,7 +7,7 @@
       "type": "npm",
       "script": "dev",
       "detail": "Launch extension for local development in a new (host) VS Code window.",
-      "problemMatcher": "$tsc-watch",
+      "problemMatcher": "$esbuild-watch",
       "isBackground": true,
       "presentation": { "reveal": "silent" },
       "group": {
