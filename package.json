@@ -42,7 +42,9 @@
     "test:e2e": "echo \"End-to-end testing not yet implemented.\""
   },
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onWebviewPanel:radicle-patch-detail-view"
+  ],
   "contributes": {
     "commands": [
       {

@@ -1,13 +1,12 @@
 import {
   type ExtensionContext,
-  Uri,
   ViewColumn,
   type WebviewOptions,
   type WebviewPanel,
   commands,
   window,
 } from 'vscode'
-import { getExtensionContext, initExtensionContext } from './store'
+import { initExtensionContext } from './store'
 import {
   logExtensionActivated,
   registerAllCommands,
@@ -40,35 +39,43 @@ export function activate(ctx: ExtensionContext) {
     }),
   )
 
-  const viewType = 'radicle-patch-detail-view'
-  const webviewOptions: WebviewOptions = {
-    enableScripts: true,
-    localResourceRoots: [Uri.joinPath(getExtensionContext().extensionUri, 'assets')],
+  // Persist state across restarts. See https://code.visualstudio.com/api/extension-guides/webview#serialization
+  // ctx.subscriptions.push(
+  //   window.registerWebviewPanelSerializer(viewType, {
+  //     deserializeWebviewPanel: async (panel: WebviewPanel, state: unknown) => {
+  //       currentPanel = panel
+  //       // `state` is the state persisted using `setState` inside the webview
+  //       console.log(`Got state: ${state}`)
+  //       // panel.webview.html = getWebviewHtml(state)
+  //     },
+  //   }),
+  // )
+}
+
+const viewType = 'radicle-patch-detail-view'
+const webviewOptions: WebviewOptions = {
+  enableScripts: true,
+  // localResourceRoots: [Uri.joinPath(getExtensionContext().extensionUri, 'assets')], // TODO: maninak uncomment
+}
+
+let panel: WebviewPanel | undefined
+
+function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
+  const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
+
+  // If we already have a panel, show it
+  if (panel) {
+    panel.reveal(column)
+
+    return
   }
 
-  let panel: WebviewPanel | undefined
+  // Otherwise, create a new panel
+  panel = window.createWebviewPanel(viewType, title, column || ViewColumn.One, webviewOptions)
 
-  function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
-    const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
-
-    // If we already have a panel, show it
-    if (panel) {
-      panel.reveal(column)
-
-      return
-    }
-
-    // Otherwise, create a new panel
-    panel = window.createWebviewPanel(
-      viewType,
-      title,
-      column || ViewColumn.One,
-      webviewOptions,
-    )
-
-    const allowedSource = panel.webview.cspSource
-    const nonce = getNonce()
-    panel.webview.html = `
+  const allowedSource = panel.webview.cspSource
+  const nonce = getNonce()
+  panel.webview.html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -113,33 +120,19 @@ export function activate(ctx: ExtensionContext) {
       </html>
     `
 
-    // Called whenever a webview's visibility changes, or is moved into a new column
-    // TODO: maninak save current state (e.g. value of any <input> elems) and try to restore on next createOrShowWebview()
-    // panel.onDidChangeViewState()
+  // Called whenever a webview's visibility changes, or is moved into a new column
+  // TODO: maninak save current state (e.g. value of any <input> elems) and try to restore on next createOrShowWebview() see https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
+  // panel.onDidChangeViewState()
 
-    panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
+  panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
+}
+
+function getNonce() {
+  let text = ''
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
 
-  function getNonce() {
-    let text = ''
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    for (let i = 0; i < 32; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length))
-    }
-
-    return text
-  }
-
-  // if (window.registerWebviewPanelSerializer) {
-  //   // TODO: maninak  add memory of serializer to disposables
-  //   // Make sure we register a serializer in activation event
-  //   window.registerWebviewPanelSerializer(viewType, {
-  //     async deserializeWebviewPanel(webviewPanel: WebviewPanel, state: any) {
-  //       console.log(`Got state: ${state}`)
-  //       // Reset the webview options so we use latest uri for `localResourceRoots`.
-  //       webviewPanel.webview.options = webviewOptions
-  //       revive(webviewPanel, ctx.extensionUri)
-  //     },
-  //   })
-  // }
+  return text
 }
