@@ -46,6 +46,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "radicle.test-webview",
+        "title": "Open dat webview",
+        "category": "Radicle"
+      },
+      {
         "command": "radicle.sync",
         "title": "Synchronize Local and Network Changes",
         "shortTitle": "Sync",
