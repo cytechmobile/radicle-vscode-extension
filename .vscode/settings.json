@@ -27,7 +27,8 @@
     "contributing",
     "httpd",
     "patches",
-    "cli"
+    "cli",
+    "webview"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
