@@ -17,5 +17,5 @@
     "incremental": true,
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
   },
-  "exclude": ["node_modules", "dist", ".vscode-test"],
+  "exclude": ["node_modules", "dist", ".vscode-test", "src/webviews"],
 }

@@ -27,6 +27,7 @@ export function activate(ctx: ExtensionContext) {
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
   validateHttpdConnection({ minimizeUserNotifications: true })
 
+  // TODO: maninak remove or obfuscate?
   ctx.subscriptions.push(
     commands.registerCommand('radicle.test-webview', () => {
       createOrShowWebview(ctx)
@@ -35,7 +36,7 @@ export function activate(ctx: ExtensionContext) {
 
   // Persist state across restarts. See https://code.visualstudio.com/api/extension-guides/webview#serialization
   // ctx.subscriptions.push(
-  //   window.registerWebviewPanelSerializer(patchDetailViewId, {
+  //   window.registerWebviewPanelSerializer(webviewId, {
   //     deserializeWebviewPanel: async (panel: WebviewPanel, state: unknown) => {
   //       currentPanel = panel
   //       // `state` is the state persisted using `setState` inside the webview

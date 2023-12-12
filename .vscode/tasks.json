@@ -7,7 +7,7 @@
       "type": "npm",
       "script": "dev",
       "detail": "Launch extension for local development in a new (host) VS Code window.",
-      "problemMatcher": "$esbuild-watch",
+      "problemMatcher": ["$esbuild-watch", "$vite"],
       "isBackground": true,
       "presentation": { "reveal": "silent" },
       "group": {
@@ -19,7 +19,7 @@
     /**
      * HACK:
      *
-     * Ideally we'd terminate a sepcific task e.g. `npm: dev`,
+     * Ideally we'd terminate a specific task e.g. `npm: dev`,
      * but this seems not feasible as of writing this (not without the user needing
      * to manually select which running task to close).
      * @see https://stackoverflow.com/questions/54480792/terminate-another-task-from-within-a-postdebugtask-vs-code

@@ -1,0 +1,36 @@
+{
+  "name": "webview",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+    "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "dev": "npm run verify-deps && npx pnpm run build-only --watch",
+    "build": "npm run verify-deps && run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build --force",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.3.10"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/jsdom": "^21.1.6",
+    "@types/node": "^18.19.2",
+    "@vitejs/plugin-vue": "^4.5.1",
+    "@vue/test-utils": "^2.4.3",
+    "@vue/tsconfig": "^0.4.0",
+    "jsdom": "^23.0.1",
+    "npm-run-all2": "^6.1.1",
+    "typescript": "~5.2.0",
+    "vite": "^5.0.5",
+    "vitest": "^1.0.1",
+    "vue-tsc": "^1.8.25"
+  }
+}

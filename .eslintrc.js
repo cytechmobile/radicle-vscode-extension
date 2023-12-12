@@ -19,6 +19,7 @@ module.exports = {
   plugins: ['unused-imports'],
   ignorePatterns: [
     'static',
+    'src/webviews',
 
     // overrides to antfu's config follow
     '!.*rc.*',
