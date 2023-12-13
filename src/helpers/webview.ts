@@ -7,7 +7,7 @@ import {
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { getNonce, getUri, log } from '../utils'
+import { assertUnreachable, getNonce, getUri } from '../utils'
 import {
   type MessageToExtension,
   type MessageToWebview,
@@ -98,11 +98,8 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
           break
         }
 
-        default: {
-          const errorMsg = 'No handler defined for received webview message'
-          console.warn(errorMsg, message)
-          log(errorMsg, 'warn', JSON.stringify(message, null, 2))
-        }
+        default:
+          assertUnreachable(message.command)
       }
     },
     undefined,

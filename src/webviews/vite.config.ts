@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       'lib': fileURLToPath(new URL('../../lib', import.meta.url)),
+      'utils': fileURLToPath(new URL('../utils', import.meta.url)),
     }
   },
   build:{
