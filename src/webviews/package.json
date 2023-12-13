@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
+    "@vueuse/core": "^10.7.0",
     "pinia": "^2.1.7",
     "vue": "^3.3.10"
   },

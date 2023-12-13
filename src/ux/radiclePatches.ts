@@ -3,7 +3,7 @@ import { getRadCliRef } from '../helpers'
 import type { Patch } from '../types'
 import { exec, log, shortenHash, showLog } from '../utils'
 
-export function checkoutPatch(patch: Patch): void {
+export function checkOutPatch(patch: Patch): void {
   const didCheckoutPatch = Boolean(
     exec(`${getRadCliRef()} patch checkout ${patch.id}`, {
       cwd: '$workspaceDir',

@@ -8,13 +8,17 @@ import {
 } from 'vscode'
 import { getExtensionContext } from '../store'
 import { getNonce, getUri, log } from '../utils'
-import type { MessageToWebviewHost } from '../webviews/lib/vscode'
+import {
+  type MessageToExtension,
+  type MessageToWebview,
+  postMessageToWebview,
+} from '../../lib/webview-messaging'
 
 export const webviewId = 'webview-patch-detail'
 
 let panel: WebviewPanel | undefined
 
-// TODO: maninak move this (and other files from helpers to "/services")
+// TODO: maninak move this (and other files from helpers to "/services" or "/providers")
 
 // TODO: maninak document
 export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
@@ -84,11 +88,15 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   // panel.onDidChangeViewState()
 
   panel.webview.onDidReceiveMessage(
-    (message: MessageToWebviewHost) => {
+    (message: MessageToExtension) => {
       switch (message.command) {
-        case 'showInfoNotification':
-          window.showInformationMessage(message.text)
+        case 'showInfoNotification': {
+          const button = 'Reset Count'
+          window.showInformationMessage(message.text, button).then((userSelection) => {
+            userSelection === button && postMsgToWebview({ command: 'resetCount' })
+          })
           break
+        }
 
         default: {
           const errorMsg = 'No handler defined for received webview message'
@@ -101,4 +109,8 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
     ctx.subscriptions,
   )
   panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
+}
+
+export function postMsgToWebview(message: MessageToWebview): void {
+  panel && postMessageToWebview(message, panel.webview)
 }

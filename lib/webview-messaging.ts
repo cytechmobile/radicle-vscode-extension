@@ -1,23 +1,31 @@
-let vscode: ReturnType<typeof acquireVsCodeApi> | undefined  = undefined
+import type { Webview } from 'vscode'
+
+let vscode: ReturnType<typeof acquireVsCodeApi> | undefined
 
 export function getVscodeRef() {
   if (vscode) {
     return vscode
   }
 
-  return vscode = acquireVsCodeApi()
+  return (vscode = acquireVsCodeApi())
 }
 
-export interface MessageToWebviewHost {
+export interface MessageToWebview {
+  command: 'resetCount'
+}
+
+export function postMessageToWebview(message: MessageToWebview, webview: Webview): void {
+  webview.postMessage(message)
+}
+
+export interface MessageToExtension {
   command: 'showInfoNotification'
   text: string
 }
 
-export function postMessageToWebviewHost(message: MessageToWebviewHost): void {
+export function postMessageToExtension(message: MessageToExtension): void {
   getVscodeRef().postMessage(message)
 }
-
-
 
 // Source: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/vscode-webview/index.d.ts
 /**
@@ -31,14 +39,14 @@ export interface WebviewApi<StateType> {
    *
    * @param message Data to post. Must be JSON serializable.
    */
-  postMessage(message: unknown): void;
+  postMessage(message: unknown): void
 
   /**
    * Get the persistent state stored for this webview.
    *
    * @return The current state or `undefined` if no state has been set.
    */
-  getState(): StateType | undefined;
+  getState(): StateType | undefined
 
   /**
    * Set the persistent state stored for this webview.
@@ -48,7 +56,7 @@ export interface WebviewApi<StateType> {
    *
    * @return The new state.
    */
-  setState<T extends StateType | undefined>(newState: T): T;
+  setState<T extends StateType | undefined>(newState: T): T
 }
 
 declare global {
@@ -60,6 +68,5 @@ declare global {
    *
    * @template StateType Type of the persisted state stored for the webview.
    */
-  // eslint-disable-next-line @definitelytyped/no-unnecessary-generics
-  function acquireVsCodeApi<StateType = unknown>(): WebviewApi<StateType>;
+  function acquireVsCodeApi<StateType = unknown>(): WebviewApi<StateType>
 }

@@ -11,11 +11,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'lib': fileURLToPath(new URL('./lib', import.meta.url)),
+      'lib': fileURLToPath(new URL('../../lib', import.meta.url)),
     }
   },
   build:{
     rollupOptions: {
+      external: ['vscode'],
       // produce predictable filenames without cache-busting SHA suffix
       output: {
         entryFileNames: `assets/[name].js`,
