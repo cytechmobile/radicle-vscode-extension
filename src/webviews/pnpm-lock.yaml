@@ -25,9 +25,6 @@ devDependencies:
   '@types/node':
     specifier: ^18.19.2
     version: 18.19.3
-  '@types/vscode-webview':
-    specifier: ^1.57.4
-    version: 1.57.4
   '@vitejs/plugin-vue':
     specifier: ^4.5.1
     version: 4.5.2(vite@5.0.7)(vue@3.3.11)
@@ -490,10 +487,6 @@ packages:
 
   /@types/tough-cookie@4.0.5:
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
-    dev: true
-
-  /@types/vscode-webview@1.57.4:
-    resolution: {integrity: sha512-RrVw9s6gBJuY1IkUHMNznWgj/ktjwLpATyOTcKxUDIbbp7AQeK7S0E1+P/8Z75OgAW13OMqSAmaiuWw25dh59Q==}
     dev: true
 
   /@vitejs/plugin-vue@4.5.2(vite@5.0.7)(vue@3.3.11):
