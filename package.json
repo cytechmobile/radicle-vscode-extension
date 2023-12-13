@@ -53,9 +53,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "radicle.test-webview",
-        "title": "Open dat webview",
-        "category": "Radicle"
+        "command": "wip-webview",
+        "title": "Open dat wip webview"
       },
       {
         "command": "radicle.sync",

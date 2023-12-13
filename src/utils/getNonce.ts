@@ -1,4 +1,7 @@
-// TODO: maninak document
+/**
+ * Returns a pseudorandom string to be used only once
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce
+ */
 export function getNonce(): string {
   let text = ''
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'

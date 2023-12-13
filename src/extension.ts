@@ -27,9 +27,9 @@ export function activate(ctx: ExtensionContext) {
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
   validateHttpdConnection({ minimizeUserNotifications: true })
 
-  // TODO: maninak remove or obfuscate?
+  // TODO: delete registration code from here and package.json when done with prototyping
   ctx.subscriptions.push(
-    commands.registerCommand('radicle.test-webview', () => {
+    commands.registerCommand('wip-webview', () => {
       createOrShowWebview(ctx)
     }),
   )

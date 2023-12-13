@@ -2,25 +2,36 @@ import {
   type ExtensionContext,
   Uri,
   ViewColumn,
+  type Webview,
   type WebviewOptions,
   type WebviewPanel,
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { assertUnreachable, getNonce, getUri } from '../utils'
+import { assertUnreachable, getNonce } from '../utils'
 import {
-  type MessageToExtension,
-  type MessageToWebview,
-  postMessageToWebview,
+  type notifyExtension,
+  notifyWebview as notifyWebviewBase,
 } from '../../lib/webview-messaging'
 
 export const webviewId = 'webview-patch-detail'
 
 let panel: WebviewPanel | undefined
 
-// TODO: maninak move this (and other files from helpers to "/services" or "/providers")
+export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']): void {
+  panel && notifyWebviewBase(message, panel.webview)
+}
 
-// TODO: maninak document
+// TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
+
+/**
+ * Opens a panel with the specified webview in the active column.
+ *
+ * If the webview is already open and visible in another column it will be moved to the active
+ * column without getting re-created.
+ *
+ * @param [title] - The title shown on the webview panel's tab
+ */
 export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
 
@@ -90,12 +101,13 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   // panel.onDidChangeViewState()
 
   panel.webview.onDidReceiveMessage(
-    (message: MessageToExtension) => {
+    (message: Parameters<typeof notifyExtension>['0']) => {
       switch (message.command) {
         case 'showInfoNotification': {
           const button = 'Reset Count'
-          window.showInformationMessage(message.text, button).then((userSelection) => {
-            userSelection === button && postMsgToWebview({ command: 'resetCount' })
+          window.showInformationMessage(message.payload.text, button).then((userSelection) => {
+            userSelection === button &&
+              notifyWebview({ command: 'resetCount', payload: undefined })
           })
           break
         }
@@ -110,6 +122,6 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
 }
 
-export function postMsgToWebview(message: MessageToWebview): void {
-  panel && postMessageToWebview(message, panel.webview)
+function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {
+  return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList))
 }
