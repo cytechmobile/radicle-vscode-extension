@@ -70,6 +70,8 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
           style-src ${allowedSource} 'unsafe-inline';
           img-src ${allowedSource} https: data:;
           script-src 'strict-dynamic' 'nonce-${nonce}' 'unsafe-inline' https:;
+          Cross-Origin-Opener-Policy: same-origin;
+          Cross-Origin-Embedder-Policy: require-corp;
         "
       >
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
