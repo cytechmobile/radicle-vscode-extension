@@ -3,12 +3,20 @@
 import { useCounterStore } from '@/stores/counter'
 import { storeToRefs } from 'pinia'
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
+import { postMessageToWebviewHost } from 'lib/vscode'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 
 const counterStore = useCounterStore()
 const { count, doubleCount } = storeToRefs(counterStore)
 const { increment } = counterStore
+
+function showInfoNotifWithCount() {
+  postMessageToWebviewHost({
+    command: "showInfoNotification",
+    text: `The count is: ${count.value}`,
+  })
+}
 </script>
 
 <template>
@@ -18,8 +26,8 @@ const { increment } = counterStore
   <div class="button-group">
     <vscode-button @click="increment">Increment</vscode-button>
     <vscode-button appearance="secondary" @click="()=> count = 0">Reset</vscode-button>
-    <vscode-button appearance="icon" @click="()=> count = 0">
-      <span class="codicon codicon-save"></span>
+    <vscode-button appearance="icon" @click="showInfoNotifWithCount">
+      <span class="codicon codicon-megaphone"></span>
     </vscode-button>
   </div>
 </template>

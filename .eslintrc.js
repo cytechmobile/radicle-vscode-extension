@@ -131,6 +131,7 @@ module.exports = {
     'max-statements-per-line': 'warn',
     'no-empty': ['warn', { allowEmptyCatch: true }],
     'no-multiple-empty-lines': ['warn', { max: 1, maxBOF: 0, maxEOF: 1 }],
+    'no-useless-return': 'warn',
 
     /*
      * Rules implemented by `@typescript-eslint` follow

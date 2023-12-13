@@ -7,7 +7,8 @@ import {
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { getNonce, getUri } from '../utils'
+import { getNonce, getUri, log } from '../utils'
+import type { MessageToWebviewHost } from '../webviews/lib/vscode'
 
 export const webviewId = 'webview-patch-detail'
 
@@ -19,14 +20,11 @@ let panel: WebviewPanel | undefined
 export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
 
-  // If we already have a panel, show it
   if (panel) {
     panel.reveal(column)
 
     return
   }
-
-  // Otherwise, create a new panel
 
   const webviewOptions: WebviewOptions = {
     enableScripts: true,
@@ -85,5 +83,22 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   // TODO: maninak save current state (e.g. value of any <input> elems) and try to restore on next createOrShowWebview() see https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
   // panel.onDidChangeViewState()
 
+  panel.webview.onDidReceiveMessage(
+    (message: MessageToWebviewHost) => {
+      switch (message.command) {
+        case 'showInfoNotification':
+          window.showInformationMessage(message.text)
+          break
+
+        default: {
+          const errorMsg = 'No handler defined for received webview message'
+          console.warn(errorMsg, message)
+          log(errorMsg, 'warn', JSON.stringify(message, null, 2))
+        }
+      }
+    },
+    undefined,
+    ctx.subscriptions,
+  )
   panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
 }
