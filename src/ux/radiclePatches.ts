@@ -26,7 +26,7 @@ export function checkoutPatch(patch: Patch): void {
     log(msg, 'error')
   }
 
-  // TODO: maninak if we ever use a proper reactive global store like pinia, where we store all
+  // TODO: if we ever use a proper reactive global store like pinia, where we store all
   // current patches, we should just do a
   // patchesRefreshEventEmitter.fire(patchesStore.patches.findById(curPatch))
   // and
