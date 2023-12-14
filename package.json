@@ -39,7 +39,7 @@
     "test": "npm run test:smoke && npm run test:unit && npm run test:e2e",
     "test:smoke": "tsc --noEmit",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
-    "test:e2e": "echo \"End-to-end testing not yet implemented.\""
+    "test:e2e": "vscode-test"
   },
   "main": "./dist/extension.js",
   "activationEvents": [],
@@ -431,8 +431,11 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/javascript-time-ago": "^2.0.4",
     "@types/lodash": "^4.14.202",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
     "esbuild": "^0.18.17",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.9.0",
