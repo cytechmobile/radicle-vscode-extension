@@ -31,7 +31,9 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
-    "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "verify-deps": "run-p -l verify-deps:*",
+    "verify-deps:extension": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "verify-deps:webviews": "cd ./src/webviews && npm run verify-deps",
     "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",

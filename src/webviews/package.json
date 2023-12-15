@@ -6,8 +6,8 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
-    "dev": "npm run verify-deps && npx pnpm run build-only --watch",
-    "build": "npm run verify-deps && run-p type-check \"build-only {@}\" --",
+    "dev": "npm run build-only --watch",
+    "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
