@@ -46,7 +46,7 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
     localResourceRoots: [
       Uri.joinPath(getExtensionContext().extensionUri, 'dist'),
       Uri.joinPath(getExtensionContext().extensionUri, 'assets'),
-      Uri.joinPath(getExtensionContext().extensionUri, 'src', 'webviews', 'dist', 'assets'),
+      Uri.joinPath(getExtensionContext().extensionUri, 'src', 'webviews', 'dist'),
     ],
   }
   panel = window.createWebviewPanel(webviewId, title, column || ViewColumn.One, webviewOptions)
@@ -81,8 +81,7 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
           style-src ${allowedSource} 'unsafe-inline';
           img-src ${allowedSource} https: data:;
           script-src 'strict-dynamic' 'nonce-${nonce}' 'unsafe-inline' https:;
-          Cross-Origin-Opener-Policy: same-origin;
-          Cross-Origin-Embedder-Policy: require-corp;
+          font-src ${allowedSource};
         "
       >
       <meta name="viewport" content="width=device-width, initial-scale=1.0">

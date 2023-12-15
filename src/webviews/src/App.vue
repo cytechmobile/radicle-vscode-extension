@@ -12,3 +12,7 @@ registerWebviewMessageHandlers()
 <template>
   <Counter/>
 </template>
+
+<style>
+@import '@/assets/codicon.css';
+</style>

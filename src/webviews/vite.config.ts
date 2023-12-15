@@ -15,7 +15,7 @@ export default defineConfig({
       'utils': fileURLToPath(new URL('../utils', import.meta.url)),
     }
   },
-  build:{
+  build: {
     rollupOptions: {
       external: ['vscode'],
       // produce predictable filenames without cache-busting SHA suffix
@@ -24,5 +24,7 @@ export default defineConfig({
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`,
       },
-  },}
+    },
+  },
+  base: '',
 })

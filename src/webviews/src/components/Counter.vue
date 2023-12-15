@@ -1,5 +1,4 @@
 <script setup lang="ts">
- // TODO: maninak fix codicon not showing
 import { useCounterStore } from '@/stores/counter'
 import { storeToRefs } from 'pinia'
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
