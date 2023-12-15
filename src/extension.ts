@@ -7,6 +7,7 @@ import {
   registerAllConfigWatchers,
   registerAllFileWatchers,
   registerAllViews,
+  registerAllWebviewRestorators,
 } from './helpers'
 import {
   validateHttpdConnection,
@@ -21,6 +22,7 @@ export function activate(ctx: ExtensionContext) {
   registerAllViews()
   registerAllConfigWatchers()
   registerAllFileWatchers()
+  registerAllWebviewRestorators()
 
   logExtensionActivated()
   validateRadCliInstallation({ minimizeUserNotifications: true })
@@ -33,16 +35,4 @@ export function activate(ctx: ExtensionContext) {
       createOrShowWebview(ctx)
     }),
   )
-
-  // Persist state across restarts. See https://code.visualstudio.com/api/extension-guides/webview#serialization
-  // ctx.subscriptions.push(
-  //   window.registerWebviewPanelSerializer(webviewId, {
-  //     deserializeWebviewPanel: async (panel: WebviewPanel, state: unknown) => {
-  //       currentPanel = panel
-  //       // `state` is the state persisted using `setState` inside the webview
-  //       console.log(`Got state: ${state}`)
-  //       // panel.webview.html = getWebviewHtml(state)
-  //     },
-  //   }),
-  // )
 }

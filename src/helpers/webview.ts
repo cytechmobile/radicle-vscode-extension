@@ -18,10 +18,6 @@ export const webviewId = 'webview-patch-detail'
 
 let panel: WebviewPanel | undefined
 
-export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']): void {
-  panel && notifyWebviewBase(message, panel.webview)
-}
-
 // TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
 
 /**
@@ -35,7 +31,16 @@ export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']
 export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
 
-  if (panel) {
+  let isPanelDisposed
+  try {
+    // eslint-disable-next-line no-unused-expressions
+    panel?.webview // getter will throw if panel is disposed
+    isPanelDisposed = false
+  } catch {
+    isPanelDisposed = true
+  }
+
+  if (panel && !isPanelDisposed) {
     panel.reveal(column)
 
     return
@@ -51,49 +56,7 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   }
   panel = window.createWebviewPanel(webviewId, title, column || ViewColumn.One, webviewOptions)
 
-  const stylesUri = getUri(panel.webview, getExtensionContext().extensionUri, [
-    'src',
-    'webviews',
-    'dist',
-    'assets',
-    'index.css',
-  ])
-  const scriptUri = getUri(panel.webview, getExtensionContext().extensionUri, [
-    'src',
-    'webviews',
-    'dist',
-    'assets',
-    'index.js',
-  ])
-  const allowedSource = panel.webview.cspSource
-  const nonce = getNonce()
-  panel.webview.html = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta
-        http-equiv="Content-Security-Policy"
-        content="
-          default-src 'none';
-          object-src 'none';
-          base-uri 'none';
-          style-src ${allowedSource} 'unsafe-inline';
-          img-src ${allowedSource} https: data:;
-          script-src 'strict-dynamic' 'nonce-${nonce}' 'unsafe-inline' https:;
-          font-src ${allowedSource};
-        "
-      >
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" type="text/css" href="${stylesUri}" nonce="${nonce}">
-      <title>${title}</title>
-    </head>
-    <body>
-      <div id="app"></div>
-      <script type="module" src="${scriptUri}" nonce="${nonce}"></script>
-    </body>
-    </html>
-  `
+  panel.webview.html = getWebviewHtml(panel.webview)
 
   panel.webview.onDidReceiveMessage(
     (message: Parameters<typeof notifyExtension>['0']) => {
@@ -115,6 +78,75 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
     ctx.subscriptions,
   )
   panel.onDidDispose(() => (panel = undefined), undefined, ctx.subscriptions)
+}
+
+export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']): void {
+  panel && notifyWebviewBase(message, panel.webview)
+}
+
+// Restores the webview across restarts using persisted state.
+// See https://code.visualstudio.com/api/extension-guides/webview#serialization
+export function registerAllWebviewRestorators() {
+  getExtensionContext().subscriptions.push(
+    window.registerWebviewPanelSerializer(webviewId, {
+      // eslint-disable-next-line @typescript-eslint/require-await, require-await
+      deserializeWebviewPanel: async (_panel: WebviewPanel, _state: unknown) => {
+        panel = _panel
+        panel.webview.html = getWebviewHtml(panel.webview)
+      },
+    }),
+  )
+}
+
+function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
+  const stylesUri = getUri(webview, getExtensionContext().extensionUri, [
+    'src',
+    'webviews',
+    'dist',
+    'assets',
+    'index.css',
+  ])
+  const scriptUri = getUri(webview, getExtensionContext().extensionUri, [
+    'src',
+    'webviews',
+    'dist',
+    'assets',
+    'index.js',
+  ])
+  const allowedSource = webview.cspSource
+  const nonce = getNonce()
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="
+          default-src 'none';
+          object-src 'none';
+          base-uri 'none';
+          style-src ${allowedSource} 'unsafe-inline';
+          img-src ${allowedSource} https: data:;
+          script-src 'strict-dynamic' 'nonce-${nonce}' 'unsafe-inline' https:;
+          font-src ${allowedSource};
+        "
+      >
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" type="text/css" href="${stylesUri}" nonce="${nonce}">
+      <script nonce="${nonce}">
+        window.injectedWebviewState = ${JSON.stringify(state)}
+      </script>
+    </head>
+    <body>
+      <div id="app"></div>
+      <script type="module" src="${scriptUri}" nonce="${nonce}"></script>
+    </body>
+    </html>
+  `
+
+  return html
 }
 
 function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {
