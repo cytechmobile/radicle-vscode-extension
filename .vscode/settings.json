@@ -27,13 +27,14 @@
     "contributing",
     "httpd",
     "patches",
-    "cli"
+    "cli",
+    "webview"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,
   "editor.codeActionsOnSave": {
-    "source.addMissingImports": true,
-    "source.fixAll.eslint": true
+    "source.addMissingImports": "explicit",
+    "source.fixAll.eslint": "explicit"
   },
   "git.alwaysSignOff": true,
 }

@@ -171,9 +171,9 @@ export interface Hunk {
 
 export interface HunkLine {
   line: string
-  lineNoOld?: number // TODO: maninak use latest rad cli and httpd and check if those props are indeed optional or not
+  lineNoOld?: number // TODO: use latest rad cli and httpd and check if those props are indeed optional or not
   lineNoNew?: number
-  type: 'context' | 'addition' | 'deletion' // TODO: maninak ensure this is not a union but HunkLine is a union instead (see JSON used in https://app.quicktype.io)
+  type: 'context' | 'addition' | 'deletion' // TODO: ensure this is not a union but HunkLine is a union instead (see JSON used in https://app.quicktype.io)
   lineNo?: number
 }
 
@@ -191,13 +191,13 @@ export interface Commit {
   parents: string[]
 }
 
-// TODO: maninak see how this correleates with Commit and refactor accordingly
+// TODO: see how this correleates with Commit and refactor accordingly
 export interface LastCommit {
   id: string
   summary: string
   description: string
   message: string
-  // TODO: maninak check why author and committer here are the same and on Commit they are not, refactor accordingly
+  // TODO: check why author and committer here are the same and on Commit they are not, refactor accordingly
   author: { name: string; email: string; time: number }
   committer: { name: string; email: string; time: number }
   parents: string[]

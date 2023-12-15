@@ -1,11 +1,13 @@
-import type { ExtensionContext } from 'vscode'
+import { type ExtensionContext, commands } from 'vscode'
 import { initExtensionContext } from './store'
 import {
+  createOrShowWebview,
   logExtensionActivated,
   registerAllCommands,
   registerAllConfigWatchers,
   registerAllFileWatchers,
   registerAllViews,
+  registerAllWebviewRestorators,
 } from './helpers'
 import {
   validateHttpdConnection,
@@ -20,9 +22,17 @@ export function activate(ctx: ExtensionContext) {
   registerAllViews()
   registerAllConfigWatchers()
   registerAllFileWatchers()
+  registerAllWebviewRestorators()
 
   logExtensionActivated()
   validateRadCliInstallation({ minimizeUserNotifications: true })
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
   validateHttpdConnection({ minimizeUserNotifications: true })
+
+  // TODO: delete registration code from here and package.json when done with prototyping
+  ctx.subscriptions.push(
+    commands.registerCommand('wip-webview', () => {
+      createOrShowWebview(ctx)
+    }),
+  )
 }

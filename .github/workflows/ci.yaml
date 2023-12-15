@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  lint-build-test:
+  audit:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -22,13 +22,13 @@ jobs:
       with:
         node-version: 20.x
         cache: 'pnpm'
-    - name: Install dependencies
+    - name: Install Dependencies
       run: pnpm run verify-deps
-    - name: Lint code
+    - name: Lint Code
       run: pnpm run lint
-    - name: Test smoke
-      run: pnpm run test:smoke
-    - name: Test unit
+    - name: Test Typings
+      run: pnpm run test:typings
+    - name: Test Unit
       run: pnpm run test:unit
     - name: Test E2E (Linux)
       if: runner.os == 'Linux'

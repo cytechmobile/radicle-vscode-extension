@@ -3,7 +3,7 @@ import { getRadCliRef } from '../helpers'
 import type { Patch } from '../types'
 import { exec, log, shortenHash, showLog } from '../utils'
 
-export function checkoutPatch(patch: Patch): void {
+export function checkOutPatch(patch: Patch): void {
   const didCheckoutPatch = Boolean(
     exec(`${getRadCliRef()} patch checkout ${patch.id}`, {
       cwd: '$workspaceDir',
@@ -26,7 +26,7 @@ export function checkoutPatch(patch: Patch): void {
     log(msg, 'error')
   }
 
-  // TODO: maninak if we ever use a proper reactive global store like pinia, where we store all
+  // TODO: if we ever use a proper reactive global store like pinia, where we store all
   // current patches, we should just do a
   // patchesRefreshEventEmitter.fire(patchesStore.patches.findById(curPatch))
   // and

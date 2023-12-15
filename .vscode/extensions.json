@@ -1,0 +1,12 @@
+{
+  // Please make sure you have the following extensions installed and
+  // enabled *for this workspace*
+  "recommendations": [
+    "connor4312.esbuild-problem-matchers",
+    "dbaeumer.vscode-eslint",
+  ],
+  // Please make sure you disable the following extensions *for this workspace*
+  "unwantedRecommendations": [
+    "esbenp.prettier-vscode",
+  ]
+}

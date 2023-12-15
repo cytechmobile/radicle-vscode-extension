@@ -174,7 +174,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
             const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
               oldVersionCommitSha,
             )}${sep}${fileDir}${sep}${filename}`
-            // TODO: maninak should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
+            // TODO: should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
             const newVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
               newVersionCommitSha,
             )}${sep}${fileDir}${sep}${filename}`
@@ -191,7 +191,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
               newVersionUrl,
               enableShowingPathInDescription,
               getTreeItem: async () => {
-                // TODO: maninak consider how to clean up httpd types so that infering those is easier or move them to the types file
+                // TODO: consider how to clean up httpd types so that infering those is easier or move them to the types file
                 type AddedFileChange = Unarray<(typeof diffResponse)['diff']['added']>
                 type DeletedFileChange = Unarray<(typeof diffResponse)['diff']['deleted']>
                 type ModifiedFileChange = Unarray<(typeof diffResponse)['diff']['modified']>

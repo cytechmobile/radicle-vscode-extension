@@ -30,21 +30,35 @@
   ],
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "prepare": "husky install",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
-    "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
-    "build": "esbuild ./src/extension.ts --bundle --minify --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
-    "dev": "npm run verify-deps && tsc --watch --sourceMap",
-    "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
-    "test": "npm run test:smoke && npm run test:unit && npm run test:e2e",
-    "test:smoke": "tsc --noEmit",
+    "verify-deps": "npm run verify-deps:extension & npm run verify-deps:webviews",
+    "verify-deps:extension": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "verify-deps:webviews": "cd ./src/webviews && npm run verify-deps",
+    "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
+    "build": "run-p -l build:*",
+    "build:extension": "npm run compile:extension -- --minify",
+    "build:webviews": "cd ./src/webviews && npm run build",
+    "dev": "run-p dev:*",
+    "dev:extension": "npm run verify-deps && npm run compile:extension -- --sourcemap --watch",
+    "dev:webviews": "cd ./src/webviews && npm run dev",
+    "lint": "run-p lint:*",
+    "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
+    "lint:webviews": "cd ./src/webviews && npm run lintfix",
+    "test": "npm run test:typings && npm run test:unit && npm run test:e2e",
+    "test:typings": "tsc --noEmit",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
     "test:e2e": "echo \"End-to-end testing not yet implemented.\""
   },
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onWebviewPanel:webview-patch-detail"
+  ],
   "contributes": {
     "commands": [
+      {
+        "command": "wip-webview",
+        "title": "Open dat wip webview"
+      },
       {
         "command": "radicle.sync",
         "title": "Synchronize Local and Network Changes",
@@ -433,16 +447,19 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.4.5",
     "@types/vscode": "^1.80.0",
-    "esbuild": "^0.18.17",
+    "esbuild": "^0.19.9",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.9.0",
     "eslint-plugin-prettier-vue": "^4.2.0",
     "eslint-plugin-tailwindcss": "^3.13.0",
     "eslint-plugin-vue-scoped-css": "^2.5.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.3",
+    "npm-run-all": "^4.1.5",
+    "simple-git-hooks": "^2.9.0",
     "ts-xor": "^1.1.0",
     "typescript": "^5.1.6"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run lint"
   },
   "private": true
 }

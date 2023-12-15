@@ -1,6 +1,7 @@
 export * from './askUser'
 export * from './assertUnreachable'
 export * from './exec'
+export * from './getNonce'
 export * from './git'
 export * from './log'
 export * from './memoizeWithDebouncedCacheClear'

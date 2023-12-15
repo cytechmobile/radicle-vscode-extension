@@ -19,6 +19,7 @@ module.exports = {
   plugins: ['unused-imports'],
   ignorePatterns: [
     'static',
+    'src/webviews',
 
     // overrides to antfu's config follow
     '!.*rc.*',
@@ -130,6 +131,8 @@ module.exports = {
     'max-statements-per-line': 'warn',
     'no-empty': ['warn', { allowEmptyCatch: true }],
     'no-multiple-empty-lines': ['warn', { max: 1, maxBOF: 0, maxEOF: 1 }],
+    'no-useless-return': 'warn',
+    'no-undef-init': 'warn',
 
     /*
      * Rules implemented by `@typescript-eslint` follow
