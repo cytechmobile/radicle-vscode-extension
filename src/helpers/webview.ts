@@ -95,10 +95,6 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
     </html>
   `
 
-  // Called whenever a webview's visibility changes, or is moved into a new column
-  // TODO: maninak save current state (e.g. value of any <input> elems) and try to restore on next createOrShowWebview() see https://code.visualstudio.com/api/extension-guides/webview#getstate-and-setstate
-  // panel.onDidChangeViewState()
-
   panel.webview.onDidReceiveMessage(
     (message: Parameters<typeof notifyExtension>['0']) => {
       switch (message.command) {

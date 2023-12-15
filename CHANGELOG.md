@@ -2,6 +2,18 @@
 
 ## _(WIP, yet unreleased version)_
 
+### 🏡 Chores
+
+- **webview:** implement infrastructure for Webviews, enabling the creation of bespoke custom views with the following powerful features
+  - UI in Webviews seamlessly blends with VS Code's familiar look'n'feel, even adjusting to each user's color theme
+  - Webviews can have bi-directional communication with the host VS Code extension
+  - auto-save Webview state (e.g. text in input fields) when it becomes a background tab and auto-restore it when it becomes visible again
+  - each new Webview panel opens in the currently active ViewColumn, if multi-column layout is in use (i.e. split editors)
+  - Webview panel gets reused without being destroyed if it is re-invoked when the user has a ViewColumn active which isn't the one already containing the running Webview
+  - Webviews are secured with strict Content Security Policy (CSP)
+
+-----
+
 ## **v0.3.2** (Nov 29th, 2023)
 
 ### 🚀 Enhancements

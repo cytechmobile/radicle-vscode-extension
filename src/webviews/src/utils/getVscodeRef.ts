@@ -1,14 +1,14 @@
 let vscodeRef: ReturnType<typeof acquireVsCodeApi> | undefined
 
 /** Resolves a reference to the VS Code context auto-injected in a webview. */
-export function getVscodeRef() {
+export function getVscodeRef<T>() {
   if (vscodeRef) {
-    return vscodeRef
+    return vscodeRef as WebviewApi<T>
   }
 
-  vscodeRef = acquireVsCodeApi()
+  vscodeRef = acquireVsCodeApi<T>()
 
-  return vscodeRef
+  return vscodeRef as WebviewApi<T>
 }
 
 // Typings copied from
