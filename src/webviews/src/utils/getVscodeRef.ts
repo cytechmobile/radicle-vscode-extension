@@ -1,4 +1,3 @@
-
 let vscodeRef: ReturnType<typeof acquireVsCodeApi> | undefined
 
 /** Resolves a reference to the VS Code context auto-injected in a webview. */

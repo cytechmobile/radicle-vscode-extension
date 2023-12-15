@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Counter from '@/components/Counter.vue'
+import TheCounter from '@/components/TheCounter.vue'
 import { registerWebviewMessageHandlers } from '@/composables/registerWebviewMessageHandlers'
 
 registerWebviewMessageHandlers()
 </script>
 
 <template>
-  <Counter/>
+  <TheCounter />
 </template>
 
 <style>

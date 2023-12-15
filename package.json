@@ -30,7 +30,6 @@
   ],
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "prepare": "husky install",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
     "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
     "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
@@ -42,7 +41,7 @@
     "dev:webviews": "cd ./src/webviews && npm run dev",
     "lint": "run-p lint:*",
     "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
-    "lint:webviews": "cd ./src/webviews && npm run lint",
+    "lint:webviews": "cd ./src/webviews && npm run lintfix",
     "test": "npm run test:typings && npm run test:unit && npm run test:e2e",
     "test:typings": "tsc --noEmit",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
