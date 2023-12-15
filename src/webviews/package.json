@@ -12,8 +12,8 @@
     "test:unit": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",
-    "lintfix": "prettier --write src/ && npm run lint -- --fix && prettier --write src/"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore --cache --cache-location node_modules/.cache/eslint",
+    "lintfix": "npm run lint -- --fix && prettier --write src/"
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
