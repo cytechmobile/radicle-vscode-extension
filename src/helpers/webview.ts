@@ -5,19 +5,22 @@ import {
   type Webview,
   type WebviewOptions,
   type WebviewPanel,
+  type WebviewPanelOptions,
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { assertUnreachable, getNonce } from '../utils'
+import { assertUnreachable, getNonce, shortenHash } from '../utils'
 import {
   type notifyExtension,
   notifyWebview as notifyWebviewBase,
-} from '../../lib/webview-messaging'
+} from '../utils/webview-messaging'
+import type { Patch, PatchDetailInjectedState } from '../types'
 
 export const webviewId = 'webview-patch-detail'
 
 let panel: WebviewPanel | undefined
 
+// TODO: maninak make the solution in file more generic, not only useful to a specific webview
 // TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
 
 /**
@@ -28,7 +31,13 @@ let panel: WebviewPanel | undefined
  *
  * @param [title] - The title shown on the webview panel's tab
  */
-export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBEEF') {
+export function createOrShowWebview(ctx: ExtensionContext, patch: Patch) {
+  const webviewState: PatchDetailInjectedState = {
+    kind: 'patchDetail',
+    id: patch.id,
+    state: patch,
+  }
+
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
 
   let isPanelDisposed
@@ -41,22 +50,31 @@ export function createOrShowWebview(ctx: ExtensionContext, title = 'Patch DEADBE
   }
 
   if (panel && !isPanelDisposed) {
+    notifyWebview({ command: 'updateState', payload: webviewState })
+    panel.title = getPanelTitle(patch)
+
     panel.reveal(column)
 
     return
   }
 
-  const webviewOptions: WebviewOptions = {
+  const webviewOptions: WebviewPanelOptions & WebviewOptions = {
     enableScripts: true,
     localResourceRoots: [
       Uri.joinPath(getExtensionContext().extensionUri, 'dist'),
       Uri.joinPath(getExtensionContext().extensionUri, 'assets'),
       Uri.joinPath(getExtensionContext().extensionUri, 'src', 'webviews', 'dist'),
     ],
+    enableFindWidget: true,
   }
-  panel = window.createWebviewPanel(webviewId, title, column || ViewColumn.One, webviewOptions)
+  panel = window.createWebviewPanel(
+    webviewId,
+    getPanelTitle(patch),
+    column || ViewColumn.One,
+    webviewOptions,
+  )
 
-  panel.webview.html = getWebviewHtml(panel.webview)
+  panel.webview.html = getWebviewHtml(panel.webview, webviewState)
 
   panel.webview.onDidReceiveMessage(
     (message: Parameters<typeof notifyExtension>['0']) => {
@@ -147,6 +165,10 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
   `
 
   return html
+}
+
+function getPanelTitle(patch: Patch) {
+  return `Patch ${shortenHash(patch.id)}`
 }
 
 function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {

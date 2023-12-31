@@ -2,11 +2,24 @@
 
 ## _(WIP, yet unreleased version)_
 
+### 🚀 Enhancements
+
+- **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured
+- **patch-list:** Patch tooltip improvements
+  - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
+  - show latest revision id and commit hash for Patches with more than the initial revision
+- **patch-list:** prioritize Patch merge event over latest revision when deriving author and "time-ago" for item description
+- **patch-list:** improve legibility of time when Patch events (e.g. created, last updated, merged) happened
+  - only "time-ago" is shown now; the full date is still available in the Patch Details view
+  - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago"
+- **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
+
 ### 🏡 Chores
 
 - **webview:** implement infrastructure for Webviews, enabling the creation of bespoke custom views with the following powerful features
   - UI in Webviews seamlessly blends with VS Code's familiar look'n'feel, even adjusting to each user's color theme
   - Webviews can have bi-directional communication with the host VS Code extension
+  - initial state can be injected into a Webview, allowing reuse of already fetched data and reducing the need for loading spinners on init
   - auto-save Webview state (e.g. text in input fields) when it becomes a background tab and auto-restore it when it becomes visible again
   - auto-save Webview state and auto-restore it if VS Code is restarted with the Webview panel open
   - each new Webview panel opens in the currently active ViewColumn, if multi-column layout is in use (i.e. split editors)
@@ -19,21 +32,21 @@
 
 ### 🚀 Enhancements
 
-- **patches:** show a button to check out a Radicle Patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** show a button to check out a Radicle Patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
   - show an indicator on the Patch's title and tooltip if its associated branch is the currently checked-out git branch
   - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
   - notify user of uncommitted changes when trying to check out a Patch
   - don't show check-out-button for the currently checked-out Patch on the list
-- **patches:** auto-refresh Patches list when `pathToNodeHome` is updated in the extension settings
-- **patches:** show a hint-text that radicle-httpd may not be running as the placeholder in Patches list, if that seems to be the case
-- **patches:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patches:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patches:** improve the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** auto-refresh Patches list when `pathToNodeHome` is updated in the extension settings
+- **patch-list:** show a hint-text that radicle-httpd may not be running as the placeholder in Patches list, if that seems to be the case
+- **patch-list:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** improve the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
 ### 🔥 Performance
 
 - **app:** heavily speed up most procedures by memoizing the resolution of the reference to the rad CLI ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patches:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
   - measured ~50x faster against a real-world Project with >50 Patches, with the benefit increasing proportionally with the count of Patches on a project
 
 ### 📖 Documentation
@@ -61,8 +74,8 @@
 
 ### 🚀 Enhancements
 
-- **patches**: show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to easily copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
-- **patches**:  each item in the list of Radicle Patches can be expanded to show a sub-list of files changed.  ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
+- **patch-list**: show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to easily copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
+- **patch-list**:  each item in the list of Radicle Patches can be expanded to show a sub-list of files changed.  ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
   - If multiple items have the same filename, their directory URL will be additionally shown as the item's description.
   - On hover, a tooltip shows the relative URL of the file in the repo, and the kind of change it had.
   - A left click on a filechange item will open a diff between the original and patched file versions.

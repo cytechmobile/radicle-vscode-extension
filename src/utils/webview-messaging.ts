@@ -1,12 +1,15 @@
 import type { Webview } from 'vscode'
-import { getVscodeRef } from '../src/webviews/src/utils/getVscodeRef'
+import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
+import type { PatchDetailInjectedState } from '../types'
 
 interface Message<Command extends string, Payload extends object | undefined = undefined> {
   command: Command
   payload: Payload
 }
 
-type MessageToWebview = Message<'resetCount'>
+type MessageToWebview =
+  | Message<'resetCount'>
+  | Message<'updateState', PatchDetailInjectedState>
 
 type MessageToExtension = Message<'showInfoNotification', { text: string }>
 // append more message types with `| Message<'...', SomeType>`

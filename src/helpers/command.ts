@@ -11,7 +11,7 @@ import {
   selectAndCloneRadicleProject,
 } from '../ux'
 import type { Patch } from '../types'
-import { getRadCliRef } from '.'
+import { createOrShowWebview, getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -140,4 +140,7 @@ export function registerAllCommands(): void {
       }
     },
   )
+  registerVsCodeCmd('radicle.viewPatchDetails', (patch: Patch) => {
+    createOrShowWebview(getExtensionContext(), patch)
+  })
 }

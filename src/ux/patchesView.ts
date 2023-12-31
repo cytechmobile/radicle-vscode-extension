@@ -12,7 +12,7 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
-import TimeAgo, { type FormatStyleName } from 'javascript-time-ago'
+import TimeAgo, { type LabelStyleName, type Style } from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import {
   debouncedClearMemoizedgetRepoIdCache,
@@ -24,6 +24,7 @@ import {
   assertUnreachable,
   capitalizeFirstLetter,
   getCurrentGitBranch,
+  getFirstAndLatestRevisions,
   getIdentityAliasOrId,
   log,
   memoizeWithDebouncedCacheClear,
@@ -32,6 +33,8 @@ import {
 
 const bullet = '•'
 const checkmark = '✓'
+
+let timesPatchListFetchErroredConsecutively = 0
 
 export interface FilechangeNode {
   filename: string
@@ -108,10 +111,15 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
       const patches = responses.flatMap((response) => response.data).filter(Boolean)
 
       if (errors.length) {
+        setTimeout(() => {
+          refreshPatchesEventEmitter.fire(undefined)
+        }, 3_000 * ++timesPatchListFetchErroredConsecutively)
+
         return errors.length === responses.length
           ? ['Please ensure `radicle-httpd` is running and accessible!']
           : ['Not all patches may be listed due to an error!', ...patches]
       }
+      timesPatchListFetchErroredConsecutively = 0
 
       if (!patches.length) {
         return [`0 Radicle Patches found`]
@@ -369,12 +377,13 @@ function getPatchTreeItemDescription(
   patch: Patch,
   { latestRevision }: ReturnType<typeof getFirstAndLatestRevisions>,
 ) {
+  const merge = patch.merges.at(-1)
   const description = `${getTimeAgo(
-    latestRevision.timestamp,
-    'mini-minute-now',
-  )} ${bullet} ${getIdentityAliasOrId(latestRevision.author)} ${bullet} ${shortenHash(
-    patch.id,
-  )}`
+    merge?.timestamp ?? latestRevision.timestamp,
+    'mini',
+  )} ${bullet} ${getIdentityAliasOrId(
+    merge?.author ?? latestRevision.author,
+  )} ${bullet} ${shortenHash(patch.id)}`
 
   return description
 }
@@ -389,11 +398,13 @@ function getPatchTreeItemTooltip(
   const sectionDivider = `${lineBreak}-----${lineBreak}`
 
   const checkedOutIndicator = isCheckedOut ? dat(`${separator} ${checkmark} Checked out`) : ''
+  const latestMerge = [...patch.merges].sort((m1, m2) => m1.timestamp - m2.timestamp).at(-1)
+  const shouldShowRevisionEvent = patch.revisions.length >= 2 // more than the initial Revision
 
   const tooltipTopSection = [
-    `${getHtmlIconForPatch(patch)} ${dat(
-      capitalizeFirstLetter(patch.state.status),
-    )} ${separator} ${dat(patch.id)} ${checkedOutIndicator}`,
+    `${getHtmlIconForPatch(patch)} ${dat(patch.state.status)} ${separator} ${dat(
+      patch.id,
+    )} ${checkedOutIndicator}`,
   ].join(lineBreak)
 
   const tooltipMiddleSection = [
@@ -406,16 +417,29 @@ function getPatchTreeItemTooltip(
   ].join(lineBreak)
 
   const tooltipBottomSection = [
-    ...(patch.revisions.length > 1
+    ...(latestMerge
       ? [
-          `Last revised by ${dat(getIdentityAliasOrId(latestRevision.author))} on ${dat(
-            getFormattedDate(latestRevision.timestamp),
-          )} ${dat(`(${getTimeAgo(latestRevision.timestamp)})`)}`,
+          `Merged by ${dat(getIdentityAliasOrId(latestMerge.author))} using revision ${dat(
+            shortenHash(latestMerge.revision),
+          )}${
+            !shouldShowRevisionEvent
+              ? ` at commit ${dat(shortenHash(latestMerge.commit))} `
+              : ' '
+          }${dat(`${getTimeAgo(latestMerge.timestamp)}`)}`,
         ]
       : []),
-    `Created by ${dat(getIdentityAliasOrId(patch.author))} on ${dat(
-      getFormattedDate(firstRevision.timestamp),
-    )} ${dat(`(${getTimeAgo(firstRevision.timestamp)})`)}`,
+    ...(shouldShowRevisionEvent
+      ? [
+          `Last updated by ${dat(
+            getIdentityAliasOrId(latestRevision.author),
+          )} with revision ${dat(shortenHash(latestRevision.id))} at commit ${dat(
+            shortenHash(latestRevision.oid),
+          )} ${dat(`${getTimeAgo(latestRevision.timestamp)}`)}`,
+        ]
+      : []),
+    `Created by ${dat(getIdentityAliasOrId(patch.author))} ${dat(
+      `${getTimeAgo(firstRevision.timestamp)}`,
+    )}`,
   ].join(lineBreak)
 
   const tooltip = new MarkdownString(
@@ -447,26 +471,13 @@ function getPatchesOfStatusSortedByLatestRevisionFirst(
       const { latestRevision: latestP1Revision } = getFirstAndLatestRevisions(p1)
       const { latestRevision: latestP2Revision } = getFirstAndLatestRevisions(p2)
 
-      return latestP2Revision.timestamp - latestP1Revision.timestamp
+      return (
+        (p2.merges.at(-1)?.timestamp ?? latestP2Revision.timestamp) -
+        (p1.merges.at(-1)?.timestamp ?? latestP1Revision.timestamp)
+      )
     })
 
   return sortedPatches
-}
-
-function getFirstAndLatestRevisions(patch: Patch) {
-  const revisionsSortedOldestFirst = [...patch.revisions].sort(
-    (p1, p2) => p1.timestamp - p2.timestamp,
-  )
-  const firstRevision = revisionsSortedOldestFirst[0] as Exclude<
-    (typeof patch.revisions)[number],
-    undefined
-  >
-  const latestRevision = revisionsSortedOldestFirst.at(-1) as Exclude<
-    (typeof patch.revisions)[number],
-    undefined
-  >
-
-  return { firstRevision, latestRevision }
 }
 
 // eslint-disable-next-line consistent-return
@@ -496,20 +507,31 @@ function getCssColor(themeColor: ThemeColor | undefined): string {
   return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
 }
 
-function getFormattedDate(unixTimestamp: number): string {
-  return new Date(unixTimestamp * 1000).toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    year: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  })
-}
+// function getFormattedDate(unixTimestamp: number): string {
+//   return new Date(unixTimestamp * 1000).toLocaleDateString(undefined, {
+//     weekday: 'short',
+//     month: 'short',
+//     year: 'numeric',
+//     day: 'numeric',
+//     hour: 'numeric',
+//     minute: 'numeric',
+//     // TODO: show zulu?
+//   })
+// }
 
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
 
-function getTimeAgo(unixTimestamp: number, style: FormatStyleName = 'round-minute'): string {
-  return timeAgo.format(unixTimestamp * 1000, style)
+function getTimeAgo(unixTimestamp: number, labelStyle: LabelStyleName = 'long'): string {
+  const customTimeAgoStyle: Omit<Style, 'labels'> = {
+    steps: [
+      { formatAs: 'now' },
+      { minTime: 60, formatAs: 'minute' },
+      { minTime: 60 * 60, formatAs: 'hour' },
+      { minTime: 60 * 60 * 24 * 2, formatAs: 'day' },
+      { minTime: 60 * 60 * 24 * 365, formatAs: 'year' },
+    ],
+  }
+
+  return timeAgo.format(unixTimestamp * 1000, { ...customTimeAgoStyle, labels: [labelStyle] })
 }

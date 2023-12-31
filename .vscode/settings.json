@@ -26,7 +26,8 @@
     "ux",
     "contributing",
     "httpd",
-    "patches",
+    "patch-list",
+    "patch-detail",
     "cli",
     "webview"
   ],

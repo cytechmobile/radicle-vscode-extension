@@ -52,7 +52,7 @@ declare global {
    * This may only be called once in a webview's context. Attempting to call `acquireVsCodeApi` after it has already
    * been called will throw an exception.
    *
-   * @template StateType Type of the persisted state stored for the webview.
+   * @template State Shape of the persisted state stored for the webview.
    */
-  function acquireVsCodeApi<StateType = unknown>(): WebviewApi<StateType>
+  function acquireVsCodeApi<State = unknown>(): WebviewApi<State>
 }

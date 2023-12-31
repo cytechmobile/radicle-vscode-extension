@@ -39,7 +39,7 @@
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
     "dev": "run-p dev:*",
-    "dev:extension": "npm run verify-deps && npm run compile:extension -- --sourcemap --watch",
+    "dev:extension": "npm run compile:extension -- --sourcemap --watch",
     "dev:webviews": "cd ./src/webviews && npm run dev",
     "lint": "run-p lint:*",
     "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
@@ -55,10 +55,6 @@
   ],
   "contributes": {
     "commands": [
-      {
-        "command": "wip-webview",
-        "title": "Open dat wip webview"
-      },
       {
         "command": "radicle.sync",
         "title": "Synchronize Local and Network Changes",
@@ -121,6 +117,14 @@
         "enablement": "radicle.isRadInitialized"
       },
       {
+        "command": "radicle.viewPatchDetails",
+        "title": "View Patch Details",
+        "shortTitle": "Patch Details",
+        "category": "Radicle",
+        "icon": "$(preview)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
         "command": "radicle.checkoutPatch",
         "title": "Check Out Patch Branch",
         "shortTitle": "Check Out",
@@ -152,6 +156,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "radicle.viewPatchDetails",
+          "when": "false"
+        },
+        {
           "command": "radicle.checkoutPatch",
           "when": "false"
         },
@@ -180,26 +188,30 @@
       ],
       "view/title": [
         {
-          "command": "radicle.collapsePatches",
+          "command": "radicle.refreshPatches",
           "when": "view == patches-view",
           "group": "navigation@1"
         },
         {
-          "command": "radicle.refreshPatches",
+          "command": "radicle.collapsePatches",
           "when": "view == patches-view",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
+          "command": "radicle.viewPatchDetails",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "inline@1"
+        },
+        {
           "command": "radicle.checkoutPatch",
           "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
-          "group": "inline"
+          "group": "inline@2"
         },
         {
           "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem =~ /patch/",
-          "group": "inline"
+          "when": "view == patches-view && viewItem =~ /patch/"
         },
         {
           "command": "radicle.openOriginalVersionOfPatchedFile",
@@ -258,6 +270,7 @@
           "id": "cli-commands",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
+          "initialSize": 230,
           "when": "radicle.isRadInitialized"
         },
         {
