@@ -5,7 +5,3 @@ import PatchDetail from '@/components/PatchDetail.vue'
 <template>
   <PatchDetail />
 </template>
-
-<style>
-@import '@/assets/codicon.css';
-</style>
