@@ -16,6 +16,7 @@
   - only "time-ago" is shown now; the full date is still available in the Patch Details view
   - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago"
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
+- **patch-list:** use smaller dot separator between data in the description of a Patch list item
 
 ### 🏡 Chores
 

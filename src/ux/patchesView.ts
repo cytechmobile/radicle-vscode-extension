@@ -31,7 +31,7 @@ import {
   shortenHash,
 } from '../utils'
 
-const bullet = '•'
+const dot = '·'
 const checkmark = '✓'
 
 let timesPatchListFetchErroredConsecutively = 0
@@ -261,7 +261,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
                   contextValue: `filechange:${filechangeKind}`,
                   label: filename,
                   description: shouldShowPathInDescription ? true : undefined,
-                  tooltip: `${filechange.path} ${bullet} ${capitalizeFirstLetter(
+                  tooltip: `${filechange.path} ${dot} ${capitalizeFirstLetter(
                     filechangeKind,
                   )}`,
                   resourceUri: Uri.file(filechange.path),
@@ -319,7 +319,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
                       : undefined,
                     tooltip: `${filechange.oldPath} ➟ ${
                       filechange.newPath
-                    } ${bullet} ${capitalizeFirstLetter(filechangeKind)}`,
+                    } ${dot} ${capitalizeFirstLetter(filechangeKind)}`,
                     resourceUri: Uri.file(filechange.newPath),
                   } satisfies TreeItem),
               }
@@ -381,9 +381,9 @@ function getPatchTreeItemDescription(
   const description = `${getTimeAgo(
     merge?.timestamp ?? latestRevision.timestamp,
     'mini',
-  )} ${bullet} ${getIdentityAliasOrId(
+  )} ${dot} ${getIdentityAliasOrId(
     merge?.author ?? latestRevision.author,
-  )} ${bullet} ${shortenHash(patch.id)}`
+  )} ${dot} ${shortenHash(patch.id)}`
 
   return description
 }
