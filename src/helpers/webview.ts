@@ -9,7 +9,7 @@ import {
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { assertUnreachable, getNonce, shortenHash } from '../utils'
+import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
 import {
   type notifyExtension,
   notifyWebview as notifyWebviewBase,
@@ -35,6 +35,7 @@ export function createOrShowWebview(ctx: ExtensionContext, patch: Patch) {
   const webviewState: PatchDetailInjectedState = {
     kind: 'patchDetail',
     id: patch.id,
+    ts: Date.now(),
     state: patch,
   }
 
@@ -168,7 +169,9 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
 }
 
 function getPanelTitle(patch: Patch) {
-  return `Patch ${shortenHash(patch.id)}`
+  const truncatedTitle = truncateKeepWords(patch.title, 24)
+
+  return `${truncatedTitle}${truncatedTitle.length < patch.title.length ? ' …' : ''}`
 }
 
 function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {

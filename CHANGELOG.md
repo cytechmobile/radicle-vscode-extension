@@ -4,6 +4,9 @@
 
 ### 🚀 Enhancements
 
+- **patch-detail:** implement new Patch Detail webview showing detailed info about a Patch
+  - can be opened via a new button "View Patch Details" on each item in the list of Patches
+  - panel's title shows the patch description in full if it's small, otherwise truncated to the nearest full word
 - **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured
 - **patch-list:** Patch tooltip improvements
   - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
