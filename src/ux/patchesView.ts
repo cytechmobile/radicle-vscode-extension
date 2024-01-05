@@ -12,8 +12,6 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
-import TimeAgo, { type LabelStyleName, type Style } from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
 import {
   debouncedClearMemoizedgetRepoIdCache,
   fetchFromHttpd,
@@ -26,6 +24,7 @@ import {
   getCurrentGitBranch,
   getFirstAndLatestRevisions,
   getIdentityAliasOrId,
+  getTimeAgo,
   log,
   memoizeWithDebouncedCacheClear,
   shortenHash,
@@ -402,9 +401,9 @@ function getPatchTreeItemTooltip(
   const shouldShowRevisionEvent = patch.revisions.length >= 2 // more than the initial Revision
 
   const tooltipTopSection = [
-    `${getHtmlIconForPatch(patch)} ${dat(patch.state.status)} ${separator} ${dat(
-      patch.id,
-    )} ${checkedOutIndicator}`,
+    `${getHtmlIconForPatch(patch)} ${dat(
+      capitalizeFirstLetter(patch.state.status),
+    )} ${separator} ${dat(patch.id)} ${checkedOutIndicator}`,
   ].join(lineBreak)
 
   const tooltipMiddleSection = [
@@ -505,33 +504,4 @@ function getHtmlIconForPatch(patch: Patch): string {
 function getCssColor(themeColor: ThemeColor | undefined): string {
   // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
   return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
-}
-
-// function getFormattedDate(unixTimestamp: number): string {
-//   return new Date(unixTimestamp * 1000).toLocaleDateString(undefined, {
-//     weekday: 'short',
-//     month: 'short',
-//     year: 'numeric',
-//     day: 'numeric',
-//     hour: 'numeric',
-//     minute: 'numeric',
-//     // TODO: show zulu?
-//   })
-// }
-
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US')
-
-function getTimeAgo(unixTimestamp: number, labelStyle: LabelStyleName = 'long'): string {
-  const customTimeAgoStyle: Omit<Style, 'labels'> = {
-    steps: [
-      { formatAs: 'now' },
-      { minTime: 60, formatAs: 'minute' },
-      { minTime: 60 * 60, formatAs: 'hour' },
-      { minTime: 60 * 60 * 24 * 2, formatAs: 'day' },
-      { minTime: 60 * 60 * 24 * 365, formatAs: 'year' },
-    ],
-  }
-
-  return timeAgo.format(unixTimestamp * 1000, { ...customTimeAgoStyle, labels: [labelStyle] })
 }

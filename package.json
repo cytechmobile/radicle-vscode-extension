@@ -38,9 +38,9 @@
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
-    "dev": "run-p dev:*",
-    "dev:extension": "npm run compile:extension -- --sourcemap --watch",
+    "dev": "run-s dev:*",
     "dev:webviews": "cd ./src/webviews && npm run dev",
+    "dev:extension": "npm run compile:extension -- --sourcemap --watch",
     "lint": "run-p lint:*",
     "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
     "lint:webviews": "cd ./src/webviews && npm run lintfix",
@@ -262,21 +262,26 @@
       "radicle": [
         {
           "id": "getting-started",
+          "contextualTitle": "Radicle",
           "name": "Getting Started",
           "icon": "$(radicle-logo)",
+          "initialSize": 1,
           "when": "!radicle.isRadInitialized"
         },
         {
           "id": "cli-commands",
+          "contextualTitle": "Radicle",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
-          "initialSize": 230,
+          "initialSize": 1,
           "when": "radicle.isRadInitialized"
         },
         {
           "id": "patches-view",
+          "contextualTitle": "Radicle",
           "name": "Patches",
           "icon": "$(git-pull-request)",
+          "initialSize": 4,
           "when": "radicle.isRadInitialized"
         }
       ]

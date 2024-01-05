@@ -4,7 +4,7 @@ import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
   checkOutPatch,
-  copyToClipboardAndNotifify,
+  copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
   refreshPatchesEventEmitter,
@@ -96,7 +96,7 @@ export function registerAllCommands(): void {
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
-    typeof patch?.id === 'string' && (await copyToClipboardAndNotifify(patch.id))
+    typeof patch?.id === 'string' && (await copyToClipboardAndNotify(patch.id))
   })
   registerVsCodeCmd(
     'radicle.openDiff',

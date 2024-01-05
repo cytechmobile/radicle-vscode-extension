@@ -9,12 +9,13 @@ import {
   window,
 } from 'vscode'
 import { getExtensionContext } from '../store'
-import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
+import { getNonce, truncateKeepWords } from '../utils'
 import {
   type notifyExtension,
   notifyWebview as notifyWebviewBase,
 } from '../utils/webview-messaging'
 import type { Patch, PatchDetailInjectedState } from '../types'
+import { copyToClipboardAndNotify } from '../ux'
 
 export const webviewId = 'webview-patch-detail'
 
@@ -88,9 +89,9 @@ export function createOrShowWebview(ctx: ExtensionContext, patch: Patch) {
           })
           break
         }
-
-        default:
-          assertUnreachable(message.command)
+        case 'copyToClipboardAndNotify':
+          copyToClipboardAndNotify(message.payload.textToCopy)
+          break
       }
     },
     undefined,
@@ -169,7 +170,7 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
 }
 
 function getPanelTitle(patch: Patch) {
-  const truncatedTitle = truncateKeepWords(patch.title, 24)
+  const truncatedTitle = truncateKeepWords(patch.title, 30)
 
   return `${truncatedTitle}${truncatedTitle.length < patch.title.length ? ' …' : ''}`
 }

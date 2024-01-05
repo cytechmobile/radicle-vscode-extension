@@ -9,7 +9,7 @@ export type Did = `did:key:${string}`
 
 export interface RadicleIdentity {
   id: Did
-  alias: string
+  alias?: string
 }
 
 export interface HttpdRoot {
@@ -75,25 +75,6 @@ export function isPatch(x: unknown): x is Patch {
   return Boolean(isPatch)
 }
 
-export interface Comment {
-  id: string
-  author: RadicleIdentity
-  body: string
-  reactions: [string, string][]
-  timestamp: number
-  replyTo: string | null
-}
-
-export type ReviewVerdict = 'accept' | 'reject' | null
-
-export interface Review {
-  author: RadicleIdentity
-  verdict?: ReviewVerdict
-  summary: string | null
-  comments: string[]
-  timestamp: number
-}
-
 export interface Revision {
   id: string
   author: RadicleIdentity
@@ -103,9 +84,40 @@ export interface Revision {
    * a.k.a. Object Identifier. The value is the commit hash.
    */
   oid: string
+  refs: string[]
   discussions: Comment[]
   reviews: Review[]
-  refs: string[]
+  timestamp: number
+}
+
+export interface Comment {
+  id: string
+  author: RadicleIdentity
+  body: string
+  edits: Edit[]
+  embeds: Embed[]
+  reactions: [string, string][]
+  timestamp: number
+  replyTo: string | null
+}
+
+export interface Edit {
+  author: RadicleIdentity
+  body: string
+  embeds: Embed[]
+  timestamp: number
+}
+
+export interface Embed {
+  name: string
+  content: string
+}
+
+export interface Review {
+  author: RadicleIdentity
+  verdict: 'accept' | 'reject' | null
+  summary: string | null
+  comments: string[]
   timestamp: number
 }
 

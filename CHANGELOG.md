@@ -4,9 +4,18 @@
 
 ### 🚀 Enhancements
 
-- **patch-detail:** implement new Patch Detail webview showing detailed info about a Patch
+- **patch-detail:** implement new Patch Detail webview showing in-depth info for a specific Patch
   - can be opened via a new button "View Patch Details" on each item in the list of Patches
-  - panel's title shows the patch description in full if it's small, otherwise truncated to the nearest full word
+  - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word
+  - the following Patch info are shown in the new view
+    - status
+    - major events like "created", "last updated", "merged" and related info with logic crafting optimal copy for each case (see similar tooltip improvements below)
+    - id (with on-hover button to copy Patch identifier to clipboard)
+    - revision authors
+    - labels
+    - title
+    - description
+    - where applicable the above have on-hover indicators hinting that they come with a tooltip showing addtional info such as author's DID, full Id in case it's shortened or full localised time in case it's a "time-ago"
 - **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured
 - **patch-list:** Patch tooltip improvements
   - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
@@ -16,7 +25,8 @@
   - only "time-ago" is shown now; the full date is still available in the Patch Details view
   - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago"
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
-- **patch-list:** use smaller dot separator between data in the description of a Patch list item
+- **patch-list:** use smaller dot as separator between data in the description of a Patch item
+- the initial size of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 resulting in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
 
 ### 🏡 Chores
 
@@ -28,6 +38,7 @@
   - auto-save Webview state and auto-restore it if VS Code is restarted with the Webview panel open
   - each new Webview panel opens in the currently active ViewColumn, if multi-column layout is in use (i.e. split editors)
   - Webview panel gets reused without being destroyed if it is re-invoked when the user has a ViewColumn active which isn't the one already containing the running Webview
+  - text content in Webviews can be searched with Ctrl + F and additional actions Copy/Paste/Cut are available on right click or by using their common keyboard shortcuts
   - Webviews are secured with strict Content Security Policy (CSP)
 
 -----

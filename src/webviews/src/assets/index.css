@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:is(code, pre, span, b)[title]:hover {
+  @apply underline decoration-dotted cursor-default;
+  text-underline-position: under;
+}
+
+:is(code, pre) {
+  @apply m-0;
+  display: initial;
+}

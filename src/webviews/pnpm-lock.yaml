@@ -11,6 +11,9 @@ dependencies:
   '@vueuse/core':
     specifier: ^10.7.0
     version: 10.7.0(vue@3.3.11)
+  javascript-time-ago:
+    specifier: ^2.5.9
+    version: 2.5.9
   pinia:
     specifier: ^2.1.7
     version: 2.1.7(typescript@5.2.2)(vue@3.3.11)
@@ -25,6 +28,9 @@ devDependencies:
   '@tsconfig/node18':
     specifier: ^18.2.2
     version: 18.2.2
+  '@types/javascript-time-ago':
+    specifier: ^2.0.8
+    version: 2.0.8
   '@types/jsdom':
     specifier: ^21.1.6
     version: 21.1.6
@@ -625,6 +631,10 @@ packages:
 
   /@tsconfig/node18@18.2.2:
     resolution: {integrity: sha512-d6McJeGsuoRlwWZmVIeE8CUA27lu6jLjvv1JzqmpsytOYYbVi1tHZEnwCNVOXnj4pyLvneZlFlpXUK+X9wBWyw==}
+    dev: true
+
+  /@types/javascript-time-ago@2.0.8:
+    resolution: {integrity: sha512-X77q3xUzWVn0qohgurKE1G5NiXZjee8VbLqaukW/HXVkz7bdCFJgOPQ3JVB4IkrDhMS4CviFTmpZuNVg0i2QFA==}
     dev: true
 
   /@types/jsdom@21.1.6:
@@ -2145,6 +2155,12 @@ packages:
       '@pkgjs/parseargs': 0.11.0
     dev: true
 
+  /javascript-time-ago@2.5.9:
+    resolution: {integrity: sha512-pQ8mNco/9g9TqWXWWjP0EWl6i/lAQScOyEeXy5AB+f7MfLSdgyV9BJhiOD1zrIac/lrxPYOWNbyl/IW8CW5n0A==}
+    dependencies:
+      relative-time-format: 1.1.6
+    dev: false
+
   /jiti@1.21.0:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
     hasBin: true
@@ -2834,6 +2850,10 @@ packages:
     dependencies:
       picomatch: 2.3.1
     dev: true
+
+  /relative-time-format@1.1.6:
+    resolution: {integrity: sha512-aCv3juQw4hT1/P/OrVltKWLlp15eW1GRcwP1XdxHrPdZE9MtgqFpegjnTjLhi2m2WI9MT/hQQtE+tjEWG1hgkQ==}
+    dev: false
 
   /requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}

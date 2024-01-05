@@ -11,8 +11,9 @@ type MessageToWebview =
   | Message<'resetCount'>
   | Message<'updateState', PatchDetailInjectedState>
 
-type MessageToExtension = Message<'showInfoNotification', { text: string }>
-// append more message types with `| Message<'...', SomeType>`
+type MessageToExtension =
+  | Message<'showInfoNotification', { text: string }>
+  | Message<'copyToClipboardAndNotify', { textToCopy: string }>
 
 /** Sends a message, usually from the host window, to the provided webview. */
 export function notifyWebview(message: MessageToWebview, webview: Webview): void {
