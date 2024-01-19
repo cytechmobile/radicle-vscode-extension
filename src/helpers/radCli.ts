@@ -2,8 +2,8 @@ import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../util
 import {
   getConfig,
   getResolvedPathToNodeHome,
-  getValidatedAliasedPathToRadBinary,
-  getValidatedDefaultPathToRadBinary,
+  getValidatedPathToDefaultRadBinaryLocation,
+  getValidatedPathToRadBinaryWhenAliased,
 } from '.'
 
 /**
@@ -19,8 +19,8 @@ export function getRadCliRefNow(): string {
 
   const radCliRef =
     getConfig('radicle.advanced.pathToRadBinary') ||
-    (Boolean(getValidatedAliasedPathToRadBinary()) && 'rad') ||
-    getValidatedDefaultPathToRadBinary()
+    (Boolean(getValidatedPathToRadBinaryWhenAliased()) && 'rad') ||
+    getValidatedPathToDefaultRadBinaryLocation()
   if (!radCliRef) {
     throw new Error('Failed resolving reference to Radicle Cli binary')
   }
@@ -61,8 +61,8 @@ export function getRadCliPath(): string | undefined {
   if (isRadCliInstalled()) {
     radCliPath =
       getConfig('radicle.advanced.pathToRadBinary') ??
-      getValidatedDefaultPathToRadBinary() ??
-      getValidatedAliasedPathToRadBinary()
+      getValidatedPathToDefaultRadBinaryLocation() ??
+      getValidatedPathToRadBinaryWhenAliased()
   }
 
   return radCliPath
@@ -86,6 +86,7 @@ export function getRadCliVersion(): string | undefined {
  *
  * @returns `true` if found, otherwise `false`.
  */
+// TODO: maninak memoize
 export function isRadCliInstalled(): boolean {
   const isInstalled = Boolean(exec(getRadCliRef()))
 
@@ -99,7 +100,7 @@ export function isRadCliInstalled(): boolean {
  * @returns `true` if the workspace is a rad-initialized repo, otherwise `false`.
  */
 export function isRadInitialized(): boolean {
-  const isInitialized = Boolean(exec(`${getRadCliRef()} inspect`, { cwd: '$workspaceDir' }))
+  const isInitialized = Boolean(getCurrentProjectId())
 
   return isInitialized
 }
@@ -188,6 +189,7 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
       assertUnreachable(format)
   }
 
+  // TODO: maninak reuse shell for second exec
   const id = exec(`${getRadCliRef()} self ${flag}`)
   const alias = exec(`${getRadCliRef()} self --alias`)
 
@@ -200,11 +202,12 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
 }
 
 /**
- * Resolves the Repository Identifier (RID) of the currently open workspace directory.
+ * Resolves the Radicle project id (RID) of the currently open workspace
+ * directory.
  *
  * @returns The RID if resolved, otherwise `undefined`.
  */
-export function getRepoId(): `rad:${string}` | undefined {
+export function getCurrentProjectId(): `rad:${string}` | undefined {
   const maybeRid = exec(`${getRadCliRef()} inspect --rid`, { cwd: '$workspaceDir' })
 
   function isStrARid(str: string | undefined): str is `rad:${string}` {
@@ -214,9 +217,9 @@ export function getRepoId(): `rad:${string}` | undefined {
   return isStrARid(maybeRid) ? maybeRid : undefined
 }
 export const {
-  memoizedFunc: memoizedGetRepoId,
-  debouncedClearMemoizedFuncCache: debouncedClearMemoizedgetRepoIdCache,
-} = memoizeWithDebouncedCacheClear(getRepoId, 10_000)
+  memoizedFunc: memoizedGetCurrentProjectId,
+  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentProjectIdCache,
+} = memoizeWithDebouncedCacheClear(getCurrentProjectId, 10_000)
 
 /**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved

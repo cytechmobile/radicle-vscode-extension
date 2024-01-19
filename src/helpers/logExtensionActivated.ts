@@ -1,4 +1,4 @@
-import { getExtensionContext } from '../store'
+import { getExtensionContext } from '../stores'
 import { log } from '../utils'
 
 interface PackageJson {

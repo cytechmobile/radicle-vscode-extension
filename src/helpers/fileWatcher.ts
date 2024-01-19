@@ -5,11 +5,8 @@ import {
   isGitRepo,
   setWhenClauseContext,
 } from '../utils'
-import {
-  notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
-  refreshPatchesEventEmitter,
-} from '../ux'
-import { getExtensionContext } from '../store'
+import { notifyUserRadCliNotResolvedAndMaybeTroubleshoot } from '../ux'
+import { getExtensionContext, useGitStore } from '../stores'
 import { isRadCliInstalled, isRadInitialized } from '.'
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
@@ -37,6 +34,7 @@ interface WatchFileNotInWorkspaceParam {
   handler: Parameters<typeof watchFileNotInWorkspace>['1']
 }
 
+// TODO: maninak replace `getRepoRoot()` with gitStore access?
 const notInWorkspaceFileWatchers = [
   {
     glob: () =>
@@ -67,10 +65,11 @@ const notInWorkspaceFileWatchers = [
         'HEAD',
       ),
     handler: () => {
-      refreshPatchesEventEmitter.fire(undefined)
+      useGitStore().refreshCurentBranch()
     },
   },
   (() => {
+    // TODO: maninak verify those still apply and align with getDefaultPathToRadBinary()
     switch (process.platform) {
       case 'linux':
         return {
@@ -90,13 +89,13 @@ const notInWorkspaceFileWatchers = [
         return undefined
     }
   })(),
-] satisfies (WatchFileNotInWorkspaceParam | undefined)[]
+].filter(Boolean) satisfies WatchFileNotInWorkspaceParam[]
 
 /**
  * Registers all handlers to be called whenever specific files get changed.
  */
-export function registerAllFileWatchers(): void {
-  notInWorkspaceFileWatchers.forEach((fw) => {
-    fw && watchFileNotInWorkspace(fw.glob, fw.handler)
+export function registerAllFileWatchers() {
+  notInWorkspaceFileWatchers.forEach((fileWatcher) => {
+    watchFileNotInWorkspace(fileWatcher.glob, fileWatcher.handler)
   })
 }

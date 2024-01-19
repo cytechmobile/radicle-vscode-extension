@@ -7,6 +7,7 @@ import { getConfig } from './config'
 // if we ever use a proper reactive global store like pinia, `doFetch()` should move in there
 // and a watcher should run `resetHttpdConnection()` upon change of config
 // `radicle.advanced.httpApiEndpoint` (as of writing this, at least ^_^)
+// TODO: maninak either do this in configStore, or consider having an httpdStore where we export fetchFromHttpd as `useHttpd().fetch()` and internally doFetch is a computed that depends on `useConfigStore().resolvedHttpdRootUrl` or `radicle.advanced.httpApiEndpoint` with some other name
 let doFetch: $Fetch
 
 /**
@@ -15,7 +16,7 @@ let doFetch: $Fetch
  * Should be run each time any of the dependencies get updated for them to take effect.
  */
 export function resetHttpdConnection(): void {
-  doFetch = ofetch.create({ baseURL: getResolvedHttpdRootUrl(), query: { perPage: 100 } })
+  doFetch = ofetch.create({ baseURL: getResolvedHttpdRootUrl(), query: { perPage: 200 } })
 }
 
 type FetchFromHttpdReturn<Data extends object> = Promise<

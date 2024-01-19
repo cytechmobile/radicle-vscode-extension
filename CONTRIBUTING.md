@@ -48,10 +48,15 @@ pnpm install a-new-pkg # if this is what you need to do
 npx pnpm install a-new-pkg # you can achieve it like this
 ```
 
+## Developing with VS Code
+
+While not required, for development it's strongly advised to use VS Code with all the [recommended extensions](.vscode/extensions.json) installed and enabled in the workspace of this repo.
+
 ## Conventions
 
 ### Paths
 
+<!-- TODO: maninak re-evaluate if this is still true now with esbuild and update docs and code as needed (maybe use `@` alias?) -->
 Because of module resolution restrictions, all paths must be relative. e.g. instead of `src/utils` (even if import auto-completion writes that) it should be corrected to `../utils`.
 
 ### Getting user input

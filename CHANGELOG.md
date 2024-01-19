@@ -6,31 +6,46 @@
 
 - **patch-detail:** implement new Patch Detail webview showing in-depth info for a specific Patch
   - can be opened via a new button "View Patch Details" on each item in the list of Patches
-  - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word
+  - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word fitting the limit
   - the following Patch info are shown in the new view
     - status
+      - the status badge's background color is a dynamic color mix of the patch status color and the dynamic editor-foreground inherited from vscode's current theme so as to ensure text contrast reaching at least [WCAAG AA](https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_WCAG/Perceivable/Color_contrast) level of accessibility at all times while also retaining a relative consistency of the colors across all our UIs
     - major events like "created", "last updated", "merged" and related info with logic crafting optimal copy for each case (see similar tooltip improvements below)
     - id (with on-hover button to copy Patch identifier to clipboard)
     - revision authors
     - labels
     - title
     - description
-    - where applicable the above have on-hover indicators hinting that they come with a tooltip showing addtional info such as author's DID, full Id in case it's shortened or full localised time in case it's a "time-ago"
+  - where applicable the Patch info have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened or localised time (including the timezone used) in full text in case it's a "time-ago"
+  - "time-ago" for major patch events gets auto-updated to remain accurate as time goes by
+  - a "Refresh" button that refetches from httpd all data of that patch and updating all views that depend on it
+  - a "Check Out" button that checks out the Git branch associated with the Radicle Patch shown in the view
+    - shown only if the Patch is not checked out
+  - a "Check Out Default" button that checks out the Git branch marked as default for the Radicle project
+    - shown only if the Patch is checked out
+  - Patch check-out status remains in sync across all views and the actual underlying Git state as the latter changes
+- **commands**: add new command to check out the current Radicle project's default Git branch
+- **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out Patch on the list
 - **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured
-- **patch-list:** Patch tooltip improvements
+- **patch-list:** improve Patch tooltip with the following
   - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
   - show latest revision id and commit hash for Patches with more than the initial revision
 - **patch-list:** prioritize Patch merge event over latest revision when deriving author and "time-ago" for item description
 - **patch-list:** improve legibility of time when Patch events (e.g. created, last updated, merged) happened
-  - only "time-ago" is shown now; the full date is still available in the Patch Details view
-  - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago"
+  - don't show full dates to make the copy less noisy. The full dates are still available in the new Patch Details view.
+  - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago" etc
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
 - **patch-list:** use smaller dot as separator between data in the description of a Patch item
-- the initial size of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 resulting in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
+- the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
+
+### 🏎️ Performance
+
+- **patch-list:** only re-render the affected Patch item(s) when checking out a(nother) patch (or a non-patch) branch. Previously all patches had to be re-fetched, parsed and all their list items (and their tooltips!) needed to be instantiated and rendered every time a different git branch got checked out.
 
 ### 🏡 Chores
 
-- **webview:** implement infrastructure for Webviews, enabling the creation of bespoke custom views with the following powerful features
+- **webview:** implement infrastructure for Webviews, effectively individual websites inside a WebviewPanel, enabling the creation of bespoke custom views with the following powerful features
+  - webviews can be full blown web-apps powered by Vue.js, Vite, VueUse, TailwindCSS and other great tech
   - UI in Webviews seamlessly blends with VS Code's familiar look'n'feel, even adjusting to each user's color theme
   - Webviews can have bi-directional communication with the host VS Code extension
   - initial state can be injected into a Webview, allowing reuse of already fetched data and reducing the need for loading spinners on init
@@ -40,6 +55,12 @@
   - Webview panel gets reused without being destroyed if it is re-invoked when the user has a ViewColumn active which isn't the one already containing the running Webview
   - text content in Webviews can be searched with Ctrl + F and additional actions Copy/Paste/Cut are available on right click or by using their common keyboard shortcuts
   - Webviews are secured with strict Content Security Policy (CSP)
+- **state:** rewrite shared state management across the entire extension from simplistic, localised, highly interdependent and brittle, procedural approach to a new declarative, reactive, global, scalable architecture powered by [`pinia`](https://pinia.vuejs.org/) and [`@vue/reactivity`](https://www.npmjs.com/package/@vue/reactivity). This enables sharing state across sibling views/entities that was previously too hard, enabling more performant solutions and features that were previously too impractical to tackle, while the code for them can be much more maintainable and less likely to regress in the future.
+
+### 📖 Documentation
+
+- **readme:** fix typos, improve title and intro copy, update milestone link
+- **contributing:** document recommended extensions for development with VS Code in [.vscode/extensions.json](.vscode/extensions.json) and add related section in the repo's contribution guide.
 
 -----
 
@@ -58,7 +79,7 @@
 - **patch-list:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patch-list:** improve the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
-### 🔥 Performance
+### 🏎️ Performance
 
 - **app:** heavily speed up most procedures by memoizing the resolution of the reference to the rad CLI ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 - **patch-list:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
@@ -173,6 +194,7 @@
 
 - ❤️🪵 Initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
+<!-- TODO: maninak update all mentions of "track" to "seed" -->
 - 📥 Cloning of tracked Radicle projects
 - 🏗️ Improved development tooling and infrastructure for maintainers
 

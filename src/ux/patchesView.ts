@@ -12,21 +12,20 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
+import { type AugmentedPatch, usePatchStore } from '../stores'
 import {
-  debouncedClearMemoizedgetRepoIdCache,
+  debouncedClearMemoizedGetCurrentProjectIdCache,
   fetchFromHttpd,
-  memoizedGetRepoId,
+  memoizedGetCurrentProjectId,
 } from '../helpers'
 import { type Patch, type Unarray, isPatch } from '../types'
 import {
   assertUnreachable,
   capitalizeFirstLetter,
-  getCurrentGitBranch,
   getFirstAndLatestRevisions,
   getIdentityAliasOrId,
   getTimeAgo,
   log,
-  memoizeWithDebouncedCacheClear,
   shortenHash,
 } from '../utils'
 
@@ -47,42 +46,55 @@ export interface FilechangeNode {
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.
  */
-export const refreshPatchesEventEmitter = new EventEmitter<
-  string | Patch | (string | Patch)[] | undefined
+const rerenderPatchesViewEventEmitter = new EventEmitter<
+  string | AugmentedPatch | (string | AugmentedPatch)[] | undefined
 >()
 
-export const patchesTreeDataProvider: TreeDataProvider<string | Patch | FilechangeNode> = {
+export function rerenderSomeItemsInPatchesView(
+  patchesMatchingItems: AugmentedPatch | AugmentedPatch[],
+) {
+  rerenderPatchesViewEventEmitter.fire(patchesMatchingItems)
+}
+
+export function rerenderAllItemsInPatchesView() {
+  rerenderPatchesViewEventEmitter.fire(undefined)
+}
+
+export const patchesTreeDataProvider: TreeDataProvider<
+  string | AugmentedPatch | FilechangeNode
+> = {
   getTreeItem: (elem) => {
     if (typeof elem === 'string') {
       return { description: elem }
     } else if (isPatch(elem)) {
-      const isCheckedOut = isPatchCheckedOut(elem)
-      const edgeRevisions = getFirstAndLatestRevisions(elem)
+      const patch = elem
+      const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
+      const edgeRevisions = getFirstAndLatestRevisions(patch)
 
       const treeItem: TreeItem = {
-        id: elem.id,
+        id: patch.id,
         contextValue: `patch:checked-out-${isCheckedOut}`,
-        iconPath: getThemeIconForPatch(elem),
-        label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${elem.title}`,
-        description: getPatchTreeItemDescription(elem, edgeRevisions),
-        tooltip: getPatchTreeItemTooltip(elem, edgeRevisions, isCheckedOut),
+        iconPath: getThemeIconForPatch(patch),
+        label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${patch.title}`,
+        description: getPatchTreeItemDescription(patch, edgeRevisions),
+        tooltip: getPatchTreeItemTooltip(patch, edgeRevisions, isCheckedOut),
         collapsibleState: TreeItemCollapsibleState.Collapsed,
       }
 
       return treeItem
-    }
-    // elem is FilechangeNode
-    else {
+    } else {
+      const filechangeNode = elem
+
       // We can't put the code to construct the filechange TreeItem inside getTreeItem()
       // because we need to perform operations on the whole collection (e.g. sort, search for
       // and handle items with same filename differently, etc). Thus we define a "constructor"
       // inside getChildren() and call that in here.
-      return elem.getTreeItem()
+      return filechangeNode.getTreeItem()
     }
   },
   getChildren: async (elem) => {
-    debouncedClearMemoizedgetRepoIdCache()
-    const rid = memoizedGetRepoId()
+    debouncedClearMemoizedGetCurrentProjectIdCache()
+    const rid = memoizedGetCurrentProjectId()
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
@@ -91,37 +103,23 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
     // get children of root
     if (!elem) {
-      // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
-      const responses = await Promise.all([
-        fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
-          query: { state: 'draft' },
-        }),
-        fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
-          query: { state: 'open' },
-        }),
-        fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
-          query: { state: 'archived' },
-        }),
-        fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
-          query: { state: 'merged' },
-        }),
-      ])
-      const errors = responses.map((response) => response.error).filter(Boolean)
-      const patches = responses.flatMap((response) => response.data).filter(Boolean)
+      const patchStore = usePatchStore()
+      await patchStore.initStoreIfNeeded()
+      const patches = patchStore.patches
 
-      if (errors.length) {
+      if (!patches) {
         setTimeout(() => {
-          refreshPatchesEventEmitter.fire(undefined)
+          rerenderAllItemsInPatchesView()
         }, 3_000 * ++timesPatchListFetchErroredConsecutively)
 
-        return errors.length === responses.length
-          ? ['Please ensure `radicle-httpd` is running and accessible!']
-          : ['Not all patches may be listed due to an error!', ...patches]
+        // TODO: maninak add button linking to see output?
+        // TODO: maninak add button linking to specific config?
+        return ['Please ensure `radicle-httpd` is running and accessible!']
       }
       timesPatchListFetchErroredConsecutively = 0
 
       if (!patches.length) {
-        return [`0 Radicle Patches found`]
+        return [`0 Radicle Patches`]
       }
 
       const patchesSortedByRevisionTsPerStatus = [
@@ -136,7 +134,8 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
 
     // get children of patch
     else if (isPatch(elem)) {
-      const { latestRevision } = getFirstAndLatestRevisions(elem)
+      const patch = elem
+      const { latestRevision } = getFirstAndLatestRevisions(patch)
       const oldVersionCommitSha = latestRevision.base
       const newVersionCommitSha = latestRevision.oid
 
@@ -256,7 +255,7 @@ export const patchesTreeDataProvider: TreeDataProvider<string | Patch | Filechan
                 }
 
                 const filechangeTreeItem: TreeItem = {
-                  id: `${elem.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.path}`,
+                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.path}`,
                   contextValue: `filechange:${filechangeKind}`,
                   label: filename,
                   description: shouldShowPathInDescription ? true : undefined,
@@ -311,7 +310,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
                 enableShowingPathInDescription,
                 getTreeItem: () =>
                   ({
-                    id: `${elem.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.newPath}`,
+                    id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.newPath}`,
                     label: filename,
                     description: shouldShowPathInDescription
                       ? Path.dirname(filechange.newPath)
@@ -335,6 +334,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
             ),
           )
 
+          // TODO: maninak always show path except if in project root
           hasSameFilenameWithAnotherFile && filechangeNode.enableShowingPathInDescription()
 
           return filechangeNode
@@ -352,25 +352,8 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
 
     return undefined
   },
-  onDidChangeTreeData: refreshPatchesEventEmitter.event,
+  onDidChangeTreeData: rerenderPatchesViewEventEmitter.event,
 } as const
-
-const {
-  memoizedFunc: memoizedGetCurrentGitBranch,
-  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentGitBranchCache,
-} = memoizeWithDebouncedCacheClear(getCurrentGitBranch, 200)
-
-/**
- * Answers whether the associated branch of the provided radicle `patch` is the
- * currenctly checked out git branch.
- */
-function isPatchCheckedOut(patch: Pick<Patch, 'id'>): boolean {
-  debouncedClearMemoizedGetCurrentGitBranchCache()
-  const branchName = memoizedGetCurrentGitBranch()
-  const isCheckedOut = Boolean(branchName?.includes(shortenHash(patch.id)))
-
-  return isCheckedOut
-}
 
 function getPatchTreeItemDescription(
   patch: Patch,
@@ -460,10 +443,10 @@ function dat(str: string): string {
   return `${formatingMarker}${str}${formatingMarker}`
 }
 
-function getPatchesOfStatusSortedByLatestRevisionFirst(
-  patches: Patch[],
-  patchStatus: Patch['state']['status'],
-): Patch[] {
+function getPatchesOfStatusSortedByLatestRevisionFirst<P extends Patch>(
+  patches: P[],
+  patchStatus: P['state']['status'],
+): P[] {
   const sortedPatches = patches
     .filter((patch) => patch.state.status === patchStatus)
     .sort((p1, p2) => {
@@ -480,7 +463,7 @@ function getPatchesOfStatusSortedByLatestRevisionFirst(
 }
 
 // eslint-disable-next-line consistent-return
-function getThemeIconForPatch(patch: Patch): ThemeIcon {
+function getThemeIconForPatch<P extends Patch>(patch: P): ThemeIcon {
   switch (patch.state.status) {
     case 'draft':
       return new ThemeIcon('git-pull-request-draft', new ThemeColor('patch.draft'))
@@ -495,7 +478,7 @@ function getThemeIconForPatch(patch: Patch): ThemeIcon {
   }
 }
 
-function getHtmlIconForPatch(patch: Patch): string {
+function getHtmlIconForPatch<P extends Patch>(patch: P): string {
   const icon = getThemeIconForPatch(patch)
 
   return `<span style="color:${getCssColor(icon.color)};">$(${icon.id})</span>`

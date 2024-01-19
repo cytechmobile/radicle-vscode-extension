@@ -1,6 +1,6 @@
 import { InputBoxValidationSeverity, window } from 'vscode'
 import { askUser, exec, log, showLog } from '../utils'
-import { getExtensionContext } from '../store'
+import { getExtensionContext } from '../stores'
 import {
   composeNodeHomePathMsg,
   getNodeSshKey,

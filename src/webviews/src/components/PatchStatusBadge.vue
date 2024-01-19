@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { usePatchDetailStore } from '@/stores/patchDetail'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusIcon from './PatchStatusIcon.vue'
 import { computed } from 'vue'
 
@@ -10,10 +10,8 @@ const status = computed(() => patch.value.state.status)
 
 <template>
   <span
-    :class="[
-      'rounded-full px-[0.75em] py-[0.25em] inline-flex items-center text-vscode-editor-background gap-[0.5em]',
-      `bg-patch-${status}`
-    ]"
+    class="rounded-full px-[0.75em] py-[0.25em] inline-flex items-center text-vscode-editor-background gap-[0.5em]"
+    :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
   >
     <PatchStatusIcon :status="status" />
     <span class="capitalize">{{ status }}</span>

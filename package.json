@@ -127,9 +127,16 @@
       {
         "command": "radicle.checkoutPatch",
         "title": "Check Out Patch Branch",
-        "shortTitle": "Check Out",
+        "shortTitle": "Check Out Patch",
         "category": "Radicle",
         "icon": "$(check)"
+      },
+      {
+        "command": "radicle.checkoutDefaultBranch",
+        "title": "Check Out Project's Default Git Branch",
+        "shortTitle": "Check Out Default",
+        "category": "Radicle",
+        "icon": "$(home)"
       },
       {
         "command": "radicle.copyPatchId",
@@ -207,6 +214,11 @@
         {
           "command": "radicle.checkoutPatch",
           "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
+          "group": "inline@2"
+        },
+        {
+          "command": "radicle.checkoutDefaultBranch",
+          "when": "view == patches-view && viewItem =~ /patch:checked-out-true/",
           "group": "inline@2"
         },
         {
@@ -396,7 +408,7 @@
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "#eb554d",
+          "dark": "#dd655f",
           "light": "#c74942",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
@@ -454,9 +466,11 @@
     "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "dependencies": {
+    "@vue/reactivity": "^3.4.5",
     "javascript-time-ago": "^2.5.9",
     "lodash": "^4.17.21",
-    "ofetch": "^1.2.1"
+    "ofetch": "^1.2.1",
+    "pinia": "^2.1.7"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",

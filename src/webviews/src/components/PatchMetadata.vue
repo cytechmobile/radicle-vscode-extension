@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
 import { storeToRefs } from 'pinia'
-import { usePatchDetailStore } from '@/stores/patchDetail'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 
 const { patch, authors } = storeToRefs(usePatchDetailStore())
-// TODO: maninak auto update time-agos every 10s (?)
+// TODO: maninak add an (orange?) info icon next to authors who's DID is seen for the first time among revisions of patches of this project with text "This is the first time a user with this DID submits a patch revision in this project"
+// TODO: maninak list committers with gravatar if available and email as tooltip
 </script>
 
 <template>

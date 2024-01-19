@@ -1,17 +1,17 @@
 import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, ref, watchEffect } from 'vue'
-import type { notifyWebview } from 'extensionUtils/webview-messaging'
+import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
 import type { Patch, PatchDetailInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
 const vscode = getVscodeRef<PatchDetailInjectedState>()
 
-export const usePatchDetailStore = defineStore('counter', () => {
+export const usePatchDetailStore = defineStore('patch-detail', () => {
   const state = ref(vscode.getState() ?? window.injectedWebviewState)
 
-  const patch = computed(() => state.value.state)
+  const patch = computed(() => state.value.state.patch)
 
   const firstAndLatestRevisions = computed(() => getFirstAndLatestRevisions(patch.value))
   const firstRevision = computed(() => firstAndLatestRevisions.value.firstRevision)

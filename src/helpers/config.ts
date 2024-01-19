@@ -65,6 +65,8 @@ export function setConfig<K extends keyof ExtensionConfig>(
  */
 export function getDefaultPathToRadBinary(): string | undefined {
   const homeDir = exec('echo $HOME')
+  // TODO: maninak can I use `~` instead and skip the shell command?
+  // TODO: maninak what if it's a mac??
   const defaultPath = homeDir ? `${homeDir}/.radicle/bin/rad` : undefined
 
   return defaultPath
@@ -76,7 +78,7 @@ export function getDefaultPathToRadBinary(): string | undefined {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export function getValidatedDefaultPathToRadBinary(): string | undefined {
+export function getValidatedPathToDefaultRadBinaryLocation(): string | undefined {
   const defaultPath = getDefaultPathToRadBinary()
 
   if (!defaultPath) {
@@ -94,7 +96,7 @@ export function getValidatedDefaultPathToRadBinary(): string | undefined {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export function getValidatedAliasedPathToRadBinary(): string | undefined {
+export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
   const aliasedPath = exec('which rad')
   if (!aliasedPath) {
     return undefined
@@ -112,6 +114,7 @@ export function getValidatedAliasedPathToRadBinary(): string | undefined {
  * @returns The path if successfully resolved, otherwise `undefined`
  * @see https://radicle.xyz/install
  */
+// TODO: maninak memoize
 export function getDefaultPathToNodeHome(): string | undefined {
   const homeDir = exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle` : undefined

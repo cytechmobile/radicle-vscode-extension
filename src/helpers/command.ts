@@ -1,13 +1,13 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext } from '../store'
+import { type AugmentedPatch, getExtensionContext, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
+  checkOutDefaultBranch,
   checkOutPatch,
   copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
-  refreshPatchesEventEmitter,
   selectAndCloneRadicleProject,
 } from '../ux'
 import type { Patch } from '../types'
@@ -92,9 +92,10 @@ export function registerAllCommands(): void {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
   registerVsCodeCmd('radicle.refreshPatches', () => {
-    refreshPatchesEventEmitter.fire(undefined)
+    usePatchStore().resetAllPatches()
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
+  registerVsCodeCmd('radicle.checkoutDefaultBranch', checkOutDefaultBranch)
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
     typeof patch?.id === 'string' && (await copyToClipboardAndNotify(patch.id))
   })
@@ -140,7 +141,7 @@ export function registerAllCommands(): void {
       }
     },
   )
-  registerVsCodeCmd('radicle.viewPatchDetails', (patch: Patch) => {
+  registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
     createOrShowWebview(getExtensionContext(), patch)
   })
 }

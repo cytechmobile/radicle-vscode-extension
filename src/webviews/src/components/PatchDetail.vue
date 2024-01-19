@@ -1,17 +1,28 @@
 <script setup lang="ts">
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
 import { storeToRefs } from 'pinia'
-import { usePatchDetailStore } from '@/stores/patchDetail'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusBadge from './PatchStatusBadge.vue'
 import PatchMajorEvents from './PatchMajorEvents.vue'
 import PatchMetadata from './PatchMetadata.vue'
+import { toRaw } from 'vue'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 
 const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
 
 function refetchPatchData() {
-  // TODO: maninak implement use `<progress-ring>` while loading
+  notifyExtension({ command: 'refreshPatchData', payload: { patchId: patch.value.id } })
+  // TODO: maninak implement and consider using `<progress-ring>` while loading
+}
+
+function checkOutPatchBranch() {
+  notifyExtension({ command: 'checkOutPatchBranch', payload: { patch: toRaw(patch.value) } })
+}
+
+function checkOutDefaultBranch() {
+  notifyExtension({ command: 'checkOutDefaultBranch', payload: undefined })
 }
 </script>
 
@@ -22,10 +33,36 @@ function refetchPatchData() {
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents />
       </div>
-      <aside class="contents">
-        <vscode-button class="self-center" appearance="secondary" @click="refetchPatchData">
+      <aside class="ml-4 flex flex-col gap-2 *:w-full">
+        <vscode-button
+          class="self-center"
+          appearance="secondary"
+          title="Refresh all data rendered on this page"
+          @click="refetchPatchData"
+        >
           <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-          <span slot="start" class="codicon codicon-refresh"></span>Refresh data</vscode-button
+          <span slot="start" class="codicon codicon-refresh"></span>Refresh</vscode-button
+        >
+        <vscode-button
+          v-if="!patch.isCheckedOut"
+          class="self-center"
+          appearance="secondary"
+          title="Check out the Git branch associated with this Radicle patch"
+          @click="checkOutPatchBranch"
+        >
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <span slot="start" class="codicon codicon-check"></span>Check Out</vscode-button
+        >
+        <vscode-button
+          v-else
+          class="self-center"
+          appearance="secondary"
+          title="Switch from the Git branch associated with this patch to the project's default branch"
+          @click="checkOutDefaultBranch"
+        >
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <span slot="start" class="codicon codicon-home"></span>Check Out
+          Default</vscode-button
         >
       </aside>
     </header>
