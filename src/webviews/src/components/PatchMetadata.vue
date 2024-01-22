@@ -29,7 +29,7 @@ const { patch, authors } = storeToRefs(usePatchDetailStore())
         @click="
           notifyExtension({
             command: 'copyToClipboardAndNotify',
-            payload: { textToCopy: patch.id }
+            payload: { textToCopy: patch.id },
           })
         "
       >

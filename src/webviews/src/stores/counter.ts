@@ -32,7 +32,7 @@ export const useCounterStore = defineStore('counter', () => {
       const message = event.data
 
       message.command === 'resetCount' && reset()
-    }
+    },
   )
 
   return { count, doubleCount, increment, reset }

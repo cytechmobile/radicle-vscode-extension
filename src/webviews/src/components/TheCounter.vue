@@ -13,7 +13,7 @@ const { increment, reset } = counterStore
 function showInfoNotifWithCount() {
   notifyExtension({
     command: 'showInfoNotification',
-    payload: { text: `The count is: ${count.value}` }
+    payload: { text: `The count is: ${count.value}` },
   })
 }
 </script>

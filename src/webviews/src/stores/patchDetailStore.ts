@@ -25,8 +25,8 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
           uniqueAuthors.find((uniqueAuthor) => uniqueAuthor.id === maybeUniqueAuthor.id)
             ? uniqueAuthors
             : [...uniqueAuthors, maybeUniqueAuthor],
-        [] as Patch['author'][]
-      )
+        [] as Patch['author'][],
+      ),
   )
 
   watchEffect(() => {
@@ -43,7 +43,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       if (message.command === 'updateState') {
         state.value = message.payload
       }
-    }
+    },
   )
 
   return { patch, firstRevision, latestRevision, authors }

@@ -12,12 +12,12 @@ const { patch, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore
 // TODO: maninak show `accepted` review as major event, if the related revision got accepted?
 
 const latestMerge = computed(() =>
-  [...patch.value.merges].sort((m1, m2) => m1.timestamp - m2.timestamp).at(-1)
+  [...patch.value.merges].sort((m1, m2) => m1.timestamp - m2.timestamp).at(-1),
 )
 const shouldShowRevisionEvent = computed(() => patch.value.revisions.length >= 2)
 
 const createdTimeAgo = computedWithControl(firstRevision, () =>
-  getTimeAgo(firstRevision.value.timestamp)
+  getTimeAgo(firstRevision.value.timestamp),
 )
 // Somehow this useIntervalFn() triggers re-rendering of the whole component including
 // re-calculation of all other `getTimeAgo()` calls too.

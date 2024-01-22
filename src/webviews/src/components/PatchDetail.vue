@@ -3,7 +3,7 @@ import {
   provideVSCodeDesignSystem,
   vsCodeButton,
   vsCodeDropdown,
-  vsCodeOption
+  vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
 import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -30,7 +30,7 @@ function getRevisionOptionLabel(revision: Revision): string {
     revision.reviews.find((review) => review.verdict === 'accept') && 'accepted',
     revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
     patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
-    patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest'
+    patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest',
   ].filter(Boolean)
   const parsedState = state.length ? ` [${state.join(', ')}]` : ''
   const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''
@@ -43,8 +43,8 @@ const revisionOptionsMap = ref(
   new Map(
     [...patch.value.revisions]
       .reverse()
-      .map((revision) => [getRevisionOptionLabel(revision), revision] as const)
-  )
+      .map((revision) => [getRevisionOptionLabel(revision), revision] as const),
+  ),
 )
 // TODO: maninak if patch is merged pre-select revision that got merged
 const selectedRevisionOption = ref(getRevisionOptionLabel(latestRevision.value))
@@ -52,17 +52,17 @@ const selectedRevision = computed(
   () =>
     revisionOptionsMap.value.get(selectedRevisionOption.value) as NonNullable<
       ReturnType<(typeof revisionOptionsMap)['value']['get']>
-    >
+    >,
 )
 const shouldHideRevisionDescription = computed(
   () =>
-    selectedRevision.value.description && selectedRevision.value.id === firstRevision.value.id
+    selectedRevision.value.description && selectedRevision.value.id === firstRevision.value.id,
 )
 const selectedRevisionAcceptedReviews = computed(() =>
-  selectedRevision.value.reviews.filter((review) => review.verdict === 'accept')
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'accept'),
 )
 const selectedRevisionRejectedReviews = computed(() =>
-  selectedRevision.value.reviews.filter((review) => review.verdict === 'reject')
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'reject'),
 )
 
 function refetchPatchData() {
@@ -169,7 +169,7 @@ This is a patch description parsed from Markdown:
               @click="
                 notifyExtension({
                   command: 'copyToClipboardAndNotify',
-                  payload: { textToCopy: selectedRevision.id }
+                  payload: { textToCopy: selectedRevision.id },
                 })
               "
             >
