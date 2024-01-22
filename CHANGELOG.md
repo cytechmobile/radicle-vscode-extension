@@ -2,28 +2,89 @@
 
 ## _(WIP, yet unreleased version)_
 
+### ✨ Highlights
+
+- New Patch Detail view
+
+    <!-- TODO: maninak add screenshot -->
+
 ### 🚀 Enhancements
 
-- **patch-detail:** implement new Patch Detail webview showing in-depth info for a specific Patch
+- **patch-detail:** implement new Patch Detail webview showing highly dynamic, in-depth information for a specific Patch
   - can be opened via a new button "View Patch Details" on each item in the list of Patches
   - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word fitting the limit
-  - the following Patch info are shown in the new view
-    - status
+  - the new view has the following main sections:
+    - header
+    - Patch
+    - Revision
+    - Activity
+  - header section shows the following info:
+    - status (e.g. open, merged, archived, ...)
       - the status badge's background color is a dynamic color mix of the patch status color and the dynamic editor-foreground inherited from vscode's current theme so as to ensure text contrast reaching at least [WCAAG AA](https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_WCAG/Perceivable/Color_contrast) level of accessibility at all times while also retaining a relative consistency of the colors across all our UIs
     - major events like "created", "last updated", "merged" and related info with logic crafting optimal copy for each case (see similar tooltip improvements below)
-    - id (with on-hover button to copy Patch identifier to clipboard)
-    - revision authors
+    - a "Refresh" button that refetches from httpd all data of that patch and updating all views that depend on it
+    - a "Check Out" button that checks out the Git branch associated with the Radicle Patch shown in the view
+      - shown only if the Patch is not checked out
+    - a "Check Out Default" button that checks out the Git branch marked as default for the Radicle project
+      - shown only if the Patch is checked out
+    - "time-ago" for major patch events gets auto-updated to remain accurate as time goes by
+  - Patch section shows the following info:
+    - checked-out indicator
+      - not shown if the Git branch associated with this Radicle Patch is not currently checked out
+    - id
+      - has on-hover button to copy Patch identifier to clipboard
+    - revision author(s)
     - labels
+      - not shown if empty
     - title
+      - supports markdown
     - description
-  - where applicable the Patch info have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened or localised time (including the timezone used) in full text in case it's a "time-ago"
-  - "time-ago" for major patch events gets auto-updated to remain accurate as time goes by
-  - a "Refresh" button that refetches from httpd all data of that patch and updating all views that depend on it
-  - a "Check Out" button that checks out the Git branch associated with the Radicle Patch shown in the view
-    - shown only if the Patch is not checked out
-  - a "Check Out Default" button that checks out the Git branch marked as default for the Radicle project
-    - shown only if the Patch is checked out
-  - Patch check-out status remains in sync across all views and the actual underlying Git state as the latter changes
+      - supports markdown
+  - Revision section shows the following info:
+    - a revision selection dropdown located next to the section heading contains all revisions of the current patch as options
+      - if a revision is merged it is auto-selected, otherwise it will be the most recently created
+      - revisions are sorted as most-recent-top
+      - revisions can be quickly browsed by using the up/down buttons while the dropdown is focused
+      - revisions can be quickly searched by typing the beginning of a revision id while the dropdown is focused
+      - revision are dynamically formatted so that the list can be scannable for a quick overview, while also showing only whatever info is necessary in each scenario, with the following data
+        - shortened revision id
+        - "mini"-sized "time-ago"
+        - state
+          - `merged`
+            - suffixed with `/<countOfMergedRevisions>` if more than one revisions got merged e.g. `merged/3`
+            - not shown if revision isn't merged
+          - `accepted`
+            - not shown if the revision doesn't have an `accept` review
+          - `rejected`
+            - not shown if the revision doesn't have a `reject` review
+          - `first`
+            - not shown if the revision isn't the earliest one for this patch or if it has only one revision
+          - `latest`
+            - not shown if the revision isn't the most recent one for this patch or if it has only one revision
+          - not shown if empty
+        - author
+          - not shown if all revisions are from the same author
+    - id
+      - has on-hover button to copy revision identifier to clipboard
+    - author
+    - reviews
+      - shows list of Radicle identity aliases who "accepted" and/or "rejected" the selected revision
+      - not shown if empty
+    - date
+      - the full date the selected revision was created, in local timezone
+    - latest commit
+      - the head commit of the selected revision
+    - based on commit
+      - the commit the selected revision is branched off of
+    - description
+      - supports markdown parsing
+      - if the selected revision is the first revision, the description is hidden under an expandable-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
+      - not shown if empty
+  - Activity section shows the following info:
+    -
+  - Patch state remains in sync with all other views
+  - where applicable the various data have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened or localised time (including the timezone used) in full text in case it's a "time-ago", etc
+  - all data coming from Radicle is made visually distinct (and a bit more accessible / easier to read) from miscellaneous UI copy by rendering it using a monotype font
 - **commands**: add new command to check out the current Radicle project's default Git branch
 - **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out Patch on the list
 - **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured

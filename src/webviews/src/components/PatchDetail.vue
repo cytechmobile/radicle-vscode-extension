@@ -1,20 +1,72 @@
 <script setup lang="ts">
-import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
+import {
+  provideVSCodeDesignSystem,
+  vsCodeButton,
+  vsCodeDropdown,
+  vsCodeOption
+} from '@vscode/webview-ui-toolkit'
+import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
+import { getFormattedDate, getTimeAgo } from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusBadge from './PatchStatusBadge.vue'
 import PatchMajorEvents from './PatchMajorEvents.vue'
 import PatchMetadata from './PatchMetadata.vue'
 import { toRaw } from 'vue'
+import type { Revision } from '../../../types'
 
-provideVSCodeDesignSystem().register(vsCodeButton())
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 
-const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
+const { patch, authors, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
+
+function getRevisionOptionLabel(revision: Revision): string {
+  const id = shortenHash(revision.id)
+  const timeAgo = getTimeAgo(revision.timestamp, 'mini')
+  const state = [
+    patch.value.merges.map((merge) => merge.revision).includes(revision.id) &&
+      `merged${patch.value.merges.length >= 2 ? `/${patch.value.merges.length}` : ''}`,
+    revision.reviews.find((review) => review.verdict === 'accept') && 'accepted',
+    revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
+    patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
+    patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest'
+  ].filter(Boolean)
+  const parsedState = state.length ? ` [${state.join(', ')}]` : ''
+  const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''
+  const label = `${id}${parsedState} ${timeAgo}${author}`
+
+  return label
+}
+
+const revisionOptionsMap = ref(
+  new Map(
+    [...patch.value.revisions]
+      .reverse()
+      .map((revision) => [getRevisionOptionLabel(revision), revision] as const)
+  )
+)
+// TODO: maninak if patch is merged pre-select revision that got merged
+const selectedRevisionOption = ref(getRevisionOptionLabel(latestRevision.value))
+const selectedRevision = computed(
+  () =>
+    revisionOptionsMap.value.get(selectedRevisionOption.value) as NonNullable<
+      ReturnType<(typeof revisionOptionsMap)['value']['get']>
+    >
+)
+const shouldHideRevisionDescription = computed(
+  () =>
+    selectedRevision.value.description && selectedRevision.value.id === firstRevision.value.id
+)
+const selectedRevisionAcceptedReviews = computed(() =>
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'accept')
+)
+const selectedRevisionRejectedReviews = computed(() =>
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'reject')
+)
 
 function refetchPatchData() {
   notifyExtension({ command: 'refreshPatchData', payload: { patchId: patch.value.id } })
-  // TODO: maninak implement and consider using `<progress-ring>` while loading
 }
 
 function checkOutPatchBranch() {
@@ -24,16 +76,27 @@ function checkOutPatchBranch() {
 function checkOutDefaultBranch() {
   notifyExtension({ command: 'checkOutDefaultBranch', payload: undefined })
 }
+
+const mockRevisionDescription = `
+This is a patch description parsed from Markdown:
+<ul>
+  <li> a list item</li>
+  <li> another <b>bold</b> item</li>
+  <li> another <em>italic</em> item</li>
+  <li> an item with <code>preformatted</code> text</li>
+</ul>
+`
 </script>
 
 <template>
-  <article class="flex flex-col gap-8">
-    <header class="pt-4 flex justify-between">
+  <article class="pt-[20px] flex flex-col gap-12">
+    <!-- TODO: maninak make h2s (and maybe also header?) sticky -->
+    <header class="flex gap-4 justify-between">
       <div class="flex gap-4 items-center">
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents />
       </div>
-      <aside class="ml-4 flex flex-col gap-2 *:w-full">
+      <aside class="flex flex-col gap-2 *:w-full">
         <vscode-button
           class="self-center"
           appearance="secondary"
@@ -66,10 +129,247 @@ function checkOutDefaultBranch() {
         >
       </aside>
     </header>
-    <PatchMetadata />
-    <main>
-      <h1 class="mt-0 mb-5 text-3xl">{{ patch.title }}</h1>
-      <pre>{{ firstRevision.description }}</pre>
+    <main class="flex flex-col gap-12">
+      <section id="patch">
+        <h2 class="text-lg mt-0 mb-3"># Patch</h2>
+        <PatchMetadata />
+        <h1 class="parsed-md my-4 text-3xl font-mono">{{ patch.title }}</h1>
+        <!-- TODO: maninak roll back to <pre>{{ firstRevision.description }}</pre> -->
+        <div class="parsed-md font-mono" v-html="mockRevisionDescription"></div>
+      </section>
+
+      <section id="revision">
+        <h2
+          class="flex flex-row items-center w-max gap-[0.5em] text-lg mt-0 mb-3"
+          title="Select a patch revision"
+        >
+          <label for="revision-selector" class="cursor-pointer"># Revision</label>
+          <vscode-dropdown
+            id="revision-selector"
+            v-model="selectedRevisionOption"
+            class="font-mono"
+          >
+            <!-- TODO: maninak maybe show inline if the revision is first, latest, merged, approved/rejected? -->
+            <vscode-option
+              v-for="revisionOption in revisionOptionsMap.keys()"
+              :key="revisionOption"
+              class="font-mono"
+              >{{ revisionOption }}</vscode-option
+            >
+          </vscode-dropdown>
+        </h2>
+        <div class="*:min-h-[1.5em]">
+          <div class="flex flex-row items-center w-max gap-[0.5em] group">
+            Id:
+            <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
+            <vscode-button
+              class="invisible group-hover:visible"
+              appearance="icon"
+              title="Copy Revision Identifier to Clipboard"
+              @click="
+                notifyExtension({
+                  command: 'copyToClipboardAndNotify',
+                  payload: { textToCopy: selectedRevision.id }
+                })
+              "
+            >
+              <span class="codicon codicon-copy"></span>
+            </vscode-button>
+          </div>
+          <div class="flex flex-row items-center w-max gap-[0.5em]">
+            Author:
+            <pre :title="selectedRevision.author.id" class="flex gap-[0.5em] w-max">{{
+              getIdentityAliasOrId(selectedRevision.author)
+            }}</pre>
+          </div>
+          <div
+            v-if="
+              selectedRevisionAcceptedReviews.length || selectedRevisionRejectedReviews.length
+            "
+            class="flex flex-row items-center w-max gap-[0.5em]"
+          >
+            Reviews:
+            <div
+              v-if="selectedRevisionAcceptedReviews.length"
+              class="flex flex-row items-center w-max gap-[1em]"
+            >
+              <div class="flex flex-row items-center w-max gap-[0.5em]">
+                <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
+                <div
+                  v-for="review in selectedRevisionAcceptedReviews"
+                  :key="review.timestamp"
+                  class="flex flex-row items-center w-max gap-[0.5em]"
+                >
+                  <pre :title="selectedRevision.author.id" class="flex gap-[0.5em] w-max">{{
+                    getIdentityAliasOrId(selectedRevision.author)
+                  }}</pre>
+                </div>
+              </div>
+              <div
+                v-if="selectedRevisionRejectedReviews.length"
+                class="flex flex-row items-center w-max gap-[0.5em]"
+              >
+                <span class="codicon codicon-thumbsdown" title="Rejected revision"></span>
+                <div
+                  v-for="review in selectedRevisionRejectedReviews"
+                  :key="review.timestamp"
+                  class="flex flex-row items-center w-max gap-[0.5em]"
+                >
+                  <pre :title="selectedRevision.author.id" class="flex gap-[0.5em] w-max">{{
+                    getIdentityAliasOrId(selectedRevision.author)
+                  }}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-row items-center w-max gap-[0.5em]">
+            Date:
+            <pre>{{ getFormattedDate(selectedRevision.timestamp) }}</pre>
+          </div>
+          <div class="flex flex-row items-center w-max gap-[0.5em]">
+            Latest commit:
+            <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>
+          </div>
+          <div class="flex flex-row items-center w-max gap-[0.5em]">
+            Based on commit:
+            <pre :title="selectedRevision.base">{{ shortenHash(selectedRevision.base) }}</pre>
+          </div>
+        </div>
+        <div v-if="selectedRevision.description" class="mt-4">
+          <details v-if="shouldHideRevisionDescription">
+            <summary
+              style="color: var(--vscode-foreground)"
+              title="Click to expand/collapse revision description"
+              >Description</summary
+            >
+            <div class="parsed-md font-mono mt-[0.25em]">{{
+              selectedRevision.description
+            }}</div>
+          </details>
+          <div class="parsed-md font-mono" v-else>{{ selectedRevision.description }}</div>
+        </div>
+      </section>
+
+      <section id="activity">
+        <h2 class="text-lg mt-0 mb-3"># Activity</h2>
+        <ul class="timeline -ml-[24px] flex flex-col gap-4">
+          <li class="-ml-4 flex gap-3 list-none items-center">
+            <span
+              title="Radicle patch revision"
+              class="p-[2px] rounded-full no-underline codicon codicon-pulse"
+              style="
+                background-color: color-mix(
+                  in srgb-linear,
+                  var(--vscode-editor-background),
+                  var(--vscode-editor-foreground) 5%
+                );
+              "
+            ></span>
+            <span>
+              Patch created with revision <pre>cdba53e</pre> by
+              <pre>danielkalman 21 hours ago</pre>
+            </span>
+          </li>
+          <li class="-ml-4 flex gap-3 list-none items-center">
+            <span
+              title="Radicle patch revision"
+              class="p-[2px] rounded-full no-underline codicon codicon-pulse"
+              style="
+                background-color: color-mix(
+                  in srgb-linear,
+                  var(--vscode-editor-background),
+                  var(--vscode-editor-foreground) 5%
+                );
+              "
+            ></span>
+            <span>
+              Patch updated with revision <pre>829bee2</pre> by
+              <pre>danielkalman 10 hours ago</pre>
+            </span>
+          </li>
+          <!-- TODO: maninak list committers with gravatar if available and email as tooltip -->
+          <li class="-ml-4 flex gap-3 list-none">
+            <span
+              title="Git commit"
+              class="px-[2px] no-underline before:bg-vscode-editor-background codicon codicon-git-commit"
+            ></span>
+            <div class="flex items-center">
+              <pre>Add embeds to patch descriptions</pre>
+              <vscode-button
+                class="ml-1"
+                appearance="icon"
+                title="Show/hide additional commit info"
+              >
+                <span class="codicon codicon-ellipsis"></span>
+              </vscode-button>
+            </div>
+            <pre class="ml-4" tile="87afc6287afc6287afc62">87afc62</pre>
+            &ndash;
+            <pre title="me@dnlklmn.dev">dnlklmn</pre>
+            <pre title=""></pre> <pre>28 hours ago</pre>
+          </li>
+          <li class="-ml-4 flex gap-3 list-none">
+            <span
+              title="Git commit"
+              class="px-[2px] no-underline before:bg-vscode-editor-background codicon codicon-git-commit"
+            ></span>
+            <div class="flex items-center">
+              <pre>Add <code>--no-announce</code> to patch comment creation for stdout</pre>
+              <vscode-button
+                class="ml-1"
+                appearance="icon"
+                title="Show/hide additional commit info"
+              >
+                <span class="codicon codicon-ellipsis"></span>
+              </vscode-button>
+            </div>
+            <pre class="ml-4" title="cc08490cc08490cc08490">cc08490</pre>
+            &ndash;
+            <pre title="me@sebastinez.dev">Sebastian Martinez</pre>
+            <pre title=""></pre> <pre>11 hours ago</pre>
+          </li>
+          <li class="-ml-4 flex gap-3 items-center list-none">
+            <span
+              title="Git commit"
+              class="px-[2px] no-underline before:bg-vscode-editor-background codicon codicon-git-commit"
+            ></span>
+            <div class="flex items-center">
+              <pre>Add embeds also to revisions</pre>
+              <vscode-button
+                class="ml-1"
+                appearance="icon"
+                title="Show/hide additional commit info"
+              >
+                <span class="codicon codicon-ellipsis"></span>
+              </vscode-button>
+            </div>
+            <pre class="ml-4" title="aed8538aed8538aed8538">aed8538</pre>
+            &ndash;
+            <pre title="me@sebastinez.dev">Sebastian Martinez</pre>
+            <pre>10 hours ago</pre>
+          </li>
+        </ul>
+      </section>
     </main>
   </article>
 </template>
+
+<style scoped>
+.timeline {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 33.4px;
+    height: 100%;
+    width: 1.2px;
+    background-color: color-mix(
+      in srgb-linear,
+      var(--vscode-editor-background),
+      var(--vscode-editor-foreground) 5%
+    );
+  }
+}
+</style>

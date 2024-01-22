@@ -2,12 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-:is(code, pre, span, b)[title]:hover {
+:where(code, pre, span, b)[title]:hover {
   @apply underline decoration-dotted cursor-default;
   text-underline-position: under;
 }
 
-:is(code, pre) {
+:where(code, pre) {
   @apply m-0;
   display: initial;
+}
+
+:where(details) {
+  & summary {
+    @apply w-max cursor-pointer select-none;
+  }
+}
+
+:where(.parsed-md) :last-child {
+  @apply mb-0;
 }

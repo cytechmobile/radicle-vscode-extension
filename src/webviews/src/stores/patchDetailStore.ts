@@ -30,6 +30,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   )
 
   watchEffect(() => {
+    // TODO: maninak save and restore scroll position
     vscode.setState(state.value)
   })
 

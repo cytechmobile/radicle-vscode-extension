@@ -14,6 +14,6 @@ const status = computed(() => patch.value.state.status)
     :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
   >
     <PatchStatusIcon :status="status" />
-    <span class="capitalize">{{ status }}</span>
+    <span class="-mb-[0.125em] capitalize font-mono">{{ status }}</span>
   </span>
 </template>

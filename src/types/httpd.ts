@@ -34,7 +34,7 @@ export interface Project {
   delegates: Did[]
   patches: { [K in PatchStatus]: number }
   issues: { open: number; closed: number }
-  trackings: number
+  trackings: number // TODO: maninak rename to seeding
 }
 
 export interface Merge {
@@ -44,19 +44,23 @@ export interface Merge {
   timestamp: number
 }
 
-export type PatchStatus = 'draft' | 'open' | 'archived' | 'merged'
-
 export interface Patch {
   id: string
   title: string
   author: RadicleIdentity
-  state: { status: PatchStatus }
+  state:
+    | { status: 'draft' }
+    | { status: 'open'; conflicts?: [string, string][] }
+    | { status: 'archived' }
+    | { status: 'merged'; revision: string; commit: string } // TODO: maninak utilized new `revision` field
   target: string
   labels: string[]
   merges: Merge[]
   assignees: string[]
   revisions: ArrayMinLength<Revision, 1>
 }
+
+export type PatchStatus = Patch['state']['status']
 
 export function isPatch(x: unknown): x is Patch {
   const patch = x as Partial<Patch> | undefined
@@ -79,9 +83,18 @@ export interface Revision {
   id: string
   author: RadicleIdentity
   description: string
+  edits: {
+    author: RadicleIdentity
+    body: string
+    embeds: Embed[]
+    timestamp: number
+  }[]
+  /**
+   * The value is a commit hash
+   */
   base: string
   /**
-   * a.k.a. Object Identifier. The value is the commit hash.
+   * a.k.a. Object Identifier. The value is a commit hash.
    */
   oid: string
   refs: string[]
@@ -96,7 +109,7 @@ export interface Comment {
   body: string
   edits: Edit[]
   embeds: Embed[]
-  reactions: [string, string][]
+  reactions: [string, string][] // TODO: maninak verify updated types
   timestamp: number
   replyTo: string | null
 }

@@ -34,6 +34,8 @@ const checkmark = '✓'
 
 let timesPatchListFetchErroredConsecutively = 0
 
+// TODO: maninak show in item and tooltip if the chosen revision is approved, by whom and when
+
 export interface FilechangeNode {
   filename: string
   relativeInRepoUrl: string
@@ -474,7 +476,7 @@ function getThemeIconForPatch<P extends Patch>(patch: P): ThemeIcon {
     case 'merged':
       return new ThemeIcon('git-merge', new ThemeColor('patch.merged'))
     default:
-      assertUnreachable(patch.state.status)
+      assertUnreachable(patch.state)
   }
 }
 

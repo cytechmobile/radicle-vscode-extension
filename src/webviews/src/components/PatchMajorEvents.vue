@@ -9,6 +9,7 @@ import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 const { patch, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
 
 // TODO: maninak use locale in `getFormattedDate()` from `vscode.env.language`
+// TODO: maninak show `accepted` review as major event, if the related revision got accepted?
 
 const latestMerge = computed(() =>
   [...patch.value.merges].sort((m1, m2) => m1.timestamp - m2.timestamp).at(-1)
