@@ -13,7 +13,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore --cache --cache-location node_modules/.cache/eslint",
-    "lintfix": "npm run lint -- --fix && prettier --write src/"
+    "lintfix": "npm run lint -- --fix && prettier --write ."
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",

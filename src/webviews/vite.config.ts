@@ -7,14 +7,14 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [
     vue({
-      template: {compilerOptions: { isCustomElement: (tag) => tag.includes("vscode-") }},
+      template: { compilerOptions: { isCustomElement: (tag) => tag.includes('vscode-') } },
     }),
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'extensionUtils': fileURLToPath(new URL('../utils', import.meta.url)),
-    }
+      extensionUtils: fileURLToPath(new URL('../utils', import.meta.url)),
+    },
   },
   build: {
     rollupOptions: {

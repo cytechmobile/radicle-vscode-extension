@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    './src/**/*.{vue,js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   safelist: [
     { pattern: /(bg|text)-patch-(draft|open|archived|merged)/ },
     { pattern: /(bg|text)-vscode-(pre|editor)-(foreground|background)/ },

@@ -9,7 +9,7 @@
     "../utils/patch.ts",
     "../utils/string.ts",
     "../utils/time.ts",
-    "../utils/webview-messaging.ts",
+    "../utils/webview-messaging.ts"
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
@@ -19,7 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "extensionUtils/*": ["../utils/*"],
+      "extensionUtils/*": ["../utils/*"]
     }
   }
 }
