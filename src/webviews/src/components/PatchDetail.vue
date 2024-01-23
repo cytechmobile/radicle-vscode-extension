@@ -31,6 +31,7 @@ function getRevisionOptionLabel(revision: Revision): string {
     revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
     patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
     patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest',
+    patch.value.revisions.length == 1 && 'sole',
   ].filter(Boolean)
   const parsedState = state.length ? ` [${state.join(', ')}]` : ''
   const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''

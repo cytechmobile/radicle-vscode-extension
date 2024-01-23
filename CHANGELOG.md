@@ -61,6 +61,8 @@
             - not shown if the revision isn't the earliest one for this patch or if it has only one revision
           - `latest`
             - not shown if the revision isn't the most recent one for this patch or if it has only one revision
+          - `sole`
+            - not shown if there are more than one revisions
           - not shown if empty
         - author
           - not shown if all revisions are from the same author
