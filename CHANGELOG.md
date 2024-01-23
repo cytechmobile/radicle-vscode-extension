@@ -96,7 +96,7 @@
 - **patch-list:** improve Patch tooltip with the following
   - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
   - show latest revision id and commit hash for Patches with more than the initial revision
-- **patch-list:** prioritize Patch merge event over latest revision when deriving author and "time-ago" for item description
+- **patch-list:** prioritize Patch merge event over latest revision when deriving author and "time-ago" for item's description and order in the list
 - **patch-list:** improve legibility of time when Patch events (e.g. created, last updated, merged) happened
   - don't show full dates to make the copy less noisy. The full dates are still available in the new Patch Details view.
   - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago" etc
