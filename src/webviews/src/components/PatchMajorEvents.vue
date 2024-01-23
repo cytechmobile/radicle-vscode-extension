@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { computedWithControl, useIntervalFn } from '@vueuse/core'
+import { computedWithControl } from '@vueuse/core'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { getTimeAgo, getFormattedDate } from 'extensionUtils/time'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
@@ -16,13 +16,21 @@ const latestMerge = computed(() =>
 )
 const shouldShowRevisionEvent = computed(() => patch.value.revisions.length >= 2)
 
+const mergedTimeAgo = computedWithControl(
+  latestMerge,
+  () => latestMerge.value && getTimeAgo(latestMerge.value.timestamp),
+)
+const updatedTimeAgo = computedWithControl(latestRevision, () =>
+  getTimeAgo(latestRevision.value.timestamp),
+)
 const createdTimeAgo = computedWithControl(firstRevision, () =>
   getTimeAgo(firstRevision.value.timestamp),
 )
-// Somehow this useIntervalFn() triggers re-rendering of the whole component including
-// re-calculation of all other `getTimeAgo()` calls too.
-// Not sure if a vueuse bug or a feature but good enough for now. :shrug:
-useIntervalFn(() => createdTimeAgo.trigger(), 3_000)
+setInterval(() => {
+  mergedTimeAgo.trigger()
+  updatedTimeAgo.trigger()
+  createdTimeAgo.trigger()
+}, 30_000)
 </script>
 
 <template>
@@ -36,7 +44,7 @@ useIntervalFn(() => createdTimeAgo.trigger(), 3_000)
         >at commit
         <pre :title="latestMerge.commit">{{ shortenHash(latestMerge.commit) }}</pre></span
       >&ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp)">{{
-        getTimeAgo(latestMerge.timestamp)
+        mergedTimeAgo
       }}</pre>
     </div>
     <div v-if="shouldShowRevisionEvent">
@@ -48,7 +56,7 @@ useIntervalFn(() => createdTimeAgo.trigger(), 3_000)
       <pre :title="latestRevision.id">{{ shortenHash(latestRevision.id) }}</pre> at commit
       <pre :title="latestRevision.oid">{{ shortenHash(latestRevision.oid) }}</pre
       >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp)">{{
-        getTimeAgo(latestRevision.timestamp)
+        updatedTimeAgo
       }}</pre>
     </div>
     <div>
