@@ -25,7 +25,7 @@ const revisionOptionsMap = computed(
     new Map(
       [...patch.value.revisions]
         .reverse()
-        .map((revision) => [assembleRevisionOptionLabel(revision), revision] as const),
+        .map((revision) => [assembleRevisionOptionLabel(revision), revision]),
     ),
 )
 // TODO: maninak if patch is merged pre-select revision that got merged
