@@ -23,5 +23,5 @@
 }
 
 vscode-dropdown::part(listbox) {
-  width: max-content;
+  min-width: max-content;
 }
