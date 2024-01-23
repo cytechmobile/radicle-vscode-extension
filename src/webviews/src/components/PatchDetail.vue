@@ -5,7 +5,7 @@ import {
   vsCodeDropdown,
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
-import { ref, computed } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 import { getFormattedDate, getTimeAgo } from 'extensionUtils/time'
@@ -14,14 +14,30 @@ import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusBadge from './PatchStatusBadge.vue'
 import PatchMajorEvents from './PatchMajorEvents.vue'
 import PatchMetadata from './PatchMetadata.vue'
-import { toRaw } from 'vue'
 import type { Revision } from '../../../types'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 
 const { patch, authors, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
 
-function getRevisionOptionLabel(revision: Revision): string {
+const revisionOptionsMap = computed(
+  () =>
+    new Map(
+      [...patch.value.revisions]
+        .reverse()
+        .map((revision) => [assembleRevisionOptionLabel(revision), revision] as const),
+    ),
+)
+// TODO: maninak if patch is merged pre-select revision that got merged
+const selectedRevisionOption = ref(assembleRevisionOptionLabel(latestRevision.value))
+const selectedRevision = computed(
+  () =>
+    revisionOptionsMap.value.get(selectedRevisionOption.value) as NonNullable<
+      ReturnType<(typeof revisionOptionsMap)['value']['get']>
+    >,
+)
+
+function assembleRevisionOptionLabel(revision: Revision): string {
   const id = shortenHash(revision.id)
   const timeAgo = getTimeAgo(revision.timestamp, 'mini')
   const state = [
@@ -40,21 +56,6 @@ function getRevisionOptionLabel(revision: Revision): string {
   return label
 }
 
-const revisionOptionsMap = ref(
-  new Map(
-    [...patch.value.revisions]
-      .reverse()
-      .map((revision) => [getRevisionOptionLabel(revision), revision] as const),
-  ),
-)
-// TODO: maninak if patch is merged pre-select revision that got merged
-const selectedRevisionOption = ref(getRevisionOptionLabel(latestRevision.value))
-const selectedRevision = computed(
-  () =>
-    revisionOptionsMap.value.get(selectedRevisionOption.value) as NonNullable<
-      ReturnType<(typeof revisionOptionsMap)['value']['get']>
-    >,
-)
 const shouldHideRevisionDescription = computed(
   () =>
     selectedRevision.value.description && selectedRevision.value.id === firstRevision.value.id,
