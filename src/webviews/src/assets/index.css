@@ -21,3 +21,7 @@
 :where(.parsed-md) :last-child {
   @apply mb-0;
 }
+
+vscode-dropdown::part(listbox) {
+  width: max-content;
+}
