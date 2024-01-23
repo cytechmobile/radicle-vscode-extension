@@ -87,7 +87,10 @@
   - all data coming from Radicle is made visually distinct (and a bit more accessible / easier to read) from miscellaneous UI copy by rendering it using a monotype font
 - **commands**: add new command to check out the current Radicle project's default Git branch
 - **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out Patch on the list
-- **patch-list:** auto-retry fetching list of Patches from httpd (with geometric backoff) if an error occured
+- **patch-list:** auto-retry fetching list of Patches from httpd (with geometric back-off) if an error occured
+- **patch-list:** show the total count of Patches and when the list was last updated as a description next to the "Patches" view title
+  - "updated-time-ago" gets auto-updated to remain accurate as time goes by or when the list is manually refreshed
+  - in case of fetch error no count will be shown
 - **patch-list:** improve Patch tooltip with the following
   - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
   - show latest revision id and commit hash for Patches with more than the initial revision
@@ -97,7 +100,7 @@
   - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago" etc
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
 - **patch-list:** use smaller dot as separator between data in the description of a Patch item
-- the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
+- **sidebar:** the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
 
 ### 🏎️ Performance
 

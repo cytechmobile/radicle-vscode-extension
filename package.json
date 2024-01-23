@@ -198,11 +198,6 @@
           "command": "radicle.refreshPatches",
           "when": "view == patches-view",
           "group": "navigation@1"
-        },
-        {
-          "command": "radicle.collapsePatches",
-          "when": "view == patches-view",
-          "group": "navigation@2"
         }
       ],
       "view/item/context": [

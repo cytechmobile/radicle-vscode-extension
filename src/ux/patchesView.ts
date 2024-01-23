@@ -121,7 +121,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
       timesPatchListFetchErroredConsecutively = 0
 
       if (!patches.length) {
-        return [`0 Radicle Patches`]
+        return undefined
       }
 
       const patchesSortedByRevisionTsPerStatus = [

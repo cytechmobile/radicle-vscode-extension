@@ -51,6 +51,7 @@ export const usePatchStore = defineStore('patch', () => {
       return { error: new Error('Failed resolving RID') }
     }
 
+    const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
     const { data: fetchedPatch, error } = await fetchFromHttpd(
       `/projects/${rid}/patches/${patchId}`,
     )
@@ -59,7 +60,7 @@ export const usePatchStore = defineStore('patch', () => {
     }
 
     const outdatedPatch = findPatchById(fetchedPatch.id)
-    const augmentedFetchedPatch = { ...fetchedPatch, ...{ lastFetchedTs: Date.now() } }
+    const augmentedFetchedPatch = { ...fetchedPatch, ...{ lastFetchedTs: nowTs } }
     if (outdatedPatch) {
       // we use `Object.assign()` to keep the same object ref
       Object.assign(outdatedPatch, augmentedFetchedPatch)
@@ -79,6 +80,7 @@ export const usePatchStore = defineStore('patch', () => {
     return foundPatch
   }
 
+  const lastFetchedTs = ref<number>()
   let inProgressRequest: Promise<unknown> | undefined
   async function fetchAllPatches() {
     if (inProgressRequest) {
@@ -91,7 +93,8 @@ export const usePatchStore = defineStore('patch', () => {
     if (!rid) {
       return false
     }
-    const nowTs = Date.now()
+    const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
+    lastFetchedTs.value = nowTs
     // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
     const promisedResponses = Promise.all([
       fetchFromHttpd(`/projects/${rid}/patches`, 'GET', undefined, {
@@ -132,6 +135,7 @@ export const usePatchStore = defineStore('patch', () => {
   return {
     patches,
     checkedOutPatch,
+    lastFetchedTs,
     findPatchById,
     resetAllPatches,
     refetchPatch,
