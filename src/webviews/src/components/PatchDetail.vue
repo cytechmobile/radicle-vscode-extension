@@ -5,7 +5,7 @@ import {
   vsCodeDropdown,
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
-import { ref, computed, toRaw } from 'vue'
+import { ref, computed, toRaw, onMounted, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import Markdown from 'vue3-markdown-it'
 import 'highlight.js/styles/vs2015.css' // TODO: maninak use own style extending this one but using vscode color variables
@@ -80,6 +80,26 @@ function checkOutPatchBranch() {
 function checkOutDefaultBranch() {
   notifyExtension({ command: 'checkOutDefaultBranch', payload: undefined })
 }
+
+onMounted(() => {
+  nextTick(() => {
+    console.info('mounted')
+    document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
+      const highlightedCodeElClass = highlightedCodeEl.classList.value
+
+      const langTagEl = document.createElement('span')
+      langTagEl.textContent = highlightedCodeElClass
+        .replace('hljs ', '')
+        .replaceAll(/language-/g, '')
+        .trim()
+      langTagEl.classList.add('langTag')
+
+      highlightedCodeEl.insertBefore(langTagEl, highlightedCodeEl.firstChild)
+
+      console.info('inserted')
+    })
+  })
+})
 </script>
 
 <template>

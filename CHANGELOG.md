@@ -87,7 +87,7 @@
   - Activity section shows the following info:
     - TODO: maninak
   - Markdown parsing comes with multiple additional features such as
-    - code highlighting
+    - code highlighting with an aditional marker of the language the code is highlighted as
     - task list e.g. `- [ ] task to do` and `- [X] task done`
     - SVG
     - emoji e.g. `:car:` =>  🚗

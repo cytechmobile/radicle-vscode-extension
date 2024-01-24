@@ -23,11 +23,10 @@
 }
 
 :where(.parsed-md) {
-  --copy-max-width: 70ch;
   @apply font-mono;
 
   > * {
-    @apply max-w-[var(--copy-max-width)];
+    @apply max-w-prose;
   }
 
   h1 {
@@ -38,7 +37,7 @@
 
   pre code {
     @apply max-w-max;
-    min-width: min(calc(100% - 26px), var(--copy-max-width));
+    min-width: min(calc(100% - 26px), 80ch);
   }
 
   ul.contains-task-list {
@@ -51,6 +50,18 @@
 
   p:has(img):not(:has(:not(img))) {
     max-width: unset;
+  }
+
+  code.hljs[class*='language-'] {
+    @apply relative;
+
+    .langTag {
+      @apply absolute top-1 right-2 text-xs text-zinc-400;
+    }
+
+    & > span[class*='hljs-']:first-of-type {
+      @apply relative;
+    }
   }
 
   & :last-child {
