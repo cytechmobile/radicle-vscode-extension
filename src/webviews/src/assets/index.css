@@ -18,8 +18,40 @@
   }
 }
 
-:where(.parsed-md) :last-child {
-  @apply mb-0;
+:is(h1, h2, h3, h4, h5, h6) .parsed-md * {
+  @apply m-0;
+}
+
+:where(.parsed-md) {
+  --copy-max-width: 70ch;
+  @apply font-mono;
+
+  > * {
+    @apply max-w-[var(--copy-max-width)];
+  }
+
+  h1 {
+    font-size: 2em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+  }
+
+  pre code {
+    @apply max-w-max;
+    min-width: min(calc(100% - 26px), var(--copy-max-width));
+  }
+
+  ul.contains-task-list {
+    @apply list-none -ml-[14px];
+
+    .task-list-item-checkbox {
+      @apply align-middle;
+    }
+  }
+
+  & :last-child {
+    @apply mb-0;
+  }
 }
 
 vscode-dropdown::part(listbox) {

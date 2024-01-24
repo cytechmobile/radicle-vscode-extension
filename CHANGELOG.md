@@ -13,7 +13,9 @@
 - **patch-detail:** implement new Patch Detail webview showing highly dynamic, in-depth information for a specific Patch
   - can be opened via a new button "View Patch Details" on each item in the list of Patches
   - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word fitting the limit
-  - the new view has the following main sections:
+  - the new view's design is purposefully minimal, glanceable, legible, responsive and verbose. It remains familiar to VS Code's native look'n'feel, while also staying true to Radicle's "hacky" vibe. Despite it being a full-fledged custom web-app under the hood, it creates the illusion of it being just another native VS Code UI.
+  - view's theme adapts fully and on-the-fly to whichever theme the user configures for his VS Code
+  - view has the following main sections:
     - header
     - Patch
     - Revision
@@ -79,11 +81,44 @@
     - based on commit
       - the commit the selected revision is branched off of
     - description
-      - supports markdown parsing
+      - supports markdown
       - if the selected revision is the first revision, the description is hidden under an expandable-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
       - not shown if empty
   - Activity section shows the following info:
-    -
+    - TODO: maninak
+  - Markdown parsing comes with multiple additional features such as
+    - code highlighting
+    - task list e.g. `- [ ] task to do` and `- [X] task done`
+    - SVG
+    - emoji e.g. `:car:` =>  🚗
+    - marked text e.e. `==marked==` => `<mark>inserted</mark>`
+    - footnote references e.g.
+
+        ```md
+        Here is a footnote reference,[^1] and another.[^longnote]
+
+        [^1]: Here is the footnote.
+        [^longnote]: Here's one with multiple blocks.
+        ```
+
+    - subscript e.g. `C~7~H~14~O~2~`
+    - superscript e.g. `x^2^`
+    - abbreviation e.g. this input:
+
+        ```md
+        *[HTML]: Hyper Text Markup Language
+        *[W3C]:  World Wide Web Consortium
+        The HTML specification is maintained by the W3C.
+        ```
+
+        results in:
+
+        ```html
+        <p>The <abbr title="Hyper Text Markup Language">HTML</abbr> specification is maintained by the <abbr title="World Wide Web Consortium">W3C</abbr>.</p>
+        ```
+
+    - automatic table of contents generation wherever the marker `[toc]` is placed
+    - automatic linkification of text such as email URIs
   - Patch state remains in sync with all other views
   - where applicable the various data have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened or localised time (including the timezone used) in full text in case it's a "time-ago", etc
   - all data coming from Radicle is made visually distinct (and a bit more accessible / easier to read) from miscellaneous UI copy by rendering it using a monotype font

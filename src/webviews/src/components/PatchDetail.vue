@@ -7,6 +7,8 @@ import {
 } from '@vscode/webview-ui-toolkit'
 import { ref, computed, toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
+import Markdown from 'vue3-markdown-it'
+import 'highlight.js/styles/vs2015.css' // TODO: maninak use own style extending this one but using vscode color variables
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 import { getFormattedDate, getTimeAgo } from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
@@ -78,16 +80,6 @@ function checkOutPatchBranch() {
 function checkOutDefaultBranch() {
   notifyExtension({ command: 'checkOutDefaultBranch', payload: undefined })
 }
-
-const mockRevisionDescription = `
-This is a patch description parsed from Markdown:
-<ul>
-  <li> a list item</li>
-  <li> another <b>bold</b> item</li>
-  <li> another <em>italic</em> item</li>
-  <li> an item with <code>preformatted</code> text</li>
-</ul>
-`
 </script>
 
 <template>
@@ -135,9 +127,12 @@ This is a patch description parsed from Markdown:
       <section id="patch">
         <h2 class="text-lg mt-0 mb-3"># Patch</h2>
         <PatchMetadata />
-        <h1 class="parsed-md my-4 text-3xl font-mono">{{ patch.title }}</h1>
-        <!-- TODO: maninak roll back to <pre>{{ firstRevision.description }}</pre> -->
-        <div class="parsed-md font-mono" v-html="mockRevisionDescription"></div>
+        <!-- TODO: maninak add button to reveal Patch item in Patches view -->
+        <h1 class="my-4 text-3xl font-mono">
+          <Markdown :source="patch.title" class="parsed-md" />
+        </h1>
+        <!-- TODO: maninak add control to toggle raw/parsed markdown -->
+        <Markdown :source="firstRevision.description" class="parsed-md text-sm" />
       </section>
 
       <section id="revision">
@@ -151,7 +146,6 @@ This is a patch description parsed from Markdown:
             v-model="selectedRevisionOption"
             class="font-mono"
           >
-            <!-- TODO: maninak maybe show inline if the revision is first, latest, merged, approved/rejected? -->
             <vscode-option
               v-for="revisionOption in revisionOptionsMap.keys()"
               :key="revisionOption"
@@ -244,11 +238,12 @@ This is a patch description parsed from Markdown:
               title="Click to expand/collapse revision description"
               >Description</summary
             >
-            <div class="parsed-md font-mono mt-[0.25em]">{{
-              selectedRevision.description
-            }}</div>
+            <Markdown
+              :source="selectedRevision.description"
+              class="parsed-md text-sm mt-[0.25em]"
+            />
           </details>
-          <div class="parsed-md font-mono" v-else>{{ selectedRevision.description }}</div>
+          <Markdown v-else :source="selectedRevision.description" class="parsed-md text-sm" />
         </div>
       </section>
 
