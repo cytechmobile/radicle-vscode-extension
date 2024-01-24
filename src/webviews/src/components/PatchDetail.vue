@@ -86,7 +86,7 @@ function checkOutDefaultBranch() {
   <article class="pt-[20px] flex flex-col gap-12">
     <!-- TODO: maninak make h2s (and maybe also header?) sticky -->
     <header class="flex gap-4 justify-between">
-      <div class="flex gap-4 items-center">
+      <div class="flex flex-wrap gap-4 items-center">
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents />
       </div>
@@ -125,7 +125,7 @@ function checkOutDefaultBranch() {
     </header>
     <main class="flex flex-col gap-12">
       <section id="patch">
-        <h2 class="text-lg mt-0 mb-3"># Patch</h2>
+        <h2 class="text-lg mt-0 mb-3">#&nbsp;Patch</h2>
         <PatchMetadata />
         <!-- TODO: maninak add button to reveal Patch item in Patches view -->
         <h1 class="my-4 text-3xl font-mono">
@@ -137,10 +137,10 @@ function checkOutDefaultBranch() {
 
       <section id="revision">
         <h2
-          class="flex flex-row items-center w-max gap-[0.5em] text-lg mt-0 mb-3"
+          class="flex items-center gap-[0.5em] text-lg mt-0 flex-wrap mb-3"
           title="Select a patch revision"
         >
-          <label for="revision-selector" class="cursor-pointer"># Revision</label>
+          <label for="revision-selector" class="cursor-pointer">#&nbsp;Revision</label>
           <vscode-dropdown
             id="revision-selector"
             v-model="selectedRevisionOption"
@@ -248,7 +248,7 @@ function checkOutDefaultBranch() {
       </section>
 
       <section id="activity">
-        <h2 class="text-lg mt-0 mb-3"># Activity</h2>
+        <h2 class="text-lg mt-0 mb-3">#&nbsp;Activity</h2>
         <ul class="timeline -ml-[24px] flex flex-col gap-4">
           <li class="-ml-4 flex gap-3 list-none items-center">
             <span

@@ -49,6 +49,10 @@
     }
   }
 
+  p:has(img):not(:has(:not(img))) {
+    max-width: unset;
+  }
+
   & :last-child {
     @apply mb-0;
   }

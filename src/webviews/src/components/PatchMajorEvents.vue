@@ -35,7 +35,7 @@ setInterval(() => {
 
 <template>
   <div class="flex flex-col gap-[0.5em]">
-    <div v-if="latestMerge">
+    <div v-if="latestMerge" class="leading-tight">
       Merged by
       <pre :title="latestMerge.author.id">{{ getIdentityAliasOrId(latestMerge.author) }}</pre>
       using revision
@@ -47,7 +47,7 @@ setInterval(() => {
         mergedTimeAgo
       }}</pre>
     </div>
-    <div v-if="shouldShowRevisionEvent">
+    <div v-if="shouldShowRevisionEvent" class="leading-tight">
       Last updated by
       <pre :title="latestRevision.author.id">{{
         getIdentityAliasOrId(latestRevision.author)
@@ -59,7 +59,7 @@ setInterval(() => {
         updatedTimeAgo
       }}</pre>
     </div>
-    <div>
+    <div class="leading-tight">
       Created by <pre :title="patch.author.id">{{ getIdentityAliasOrId(patch.author) }}</pre
       >&ensp;<wbr /><pre :title="getFormattedDate(firstRevision.timestamp)">{{
         createdTimeAgo
