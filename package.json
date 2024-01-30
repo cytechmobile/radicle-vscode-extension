@@ -45,7 +45,9 @@
     "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
     "lint:webviews": "cd ./src/webviews && npm run lintfix",
     "test": "npm run test:typings && npm run test:unit && npm run test:e2e",
-    "test:typings": "tsc --noEmit",
+    "test:typings": "run-p test:typings:*",
+    "test:typings:extension": "tsc --noEmit",
+    "test:typings:webviews": "cd ./src/webviews && npm run type-check",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
     "test:e2e": "echo \"End-to-end testing not yet implemented.\""
   },
