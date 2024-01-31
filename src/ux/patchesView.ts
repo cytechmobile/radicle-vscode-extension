@@ -12,13 +12,13 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
-import { type AugmentedPatch, usePatchStore } from '../stores'
+import { usePatchStore } from '../stores'
 import {
   debouncedClearMemoizedGetCurrentProjectIdCache,
   fetchFromHttpd,
   memoizedGetCurrentProjectId,
 } from '../helpers'
-import { type Patch, type Unarray, isPatch } from '../types'
+import { type AugmentedPatch, type Patch, type Unarray, isPatch } from '../types'
 import {
   assertUnreachable,
   capitalizeFirstLetter,

@@ -1,7 +1,6 @@
 import type { Webview } from 'vscode'
-import type { AugmentedPatch } from '../stores'
+import type { AugmentedPatch, Patch, PatchDetailInjectedState } from '../types'
 import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
-import type { Patch, PatchDetailInjectedState } from '../types'
 
 interface Message<Command extends string, Payload extends object | undefined = undefined> {
   command: Command

@@ -1,5 +1,5 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { type AugmentedPatch, getExtensionContext, usePatchStore } from '../stores'
+import { getExtensionContext, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
@@ -10,7 +10,7 @@ import {
   launchAuthenticationFlow,
   selectAndCloneRadicleProject,
 } from '../ux'
-import type { Patch } from '../types'
+import type { AugmentedPatch, Patch } from '../types'
 import { createOrShowWebview, getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {

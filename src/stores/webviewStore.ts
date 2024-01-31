@@ -1,17 +1,18 @@
 import type { WebviewPanel } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, reactive } from '@vue/reactivity'
-import { webviewId } from '../helpers'
 
 setActivePinia(createPinia())
 
 // TODO: maninak check why webviews are not reused
 // TODO: maninak on shift/alt + click on item button to open webview, open always in newtab
 
+export const webviewPatchDetailId = 'webview-patch-detail'
+
 export const useWebviewStore = defineStore('webviewStore', () => {
   const panels = reactive<Map<string, WebviewPanel>>(new Map())
 
-  const patchDetailPanel = computed(() => panels.get(webviewId))
+  const patchDetailPanel = computed(() => panels.get(webviewPatchDetailId))
 
   function trackPanel(panel: WebviewPanel) {
     // TODO: maninak create a `const stateForWebview = computed(...)` and store it along with this panel?

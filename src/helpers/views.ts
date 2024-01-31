@@ -1,7 +1,8 @@
 import { window } from 'vscode'
 import { effect } from '@vue/reactivity'
-import { type AugmentedPatch, usePatchStore } from '../stores'
+import { usePatchStore } from '../stores'
 import { getTimeAgo } from '../utils'
+import type { AugmentedPatch } from '../types'
 import { patchesTreeDataProvider } from '../ux'
 
 let patchesView: ReturnType<typeof registerPatchesView> | undefined

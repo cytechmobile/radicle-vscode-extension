@@ -2,14 +2,10 @@ import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, effect, ref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 import { fetchFromHttpd, memoizedGetCurrentProjectId } from '../helpers'
-import type { Patch } from '../types'
+import type { AugmentedPatch, Patch } from '../types'
 import { useGitStore } from '.'
 
 setActivePinia(createPinia())
-
-export interface AugmentedPatch extends Patch {
-  lastFetchedTs: number
-}
 
 export const usePatchStore = defineStore('patch', () => {
   const patches = ref<AugmentedPatch[]>()

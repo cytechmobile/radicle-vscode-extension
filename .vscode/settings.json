@@ -12,6 +12,7 @@
     "commands",
     "activity-bar",
     "repo",
+    "ts",
     "log",
     "config",
     "scm",

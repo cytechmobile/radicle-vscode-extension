@@ -7,22 +7,19 @@ import {
   window,
 } from 'vscode'
 import {
-  type AugmentedPatch,
   getExtensionContext,
   usePatchStore,
   useWebviewStore,
+  webviewPatchDetailId,
 } from '../stores'
 import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
 import {
   type notifyExtension,
   notifyWebview as notifyWebviewBase,
 } from '../utils/webview-messaging'
-import type { PatchDetailInjectedState } from '../types'
+import type { AugmentedPatch, PatchDetailInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
 import { revealPatch } from './views'
-
-// TODO: maninak move into store
-export const webviewId = 'webview-patch-detail'
 
 // TODO: maninak make the solution in file more generic, not only useful to a specific webview
 // TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
@@ -39,7 +36,7 @@ export function createOrShowWebview(ctx: ExtensionContext, patch: AugmentedPatch
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
 
   const webviewStore = useWebviewStore()
-  const foundPanel = webviewStore.findPanel(webviewId)
+  const foundPanel = webviewStore.findPanel(webviewPatchDetailId)
 
   // If panel already exists and is usable then re-use it
 
@@ -55,7 +52,7 @@ export function createOrShowWebview(ctx: ExtensionContext, patch: AugmentedPatch
   // Otherwise create new panel from scratch
 
   const newPanel = window.createWebviewPanel(
-    webviewId,
+    webviewPatchDetailId,
     getPanelTitle(patch),
     column || ViewColumn.One,
     {
@@ -122,7 +119,7 @@ export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']
 // See https://code.visualstudio.com/api/extension-guides/webview#serialization
 export function registerAllWebviewRestorators() {
   getExtensionContext().subscriptions.push(
-    window.registerWebviewPanelSerializer(webviewId, {
+    window.registerWebviewPanelSerializer(webviewPatchDetailId, {
       // eslint-disable-next-line @typescript-eslint/require-await, require-await
       deserializeWebviewPanel: async (_panel: WebviewPanel, _state: unknown) => {
         _panel.webview.html = getWebviewHtml(_panel.webview)
@@ -186,7 +183,7 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
 function getStateForWebview(patch: AugmentedPatch): PatchDetailInjectedState {
   const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
   const state: PatchDetailInjectedState = {
-    kind: webviewId,
+    kind: webviewPatchDetailId,
     id: patch.id,
     state: {
       patch: { ...patch, isCheckedOut },

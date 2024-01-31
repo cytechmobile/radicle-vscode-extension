@@ -1,10 +1,9 @@
-import type { webviewId } from '../helpers'
-import type { AugmentedPatch } from '../stores'
+import type { AugmentedPatch } from '../types'
 import type { Patch } from './httpd'
 
 // TODO: maninak rename as PatchDetailWebviewState?
 export interface PatchDetailInjectedState {
-  kind: typeof webviewId
+  kind: 'webview-patch-detail'
   id: Patch['id']
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
