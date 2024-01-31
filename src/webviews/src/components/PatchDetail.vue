@@ -81,9 +81,12 @@ function checkOutDefaultBranch() {
   notifyExtension({ command: 'checkOutDefaultBranch', payload: undefined })
 }
 
+function revealPatch() {
+  notifyExtension({ command: 'revealInPatchesView', payload: { patch: toRaw(patch.value) } })
+}
+
 onMounted(() => {
   nextTick(() => {
-    console.info('mounted')
     document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
       const highlightedCodeElClass = highlightedCodeEl.classList.value
 
@@ -140,6 +143,15 @@ onMounted(() => {
           <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
           <span slot="start" class="codicon codicon-home"></span>Check Out
           Default</vscode-button
+        >
+        <vscode-button
+          class="self-center"
+          appearance="secondary"
+          title="Reveal In Patches View"
+          @click="revealPatch"
+        >
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <span slot="start" class="codicon codicon-export"></span>Reveal</vscode-button
         >
       </aside>
     </header>

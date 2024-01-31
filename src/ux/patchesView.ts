@@ -41,6 +41,7 @@ export interface FilechangeNode {
   relativeInRepoUrl: string
   oldVersionUrl?: string
   newVersionUrl?: string
+  patch: AugmentedPatch
   enableShowingPathInDescription: () => void
   getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
 }
@@ -197,6 +198,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
               relativeInRepoUrl: filechange.path,
               oldVersionUrl,
               newVersionUrl,
+              patch,
               enableShowingPathInDescription,
               getTreeItem: async () => {
                 // TODO: consider how to clean up httpd types so that infering those is easier or move them to the types file
@@ -309,6 +311,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
               const node: FilechangeNode = {
                 filename,
                 relativeInRepoUrl: filechange.newPath,
+                patch,
                 enableShowingPathInDescription,
                 getTreeItem: () =>
                   ({
@@ -353,6 +356,13 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
     }
 
     return undefined
+  },
+  getParent: (elem) => {
+    if (typeof elem === 'string' || isPatch(elem)) {
+      return undefined
+    } else {
+      return elem.patch
+    }
   },
   onDidChangeTreeData: rerenderPatchesViewEventEmitter.event,
 } as const

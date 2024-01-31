@@ -1,4 +1,5 @@
 import type { Webview } from 'vscode'
+import type { AugmentedPatch } from '../stores'
 import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
 import type { Patch, PatchDetailInjectedState } from '../types'
 
@@ -16,6 +17,7 @@ type MessageToExtension =
   | Message<'copyToClipboardAndNotify', { textToCopy: string }>
   | Message<'refreshPatchData', { patchId: Patch['id'] }>
   | Message<'checkOutPatchBranch', { patch: Patch }>
+  | Message<'revealInPatchesView', { patch: AugmentedPatch }>
   | Message<'checkOutDefaultBranch'>
 
 /**

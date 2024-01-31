@@ -1,6 +1,6 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, effect, ref } from '@vue/reactivity'
-import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from 'src/ux'
+import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 import { fetchFromHttpd, memoizedGetCurrentProjectId } from '../helpers'
 import type { Patch } from '../types'
 import { useGitStore } from '.'

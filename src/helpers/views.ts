@@ -1,14 +1,16 @@
 import { window } from 'vscode'
 import { effect } from '@vue/reactivity'
-import { usePatchStore } from '../stores'
+import { type AugmentedPatch, usePatchStore } from '../stores'
 import { getTimeAgo } from '../utils'
 import { patchesTreeDataProvider } from '../ux'
+
+let patchesView: ReturnType<typeof registerPatchesView> | undefined
 
 /**
  * Initializes and registers all Views dependent on a JS provider.
  */
 export function registerAllViews(): void {
-  registerPatchesView()
+  patchesView = registerPatchesView()
 }
 
 function registerPatchesView() {
@@ -29,4 +31,10 @@ function registerPatchesView() {
   setInterval(() => {
     updatePatchesViewDescription()
   }, 30_000)
+
+  return patchesView
+}
+
+export function revealPatch(patch: AugmentedPatch): void {
+  patchesView?.reveal(patch)
 }

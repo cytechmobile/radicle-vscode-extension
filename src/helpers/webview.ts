@@ -12,13 +12,14 @@ import {
   usePatchStore,
   useWebviewStore,
 } from '../stores'
-import { getNonce, truncateKeepWords } from '../utils'
+import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
 import {
   type notifyExtension,
   notifyWebview as notifyWebviewBase,
 } from '../utils/webview-messaging'
-import type { Patch, PatchDetailInjectedState } from '../types'
+import type { PatchDetailInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
+import { revealPatch } from './views'
 
 // TODO: maninak move into store
 export const webviewId = 'webview-patch-detail'
@@ -93,8 +94,12 @@ export function createOrShowWebview(ctx: ExtensionContext, patch: AugmentedPatch
           break
         case 'checkOutDefaultBranch':
           await checkOutDefaultBranch()
-
           break
+        case 'revealInPatchesView':
+          revealPatch(message.payload.patch)
+          break
+        default:
+          assertUnreachable(message)
       }
     },
     undefined,
@@ -191,7 +196,7 @@ function getStateForWebview(patch: AugmentedPatch): PatchDetailInjectedState {
   return state
 }
 
-function getPanelTitle(patch: Patch) {
+function getPanelTitle(patch: AugmentedPatch) {
   const truncatedTitle = truncateKeepWords(patch.title, 30)
 
   return `${truncatedTitle}${truncatedTitle.length < patch.title.length ? ' …' : ''}`
