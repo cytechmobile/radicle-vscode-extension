@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
+import Metadatum from './Metadatum.vue'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 
@@ -12,39 +13,38 @@ const { patch, authors } = storeToRefs(usePatchDetailStore())
 </script>
 
 <template>
-  <aside class="*:min-h-[1.5em]">
+  <aside>
     <pre
       v-if="patch.isCheckedOut"
       title="The Git branch associated with this Radicle patch is currently checked out"
+      class="min-h-[1.5em]"
     >
 ✓ Checked out</pre
     >
-    <div class="flex flex-row items-center w-max gap-[0.5em] group">
-      Id:
+    <Metadatum label="Id">
       <pre :title="patch.id">{{ shortenHash(patch.id) }}</pre>
-      <vscode-button
-        class="invisible group-hover:visible"
-        appearance="icon"
-        title="Copy Patch Identifier to Clipboard"
-        @click="
-          notifyExtension({
-            command: 'copyToClipboardAndNotify',
-            payload: { textToCopy: patch.id },
-          })
-        "
-      >
-        <span class="codicon codicon-copy"></span>
-      </vscode-button>
-    </div>
-    <div class="flex flex-row items-center w-max gap-[0.5em]">
-      Authors:
+      <template #aside>
+        <vscode-button
+          appearance="icon"
+          title="Copy Patch Identifier to Clipboard"
+          @click="
+            notifyExtension({
+              command: 'copyToClipboardAndNotify',
+              payload: { textToCopy: patch.id },
+            })
+          "
+        >
+          <span class="codicon codicon-copy"></span>
+        </vscode-button>
+      </template>
+    </Metadatum>
+    <Metadatum label="Authors">
       <pre v-for="author in authors" :key="author.id" :title="author.id">{{
         getIdentityAliasOrId(author)
       }}</pre>
-    </div>
-    <div v-if="patch.labels.length" class="flex flex-row items-center w-max gap-[0.5em]">
-      Labels:
+    </Metadatum>
+    <Metadatum v-if="patch.labels.length" label="Labels">
       <code v-for="label in patch.labels" :key="label">{{ label }}</code>
-    </div>
+    </Metadatum>
   </aside>
 </template>

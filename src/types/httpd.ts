@@ -52,7 +52,7 @@ export interface Patch {
     | { status: 'draft' }
     | { status: 'open'; conflicts?: [string, string][] }
     | { status: 'archived' }
-    | { status: 'merged'; revision: string; commit: string } // TODO: maninak utilized new `revision` field
+    | { status: 'merged'; revision: string; commit: string } // TODO: maninak utilize new `revision` field
   target: string
   labels: string[]
   merges: Merge[]
@@ -109,9 +109,11 @@ export interface Comment {
   body: string
   edits: Edit[]
   embeds: Embed[]
-  reactions: [string, string][] // TODO: maninak verify updated types
+  resolved: boolean
+  reactions: { emoji: string; authors: string[] }[]
+  location?: CodeLocation
+  replyTo?: string
   timestamp: number
-  replyTo: string | null
 }
 
 export interface Edit {
@@ -128,10 +130,25 @@ export interface Embed {
 
 export interface Review {
   author: RadicleIdentity
-  verdict: 'accept' | 'reject' | null
-  summary: string | null
-  comments: string[]
+  verdict?: 'accept' | 'reject'
+  summary?: string
+  comment?: string
+  inline?: CommentInlineWithCode[]
   timestamp: number
+}
+export interface CommentInlineWithCode {
+  location: CodeLocation
+  comment: string
+  timestamp: number
+}
+
+interface CodeLocation {
+  path: string
+  commit: string
+  lines: {
+    start: number
+    end: number
+  }
 }
 
 export interface DiffResponse {

@@ -7,5 +7,6 @@ export interface PatchDetailInjectedState {
   id: Patch['id']
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
+    localIdentity?: { id: `did:key:${string}`; alias?: string }
   }
 }

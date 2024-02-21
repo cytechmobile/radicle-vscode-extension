@@ -3,7 +3,7 @@ export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   safelist: [
     { pattern: /(bg|text)-patch-(draft|open|archived|merged)/ },
-    { pattern: /(bg|text)-vscode-(pre|editor)-(foreground|background)/ },
+    { pattern: /(bg|text|outline)-vscode-(pre|editor)-(foreground|background)/ },
   ],
   corePlugins: {
     preflight: false,

@@ -10,8 +10,8 @@
 
 ### 🚀 Enhancements
 
-- **patch-detail:** implement new Patch Detail webview showing highly dynamic, in-depth information for a specific Patch
-  - can be opened via a new button "View Patch Details" on each item in the list of Patches
+- **patch-detail:** implement new Patch Detail webview showing highly dynamic, in-depth information for a specific patch
+  - can be opened via a new button "View Patch Details" on each item in the list of patches
   - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word fitting the limit
   - the new view's design is purposefully minimal, glanceable, legible, responsive and verbose. It remains familiar to VS Code's native look'n'feel, while also staying true to Radicle's "hacky" vibe. Despite it being a full-fledged custom web-app under the hood, it creates the illusion of it being just another native VS Code UI.
   - view's theme adapts fully and on-the-fly to whichever theme the user configures for his VS Code
@@ -26,7 +26,7 @@
     - major events like "created", "last updated", "merged" and related info with logic crafting optimal copy for each case (see similar tooltip improvements below)
     - a "Refresh" button that refetches from httpd all data of that patch and updating all views that depend on it
     - a "Check Out" button that checks out the Git branch associated with the Radicle Patch shown in the view
-      - shown only if the Patch is not checked out
+      - shown only if the patch is not checked out
     - a "Check Out Default" button that checks out the Git branch marked as default for the Radicle project
       - shown only if the Patch is checked out
     - "time-ago" for major patch events gets auto-updated to remain accurate as time goes by
@@ -76,21 +76,64 @@
       - not shown if empty
     - date
       - the full date the selected revision was created, in local timezone
+      - shows the full date in standard ISO 8601 format
     - latest commit
       - the head commit of the selected revision
     - based on commit
       - the commit the selected revision is branched off of
     - description
       - supports markdown
-      - if the selected revision is the first revision, the description is hidden under an expandable-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
+      - if the selected revision is the first revision, the description is hidden under an expand-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
       - not shown if empty
-  - Activity section shows the following info:
-    - TODO: maninak
+  - Activity section lists various patch-related events across time. Each event is preceded by a "mini"-sized "time-ago" and a dedicated icon. A new event entry is listed for:
+    - event for patch revision creation
+      - copy explicitly points out that the patch and its first revision have the same id
+    - event for review of any revision, with the following data:
+      - icon thumbs-up/thumbs-down/person-speaking, as well as the actual result, depending on the review verdict (accept/reject/null)
+      - a mention that the review was posted with "with code-inlined comments", if applicable
+      - comment summary
+        - not shown if empty
+      - comment body
+        - supports markdown
+        - hidden under an expand-on-click control
+        - not shown if empty
+    - event for discussion/standalone-comment posted on any revision, with the following data:
+      - icon comment/comment-unresolved, as well as clear textual indication for the latter case
+      - whether the post was in reply to another former standalone comment
+        - on click:
+          - intelligently smooth-scrolls to bring that parent comment into view, if needed
+          - shows a "pulse-outline" animation around the parent comment's event in the Activity section
+      - comment body
+        - supports markdown
+        - hidden under an expand-on-click control
+          - if the content is longer than 65 characters
+          - or if the content is multi-paragraph, breaking among the first 65 chars (with use of double-line-break)
+            - when multi-paragraph, only the first line is shown in the expand-on-click control's summary
+          - control's summary shows unparsed Markdown
+          - control's summary turns down to 50% opacity when expanded to further denote state and visually differentiate possibly duplicate content between summary and details
+      - emoji reactions to the comment
+        - if the total count of reactions is 4 or less, then the reacting users' alias/truncated-Nid are shown next to each reaction
+        - if the total count of reactions is 5 or more, then the count of users with the same reaction are shown next to each reaction
+        - shows, on hover, the Radicle identities behind each reaction in list-ified english copy
+        - if the _local_ Radicle identity is included in the reacting users, the reaction gets an additional visual cue
+        - if a Radicle identity has already interacted in any other form in the Patch, the identity's alias (if available) will be resolved and shown. Otherwise the identity's middle-truncated Nid (Node Identifier) will be shown (author alias is otherwise unavailable in the reaction entity).
+    - patch merge
+      - shown anew each time a different delegate merges the same patch (must happen multiple times for repos with this requirement set)
+    - all of the above events also show:
+      - shortened revision id
+        - shows the revision description on hover, if available
+        - on click:
+          - selects that revision in the Revision section
+          - intelligently smooth-scrolls to bring the Revision-selector control into view if needed
+          - shows a "pulse-outline" animation around the Revision-selection control which just got updated
+      - event author/initiator alias, or if not available, their truncated Did
+        - shows the full Did on hover
   - Markdown parsing comes with multiple additional features such as
     - code highlighting with an aditional marker of the language the code is highlighted as
     - task list e.g. `- [ ] task to do` and `- [X] task done`
     - SVG
-    - emoji e.g. `:car:` =>  🚗
+    - emoji e.g. `:car:` =>  `🚗`
+      - emoticons remain untouched e.g. `:)` => `:)` instead of it getting converted to `😀`
     - marked text e.e. `==marked==` => `<mark>inserted</mark>`
     - footnote references e.g.
 
@@ -157,6 +200,7 @@
   - text content in Webviews can be searched with Ctrl + F and additional actions Copy/Paste/Cut are available on right click or by using their common keyboard shortcuts
   - Webviews are secured with strict Content Security Policy (CSP)
 - **state:** rewrite shared state management across the entire extension from simplistic, localised, highly interdependent and brittle, procedural approach to a new declarative, reactive, global, scalable architecture powered by [`pinia`](https://pinia.vuejs.org/) and [`@vue/reactivity`](https://www.npmjs.com/package/@vue/reactivity). This enables sharing state across sibling views/entities that was previously too hard, enabling more performant solutions and features that were previously too impractical to tackle, while the code for them can be much more maintainable and less likely to regress in the future.
+- **httpd:** update typings to align with latest Radicle HTTP API endpoint schema updates
 
 ### 📖 Documentation
 

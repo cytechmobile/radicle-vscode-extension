@@ -171,7 +171,7 @@ export function isRadicleIdentityAuthed(): boolean {
  */
 export function getRadicleIdentity(
   format: 'DID',
-): { DID: string; alias: string; toString: () => string } | undefined
+): { DID: `did:key:${string}`; alias: string; toString: () => string } | undefined
 export function getRadicleIdentity(
   format: 'NID',
 ): { NID: string; alias: string; toString: () => string } | undefined

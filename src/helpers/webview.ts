@@ -19,7 +19,7 @@ import {
 } from '../utils/webview-messaging'
 import type { AugmentedPatch, PatchDetailInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
-import { revealPatch } from './views'
+import { getRadicleIdentity, revealPatch } from '.'
 
 // TODO: maninak make the solution in file more generic, not only useful to a specific webview
 // TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
@@ -182,11 +182,16 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
 
 function getStateForWebview(patch: AugmentedPatch): PatchDetailInjectedState {
   const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
+
+  const identity = getRadicleIdentity('DID')
+  const localIdentity = identity ? { id: identity.DID, alias: identity.alias } : undefined
+
   const state: PatchDetailInjectedState = {
     kind: webviewPatchDetailId,
     id: patch.id,
     state: {
       patch: { ...patch, isCheckedOut },
+      localIdentity,
     },
   }
 

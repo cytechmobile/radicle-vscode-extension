@@ -29,8 +29,29 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       ),
   )
 
+  const localIdentity = computed(() => state.value.state.localIdentity)
+  const identities = computed(() => {
+    const mergers = patch.value.merges.map((merge) => merge.author)
+    const commenters = patch.value.revisions.flatMap((revision) =>
+      revision.discussions.map((discussion) => discussion.author),
+    )
+    const reviewers = patch.value.revisions.flatMap((revision) =>
+      revision.reviews.map((review) => review.author),
+    )
+
+    const uniqueIds = [
+      ...new Map(
+        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers]
+          .filter(Boolean)
+          .map((identity) => [identity.id, identity]),
+      ).values(),
+    ]
+
+    return uniqueIds
+  })
+
   watchEffect(() => {
-    // TODO: maninak save and restore scroll position
+    // TODO: save and restore scroll position?
     vscode.setState(state.value)
   })
 
@@ -46,7 +67,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     },
   )
 
-  return { patch, firstRevision, latestRevision, authors }
+  return { patch, firstRevision, latestRevision, authors, localIdentity, identities }
 })
 
 declare global {

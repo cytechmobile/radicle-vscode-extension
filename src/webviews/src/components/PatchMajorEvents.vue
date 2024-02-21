@@ -37,6 +37,7 @@ setInterval(() => {
   <div class="flex flex-col gap-[0.5em]">
     <div v-if="latestMerge" class="leading-tight">
       Merged by
+      <!--  TODO: maninak include all revisions and mergers? -->
       <pre :title="latestMerge.author.id">{{ getIdentityAliasOrId(latestMerge.author) }}</pre>
       using revision
       <pre :title="latestMerge.revision">{{ shortenHash(latestMerge.revision) }}</pre>
