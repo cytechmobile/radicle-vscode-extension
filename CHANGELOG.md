@@ -4,37 +4,37 @@
 
 ### ✨ Highlights
 
-- New Patch Detail view
+- New Patch detail view
 
     <!-- TODO: maninak add screenshot -->
 
 ### 🚀 Enhancements
 
-- **patch-detail:** implement new Patch Detail webview showing highly dynamic, in-depth information for a specific patch
-  - can be opened via a new button "View Patch Details" on each item in the list of patches
+- **patch-detail:** implement new patch detail webview showing highly dynamic, in-depth information for a specific patch
+  - can be opened via a new button "View Patch Details" on each item in the Patches view
   - panel's title shows the patch description in full if it's short, otherwise truncated to the nearest full word fitting the limit
-  - the new view's design is purposefully minimal, glanceable, legible, responsive and verbose. It remains familiar to VS Code's native look'n'feel, while also staying true to Radicle's "hacky" vibe. Despite it being a full-fledged custom web-app under the hood, it creates the illusion of it being just another native VS Code UI.
-  - view's theme adapts fully and on-the-fly to whichever theme the user configures for his VS Code
+  - the new view's design is purposefully minimal, glanceable, legible, responsive and verbose. It remains familiar to VS Code's native look'n'feel, while also staying true to Radicle's "hacky" vibe. Despite it being a full-fledged custom web-app under the hood, it successfully creates the illusion of it being just another piece of native VS Code UI.
+  - view's theme adapts fully and on-the-fly (without reopening of the view) to whichever theme the user configures for his VS Code
   - view has the following main sections:
     - header
     - Patch
     - Revision
     - Activity
   - header section shows the following info:
-    - status (e.g. open, merged, archived, ...)
-      - the status badge's background color is a dynamic color mix of the patch status color and the dynamic editor-foreground inherited from vscode's current theme so as to ensure text contrast reaching at least [WCAAG AA](https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_WCAG/Perceivable/Color_contrast) level of accessibility at all times while also retaining a relative consistency of the colors across all our UIs
+    - status of the patch (e.g. open, merged, archived, ...)
+      - the status badge's background color is a dynamic color mix of the patch status color and the dynamic editor-foreground color inherited from vscode's current theme so as to ensure text contrast reaching at least [WCAAG AA](https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_WCAG/Perceivable/Color_contrast) level of accessibility at all times while also retaining a relative consistency of the colors across all our UIs and user-selected themes
     - major events like "created", "last updated", "merged" and related info with logic crafting optimal copy for each case (see similar tooltip improvements below)
     - a "Refresh" button that refetches from httpd all data of that patch and updating all views that depend on it
-    - a "Check Out" button that checks out the Git branch associated with the Radicle Patch shown in the view
+    - a "Check Out" button that checks out the Git branch associated with the Radicle patch shown in the view
       - shown only if the patch is not checked out
     - a "Check Out Default" button that checks out the Git branch marked as default for the Radicle project
-      - shown only if the Patch is checked out
+      - shown only if the patch is checked out
     - "time-ago" for major patch events gets auto-updated to remain accurate as time goes by
   - Patch section shows the following info:
     - checked-out indicator
-      - not shown if the Git branch associated with this Radicle Patch is not currently checked out
+      - not shown if the Git branch associated with this Radicle patch is not currently checked out
     - id
-      - has on-hover button to copy Patch identifier to clipboard
+      - has on-hover button to copy patch identifier to clipboard
     - revision author(s)
     - labels
       - not shown if empty
@@ -85,11 +85,12 @@
       - supports markdown
       - if the selected revision is the first revision, the description is hidden under an expand-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
       - not shown if empty
-  - Activity section lists various patch-related events across time. Each event is preceded by a "mini"-sized "time-ago" and a dedicated icon. A new event entry is listed for:
+  - Activity section lists various patch-related events that took place across the lifetime of the patch. Each event is preceded by a "mini"-sized "time-ago" and a dedicated icon. A new event entry is listed for:
     - event for patch revision creation
-      - copy explicitly points out that the patch and its first revision have the same id
+      - if the patch and its first revision have the same id, the copy explicitly points that out, organically also educating the user about this Radicle fact
     - event for review of any revision, with the following data:
-      - icon thumbs-up/thumbs-down/person-speaking, as well as the actual result, depending on the review verdict (accept/reject/null)
+      - icon thumbs-up/thumbs-down/person-speaking matching the review verdict (accept/reject/null)
+      - verdict of the review
       - a mention that the review was posted with "with code-inlined comments", if applicable
       - comment summary
         - not shown if empty
@@ -97,7 +98,7 @@
         - supports markdown
         - hidden under an expand-on-click control
         - not shown if empty
-    - event for discussion/standalone-comment posted on any revision, with the following data:
+    - event for standalone-comment/discussion posted on a revision, with the following data:
       - icon comment/comment-unresolved, as well as clear textual indication for the latter case
       - whether the post was in reply to another former standalone comment
         - on click:
@@ -116,7 +117,7 @@
         - if the total count of reactions is 5 or more, then the count of users with the same reaction are shown next to each reaction
         - shows, on hover, the Radicle identities behind each reaction in list-ified english copy
         - if the _local_ Radicle identity is included in the reacting users, the reaction gets an additional visual cue
-        - if a Radicle identity has already interacted in any other form in the Patch, the identity's alias (if available) will be resolved and shown. Otherwise the identity's middle-truncated Nid (Node Identifier) will be shown (author alias is otherwise unavailable in the reaction entity).
+        - if a Radicle identity has already interacted in any other form in the patch, the identity's alias (if available) will be resolved and shown. Otherwise the identity's middle-truncated Nid (Node Identifier) will be shown (author alias is otherwise unavailable in the reaction entity).
     - patch merge
       - shown anew each time a different delegate merges the same patch (must happen multiple times for repos with this requirement set)
     - all of the above events also show:
@@ -129,11 +130,11 @@
       - event author/initiator alias, or if not available, their truncated Did
         - shows the full Did on hover
   - Markdown parsing comes with multiple additional features such as
-    - code highlighting with an aditional marker of the language the code is highlighted as
+    - code highlighting with an aditional label communicating the language the code is identified and highlighted as
     - task list e.g. `- [ ] task to do` and `- [X] task done`
     - SVG
     - emoji e.g. `:car:` =>  `🚗`
-      - emoticons remain untouched e.g. `:)` => `:)` instead of it getting converted to `😀`
+      - emoticons remain untouched e.g. `:)` => `:)` instead of it getting converted to `😀`, which may not match the author's initial sentiment
     - marked text e.e. `==marked==` => `<mark>inserted</mark>`
     - footnote references e.g.
 
@@ -160,31 +161,31 @@
         <p>The <abbr title="Hyper Text Markup Language">HTML</abbr> specification is maintained by the <abbr title="World Wide Web Consortium">W3C</abbr>.</p>
         ```
 
-    - automatic table of contents generation wherever the marker `[toc]` is placed
+    - automatic table of contents generation wherever the marker `[toc]` is placed, based on previously declared headings etc
     - automatic linkification of text such as email URIs
-  - Patch state remains in sync with all other views
-  - where applicable the various data have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened or localised time (including the timezone used) in full text in case it's a "time-ago", etc
+  - patch state remains in sync with all other views
+  - where applicable the various data have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened, or localised time (including the timezone used) in full text in case it's a "time-ago", etc
   - all data coming from Radicle is made visually distinct (and a bit more accessible / easier to read) from miscellaneous UI copy by rendering it using a monotype font
 - **commands**: add new command to check out the current Radicle project's default Git branch
-- **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out Patch on the list
-- **patch-list:** auto-retry fetching list of Patches from httpd (with geometric back-off) if an error occured
-- **patch-list:** show the total count of Patches and when the list was last updated as a description next to the "Patches" view title
+- **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out patch on the list
+- **patch-list:** auto-retry fetching list of patches from httpd (with geometric back-off) if an error occured
+- **patch-list:** show the total count of patches and when the list was last updated as a description next to the "Patches" view title
   - "updated-time-ago" gets auto-updated to remain accurate as time goes by or when the list is manually refreshed
   - in case of fetch error no count will be shown
-- **patch-list:** improve Patch tooltip with the following
-  - show merge revision id and commit hash (if not already shown in revision event's copy) for merged Patches
-  - show latest revision id and commit hash for Patches with more than the initial revision
-- **patch-list:** prioritize Patch merge event over latest revision when deriving author and "time-ago" for item's description and order in the list
-- **patch-list:** improve legibility of time when Patch events (e.g. created, last updated, merged) happened
-  - don't show full dates to make the copy less noisy. The full dates are still available in the new Patch Details view.
+- **patch-list:** improve patch tooltip with the following
+  - show merge revision id and commit hash (if not already shown in revision event's copy) for merged patches
+  - show latest revision id and commit hash for patches with more than the initial revision
+- **patch-list:** prioritize patch merge event over latest revision when deriving author and "time-ago" for item's description and order in the list
+- **patch-list:** improve legibility of time when patch events (e.g. created, last updated, merged) happened
+  - don't show full dates to make the copy less noisy. The full dates are still available in the new patch detail view.
   - use custom "time-ago" logic producing more informative results with fewer collisions e.g. "35 days ago" instead of "1 month ago" etc
-- **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into Patch item's context menu
-- **patch-list:** use smaller dot as separator between data in the description of a Patch item
+- **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into patch item's context menu
+- **patch-list:** use smaller dot as separator between data in the description of a patch item
 - **sidebar:** the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
 
-### 🏎️ Performance
+### 🔥 Performance
 
-- **patch-list:** only re-render the affected Patch item(s) when checking out a(nother) patch (or a non-patch) branch. Previously all patches had to be re-fetched, parsed and all their list items (and their tooltips!) needed to be instantiated and rendered every time a different git branch got checked out.
+- **patch-list:** only re-render the affected patch item(s) when checking out a(nother) patch (or a non-patch) branch. Previously all patches had to be re-fetched, parsed and all their list items (and their tooltips!) needed to be instantiated and rendered every time a different git branch got checked out.
 
 ### 🏡 Chores
 
@@ -213,22 +214,22 @@
 
 ### 🚀 Enhancements
 
-- **patch-list:** show a button to check out a Radicle Patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-  - show an indicator on the Patch's title and tooltip if its associated branch is the currently checked-out git branch
+- **patch-list:** show a button to check out a Radicle patch's associated git branch ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - show an indicator on the patch's title and tooltip if its associated branch is the currently checked-out git branch
   - keep indicator's state in sync even if the git branch change doesn't happen from within our UI (e.g. `rad patch checkout` or `git checkout` in the terminal)
-  - notify user of uncommitted changes when trying to check out a Patch
-  - don't show check-out-button for the currently checked-out Patch on the list
-- **patch-list:** auto-refresh Patches list when `pathToNodeHome` is updated in the extension settings
-- **patch-list:** show a hint-text that radicle-httpd may not be running as the placeholder in Patches list, if that seems to be the case
+  - notify user of uncommitted changes when trying to check out a patch
+  - don't show check-out-button for the currently checked-out patch on the list
+- **patch-list:** auto-refresh list when `pathToNodeHome` is updated in the extension settings
+- **patch-list:** show a hint-text that radicle-httpd may not be running as the placeholder in Patches view, if that seems to be the case
 - **patch-list:** fall back to showing their DID if the revision author's alias isn't defined ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patch-list:** use new better-fitting icon for merged Patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patch-list:** improve the contrast of the colors used by Patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** use new better-fitting icon for merged patches ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+- **patch-list:** improve the contrast of the colors used by patch status icons for light themes ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
 
-### 🏎️ Performance
+### 🔥 Performance
 
 - **app:** heavily speed up most procedures by memoizing the resolution of the reference to the rad CLI ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-- **patch-list:** heavily speed up (re-)loading of Patches list ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
-  - measured ~50x faster against a real-world Project with >50 Patches, with the benefit increasing proportionally with the count of Patches on a project
+- **patch-list:** heavily speed up (re-)loading of Patches view ([#75](https://github.com/cytechmobile/radicle-vscode-extension/issues/75))
+  - measured ~50x faster against a real-world Project with >50 patches, with the benefit increasing proportionally with the count of patches on a project
 
 ### 📖 Documentation
 
@@ -241,7 +242,7 @@
 
 ### 🩹 Fixes
 
-- **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change, resulting in Patches View getting stuck with `Unable to fetch Radicle Patches for non-Radicle-initialized workspace`. ([#90](https://github.com/cytechmobile/radicle-vscode-extension/issues/90))
+- **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change, resulting in Patches View getting stuck with `Unable to fetch Radicle patches for non-Radicle-initialized workspace`. ([#90](https://github.com/cytechmobile/radicle-vscode-extension/issues/90))
 
 -----
 
