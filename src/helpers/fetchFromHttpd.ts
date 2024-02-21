@@ -44,9 +44,10 @@ type FetchFromHttpdReturn<Data extends object> = Promise<
  * @example PATCH request with error handling
  * ```ts
  * const { error } = await fetchFromHttpd(
- *   `/projects/${projectId}/patches/${patchId}`,
- *   'PATCH',
- *   { state: 'merged' },
+ *   `/projects/${projectId}/patches/${patchId}`, {
+ *     method: 'PATCH',
+ *     body: { state: 'merged' },
+ *   },
  * )
  * if (error) {
  *   notifyUserAboutFetchError(error)
@@ -56,9 +57,7 @@ type FetchFromHttpdReturn<Data extends object> = Promise<
  * ```
  *
  * @param path The relative path (as seen from the API's root) to the resource we want to access.
- * @param method Optionally the HTTP verb to be used in the request. Defaults to `'GET'`.
- * @param body The request body to be sent with the HTTP request. Optional if the method is `'GET'` or `'DELETE'`
- * @param options Optionally additional request options.
+ * @param options Optionally additional request options like HTTP verb or request body.
  *
  * @returns Returns either an object with the properties `data` (ready-to-use data of the response) and`response` (complete response object with full context) if the request was successful, or an object with the poperty `error` (most times set with full context) if it isn't, but never both.
  */
@@ -73,54 +72,36 @@ type FetchFromHttpdReturn<Data extends object> = Promise<
  */
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}/patches/${string}`,
-  method: 'PATCH',
-  body?: object & { state: PatchStatus },
-  options?: object,
+  options: FetchOptions<'json'> & { method: 'PATCH'; body: { state: PatchStatus } },
 ): FetchFromHttpdReturn<Patch>
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}/patches/${string}`,
-  method?: 'GET',
-  body?: object,
-  options?: object,
+  options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<Patch>
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}/patches`,
-  method?: 'GET',
-  body?: object,
-  options?: object,
+  options?: FetchOptions<'json'> & { query?: { state: PatchStatus }; method?: 'GET' },
 ): FetchFromHttpdReturn<Patch[]>
 export async function fetchFromHttpd<RevBase extends string, RevOid extends string>(
   path: `/projects/rad:${string}/diff/${RevBase}/${RevOid}`,
-  method?: 'GET',
-  body?: object,
-  options?: object,
+  options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<DiffResponse>
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}`,
-  method?: 'GET',
-  body?: object,
-  options?: object,
+  options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<Project>
 export async function fetchFromHttpd(
   path: '/projects',
-  method?: 'GET',
-  body?: undefined,
-  options?: Omit<FetchOptions<'json'>, 'method' | 'body'> & {
-    query: { show: 'pinned' | 'all' }
-  },
+  options: FetchOptions<'json'> & { query: { show: 'pinned' | 'all' }; method?: 'GET' },
 ): FetchFromHttpdReturn<Project[]>
 export async function fetchFromHttpd(
   path: '/',
-  method?: 'GET',
-  body?: undefined,
-  options?: undefined,
+  options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<HttpdRoot>
 
 export async function fetchFromHttpd<Data extends object>(
   path: string,
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
-  body?: object,
-  options?: Omit<FetchOptions<'json'>, 'method' | 'body'>,
+  options?: FetchOptions<'json'>,
 ): FetchFromHttpdReturn<Data> {
   if (!doFetch) {
     resetHttpdConnection()
@@ -130,8 +111,6 @@ export async function fetchFromHttpd<Data extends object>(
     const response = await doFetch.raw<Data>(
       removeTrailingSlashes(path), // httpd paths don't support trailing slashes
       {
-        method,
-        body,
         ...(path === '/'
           ? { ...(options ?? {}), query: { perPage: undefined } } // unset `perPage` for '/'
           : options ?? {}),

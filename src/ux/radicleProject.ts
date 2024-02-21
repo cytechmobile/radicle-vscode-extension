@@ -6,7 +6,7 @@ import { notifyUserAboutFetchError } from './httpdConnection'
 
 // TODO: maninak fix no projects listed since upgrading to latest Radicle
 export async function selectAndCloneRadicleProject(): Promise<void> {
-  const { data: projects, error } = await fetchFromHttpd('/projects', 'GET', undefined, {
+  const { data: projects, error } = await fetchFromHttpd('/projects', {
     query: { show: 'all' },
   })
   if (!projects) {
