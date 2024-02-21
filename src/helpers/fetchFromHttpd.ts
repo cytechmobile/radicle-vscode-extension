@@ -105,7 +105,9 @@ export async function fetchFromHttpd(
   path: '/projects',
   method?: 'GET',
   body?: undefined,
-  options?: object,
+  options?: Omit<FetchOptions<'json'>, 'method' | 'body'> & {
+    query: { show: 'pinned' | 'all' }
+  },
 ): FetchFromHttpdReturn<Project[]>
 export async function fetchFromHttpd(
   path: '/',

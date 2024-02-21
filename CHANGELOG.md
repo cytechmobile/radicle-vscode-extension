@@ -187,6 +187,9 @@
 
 - **patch-list:** only re-render the affected patch item(s) when checking out a(nother) patch (or a non-patch) branch. Previously all patches had to be re-fetched, parsed and all their list items (and their tooltips!) needed to be instantiated and rendered every time a different git branch got checked out.
 
+### 🩹 Fixes
+- **commands:** don't always show empty project list for command `radicle.clone` command. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+
 ### 🏡 Chores
 
 - **webview:** implement infrastructure for Webviews, effectively individual websites inside a WebviewPanel, enabling the creation of bespoke custom views with the following powerful features
