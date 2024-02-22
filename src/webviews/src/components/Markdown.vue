@@ -32,7 +32,6 @@ defineProps<{ source: string }>()
 
   pre code {
     @apply max-w-max;
-    min-width: min(calc(100% - 26px), 80ch);
   }
 
   ul.contains-task-list {

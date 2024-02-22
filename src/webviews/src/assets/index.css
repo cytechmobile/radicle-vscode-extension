@@ -5,7 +5,7 @@
 body {
   @apply p-[10px];
 
-  @media (width >= 360px) {
+  @media screen(md) {
     @apply p-5;
   }
 }

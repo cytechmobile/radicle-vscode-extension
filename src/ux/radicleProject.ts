@@ -4,7 +4,6 @@ import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import { exec, getRepoRoot, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
 
-// TODO: maninak fix no projects listed since upgrading to latest Radicle
 export async function selectAndCloneRadicleProject(): Promise<void> {
   const { data: projects, error } = await fetchFromHttpd('/projects', {
     query: { show: 'all' },

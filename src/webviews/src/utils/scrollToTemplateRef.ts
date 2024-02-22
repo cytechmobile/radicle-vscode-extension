@@ -11,7 +11,7 @@ export function scrollToTemplateRef(
     return
   }
 
-  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' })
 
   if (options?.classToAdd) {
     el.classList.add(options.classToAdd)

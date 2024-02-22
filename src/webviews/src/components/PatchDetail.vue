@@ -32,7 +32,7 @@ provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOpt
 const { patch, authors, firstRevision, latestRevision, localIdentity, identities } =
   storeToRefs(usePatchDetailStore())
 
-const revisionSelectorRef = ref<HTMLElement>()
+const revisionSectionRef = ref<HTMLElement>()
 const revisionOptionsMap = computed(
   () =>
     new Map(
@@ -52,9 +52,9 @@ const selectedRevision = computed(
 
 function selectAndScrollToRevision(revision: Revision) {
   selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
-  scrollToTemplateRef(revisionSelectorRef.value, {
+  scrollToTemplateRef(revisionSectionRef.value, {
     classToAdd: 'pulse-outline',
-    removeAfterMs: 1500,
+    removeAfterMs: 1000,
   })
 }
 
@@ -174,9 +174,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <article class="flex flex-col gap-12">
+  <article
+    class="grid grid-cols-1 sm:grid-cols-[minmax(calc(50cqw_+_80px),_1fr)_minmax(95px,_1fr)] xl:grid-cols-2 grid-areas-patch gap-x-9 gap-y-12"
+  >
     <!-- TODO: maninak make h2s (and maybe also header?) sticky -->
-    <header class="flex gap-4 justify-between">
+    <header class="flex gap-4 justify-between" style="grid-area: header">
       <div class="flex flex-wrap gap-4 items-center">
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents />
@@ -223,112 +225,17 @@ onMounted(() => {
         >
       </aside>
     </header>
-    <main class="flex flex-col gap-12">
-      <section>
+    <main
+      class="grid grid-rows-subgrid grid-cols-subgrid row-span-3 sm:row-span-2 sm:col-span-2"
+    >
+      <section style="grid-area: section-patch">
         <h2 class="text-lg mt-0 mb-3">#&nbsp;Patch</h2>
         <PatchMetadata />
         <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <Markdown :source="firstRevision.description" class="text-sm" />
       </section>
 
-      <section>
-        <h2
-          class="max-w-max flex items-center gap-[0.5em] text-lg mt-0 flex-wrap mb-3"
-          title="Select a patch revision"
-        >
-          <label for="revision-selector" class="cursor-pointer">#&nbsp;Revision</label>
-          <vscode-dropdown
-            id="revision-selector"
-            ref="revisionSelectorRef"
-            v-model="selectedRevisionOption"
-            class="font-mono rounded-none"
-          >
-            <vscode-option
-              v-for="revisionOption in revisionOptionsMap.keys()"
-              :key="revisionOption"
-              class="font-mono"
-              >{{ revisionOption }}</vscode-option
-            >
-          </vscode-dropdown>
-        </h2>
-        <Metadatum label="Id">
-          <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
-          <template #aside>
-            <vscode-button
-              appearance="icon"
-              title="Copy Revision Identifier to Clipboard"
-              @click="
-                notifyExtension({
-                  command: 'copyToClipboardAndNotify',
-                  payload: { textToCopy: selectedRevision.id },
-                })
-              "
-            >
-              <span class="codicon codicon-copy"></span>
-            </vscode-button>
-          </template>
-        </Metadatum>
-        <Metadatum label="Author">
-          <pre :title="selectedRevision.author.id">{{
-            getIdentityAliasOrId(selectedRevision.author)
-          }}</pre>
-        </Metadatum>
-        <Metadatum
-          v-if="
-            selectedRevisionAcceptedReviews.length || selectedRevisionRejectedReviews.length
-          "
-          label="Reviews"
-        >
-          <span class="flex items-center gap-[1em]">
-            <span
-              v-if="selectedRevisionAcceptedReviews.length"
-              class="flex items-start gap-x-[0.5em]"
-            >
-              <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
-              <span v-for="review in selectedRevisionAcceptedReviews" :key="review.timestamp">
-                <pre :title="selectedRevision.author.id">{{
-                  getIdentityAliasOrId(selectedRevision.author)
-                }}</pre>
-              </span>
-            </span>
-            <span
-              v-if="selectedRevisionRejectedReviews.length"
-              class="flex items-start gap-x-[0.5em]"
-            >
-              <span class="codicon codicon-thumbsdown" title="Rejected revision"></span>
-              <span v-for="review in selectedRevisionRejectedReviews" :key="review.timestamp">
-                <pre :title="selectedRevision.author.id">{{
-                  getIdentityAliasOrId(selectedRevision.author)
-                }}</pre>
-              </span>
-            </span>
-          </span>
-        </Metadatum>
-        <Metadatum label="Date">
-          <span
-            :title="new Date(selectedRevision.timestamp * 1000).toISOString()"
-            class="font-mono"
-            >{{ getFormattedDate(selectedRevision.timestamp) }}</span
-          >
-        </Metadatum>
-        <Metadatum label="Latest commit">
-          <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>
-        </Metadatum>
-        <Metadatum label="Based on commit">
-          <pre :title="selectedRevision.base">{{ shortenHash(selectedRevision.base) }}</pre>
-        </Metadatum>
-        <div v-if="selectedRevision.description" class="mt-4">
-          <details v-if="shouldHideRevisionDescription">
-            <summary style="color: var(--vscode-foreground)" title="Click to expand/collapse"
-              >Description</summary
-            >
-            <Markdown :source="selectedRevision.description" class="mt-[0.25em] text-sm" />
-          </details>
-          <Markdown v-else :source="selectedRevision.description" class="text-sm" />
-        </div>
-      </section>
-
-      <section>
+      <section style="grid-area: section-primary">
         <!-- TODO: add button to expand/collapse all -->
         <h2 class="text-lg mt-0 mb-3">#&nbsp;Activity</h2>
         <EventList>
@@ -538,11 +445,122 @@ onMounted(() => {
           </template>
         </EventList>
       </section>
+
+      <section ref="revisionSectionRef" class="h-fit" style="grid-area: section-secondary">
+        <h2
+          class="max-w-max flex items-center gap-[0.5em] text-lg mt-0 flex-wrap mb-3"
+          title="Select a patch revision"
+        >
+          <label for="revision-selector" class="cursor-pointer">#&nbsp;Revision</label>
+          <vscode-dropdown
+            id="revision-selector"
+            v-model="selectedRevisionOption"
+            class="font-mono rounded-none"
+          >
+            <vscode-option
+              v-for="revisionOption in revisionOptionsMap.keys()"
+              :key="revisionOption"
+              class="font-mono"
+              >{{ revisionOption }}</vscode-option
+            >
+          </vscode-dropdown>
+        </h2>
+        <Metadatum label="Id">
+          <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
+          <template #aside>
+            <vscode-button
+              appearance="icon"
+              title="Copy Revision Identifier to Clipboard"
+              @click="
+                notifyExtension({
+                  command: 'copyToClipboardAndNotify',
+                  payload: { textToCopy: selectedRevision.id },
+                })
+              "
+            >
+              <span class="codicon codicon-copy"></span>
+            </vscode-button>
+          </template>
+        </Metadatum>
+        <Metadatum label="Author">
+          <pre :title="selectedRevision.author.id">{{
+            getIdentityAliasOrId(selectedRevision.author)
+          }}</pre>
+        </Metadatum>
+        <Metadatum
+          v-if="
+            selectedRevisionAcceptedReviews.length || selectedRevisionRejectedReviews.length
+          "
+          label="Reviews"
+        >
+          <span class="flex items-center gap-[1em]">
+            <span
+              v-if="selectedRevisionAcceptedReviews.length"
+              class="flex items-start gap-x-[0.5em]"
+            >
+              <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
+              <span v-for="review in selectedRevisionAcceptedReviews" :key="review.timestamp">
+                <pre :title="selectedRevision.author.id">{{
+                  getIdentityAliasOrId(selectedRevision.author)
+                }}</pre>
+              </span>
+            </span>
+            <span
+              v-if="selectedRevisionRejectedReviews.length"
+              class="flex items-start gap-x-[0.5em]"
+            >
+              <span class="codicon codicon-thumbsdown" title="Rejected revision"></span>
+              <span v-for="review in selectedRevisionRejectedReviews" :key="review.timestamp">
+                <pre :title="selectedRevision.author.id">{{
+                  getIdentityAliasOrId(selectedRevision.author)
+                }}</pre>
+              </span>
+            </span>
+          </span>
+        </Metadatum>
+        <Metadatum label="Date">
+          <span
+            :title="new Date(selectedRevision.timestamp * 1000).toISOString()"
+            class="font-mono"
+            >{{ getFormattedDate(selectedRevision.timestamp) }}</span
+          >
+        </Metadatum>
+        <Metadatum label="Latest commit">
+          <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>
+        </Metadatum>
+        <Metadatum label="Based on commit">
+          <pre :title="selectedRevision.base">{{ shortenHash(selectedRevision.base) }}</pre>
+        </Metadatum>
+        <div v-if="selectedRevision.description" class="mt-4">
+          <details v-if="shouldHideRevisionDescription">
+            <summary style="color: var(--vscode-foreground)" title="Click to expand/collapse"
+              >Description</summary
+            >
+            <Markdown :source="selectedRevision.description" class="mt-[0.25em] text-sm" />
+          </details>
+          <Markdown v-else :source="selectedRevision.description" class="text-sm" />
+        </div>
+      </section>
     </main>
   </article>
 </template>
 
 <style scoped>
+.grid-areas-patch {
+  grid-template-areas:
+    'header           '
+    'section-patch    '
+    'section-primary  '
+    'section-secondary';
+
+  @media screen(sm) {
+    grid-template-areas:
+      'header          header           '
+      'section-patch   section-patch    '
+      'section-primary section-secondary';
+  }
+}
+
 .modified-by-local-identity {
   @apply outline outline-1 outline-offset-1;
   background-color: color-mix(in srgb, var(--vscode-editor-foreground) 7%, transparent);
@@ -569,6 +587,6 @@ onMounted(() => {
   }
 
   @apply outline outline-offset-[0.25em];
-  animation: outline-pulse 1.5s ease-in-out forwards;
+  animation: outline-pulse 1000ms ease-in-out forwards;
 }
 </style>
