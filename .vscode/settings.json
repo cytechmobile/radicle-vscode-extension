@@ -30,7 +30,8 @@
     "patch-list",
     "patch-detail",
     "cli",
-    "webview"
+    "webview",
+    "app"
   ],
   "conventionalCommits.gitmoji": false,
   "prettier.enable": false,

@@ -57,33 +57,13 @@ export function setConfig<K extends keyof ExtensionConfig>(
 }
 
 /**
- * Resolves the path where the Radicle CLI binary _is expected to be located_, as per
- * the installation script.
- *
- * @returns The path if successfully resolved, otherwise `undefined`
- * @see https://radicle.xyz/install
- */
-export function getDefaultPathToRadBinary(): string | undefined {
-  const homeDir = exec('echo $HOME')
-  // TODO: maninak can I use `~` instead and skip the shell command?
-  // TODO: maninak what if it's a mac??
-  const defaultPath = homeDir ? `${homeDir}/.radicle/bin/rad` : undefined
-
-  return defaultPath
-}
-
-/**
  * Resolves the default path to the Radicle CLI binary _after having confirmed_ that the binary
  * is indeed there and accessible for command execution.
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
 export function getValidatedPathToDefaultRadBinaryLocation(): string | undefined {
-  const defaultPath = getDefaultPathToRadBinary()
-
-  if (!defaultPath) {
-    return undefined
-  }
+  const defaultPath = '~/.radicle/bin/rad' // as per https://radicle.xyz/install
 
   const isBinaryAtDefaultPath = Boolean(exec(defaultPath))
 
