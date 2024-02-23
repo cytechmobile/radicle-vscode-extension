@@ -54,11 +54,6 @@ While not required, for development it's strongly advised to use VS Code with al
 
 ## Conventions
 
-### Paths
-
-<!-- TODO: maninak re-evaluate if this is still true now with esbuild and update docs and code as needed (maybe use `@` alias?) -->
-Because of module resolution restrictions, all paths must be relative. e.g. instead of `src/utils` (even if import auto-completion writes that) it should be corrected to `../utils`.
-
 ### Importing extension modules inside webview modules
 
 Any of the extension's modules (e.g. a file containing a TS type or a util function) we need to import inside a webview module (e.g. a .vue file) must be also declared as an import in [src/webviews/tsconfig.app.json](src/webviews/tsconfig.app.json) under `includes`.
