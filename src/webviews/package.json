@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "@vueuse/core": "^10.7.0",
+    "@vueuse/core": "^10.8.0",
     "highlight.js": "^11.9.0",
     "javascript-time-ago": "^2.5.9",
     "pinia": "^2.1.7",

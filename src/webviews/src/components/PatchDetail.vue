@@ -4,8 +4,17 @@ import {
   vsCodeButton,
   vsCodeDropdown,
   vsCodeOption,
+  vsCodePanels,
+  vsCodePanelTab,
+  vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
 import { ref, computed, toRaw, onMounted, nextTick } from 'vue'
+import {
+  breakpointsTailwind,
+  useBreakpoints,
+  useEventListener,
+  useThrottleFn,
+} from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import {
   getIdentityAliasOrId,
@@ -27,7 +36,14 @@ import Metadatum from '@/components/Metadatum.vue'
 import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
 
-provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
+provideVSCodeDesignSystem().register(
+  vsCodeButton(),
+  vsCodeDropdown(),
+  vsCodeOption(),
+  vsCodePanels(),
+  vsCodePanelTab(),
+  vsCodePanelView(),
+)
 
 const { patch, authors, firstRevision, latestRevision, localIdentity, identities } =
   storeToRefs(usePatchDetailStore())
@@ -50,12 +66,18 @@ const selectedRevision = computed(
     >,
 )
 
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isWindowNarrowerThanSm = ref<boolean>()
+const recalcIsWindowNarrowerThanSm = () =>
+  (isWindowNarrowerThanSm.value = breakpoints.isSmaller('sm'))
+recalcIsWindowNarrowerThanSm()
+useEventListener('resize', useThrottleFn(recalcIsWindowNarrowerThanSm, 50))
+
+const revisionTabRef = ref<HTMLElement>()
 function selectAndScrollToRevision(revision: Revision) {
   selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
-  scrollToTemplateRef(revisionSectionRef.value, {
-    classToAdd: 'pulse-outline',
-    removeAfterMs: 1000,
-  })
+  isWindowNarrowerThanSm.value && revisionTabRef.value?.click()
+  scrollToTemplateRef(revisionSectionRef.value)
 }
 
 function getRevisionHoverTitle(text: string) {
@@ -229,15 +251,358 @@ onMounted(() => {
       class="grid grid-rows-subgrid grid-cols-subgrid row-span-3 sm:row-span-2 sm:col-span-2"
     >
       <section style="grid-area: section-patch">
-        <h2 class="text-lg mt-0 mb-3">#&nbsp;Patch</h2>
         <PatchMetadata />
         <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <Markdown :source="firstRevision.description" class="text-sm" />
       </section>
 
-      <section style="grid-area: section-primary">
+      <vscode-panels
+        v-if="isWindowNarrowerThanSm"
+        style="grid-area: section-primary"
+        aria-label="Detailed patch information"
+      >
+        <vscode-panel-tab
+          title="Click to see all events which took place during the lifetime of the patch"
+          class="text-lg"
+          >Activity</vscode-panel-tab
+        >
+        <vscode-panel-tab
+          ref="revisionTabRef"
+          title="Click to see details of a specific revision of the patch"
+          class="text-lg"
+          >Revision</vscode-panel-tab
+        >
+        <vscode-panel-view class="pt-5 px-0 pb-0">
+          <section>
+            <!-- TODO: add button to expand/collapse all -->
+            <EventList>
+              <!-- TODO: list committer's email as tooltip -->
+              <!--<div class="grid grid-cols-subgrid gap-x-3 items-center">
+            <span
+              title="Git commit"
+              class="px-[2px] no-underline before:bg-vscode-editor-background codicon codicon-git-commit"
+            ></span>
+            <div class="flex items-center">
+              <pre>Add embeds also to revisions</pre>
+              <vscode-button
+                class="ml-1"
+                appearance="icon"
+                title="Show/hide additional commit info"
+              >
+                <span class="codicon codicon-ellipsis"></span>
+              </vscode-button>
+            </div>
+            <pre title="aed8538aed8538aed8538">aed8538</pre>
+            &ndash;
+            <pre title="me@sebastinez.dev">Sebastian Martinez</pre>
+            <pre>10 hours ago</pre>
+          </div> -->
+              <template v-for="event in patchEvents" :key="event.ts">
+                <EventItem
+                  v-if="event.kind === 'revision'"
+                  :when="event.ts"
+                  codicon="codicon-versions"
+                >
+                  {{
+                    event.revision.id === firstRevision.id ? 'Patch and revision' : 'Revision'
+                  }}
+                  <span
+                    @click="selectAndScrollToRevision(event.revision)"
+                    :title="getRevisionHoverTitle(event.revision.description)"
+                    class="font-mono hover:cursor-pointer"
+                    >{{ shortenHash(event.revision.id) }}</span
+                  >
+                  created by
+                  <span :title="event.revision.author.id" class="font-mono">{{
+                    getIdentityAliasOrId(event.revision.author)
+                  }}</span>
+                </EventItem>
+                <EventItem
+                  v-else-if="event.kind === 'review'"
+                  :when="event.ts"
+                  :codicon="
+                    event.review.verdict === 'accept'
+                      ? 'codicon-thumbsup'
+                      : event.review.verdict === 'reject'
+                        ? 'codicon-thumbsdown'
+                        : 'codicon-feedback'
+                  "
+                >
+                  Review
+                  <span v-if="event.review.verdict" class="font-mono">
+                    {{ `${event.review.verdict}ing` }}
+                  </span>
+                  <template v-else
+                    >with <span class="font-mono">no verdict</span> for</template
+                  >
+                  revision
+                  <span
+                    @click="selectAndScrollToRevision(event.revision)"
+                    :title="getRevisionHoverTitle(event.revision.description)"
+                    class="font-mono hover:cursor-pointer"
+                    >{{ shortenHash(event.revision.id) }}</span
+                  >
+                  posted
+                  <span v-if="event.review.inline?.length">with code-inlined comments</span>
+                  by
+                  <span :title="event.revision.author.id" class="font-mono">{{
+                    getIdentityAliasOrId(event.revision.author)
+                  }}</span>
+                  <template v-if="event.review.summary">
+                    <details v-if="event.review.summary && event.review.comment">
+                      <summary
+                        style="color: var(--vscode-foreground)"
+                        title="Click to expand/collapse"
+                        class="mt-1 max-w-prose break-words text-sm font-mono"
+                        >{{ event.review.summary }}</summary
+                      >
+                      <Markdown :source="event.review.comment" class="mt-[0.25em] text-sm" />
+                    </details>
+                    <p
+                      v-else-if="event.review.summary && !event.review.comment"
+                      class="mt-1 -mb-[0.2em] max-w-prose break-words text-sm font-mono"
+                      >{{ event.review.summary }}</p
+                    >
+                  </template>
+                </EventItem>
+                <EventItem
+                  v-else-if="event.kind === 'discussion'"
+                  ref="commentRefs"
+                  :id="event.discussion.id"
+                  :when="event.ts"
+                  :codicon="
+                    event.discussion.resolved
+                      ? 'codicon-comment'
+                      : 'codicon-comment-unresolved'
+                  "
+                >
+                  Comment
+                  <span v-if="!event.discussion.resolved"
+                    >(<span class="font-mono">unresolved</span>)</span
+                  >
+                  posted on revision
+                  <span
+                    @click="selectAndScrollToRevision(event.revision)"
+                    :title="getRevisionHoverTitle(event.revision.description)"
+                    class="font-mono hover:cursor-pointer"
+                    >{{ shortenHash(event.revision.id) }}</span
+                  >
+                  by
+                  <span :title="event.discussion.author.id" class="font-mono">{{
+                    getIdentityAliasOrId(event.discussion.author)
+                  }}</span>
+                  <span v-if="event.discussion.replyTo">
+                    in reply to
+                    <span
+                      @click="scrollToComment(event.discussion.replyTo)"
+                      title="Click to show parent comment"
+                      class="font-mono hover:cursor-pointer"
+                      >another</span
+                    ></span
+                  >
+                  <details
+                    v-if="event.discussion.body.length > maxCharsForUntruncatedMdText"
+                    class="[&_summary]:open:opacity-50"
+                  >
+                    <summary
+                      style="color: var(--vscode-foreground)"
+                      title="Click to expand/collapse"
+                      class="mt-1 max-w-prose text-sm font-mono"
+                      >{{ truncateMarkdown(event.discussion.body) }}</summary
+                    >
+                    <Markdown :source="event.discussion.body" class="mt-[0.25em] text-sm" />
+                  </details>
+                  <Markdown
+                    v-else
+                    :source="event.discussion.body"
+                    class="mt-[0.25em] text-sm"
+                  />
+                  <div
+                    v-if="event.discussion.reactions.length"
+                    class="mt-[0.25em] flex flex-wrap gap-x-3"
+                  >
+                    <span
+                      v-for="reaction in event.discussion.reactions"
+                      :key="reaction.emoji"
+                      :title="`Reaction from ${new Intl.ListFormat('en', {
+                        style: 'long',
+                        type: 'conjunction',
+                      }).format(
+                        reaction.authors.map(
+                          (author) => resolveRadicleIdentity(author)?.alias ?? author,
+                        ),
+                      )}`"
+                      :class="{
+                        'modified-by-local-identity': reaction.authors.find((author) =>
+                          localIdentity?.id.includes(author),
+                        ),
+                      }"
+                    >
+                      <template
+                        v-if="
+                          event.discussion.reactions.flatMap((reaction) => reaction.authors)
+                            .length <= 4
+                        "
+                      >
+                        {{ reaction.emoji }}
+                        <template
+                          v-for="(part, index) in new Intl.ListFormat('en', {
+                            style: 'short',
+                            type: 'unit',
+                          }).formatToParts(
+                            reaction.authors.map(
+                              (author) =>
+                                resolveRadicleIdentity(author)?.alias ??
+                                truncateMiddle(author),
+                            ),
+                          )"
+                          :key="index"
+                        >
+                          <span v-if="part.type === 'element'" class="font-mono">{{
+                            part.value
+                          }}</span>
+                          <template v-else-if="part.type === 'literal'">{{
+                            part.value
+                          }}</template>
+                        </template>
+                      </template>
+                      <template v-else>
+                        {{ reaction.emoji }}
+                        <span class="font-mono">{{ reaction.authors.length }}</span>
+                      </template>
+                    </span>
+                  </div>
+                </EventItem>
+                <EventItem
+                  v-else-if="event.kind === 'merge'"
+                  :when="event.ts"
+                  codicon="codicon-git-merge"
+                >
+                  Patch merged by
+                  <span :title="event.merge.author.id" class="font-mono">{{
+                    getIdentityAliasOrId(event.merge.author)
+                  }}</span>
+                  using revision
+                  <span
+                    v-if="event.revision"
+                    @click="selectAndScrollToRevision(event.revision)"
+                    :title="getRevisionHoverTitle(event.revision.description)"
+                    class="font-mono hover:cursor-pointer"
+                    >{{ shortenHash(event.revision.id) }}</span
+                  >
+                  <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
+                </EventItem>
+              </template>
+            </EventList>
+          </section>
+        </vscode-panel-view>
+        <vscode-panel-view class="pt-5 px-0 pb-0">
+          <section ref="revisionSectionRef" class="h-fit">
+            <vscode-dropdown
+              v-model="selectedRevisionOption"
+              title="Select a patch revision to see more info about it"
+              class="max-w-full mb-3 font-mono rounded-none"
+            >
+              <vscode-option
+                v-for="revisionOption in revisionOptionsMap.keys()"
+                :key="revisionOption"
+                class="font-mono"
+                >{{ revisionOption }}</vscode-option
+              >
+            </vscode-dropdown>
+            <Metadatum label="Id">
+              <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
+              <template #aside>
+                <vscode-button
+                  appearance="icon"
+                  title="Copy Revision Identifier to Clipboard"
+                  @click="
+                    notifyExtension({
+                      command: 'copyToClipboardAndNotify',
+                      payload: { textToCopy: selectedRevision.id },
+                    })
+                  "
+                >
+                  <span class="codicon codicon-copy"></span>
+                </vscode-button>
+              </template>
+            </Metadatum>
+            <Metadatum label="Author">
+              <pre :title="selectedRevision.author.id">{{
+                getIdentityAliasOrId(selectedRevision.author)
+              }}</pre>
+            </Metadatum>
+            <Metadatum
+              v-if="
+                selectedRevisionAcceptedReviews.length ||
+                selectedRevisionRejectedReviews.length
+              "
+              label="Reviews"
+            >
+              <span class="flex items-center gap-[1em]">
+                <span
+                  v-if="selectedRevisionAcceptedReviews.length"
+                  class="flex items-start gap-x-[0.5em]"
+                >
+                  <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
+                  <span
+                    v-for="review in selectedRevisionAcceptedReviews"
+                    :key="review.timestamp"
+                  >
+                    <pre :title="selectedRevision.author.id">{{
+                      getIdentityAliasOrId(selectedRevision.author)
+                    }}</pre>
+                  </span>
+                </span>
+                <span
+                  v-if="selectedRevisionRejectedReviews.length"
+                  class="flex items-start gap-x-[0.5em]"
+                >
+                  <span class="codicon codicon-thumbsdown" title="Rejected revision"></span>
+                  <span
+                    v-for="review in selectedRevisionRejectedReviews"
+                    :key="review.timestamp"
+                  >
+                    <pre :title="selectedRevision.author.id">{{
+                      getIdentityAliasOrId(selectedRevision.author)
+                    }}</pre>
+                  </span>
+                </span>
+              </span>
+            </Metadatum>
+            <Metadatum label="Date">
+              <span
+                :title="new Date(selectedRevision.timestamp * 1000).toISOString()"
+                class="font-mono"
+                >{{ getFormattedDate(selectedRevision.timestamp) }}</span
+              >
+            </Metadatum>
+            <Metadatum label="Latest commit">
+              <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>
+            </Metadatum>
+            <Metadatum label="Based on commit">
+              <pre :title="selectedRevision.base">{{
+                shortenHash(selectedRevision.base)
+              }}</pre>
+            </Metadatum>
+            <div v-if="selectedRevision.description" class="mt-4">
+              <details v-if="shouldHideRevisionDescription">
+                <summary
+                  style="color: var(--vscode-foreground)"
+                  title="Click to expand/collapse"
+                  >Description</summary
+                >
+                <Markdown :source="selectedRevision.description" class="mt-[0.25em] text-sm" />
+              </details>
+              <Markdown v-else :source="selectedRevision.description" class="text-sm" />
+            </div>
+          </section>
+        </vscode-panel-view>
+      </vscode-panels>
+
+      <section v-if="!isWindowNarrowerThanSm" style="grid-area: section-primary">
         <!-- TODO: add button to expand/collapse all -->
-        <h2 class="text-lg mt-0 mb-3">#&nbsp;Activity</h2>
+        <h2 class="text-lg font-normal mt-0 mb-4">Activity</h2>
         <EventList>
           <!-- TODO: list committer's email as tooltip -->
           <!--<div class="grid grid-cols-subgrid gap-x-3 items-center">
@@ -446,25 +811,25 @@ onMounted(() => {
         </EventList>
       </section>
 
-      <section ref="revisionSectionRef" class="h-fit" style="grid-area: section-secondary">
-        <h2
-          class="max-w-max flex items-center gap-[0.5em] text-lg mt-0 flex-wrap mb-3"
-          title="Select a patch revision"
+      <section
+        v-if="!isWindowNarrowerThanSm"
+        ref="revisionSectionRef"
+        class="hidden sm:block h-fit"
+        style="grid-area: section-secondary"
+      >
+        <h2 class="text-lg font-normal mt-0 mb-3">Revision</h2>
+        <vscode-dropdown
+          v-model="selectedRevisionOption"
+          title="Select a patch revision to see more info about it"
+          class="max-w-full mb-3 font-mono rounded-none"
         >
-          <label for="revision-selector" class="cursor-pointer">#&nbsp;Revision</label>
-          <vscode-dropdown
-            id="revision-selector"
-            v-model="selectedRevisionOption"
-            class="font-mono rounded-none"
+          <vscode-option
+            v-for="revisionOption in revisionOptionsMap.keys()"
+            :key="revisionOption"
+            class="font-mono"
+            >{{ revisionOption }}</vscode-option
           >
-            <vscode-option
-              v-for="revisionOption in revisionOptionsMap.keys()"
-              :key="revisionOption"
-              class="font-mono"
-              >{{ revisionOption }}</vscode-option
-            >
-          </vscode-dropdown>
-        </h2>
+        </vscode-dropdown>
         <Metadatum label="Id">
           <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
           <template #aside>

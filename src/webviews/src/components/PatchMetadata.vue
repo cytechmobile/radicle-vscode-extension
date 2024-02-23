@@ -21,7 +21,7 @@ const { patch, authors } = storeToRefs(usePatchDetailStore())
     >
 ✓ Checked out</pre
     >
-    <Metadatum label="Id">
+    <Metadatum label="Patch id">
       <pre :title="patch.id">{{ shortenHash(patch.id) }}</pre>
       <template #aside>
         <vscode-button
