@@ -43,6 +43,7 @@ const { patch, authors } = storeToRefs(usePatchDetailStore())
         getIdentityAliasOrId(author)
       }}</pre>
     </Metadatum>
+    <!-- TODO: show names of all unique committers across all revisions -->
     <Metadatum v-if="patch.labels.length" label="Labels">
       <code v-for="label in patch.labels" :key="label">{{ label }}</code>
     </Metadatum>
