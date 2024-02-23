@@ -68,6 +68,7 @@
           - not shown if empty
         - author
           - not shown if all revisions are from the same author
+      - as the viewport is getting narrower the dropdown will respond by also becoming narrower to always fit within the webview. But when clicked to expand its popover listing the available revision options for selection, those options will always be shown in full, adjusting the scroll state as needed and restoring it when the popover is closed.
     - id
       - has on-hover button to copy revision identifier to clipboard
     - author
@@ -129,6 +130,10 @@
           - shows a "pulse-outline" animation around the Revision-selection control which just got updated
       - event author/initiator alias, or if not available, their truncated Did
         - shows the full Did on hover
+  - the Activity an Revision sections come with fine-tuned responsiveness features depending on the webview viewport's width
+    - when the viewport is wide they are shown in a 50/50 split two-column layout
+    - as the viewport is getting narrower the Revision column gets narrower *faster* (resulting in e.g. 70/30 split) to prioritize giving the Activity section maximum of the available horizontal real-estate since it not only hosts relatively more important content, but also one that is commonly wrapping around into new lines due to how expansive it can be. Even a few pixels narrower Activity column can result in very quickly stretching it's contents vertically as it wraps around itself.
+    - when the viewport becomes less than 640px the columns will collapse in a single one and the two respective sections will get joined in a tabbed layout. State such as the selected revision in the section's dropdown persist across tab switching and column-layout changes
   - Markdown parsing comes with multiple additional features such as
     - code highlighting with an aditional label communicating the language the code is identified and highlighted as
     - task list e.g. `- [ ] task to do` and `- [X] task done`
