@@ -13,8 +13,8 @@ import {
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from './ux'
+import { setWhenClauseContext } from './utils'
 
-// TODO: maninak show blank (or "Activating extension...") welcome screen while whenClauseContext vars are not yet set?
 export function activate(ctx: ExtensionContext) {
   initExtensionContext(ctx)
 
@@ -28,4 +28,6 @@ export function activate(ctx: ExtensionContext) {
   validateRadCliInstallation({ minimizeUserNotifications: true })
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
   validateHttpdConnection({ minimizeUserNotifications: true })
+
+  setWhenClauseContext('radicle.isExtensionActivated', true)
 }

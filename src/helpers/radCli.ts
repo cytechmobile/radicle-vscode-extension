@@ -1,5 +1,6 @@
 import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../utils'
 import {
+  defaultRadBinaryLocation,
   getConfig,
   getResolvedPathToNodeHome,
   getValidatedPathToDefaultRadBinaryLocation,
@@ -20,10 +21,7 @@ export function getRadCliRefNow(): string {
   const radCliRef =
     getConfig('radicle.advanced.pathToRadBinary') ||
     (Boolean(getValidatedPathToRadBinaryWhenAliased()) && 'rad') ||
-    getValidatedPathToDefaultRadBinaryLocation()
-  if (!radCliRef) {
-    throw new Error('Failed resolving reference to Radicle Cli binary')
-  }
+    defaultRadBinaryLocation
 
   const radCliRefWithEnvVars = `${parsedEnvVars}${radCliRef}`
 
@@ -37,7 +35,7 @@ const {
 /**
  * Resolves a reference to Radicle CLI to be used for executing shell commands.
  *
- * Debounced!
+ * Memoized for temporaly proximal calls!
  *
  * @returns Either the path to the `rad` binary defined manually by the user via
  * config, or otherwise just the string `"rad"`
@@ -86,7 +84,6 @@ export function getRadCliVersion(): string | undefined {
  *
  * @returns `true` if found, otherwise `false`.
  */
-// TODO: maninak memoize
 export function isRadCliInstalled(): boolean {
   const isInstalled = Boolean(exec(getRadCliRef()))
 

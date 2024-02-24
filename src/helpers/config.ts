@@ -57,17 +57,30 @@ export function setConfig<K extends keyof ExtensionConfig>(
 }
 
 /**
+ * Resolves the full path (starting from `/`) where the Radicle CLI binary
+ * _is expected to be located_, as per the https://radicle.xyz/install script.
+ *
+ * @returns The path if successfully resolved, otherwise `undefined`
+ */
+export function getFullDefaultPathToRadBinaryDirectory(): string | undefined {
+  const homeDir = exec('echo $HOME')
+  const defaultPath = homeDir ? `${homeDir}/.radicle/bin/` : undefined
+
+  return defaultPath
+}
+
+export const defaultRadBinaryLocation = '~/.radicle/bin/rad' // as per https://radicle.xyz/install
+
+/**
  * Resolves the default path to the Radicle CLI binary _after having confirmed_ that the binary
  * is indeed there and accessible for command execution.
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
 export function getValidatedPathToDefaultRadBinaryLocation(): string | undefined {
-  const defaultPath = '~/.radicle/bin/rad' // as per https://radicle.xyz/install
+  const isBinaryAtDefaultPath = Boolean(exec(defaultRadBinaryLocation))
 
-  const isBinaryAtDefaultPath = Boolean(exec(defaultPath))
-
-  return isBinaryAtDefaultPath ? defaultPath : undefined
+  return isBinaryAtDefaultPath ? defaultRadBinaryLocation : undefined
 }
 
 /**

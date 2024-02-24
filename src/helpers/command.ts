@@ -9,6 +9,7 @@ import {
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
   selectAndCloneRadicleProject,
+  troubleshootRadCliInstallation,
 } from '../ux'
 import type { AugmentedPatch, Patch } from '../types'
 import { createOrShowWebview, getRadCliRef } from '.'
@@ -85,6 +86,7 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
 export function registerAllCommands(): void {
   registerSimpleRadCliCmdsAsVsCodeCmds(simpleRadCliCmdsToRegisterInVsCode)
 
+  registerVsCodeCmd('radicle.troubleshootRadCliInstallation', troubleshootRadCliInstallation)
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
   registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)

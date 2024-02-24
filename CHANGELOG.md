@@ -132,7 +132,7 @@
         - shows the full Did on hover
   - the Activity an Revision sections come with fine-tuned responsiveness features depending on the webview viewport's width
     - when the viewport is wide they are shown in a 50/50 split two-column layout
-    - as the viewport is getting narrower the Revision column gets narrower *faster* (resulting in e.g. 70/30 split) to prioritize giving the Activity section maximum of the available horizontal real-estate since it not only hosts relatively more important content, but also one that is commonly wrapping around into new lines due to how expansive it can be. Even a few pixels narrower Activity column can result in very quickly stretching it's contents vertically as it wraps around itself.
+    - as the viewport is getting narrower the Revision column gets narrower _faster_ (resulting in e.g. 70/30 split) to prioritize giving the Activity section maximum of the available horizontal real-estate since it not only hosts relatively more important content, but also one that is commonly wrapping around into new lines due to how expansive it can be. Even a few pixels narrower Activity column can result in very quickly stretching it's contents vertically as it wraps around itself.
     - when the viewport becomes less than 640px the columns will collapse in a single one and the two respective sections will get joined in a tabbed layout. State such as the selected revision in the section's dropdown persist across tab switching and column-layout changes
   - Markdown parsing comes with multiple additional features such as
     - code highlighting with an aditional label communicating the language the code is identified and highlighted as
@@ -171,7 +171,7 @@
   - patch state remains in sync with all other views
   - where applicable the various data have on-hover indicators hinting that they come with a tooltip which shows additional info such as author's DID, full Id in case it's shortened, or localised time (including the timezone used) in full text in case it's a "time-ago", etc
   - all data coming from Radicle is made visually distinct (and a bit more accessible / easier to read) from miscellaneous UI copy by rendering it using a monotype font
-- **commands**: add new command to check out the current Radicle project's default Git branch
+- **commands:** add new command to check out the current Radicle project's default Git branch
 - **patch-list:** show button to "Check Out Default Git Branch" for the currently checked-out patch on the list
 - **patch-list:** auto-retry fetching list of patches from httpd (with geometric back-off) if an error occured
 - **patch-list:** show the total count of patches and when the list was last updated as a description next to the "Patches" view title
@@ -187,13 +187,21 @@
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into patch item's context menu
 - **patch-list:** use smaller dot as separator between data in the description of a patch item
 - **sidebar:** the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
+- **onboarding:** add the new default path `~/.radicle/bin/rad` defined in https://radicle.xyz/install script to the list of watched paths previously defined for the legacy package-manager-based installers
+- **onboarding:** replace current standard views and an error notification shown when the Radicle CLI binary didn't get resolved succesfully, with a new dedicated Welcome View explaining the situation, setting user expectations accordingly and offering to launch the troubleshooting flow via a button.
+- **onboarding:** replace whichever Welcome View ends up randomly beeing shown for a split-second while the extension is acticating with an "Activating extension..." one
+- **commands:** add new command to launch Radicle CLI installation troubleshooter (available only when binary hasn't resolved)
 
 ### 🔥 Performance
 
 - **patch-list:** only re-render the affected patch item(s) when checking out a(nother) patch (or a non-patch) branch. Previously all patches had to be re-fetched, parsed and all their list items (and their tooltips!) needed to be instantiated and rendered every time a different git branch got checked out.
+- **app:** shorten the amount of time the extension needs to get activated down to about 70% of what it was before
 
 ### 🩹 Fixes
+
 - **commands:** don't always show empty project list for command `radicle.clone` command. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+- **onboarding:** fix regression causing the extension to error out (with informative error message but still...) when the path to the Radicle CLI binary didn't resolve successfully.
+- **onboarding:** re-check if repo is rad-initialized and as a result properly adjust which views are available if starting without a resolved Radicle CLI and then troubleshooting it successfully (e.g. installing it for the first time).
 
 ### 🏡 Chores
 
@@ -264,14 +272,14 @@
 
 ### 🚀 Enhancements
 
-- **patch-list**: show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to easily copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
-- **patch-list**:  each item in the list of Radicle Patches can be expanded to show a sub-list of files changed.  ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
+- **patch-list:** show new view in the sidebar listing all Radicle Patches, including a tooltip with more info on hover and the ability to easily copy the Patch identifier ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
+- **patch-list:**  each item in the list of Radicle Patches can be expanded to show a sub-list of files changed.  ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
   - If multiple items have the same filename, their directory URL will be additionally shown as the item's description.
   - On hover, a tooltip shows the relative URL of the file in the repo, and the kind of change it had.
   - A left click on a filechange item will open a diff between the original and patched file versions.
   - A right-click allows opening either the original or changed file versions (as applicable) without the diffing visual noise.
-- **commands**: new VS Code command to refresh the list of Radicle Patches ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
-- **commands**: new VS Code command to collapse all items in the list of Radicle Patches ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
+- **commands:** new VS Code command to refresh the list of Radicle Patches ([#43](https://github.com/cytechmobile/radicle-vscode-extension/issues/43))
+- **commands:** new VS Code command to collapse all items in the list of Radicle Patches ([#46](https://github.com/cytechmobile/radicle-vscode-extension/issues/46))
 - **ux:** convert existing flows with series of user input steps into a bespoke, cohesive experience indicating total step count and completion progress, allow editing of already submitted answers of the same flow, as well reveal-toggling of typed-in passwords, among other improvements ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 - **auth:** additionally show the alias associated with a Radicle identitifier whenever showing the latter ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
