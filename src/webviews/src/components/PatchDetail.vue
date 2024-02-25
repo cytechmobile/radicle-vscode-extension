@@ -54,7 +54,7 @@ const revisionOptionsMap = computed(
         .map((revision) => [assembleRevisionOptionLabel(revision), revision]),
     ),
 )
-// TODO: maninak if patch is merged pre-select revision that got merged
+// TODO: if patch is merged pre-select revision that got merged
 const selectedRevisionOption = ref(assembleRevisionOptionLabel(latestRevision.value))
 const selectedRevision = computed(
   () =>
@@ -104,6 +104,8 @@ onMounted(() => {
     })
   })
 })
+
+// TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
 <template>
@@ -126,6 +128,7 @@ onMounted(() => {
         <PatchMetadata />
         <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <Markdown :source="firstRevision.description" class="text-sm" />
+        <!-- TODO: maninak show reactions to revisions -->
       </section>
 
       <vscode-panels

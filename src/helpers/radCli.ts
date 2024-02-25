@@ -173,6 +173,7 @@ export function getRadicleIdentity(
   format: 'NID',
 ): { NID: string; alias: string; toString: () => string } | undefined
 
+// TODO: maninak call http://127.0.0.1:8080/api/v1/node to collect that info instead
 export function getRadicleIdentity(format: 'DID' | 'NID') {
   let flag: string
   switch (format) {

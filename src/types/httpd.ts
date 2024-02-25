@@ -57,7 +57,7 @@ export interface Patch {
     | { status: 'draft' }
     | { status: 'open'; conflicts?: [string, string][] }
     | { status: 'archived' }
-    | { status: 'merged'; revision: string; commit: string } // TODO: maninak utilize new `revision` field
+    | { status: 'merged'; revision: string; commit: string }
   target: string
   labels: string[]
   merges: Merge[]

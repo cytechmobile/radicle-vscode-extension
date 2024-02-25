@@ -1,6 +1,6 @@
 import type { Patch, Revision } from '../types'
 
-// TODO: maninak change logic (and rename here and everywhere) to not get the latest revision but the most important one which is `patch.status === merged ? mergedRevision(s) ? latestRevision`
+// TODO: change logic (and rename here and everywhere) to not get the latest revision but the most important one which is `patch.status === merged ? mergedRevision(s) ? latestRevision`
 
 export function getFirstAndLatestRevisions(patch: Patch): {
   firstRevision: Revision

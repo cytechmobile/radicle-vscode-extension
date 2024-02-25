@@ -46,7 +46,7 @@ export async function validateHttpdConnection(
  *
  * @param error The error that was thrown when the recuest to httpd failed.
  */
-// TODO: maninak revisit all cases because the errors seem to have changed (due to Fetch v2?) and most/all cases seem to not match anymore
+// TODO: revisit all cases because the errors seem to have changed (due to Fetch v2?) and most/all cases seem to not match anymore
 export async function notifyUserAboutFetchError(error: FetchError): Promise<void> {
   const requestUrl = error?.request?.toString()
   const buttonOutput = 'Show Output'

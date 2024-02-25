@@ -24,6 +24,8 @@ function registerPatchesView() {
     const patchCount = usePatchStore().patches?.length
     const formattedPatchCount = typeof patchCount === 'number' ? `${patchCount} · ` : ''
 
+    // TODO: maninak add "Updating..."
+
     const lastFetchedTs = usePatchStore().lastFetchedTs
     if (lastFetchedTs) {
       patchesView.description = `${formattedPatchCount}Updated ${getTimeAgo(lastFetchedTs)}`

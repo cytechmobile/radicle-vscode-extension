@@ -21,8 +21,8 @@ import type { AugmentedPatch, PatchDetailInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
 import { getRadicleIdentity, revealPatch } from '.'
 
-// TODO: maninak make the solution in file more generic, not only useful to a specific webview
-// TODO: maninak move this file (and other found in helpers) to "/services" or "/providers"
+// TODO: make the solution in file more generic, not only useful to a specific webview
+// TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
 /**
  * Opens a panel with the specified webview in the active column.

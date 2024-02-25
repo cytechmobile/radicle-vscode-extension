@@ -9,7 +9,7 @@ import Metadatum from './Metadatum.vue'
 provideVSCodeDesignSystem().register(vsCodeButton())
 
 const { patch, authors } = storeToRefs(usePatchDetailStore())
-// TODO: maninak add an (orange?) info icon next to authors who's DID is seen for the first time among revisions of patches of this project with text "This is the first time a user with this DID submits a patch revision in this project"
+// TODO: add an (orange?) info icon next to authors who's DID is seen for the first time among revisions of patches of this project with text "This is the first time a user with this DID submits a patch revision in this project"
 </script>
 
 <template>
