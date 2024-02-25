@@ -14,12 +14,14 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
     return
   }
 
-  const qPickItems: QuickPickItem[] = projects.map((proj) => ({
-    label: proj.name,
-    description: `$(radio-tower) ${proj.trackings} | ${proj.id}`,
-    detail: proj.description,
-    icon: 'repo',
-  }))
+  const qPickItems: QuickPickItem[] = projects
+    .sort((p1, p2) => p2.seeding - p1.seeding)
+    .map((proj) => ({
+      label: proj.name,
+      description: `$(radio-tower) ${proj.seeding} | ${proj.id}`,
+      detail: proj.description,
+      icon: 'repo',
+    }))
 
   const projSelection = await window.showQuickPick(qPickItems, {
     placeHolder: 'Choose a Radicle project to clone locally',

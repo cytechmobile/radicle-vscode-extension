@@ -199,7 +199,8 @@
 
 ### 🩹 Fixes
 
-- **commands:** don't always show empty project list for command `radicle.clone` command. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+- **commands:** don't always show empty project list for command `radicle.clone` command. Now the list will also be shown with the most seeded repos at the top. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+- **commands:** fix `radicle.clone` command not showing number of users seeding each repo in the list items. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
 - **onboarding:** fix regression causing the extension to error out (with informative error message but still...) when the path to the Radicle CLI binary didn't resolve successfully.
 - **onboarding:** re-check if repo is rad-initialized and as a result properly adjust which views are available if starting without a resolved Radicle CLI and then troubleshooting it successfully (e.g. installing it for the first time).
 
@@ -223,6 +224,7 @@
 
 - **readme:** fix typos, improve title and intro copy, update milestone link
 - **contributing:** document recommended extensions for development with VS Code in [.vscode/extensions.json](.vscode/extensions.json) and add related section in the repo's contribution guide.
+- update all references using the now deprecated term "track" to the new term "seed" aross our docs
 
 -----
 
@@ -356,8 +358,7 @@
 
 - ❤️🪵 Initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
-<!-- TODO: maninak update all mentions of "track" to "seed" -->
-- 📥 Cloning of tracked Radicle projects
+- 📥 Cloning of seeded Radicle projects
 - 🏗️ Improved development tooling and infrastructure for maintainers
 
 ### 🚀 Enhancements
@@ -370,7 +371,7 @@
 - **log:** indicate in logs and notifications if an identity was pre-unlocked, got auto-unlocked using stored passphrase, got unlocked with user provided passphrase, or got created anew ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 - **config:** new `pathToNodeHome` setting, which sets the `RAD_HOME` env variable ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 - **config:**  new `httpApiEndpoint` setting, useful when reverse-proxies are running in front of `radicle-httpd` etc ([#26](https://github.com/cytechmobile/radicle-vscode-extension/issues/26))
-- **commands:** new VS Code command to clone a Radicle project from a filterable list of all tracked ones ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
+- **commands:** new VS Code command to clone a Radicle project from a filterable list of all seeded ones ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
 - **commands:** show rad clone command in the native Source Control three-dot-menu's Radicle submenu ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
 - **onboarding:** when opening VS Code without any folder in the workspace show in the dedicated Welcome View an additional button to clone from Radicle ([#27](https://github.com/cytechmobile/radicle-vscode-extension/issues/27))
 - **config:** set default value for existing config `pathToRadBinary` ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
