@@ -4,6 +4,10 @@
   "recommendations": [
     "connor4312.esbuild-problem-matchers",
     "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "Vue.volar",
+    "Vue.vscode-typescript-vue-plugin",
+    "antfu.iconify",
   ],
   // Please make sure you disable the following extensions *for this workspace*
   "unwantedRecommendations": [

@@ -1,5 +1,7 @@
 import type { ExtensionContext } from 'vscode'
 
+// TODO: maninak move these into an envStore
+
 let ctx: ExtensionContext
 
 /**

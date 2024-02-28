@@ -1,16 +1,25 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "../../lib/**/*", "../utils/assertUnreachable.ts"],
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "../types/**/*.ts",
+    "../utils/assertUnreachable.ts",
+    "../utils/patch.ts",
+    "../utils/string.ts",
+    "../utils/time.ts",
+    "../utils/webview-messaging.ts"
+  ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2022", "DOM"],
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "lib/*": ["../../lib/*"],
-      "utils/*": ["../utils/*"],
+      "extensionUtils/*": ["../utils/*"]
     }
   }
 }

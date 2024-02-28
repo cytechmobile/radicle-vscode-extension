@@ -38,14 +38,16 @@
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
-    "dev": "run-p dev:*",
-    "dev:extension": "npm run verify-deps && npm run compile:extension -- --sourcemap --watch",
+    "dev": "npm run verify-deps && run-s dev:*",
     "dev:webviews": "cd ./src/webviews && npm run dev",
+    "dev:extension": "npm run compile:extension -- --sourcemap --watch",
     "lint": "run-p lint:*",
     "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
     "lint:webviews": "cd ./src/webviews && npm run lintfix",
     "test": "npm run test:typings && npm run test:unit && npm run test:e2e",
-    "test:typings": "tsc --noEmit",
+    "test:typings": "run-p test:typings:*",
+    "test:typings:extension": "tsc --noEmit",
+    "test:typings:webviews": "cd ./src/webviews && npm run type-check",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
     "test:e2e": "echo \"End-to-end testing not yet implemented.\""
   },
@@ -56,8 +58,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "wip-webview",
-        "title": "Open dat wip webview"
+        "command": "radicle.troubleshootRadCliInstallation",
+        "title": "Troubleshoot Radicle CLI (a.k.a. `rad`) Installation",
+        "shortTitle": "Troubleshoot rad CLI",
+        "category": "Radicle",
+        "icon": "$(wand)",
+        "enablement": "!radicle.isRadCliInstalled"
       },
       {
         "command": "radicle.sync",
@@ -121,11 +127,26 @@
         "enablement": "radicle.isRadInitialized"
       },
       {
+        "command": "radicle.viewPatchDetails",
+        "title": "View Patch Details",
+        "shortTitle": "Patch Details",
+        "category": "Radicle",
+        "icon": "$(preview)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
         "command": "radicle.checkoutPatch",
         "title": "Check Out Patch Branch",
-        "shortTitle": "Check Out",
+        "shortTitle": "Check Out Patch",
         "category": "Radicle",
         "icon": "$(check)"
+      },
+      {
+        "command": "radicle.checkoutDefaultBranch",
+        "title": "Check Out Project's Default Git Branch",
+        "shortTitle": "Check Out Default",
+        "category": "Radicle",
+        "icon": "$(home)"
       },
       {
         "command": "radicle.copyPatchId",
@@ -151,6 +172,10 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "radicle.viewPatchDetails",
+          "when": "false"
+        },
         {
           "command": "radicle.checkoutPatch",
           "when": "false"
@@ -180,26 +205,30 @@
       ],
       "view/title": [
         {
-          "command": "radicle.collapsePatches",
-          "when": "view == patches-view",
-          "group": "navigation@1"
-        },
-        {
           "command": "radicle.refreshPatches",
           "when": "view == patches-view",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [
         {
+          "command": "radicle.viewPatchDetails",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "inline@1"
+        },
+        {
           "command": "radicle.checkoutPatch",
           "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
-          "group": "inline"
+          "group": "inline@2"
+        },
+        {
+          "command": "radicle.checkoutDefaultBranch",
+          "when": "view == patches-view && viewItem =~ /patch:checked-out-true/",
+          "group": "inline@2"
         },
         {
           "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem =~ /patch/",
-          "group": "inline"
+          "when": "view == patches-view && viewItem =~ /patch/"
         },
         {
           "command": "radicle.openOriginalVersionOfPatchedFile",
@@ -250,39 +279,56 @@
       "radicle": [
         {
           "id": "getting-started",
+          "contextualTitle": "Radicle",
           "name": "Getting Started",
           "icon": "$(radicle-logo)",
-          "when": "!radicle.isRadInitialized"
+          "initialSize": 1,
+          "when": "!radicle.isRadCliInstalled || !radicle.isRadInitialized"
         },
         {
           "id": "cli-commands",
+          "contextualTitle": "Radicle",
           "name": "CLI Commands",
           "icon": "$(radicle-logo)",
-          "when": "radicle.isRadInitialized"
+          "initialSize": 1,
+          "when": "radicle.isRadCliInstalled && radicle.isRadInitialized"
         },
         {
           "id": "patches-view",
+          "contextualTitle": "Radicle",
           "name": "Patches",
           "icon": "$(git-pull-request)",
-          "when": "radicle.isRadInitialized"
+          "initialSize": 4,
+          "when": "radicle.isRadCliInstalled && radicle.isRadInitialized",
+          "type": "tree"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "getting-started",
+        "contents": "Activating extension...",
+        "when": "!radicle.isExtensionActivated"
+      },
+      {
+        "view": "getting-started",
+        "contents": "Failed resolving the Radicle CLI binary.\nPlease ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.\nPlease expect the extention's capabilities to remain severely limited until this issue is resolved.\n[$(wand)Troubleshoot](command:radicle.troubleshootRadCliInstallation)",
+        "when": "radicle.isExtensionActivated && !radicle.isRadCliInstalled"
+      },
+      {
+        "view": "getting-started",
         "contents": "No folder is currently open in your workspace.\nTo use Radicle, you must open a folder containing a git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(rad-clone)Clone from Radicle](command:radicle.clone)\n",
-        "when": "workspaceFolderCount == 0"
+        "when": "radicle.isExtensionActivated && workspaceFolderCount == 0"
       },
       {
         "view": "getting-started",
         "contents": "The folder currently opened in your workspace is not a git code repository.\nTo use Radicle, you can initialize the folder as a code repository enabling source control features powered by git.\n[Initialize Repository](command:git.init?%5Btrue%5D)\n[Choose a Different Folder](command:workbench.action.files.openFolder)\nTo learn more about how to use git and source control in VS Code [read the docs](https://code.visualstudio.com/docs/sourcecontrol/overview).",
-        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount == 0"
+        "when": "radicle.isExtensionActivated && workspaceFolderCount > 0 && gitOpenRepositoryCount == 0"
       },
       {
         "view": "getting-started",
-        "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal after ensuring that the Radicle CLI is installed on your machine.\nOnce initialized, you'll have access to advanced source control and project management capabilities powered by both git and Radicle.",
-        "when": "workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
+        "contents": "The git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle, you can run `rad init` in your terminal.\nOnce initialized, you'll have access to advanced source control and project management capabilities powered by both Git and Radicle.",
+        "when": "radicle.isExtensionActivated && workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
       },
       {
         "view": "cli-commands",
@@ -378,7 +424,7 @@
       {
         "id": "patch.archived",
         "defaults": {
-          "dark": "#eb554d",
+          "dark": "#dd655f",
           "light": "#c74942",
           "highContrast": "editor.foreground",
           "highContrastLight": "editor.foreground"
@@ -436,27 +482,29 @@
     "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
   },
   "dependencies": {
+    "@vue/reactivity": "^3.4.20",
     "javascript-time-ago": "^2.5.9",
     "lodash": "^4.17.21",
-    "ofetch": "^1.2.1"
+    "ofetch": "^1.3.3",
+    "pinia": "^2.1.7"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.8",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/javascript-time-ago": "^2.0.4",
+    "@types/javascript-time-ago": "^2.0.8",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.4.5",
-    "@types/vscode": "^1.80.0",
-    "esbuild": "^0.19.9",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.9.0",
+    "@types/node": "^20.11.21",
+    "@types/vscode": "^1.86.0",
+    "esbuild": "^0.19.12",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-prettier-vue": "^4.2.0",
-    "eslint-plugin-tailwindcss": "^3.13.0",
-    "eslint-plugin-vue-scoped-css": "^2.5.0",
+    "eslint-plugin-tailwindcss": "^3.14.3",
+    "eslint-plugin-vue-scoped-css": "^2.7.2",
     "npm-run-all": "^4.1.5",
     "simple-git-hooks": "^2.9.0",
-    "ts-xor": "^1.1.0",
-    "typescript": "^5.1.6"
+    "ts-xor": "^1.3.0",
+    "typescript": "^5.3.3"
   },
   "simple-git-hooks": {
     "pre-commit": "npm run lint"

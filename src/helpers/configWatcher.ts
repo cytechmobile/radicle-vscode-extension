@@ -1,11 +1,10 @@
 import { workspace } from 'vscode'
 import {
-  refreshPatchesEventEmitter,
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from '../ux/'
-import { getExtensionContext } from '../store'
+import { getExtensionContext, usePatchStore } from '../stores'
 import { type ExtensionConfig, resetHttpdConnection } from '.'
 
 function onConfigChange(
@@ -26,6 +25,7 @@ interface OnConfigChangeParam {
   onChangeCallback: Parameters<typeof onConfigChange>['1']
 }
 
+// TODO: maninak instead of calling stuff directly to change, onChange set the values in a new configStore and have other things depend on it
 const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToRadBinary',
@@ -39,7 +39,7 @@ const configWatchers = [
     onChangeCallback: () => {
       // no need to notify since we check AND notify on rad command execution
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
-      refreshPatchesEventEmitter.fire(undefined)
+      usePatchStore().resetAllPatches()
     },
   },
   {
@@ -47,7 +47,7 @@ const configWatchers = [
     onChangeCallback: () => {
       resetHttpdConnection()
       validateHttpdConnection()
-      refreshPatchesEventEmitter.fire(undefined)
+      usePatchStore().resetAllPatches()
     },
   },
 ] satisfies OnConfigChangeParam[]

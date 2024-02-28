@@ -1,17 +1,18 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext } from '../store'
+import { getExtensionContext, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
+  checkOutDefaultBranch,
   checkOutPatch,
-  copyToClipboardAndNotifify,
+  copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
-  refreshPatchesEventEmitter,
   selectAndCloneRadicleProject,
+  troubleshootRadCliInstallation,
 } from '../ux'
-import type { Patch } from '../types'
-import { getRadCliRef } from '.'
+import type { AugmentedPatch, Patch } from '../types'
+import { createOrShowWebview, getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -85,6 +86,7 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
 export function registerAllCommands(): void {
   registerSimpleRadCliCmdsAsVsCodeCmds(simpleRadCliCmdsToRegisterInVsCode)
 
+  registerVsCodeCmd('radicle.troubleshootRadCliInstallation', troubleshootRadCliInstallation)
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
   registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
@@ -92,11 +94,12 @@ export function registerAllCommands(): void {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
   registerVsCodeCmd('radicle.refreshPatches', () => {
-    refreshPatchesEventEmitter.fire(undefined)
+    usePatchStore().resetAllPatches()
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
+  registerVsCodeCmd('radicle.checkoutDefaultBranch', checkOutDefaultBranch)
   registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
-    typeof patch?.id === 'string' && (await copyToClipboardAndNotifify(patch.id))
+    typeof patch?.id === 'string' && (await copyToClipboardAndNotify(patch.id))
   })
   registerVsCodeCmd(
     'radicle.openDiff',
@@ -140,4 +143,7 @@ export function registerAllCommands(): void {
       }
     },
   )
+  registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
+    createOrShowWebview(getExtensionContext(), patch)
+  })
 }

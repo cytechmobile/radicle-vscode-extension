@@ -1,7 +1,6 @@
-import { type ExtensionContext, commands } from 'vscode'
-import { initExtensionContext } from './store'
+import type { ExtensionContext } from 'vscode'
+import { initExtensionContext } from './stores'
 import {
-  createOrShowWebview,
   logExtensionActivated,
   registerAllCommands,
   registerAllConfigWatchers,
@@ -14,6 +13,7 @@ import {
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from './ux'
+import { setWhenClauseContext } from './utils'
 
 export function activate(ctx: ExtensionContext) {
   initExtensionContext(ctx)
@@ -29,10 +29,5 @@ export function activate(ctx: ExtensionContext) {
   validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
   validateHttpdConnection({ minimizeUserNotifications: true })
 
-  // TODO: delete registration code from here and package.json when done with prototyping
-  ctx.subscriptions.push(
-    commands.registerCommand('wip-webview', () => {
-      createOrShowWebview(ctx)
-    }),
-  )
+  setWhenClauseContext('radicle.isExtensionActivated', true)
 }

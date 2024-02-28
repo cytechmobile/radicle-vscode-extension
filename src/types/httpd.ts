@@ -3,20 +3,24 @@
 import type { ArrayMinLength } from '.'
 
 /**
- * Decentralized Identifier, commonly used for Radicle Identities
+ * Decentralized Identifier. Commonly used for Radicle Identities
  */
 export type Did = `did:key:${string}`
+/**
+ * Radicle Node Identifier. Effectively Did without the `did:key:` prefix
+ */
+export type Nid = string
 
 export interface RadicleIdentity {
   id: Did
-  alias: string
+  alias?: string
 }
 
 export interface HttpdRoot {
   message: string
   service: string
   version: string
-  node: { id: string }
+  node: { id: string } // TODO: maninak handle breaking change https://radicle.zulipchat.com/#narrow/stream/369278-web/topic/breaking.20changes.20in.20HTTPD/near/409172640
   path: string
   links: {
     href: string
@@ -30,11 +34,12 @@ export interface Project {
   name: string
   description: string
   defaultBranch: string
-  head: string
   delegates: Did[]
+  head: string
   patches: { [K in PatchStatus]: number }
   issues: { open: number; closed: number }
-  trackings: number
+  seeding: number
+  visibility?: { type: 'public' } | { type: 'private'; allow?: string[] }
 }
 
 export interface Merge {
@@ -44,19 +49,23 @@ export interface Merge {
   timestamp: number
 }
 
-export type PatchStatus = 'draft' | 'open' | 'archived' | 'merged'
-
 export interface Patch {
   id: string
   title: string
   author: RadicleIdentity
-  state: { status: PatchStatus }
+  state:
+    | { status: 'draft' }
+    | { status: 'open'; conflicts?: [string, string][] }
+    | { status: 'archived' }
+    | { status: 'merged'; revision: string; commit: string }
   target: string
   labels: string[]
   merges: Merge[]
   assignees: string[]
   revisions: ArrayMinLength<Revision, 1>
 }
+
+export type PatchStatus = Patch['state']['status']
 
 export function isPatch(x: unknown): x is Patch {
   const patch = x as Partial<Patch> | undefined
@@ -75,38 +84,82 @@ export function isPatch(x: unknown): x is Patch {
   return Boolean(isPatch)
 }
 
-export interface Comment {
-  id: string
-  author: RadicleIdentity
-  body: string
-  reactions: [string, string][]
-  timestamp: number
-  replyTo: string | null
-}
-
-export type ReviewVerdict = 'accept' | 'reject' | null
-
-export interface Review {
-  author: RadicleIdentity
-  verdict?: ReviewVerdict
-  summary: string | null
-  comments: string[]
-  timestamp: number
-}
-
 export interface Revision {
   id: string
   author: RadicleIdentity
   description: string
+  edits: {
+    author: RadicleIdentity
+    body: string
+    embeds: Embed[]
+    timestamp: number
+  }[]
+  reactions: (Reaction & { location?: CodeLocation })[]
+  /**
+   * The value is a commit hash
+   */
   base: string
   /**
-   * a.k.a. Object Identifier. The value is the commit hash.
+   * a.k.a. Object Identifier. The value is a commit hash.
    */
   oid: string
+  refs: string[]
   discussions: Comment[]
   reviews: Review[]
-  refs: string[]
   timestamp: number
+}
+
+export interface Comment {
+  id: string
+  author: RadicleIdentity
+  body: string
+  edits: Edit[]
+  embeds: Embed[]
+  resolved: boolean
+  reactions: Reaction[]
+  location?: CodeLocation
+  replyTo?: string
+  timestamp: number
+}
+
+export interface Edit {
+  author: RadicleIdentity
+  body: string
+  embeds: Embed[]
+  timestamp: number
+}
+
+export interface Embed {
+  name: string
+  content: string
+}
+
+export interface Reaction {
+  emoji: string // literal Unicode char(s)
+  authors: Nid[]
+}
+
+export interface Review {
+  author: RadicleIdentity
+  verdict?: 'accept' | 'reject'
+  summary?: string
+  comment?: string
+  inline?: CommentInlineWithCode[]
+  timestamp: number
+}
+export interface CommentInlineWithCode {
+  location: CodeLocation
+  comment: string
+  timestamp: number
+}
+
+interface CodeLocation {
+  path: string
+  commit: string
+  lines: {
+    start: number
+    end: number
+  }
 }
 
 export interface DiffResponse {

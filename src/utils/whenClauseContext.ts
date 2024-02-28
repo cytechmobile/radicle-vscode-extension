@@ -5,6 +5,7 @@ import { commands } from 'vscode'
  * @see https://code.visualstudio.com/api/references/when-clause-contexts
  */
 interface CustomWhenClauseContextKeys {
+  'radicle.isExtensionActivated': boolean
   'radicle.isRadCliInstalled': boolean
   'radicle.isRadInitialized': boolean
 }

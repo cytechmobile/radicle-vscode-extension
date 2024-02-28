@@ -1,5 +1,5 @@
-import type { getConfig } from 'src/helpers'
 import { commands, workspace } from 'vscode'
+import type { getConfig } from '../helpers'
 
 /**
  * Opens the Settings UI with the options filtered to show only the specified config

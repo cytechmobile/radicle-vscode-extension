@@ -57,18 +57,19 @@ export function setConfig<K extends keyof ExtensionConfig>(
 }
 
 /**
- * Resolves the path where the Radicle CLI binary _is expected to be located_, as per
- * the installation script.
+ * Resolves the full path (starting from `/`) where the Radicle CLI binary
+ * _is expected to be located_, as per the https://radicle.xyz/install script.
  *
  * @returns The path if successfully resolved, otherwise `undefined`
- * @see https://radicle.xyz/install
  */
-export function getDefaultPathToRadBinary(): string | undefined {
+export function getFullDefaultPathToRadBinaryDirectory(): string | undefined {
   const homeDir = exec('echo $HOME')
-  const defaultPath = homeDir ? `${homeDir}/.radicle/bin/rad` : undefined
+  const defaultPath = homeDir ? `${homeDir}/.radicle/bin/` : undefined
 
   return defaultPath
 }
+
+export const defaultRadBinaryLocation = '~/.radicle/bin/rad' // as per https://radicle.xyz/install
 
 /**
  * Resolves the default path to the Radicle CLI binary _after having confirmed_ that the binary
@@ -76,16 +77,10 @@ export function getDefaultPathToRadBinary(): string | undefined {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export function getValidatedDefaultPathToRadBinary(): string | undefined {
-  const defaultPath = getDefaultPathToRadBinary()
+export function getValidatedPathToDefaultRadBinaryLocation(): string | undefined {
+  const isBinaryAtDefaultPath = Boolean(exec(defaultRadBinaryLocation))
 
-  if (!defaultPath) {
-    return undefined
-  }
-
-  const isBinaryAtDefaultPath = Boolean(exec(defaultPath))
-
-  return isBinaryAtDefaultPath ? defaultPath : undefined
+  return isBinaryAtDefaultPath ? defaultRadBinaryLocation : undefined
 }
 
 /**
@@ -94,7 +89,7 @@ export function getValidatedDefaultPathToRadBinary(): string | undefined {
  *
  * @returns The path if successfully resolved, otherwise `undefined`
  */
-export function getValidatedAliasedPathToRadBinary(): string | undefined {
+export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
   const aliasedPath = exec('which rad')
   if (!aliasedPath) {
     return undefined
@@ -112,6 +107,7 @@ export function getValidatedAliasedPathToRadBinary(): string | undefined {
  * @returns The path if successfully resolved, otherwise `undefined`
  * @see https://radicle.xyz/install
  */
+// TODO: maninak memoize
 export function getDefaultPathToNodeHome(): string | undefined {
   const homeDir = exec('echo $HOME')
   const defaultPath = homeDir ? `${homeDir}/.radicle` : undefined

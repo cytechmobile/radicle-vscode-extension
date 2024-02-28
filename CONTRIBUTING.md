@@ -48,11 +48,19 @@ pnpm install a-new-pkg # if this is what you need to do
 npx pnpm install a-new-pkg # you can achieve it like this
 ```
 
+## Developing with VS Code
+
+While not required, for development it's strongly advised to use VS Code with all the [recommended extensions](.vscode/extensions.json) installed and enabled in the workspace of this repo.
+
 ## Conventions
 
-### Paths
+### Importing extension modules inside webview modules
 
-Because of module resolution restrictions, all paths must be relative. e.g. instead of `src/utils` (even if import auto-completion writes that) it should be corrected to `../utils`.
+Any of the extension's modules (e.g. a file containing a TS type or a util function) we need to import inside a webview module (e.g. a .vue file) must be also declared as an import in [src/webviews/tsconfig.app.json](src/webviews/tsconfig.app.json) under `includes`.
+
+Moreover we must ensure that each of those extension modules defined for the aforementioned `includes` property of the webviews app _does not import any other modules NOT defined under that same property_. That implies a clean organization of modules and a clear separation of concerns for the code inside each of them.
+
+If necessary, specific code shared between extension and webviews should be extracted in dedicated shared modules.
 
 ### Getting user input
 

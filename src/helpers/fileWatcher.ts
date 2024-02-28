@@ -1,26 +1,21 @@
 import { RelativePattern, Uri, workspace } from 'vscode'
-import {
-  getRepoRoot,
-  getWorkspaceFolderPaths,
-  isGitRepo,
-  setWhenClauseContext,
-} from '../utils'
-import {
-  notifyUserRadCliNotResolvedAndMaybeTroubleshoot,
-  refreshPatchesEventEmitter,
-} from '../ux'
-import { getExtensionContext } from '../store'
-import { isRadCliInstalled, isRadInitialized } from '.'
+import { getRepoRoot, getWorkspaceFolderPaths, setWhenClauseContext } from '../utils'
+import { validateRadCliInstallation } from '../ux'
+import { getExtensionContext, useGitStore } from '../stores'
+import { getFullDefaultPathToRadBinaryDirectory, isRadInitialized } from '.'
+
+interface FileWatcherConfig {
+  glob:
+    | Parameters<typeof workspace.createFileSystemWatcher>['0']
+    | (() => Parameters<typeof workspace.createFileSystemWatcher>['0'])
+  handler: () => unknown
+  immediate?: boolean
+}
 
 // A very hacky and specialized wrapper. If it doesn't meet your use case, consider
 // going manual instead of adapting it.
-function watchFileNotInWorkspace(
-  glob:
-    | Parameters<typeof workspace.createFileSystemWatcher>['0']
-    | (() => Parameters<typeof workspace.createFileSystemWatcher>['0']),
-  handler: () => unknown,
-): void {
-  handler() // always run once on init
+function watchFileNotInWorkspace({ glob, handler, immediate }: FileWatcherConfig): void {
+  immediate && handler()
 
   const resolvedGlobPattern = typeof glob === 'function' ? glob() : glob
 
@@ -32,11 +27,7 @@ function watchFileNotInWorkspace(
   getExtensionContext().subscriptions.push(watcher)
 }
 
-interface WatchFileNotInWorkspaceParam {
-  glob: Parameters<typeof watchFileNotInWorkspace>['0']
-  handler: Parameters<typeof watchFileNotInWorkspace>['1']
-}
-
+// TODO: maninak replace `getRepoRoot()` with gitStore access?
 const notInWorkspaceFileWatchers = [
   {
     glob: () =>
@@ -50,11 +41,8 @@ const notInWorkspaceFileWatchers = [
       ),
     handler: () => {
       setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
-
-      if (!isRadCliInstalled() && !isRadInitialized() && isGitRepo()) {
-        notifyUserRadCliNotResolvedAndMaybeTroubleshoot()
-      }
     },
+    immediate: true,
   },
   {
     glob: () =>
@@ -66,37 +54,66 @@ const notInWorkspaceFileWatchers = [
         Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'HEAD',
       ),
-    handler: () => {
-      refreshPatchesEventEmitter.fire(undefined)
-    },
+    handler: useGitStore().refreshCurentBranch,
   },
+  // installation with package manager
   (() => {
     switch (process.platform) {
       case 'linux':
         return {
           glob: new RelativePattern(Uri.file('/usr/bin/'), 'rad'),
           handler: () => {
-            setWhenClauseContext('radicle.isRadCliInstalled', isRadCliInstalled())
+            validateRadCliInstallation()
+            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
           },
         }
       case 'darwin':
         return {
           glob: new RelativePattern(Uri.file('~/.cargo/bin/'), 'rad'),
           handler: () => {
-            setWhenClauseContext('radicle.isRadCliInstalled', isRadCliInstalled())
+            validateRadCliInstallation()
+            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
           },
         }
       default:
         return undefined
     }
   })(),
-] satisfies (WatchFileNotInWorkspaceParam | undefined)[]
+  // installation with script from https://radicle.xyz/install
+  (() => {
+    const fullDefaultPathToRadBinaryDirectory = getFullDefaultPathToRadBinaryDirectory()
+    if (!fullDefaultPathToRadBinaryDirectory) {
+      return undefined
+    }
+
+    switch (process.platform) {
+      case 'linux':
+        return {
+          glob: new RelativePattern(Uri.file(fullDefaultPathToRadBinaryDirectory), 'rad'),
+          handler: () => {
+            validateRadCliInstallation()
+            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
+          },
+        }
+      case 'darwin':
+        return {
+          glob: new RelativePattern(Uri.file(fullDefaultPathToRadBinaryDirectory), 'rad'),
+          handler: () => {
+            validateRadCliInstallation()
+            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
+          },
+        }
+      default:
+        return undefined
+    }
+  })(),
+].filter(Boolean) satisfies FileWatcherConfig[]
 
 /**
  * Registers all handlers to be called whenever specific files get changed.
  */
-export function registerAllFileWatchers(): void {
-  notInWorkspaceFileWatchers.forEach((fw) => {
-    fw && watchFileNotInWorkspace(fw.glob, fw.handler)
+export function registerAllFileWatchers() {
+  notInWorkspaceFileWatchers.forEach((fileWatcherConfig) => {
+    watchFileNotInWorkspace(fileWatcherConfig)
   })
 }

@@ -1,6 +1,42 @@
 import type { Did, RadicleIdentity } from '../types'
 
 /**
+ * Return the given string shortened to less than `maxLen` characters without truncating words.
+ */
+export function truncateKeepWords(str: string, maxLen: number, separator = ' '): string {
+  if (str.length <= maxLen) {
+    return str
+  }
+
+  return str.substring(0, str.lastIndexOf(separator, maxLen))
+}
+
+export const maxCharsForUntruncatedMdText = 65 // TailWindCSS class `w-prose` has `65ch` length
+
+/**
+ * Return the given string shortened to its first line which in turn is shortened to
+ * less than `maxCharsForUntruncatedMdText` without truncating words.
+ */
+export function truncateMarkdown(str: string): string {
+  const ellipses = '…'
+
+  const indexOfNewlineDelimiter = str.indexOf('\n\n')
+  const firstLine = str.substring(
+    0,
+    indexOfNewlineDelimiter > 0 ? indexOfNewlineDelimiter : undefined,
+  )
+
+  if (firstLine.length <= maxCharsForUntruncatedMdText) {
+    return firstLine
+  }
+
+  return `${firstLine.substring(
+    0,
+    firstLine.lastIndexOf(' ', maxCharsForUntruncatedMdText - 1),
+  )}${ellipses}`
+}
+
+/**
  * Truncates a string, if needed, replacing its middle chars with an ellipses (`…`).
  *
  * @param {string} str The string to potentialy truncate

@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply p-[10px];
+
+  @media screen(md) {
+    @apply p-5;
+  }
+}
+
+:where(code, pre, span, b)[title]:hover {
+  @apply underline decoration-dotted cursor-default;
+  text-underline-position: under;
+}
+
+:where(code, pre) {
+  @apply m-0;
+  display: initial;
+}
+
+:where(details) {
+  & summary {
+    @apply w-fit cursor-pointer select-none;
+  }
+}
+
+vscode-dropdown::part(listbox) {
+  min-width: max-content;
+}
+
+summary.max-w-prose {
+  @apply max-w-[66ch]; /* = max-w-prose + 1ch due to ::marker's content */
+}

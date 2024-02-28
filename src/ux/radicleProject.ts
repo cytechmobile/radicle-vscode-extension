@@ -5,19 +5,23 @@ import { exec, getRepoRoot, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
 
 export async function selectAndCloneRadicleProject(): Promise<void> {
-  const { data: projects, error } = await fetchFromHttpd('/projects')
+  const { data: projects, error } = await fetchFromHttpd('/projects', {
+    query: { show: 'all' },
+  })
   if (!projects) {
     notifyUserAboutFetchError(error)
 
     return
   }
 
-  const qPickItems: QuickPickItem[] = projects.map((proj) => ({
-    label: proj.name,
-    description: `$(radio-tower) ${proj.trackings} | ${proj.id}`,
-    detail: proj.description,
-    icon: 'repo',
-  }))
+  const qPickItems: QuickPickItem[] = projects
+    .sort((p1, p2) => p2.seeding - p1.seeding)
+    .map((proj) => ({
+      label: proj.name,
+      description: `$(radio-tower) ${proj.seeding} | ${proj.id}`,
+      detail: proj.description,
+      icon: 'repo',
+    }))
 
   const projSelection = await window.showQuickPick(qPickItems, {
     placeHolder: 'Choose a Radicle project to clone locally',

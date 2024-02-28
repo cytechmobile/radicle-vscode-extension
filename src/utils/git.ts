@@ -14,6 +14,7 @@ export function isGitRepo(): boolean {
 /**
  * Resolves the root directory of the git repo of the opened workspace folder.
  */
+// TODO: maninak memoize
 export function getRepoRoot(): string | undefined {
   const gitRepoRootDir = exec('git rev-parse --show-toplevel', { cwd: '$workspaceDir' })
 
