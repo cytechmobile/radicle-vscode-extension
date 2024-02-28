@@ -6,7 +6,7 @@
 
 - New Patch detail view
 
-    <!-- TODO: maninak add screenshot -->
+    ![Patche detail view](./assets/for-md/patch-detail.png)
 
 ### 🚀 Enhancements
 
