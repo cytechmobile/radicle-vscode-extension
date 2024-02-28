@@ -137,7 +137,7 @@ onMounted(() => {
         aria-label="Detailed patch information"
       >
         <vscode-panel-tab
-          title="Click to see all events which took place during the lifetime of the patch"
+          title="Click to see all events that took place during the lifetime of the patch"
           class="text-lg"
           >Activity</vscode-panel-tab
         >

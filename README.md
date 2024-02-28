@@ -14,6 +14,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 - 🖲️ [Radicle Commands](#integrated-radicle-commands) everywhere you need them
 - 📋 [Patches View](#patches-view) offers a glance at the status of code changes in your project
+- 📑 [Patch Detail View](#patch-detail-view) offers in-depth information for a specific patch
 - 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
 - 📥 [Cloning](#cloning) of seeded Radicle projects
 - 🗺️ [Onboarding Flow](#onboarding-flow) with tips tuned to whichever state your Workspace is in when starting out
@@ -44,6 +45,12 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 Browse Radicle Patches, check out their associated git branches and inspect their file changes and diffs.
 
 ![screenshot of Radicle Patches view](./assets/for-md/patches-diff.png)
+
+### Patch Detail View
+
+Inspect all details you'd want to know about a patch including discussions, details of a specific revision as well as all events that took place during the lifetime of the patch.
+
+![Patch detail view](./assets/for-md/patch-detail.png)
 
 ### Integrated Authentication
 
