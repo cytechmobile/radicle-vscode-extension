@@ -38,7 +38,7 @@
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
-    "dev": "run-s dev:*",
+    "dev": "npm run verify-deps && run-s dev:*",
     "dev:webviews": "cd ./src/webviews && npm run dev",
     "dev:extension": "npm run compile:extension -- --sourcemap --watch",
     "lint": "run-p lint:*",
