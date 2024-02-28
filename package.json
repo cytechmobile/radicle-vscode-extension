@@ -18,7 +18,7 @@
   "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.80.0",
+    "vscode": "^1.86.0",
     "npm": "^7"
   },
   "keywords": [
