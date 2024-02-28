@@ -14,6 +14,7 @@ import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import Markdown from '@/components/Markdown.vue'
 import Metadatum from '@/components/Metadatum.vue'
+import Reactions from './Reactions.vue'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 
@@ -119,6 +120,9 @@ const selectedRevisionRejectedReviews = computed(() =>
     </Metadatum>
     <Metadatum label="Based on commit">
       <pre :title="selectedRevision.base">{{ shortenHash(selectedRevision.base) }}</pre>
+    </Metadatum>
+    <Metadatum v-if="selectedRevision.reactions.length" label="Reactions">
+      <Reactions :reactions="selectedRevision.reactions" />
     </Metadatum>
     <!-- TODO: show names of all unique committers -->
     <div v-if="selectedRevision.description" class="mt-4">

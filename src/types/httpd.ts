@@ -94,6 +94,7 @@ export interface Revision {
     embeds: Embed[]
     timestamp: number
   }[]
+  reactions: (Reaction & { location?: CodeLocation })[]
   /**
    * The value is a commit hash
    */
@@ -115,7 +116,7 @@ export interface Comment {
   edits: Edit[]
   embeds: Embed[]
   resolved: boolean
-  reactions: { emoji: string; authors: Nid[] }[]
+  reactions: Reaction[]
   location?: CodeLocation
   replyTo?: string
   timestamp: number
@@ -131,6 +132,11 @@ export interface Edit {
 export interface Embed {
   name: string
   content: string
+}
+
+export interface Reaction {
+  emoji: string // literal Unicode char(s)
+  authors: Nid[]
 }
 
 export interface Review {

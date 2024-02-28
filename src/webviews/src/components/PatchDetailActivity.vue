@@ -6,20 +6,20 @@ import {
   shortenHash,
   truncateMarkdown,
   maxCharsForUntruncatedMdText,
-  truncateMiddle,
 } from 'extensionUtils/string'
-import type { Comment, RadicleIdentity, Revision } from '../../../types'
+import type { Comment, Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
 import Markdown from '@/components/Markdown.vue'
 import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
+import Reactions from '@/components/Reactions.vue'
 
 defineProps<{ showHeading: boolean }>()
 
 const emit = defineEmits<{ showRevision: [revision: Revision] }>()
 
-const { patch, firstRevision, localIdentity, identities } = storeToRefs(usePatchDetailStore())
+const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
 
 function getRevisionHoverTitle(text: string) {
   return `Click to show Revision details.\n\nRevision description:\n"${text}"`
@@ -63,14 +63,6 @@ const patchEvents = computed(() =>
     .flat()
     .sort((ev1, ev2) => ev2.ts - ev1.ts),
 )
-
-// TODO: delete resolveRadicleIdentity when httpd returns a full RadicleIdentity for reactions
-// When doing so, also delete:
-//  - `localIdentity` from `PatchDetailInjectedState`
-//  - `identities` from `patchDetailStore`
-function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
-  return identities.value.find((identity) => identity.id.includes(id))
-}
 </script>
 
 <template>
@@ -209,58 +201,11 @@ function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
             <Markdown :source="event.discussion.body" class="mt-[0.25em] text-sm" />
           </details>
           <Markdown v-else :source="event.discussion.body" class="mt-[0.25em] text-sm" />
-          <div
+          <Reactions
             v-if="event.discussion.reactions.length"
-            class="mt-[0.25em] flex flex-wrap gap-x-3"
-          >
-            <span
-              v-for="reaction in event.discussion.reactions"
-              :key="reaction.emoji"
-              :title="`Reaction from ${new Intl.ListFormat('en', {
-                style: 'long',
-                type: 'conjunction',
-              }).format(
-                reaction.authors.map(
-                  (author) => resolveRadicleIdentity(author)?.alias ?? author,
-                ),
-              )}`"
-              :class="{
-                'modified-by-local-identity': reaction.authors.find((author) =>
-                  localIdentity?.id.includes(author),
-                ),
-              }"
-            >
-              <template
-                v-if="
-                  event.discussion.reactions.flatMap((reaction) => reaction.authors).length <=
-                  4
-                "
-              >
-                {{ reaction.emoji }}
-                <template
-                  v-for="(part, index) in new Intl.ListFormat('en', {
-                    style: 'short',
-                    type: 'unit',
-                  }).formatToParts(
-                    reaction.authors.map(
-                      (author) =>
-                        resolveRadicleIdentity(author)?.alias ?? truncateMiddle(author),
-                    ),
-                  )"
-                  :key="index"
-                >
-                  <span v-if="part.type === 'element'" class="font-mono">{{
-                    part.value
-                  }}</span>
-                  <template v-else-if="part.type === 'literal'">{{ part.value }}</template>
-                </template>
-              </template>
-              <template v-else>
-                {{ reaction.emoji }}
-                <span class="font-mono">{{ reaction.authors.length }}</span>
-              </template>
-            </span>
-          </div>
+            :reactions="event.discussion.reactions"
+            class="mt-[0.25em]"
+          />
         </EventItem>
         <EventItem
           v-else-if="event.kind === 'merge'"
@@ -287,12 +232,6 @@ function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
 </template>
 
 <style scoped>
-.modified-by-local-identity {
-  @apply outline outline-1 outline-offset-1;
-  background-color: color-mix(in srgb, var(--vscode-editor-foreground) 7%, transparent);
-  outline-color: color-mix(in srgb, var(--vscode-editor-foreground) 20%, transparent);
-}
-
 :deep(.pulse-outline) {
   @keyframes outline-pulse {
     from {

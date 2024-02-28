@@ -38,6 +38,12 @@
     - revision author(s)
     - labels
       - not shown if empty
+    - emoji reactions to the patch
+      - if the total count of reactions is 4 or less, then the reacting users' alias/truncated-Nid are shown next to each reaction
+      - if the total count of reactions is 5 or more, then the count of users with the same reaction are shown next to each reaction
+      - shows, on hover, the Radicle identities behind each reaction in list-ified english copy
+      - if the _local_ Radicle identity is included in the reacting users, the reaction gets an additional visual cue
+      - if a Radicle identity has already interacted in any other form in the patch, the identity's alias (if available) will be resolved and shown. Otherwise the identity's middle-truncated Nid (Node Identifier) will be shown (author alias is otherwise unavailable in the reaction entity).
     - title
       - supports markdown
     - description
@@ -82,6 +88,8 @@
       - the head commit of the selected revision
     - based on commit
       - the commit the selected revision is branched off of
+    - emoji reactions to the revision
+      - same behaviour as described for patch section
     - description
       - supports markdown
       - if the selected revision is the first revision, the description is hidden under an expand-on-click control (to avoid showing the same content twice since it's already shown in the Patch section)
@@ -114,11 +122,7 @@
           - control's summary shows unparsed Markdown
           - control's summary turns down to 50% opacity when expanded to further denote state and visually differentiate possibly duplicate content between summary and details
       - emoji reactions to the comment
-        - if the total count of reactions is 4 or less, then the reacting users' alias/truncated-Nid are shown next to each reaction
-        - if the total count of reactions is 5 or more, then the count of users with the same reaction are shown next to each reaction
-        - shows, on hover, the Radicle identities behind each reaction in list-ified english copy
-        - if the _local_ Radicle identity is included in the reacting users, the reaction gets an additional visual cue
-        - if a Radicle identity has already interacted in any other form in the patch, the identity's alias (if available) will be resolved and shown. Otherwise the identity's middle-truncated Nid (Node Identifier) will be shown (author alias is otherwise unavailable in the reaction entity).
+        - same behaviour as described for patch section
     - patch merge
       - shown anew each time a different delegate merges the same patch (must happen multiple times for repos with this requirement set)
     - all of the above events also show:

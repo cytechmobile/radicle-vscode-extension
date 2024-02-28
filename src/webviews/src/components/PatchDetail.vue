@@ -128,7 +128,6 @@ onMounted(() => {
         <PatchMetadata />
         <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <Markdown :source="firstRevision.description" class="text-sm" />
-        <!-- TODO: maninak show reactions to revisions -->
       </section>
 
       <vscode-panels
