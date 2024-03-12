@@ -1,4 +1,4 @@
-import type { Did, RadicleIdentity } from '../types'
+import type { DId, RadicleIdentity } from '../types'
 
 /**
  * Return the given string shortened to less than `maxLen` characters without truncating words.
@@ -96,7 +96,7 @@ export function capitalizeFirstLetter(str: string): string {
 
 /**
  * Truncates a Radicle Identity id's hash, replacing its middle chars with an ellipses (`…`).
- * @param {Did} did The string to potentialy truncate
+ * @param {DId} did The string to potentialy truncate
  * @default 8
  * @param {number} maxTotalCharsToShow The count of maximmum total chars
  * that`str` can have (excluding the ellipses). If `str` is longer than that number,
@@ -107,19 +107,19 @@ export function capitalizeFirstLetter(str: string): string {
  */
 
 /**
- * Truncates a Radicle Identity id's hash, replacing its middle chars with an ellipses (`…`).
+ * Truncates a Radicle Identity's hash, replacing its middle chars with an ellipses (`…`).
  *
- * @param {Did} did
- * @return {Did} `did` truncated
+ * @param {DId} did
+ * @return {DId} `did` truncated
  */
-export function truncateDid(did: Did): Did {
+export function truncateDid(did: DId): DId {
   const matchDidHashRegex = /(did:key:)(.*)/
   const didPrefix = did.match(matchDidHashRegex)?.[1]
   const nid = did.match(matchDidHashRegex)?.[2] as string
 
   const truncatedDid = `${didPrefix}${truncateMiddle(nid)}`
 
-  return truncatedDid as Did
+  return truncatedDid as DId
 }
 
 /**

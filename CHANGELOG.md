@@ -1,5 +1,20 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🚀 Enhancements
+
+- **patch-detail:** improve how reactions are shown
+  - use more subtle styling when a reaction involves the local radicle identity (italic text vs border & background)
+  - show "you" instead of local identity's alias
+  - on hover show the truncated DId next to each identity
+
+### 🩹 Fixes
+
+- **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+
+-----
+
 ## **v0.4.0** (Feb 28th, 2023)
 
 ### ✨ Highlights
