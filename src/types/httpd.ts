@@ -5,14 +5,14 @@ import type { ArrayMinLength } from '.'
 /**
  * Decentralized Identifier. Commonly used for Radicle Identities
  */
-export type Did = `did:key:${string}`
+export type DId = `did:key:${string}`
 /**
  * Radicle Node Identifier. Effectively Did without the `did:key:` prefix
  */
-export type Nid = string
+export type NId = string
 
 export interface RadicleIdentity {
-  id: Did
+  id: DId
   alias?: string
 }
 
@@ -34,7 +34,7 @@ export interface Project {
   name: string
   description: string
   defaultBranch: string
-  delegates: Did[]
+  delegates: DId[]
   head: string
   patches: { [K in PatchStatus]: number }
   issues: { open: number; closed: number }
@@ -136,7 +136,7 @@ export interface Embed {
 
 export interface Reaction {
   emoji: string // literal Unicode char(s)
-  authors: Nid[]
+  authors: RadicleIdentity[]
 }
 
 export interface Review {

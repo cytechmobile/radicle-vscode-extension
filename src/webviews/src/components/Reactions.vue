@@ -1,20 +1,33 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import type { RadicleIdentity, Reaction } from '../../../types'
+import type { Reaction } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import { truncateMiddle } from 'extensionUtils/string'
+import { truncateDid } from 'extensionUtils/string'
 
 defineProps<{ reactions: Reaction[] }>()
 
-const { identities, localIdentity } = storeToRefs(usePatchDetailStore())
+const { localIdentity } = storeToRefs(usePatchDetailStore())
 
-// TODO: delete resolveRadicleIdentity when httpd returns a full RadicleIdentity for reactions
-// When doing so, also delete:
-//  - `localIdentity` from `PatchDetailInjectedState`
-//  - `identities` from `patchDetailStore`
-function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
-  return identities.value.find((identity) => identity.id.includes(id))
+// TODO: delete delete `identities` from `patchDetailStore` or move it into patchesStore across all patches if not too slow
+function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[] {
+  const normalizedAuthors = reaction.authors.map((author) =>
+    localIdentity.value?.id === author.id ? 'you' : author.alias ?? truncateDid(author.id),
+  )
+
+  return normalizedAuthors
+}
+
+function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
+  const normalizedAuthors = reaction.authors.map((author) =>
+    localIdentity.value?.id === author.id
+      ? `you (${truncateDid(localIdentity.value!.id)})`
+      : author.alias
+        ? `${author.alias} (${truncateDid(author.id)})`
+        : truncateDid(author.id),
+  )
+
+  return normalizedAuthors
 }
 </script>
 
@@ -26,14 +39,7 @@ function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
       :title="`Reaction from ${new Intl.ListFormat('en', {
         style: 'long',
         type: 'conjunction',
-      }).format(
-        reaction.authors.map((author) => resolveRadicleIdentity(author)?.alias ?? author),
-      )}`"
-      :class="{
-        'modified-by-local-identity': reaction.authors.find((author) =>
-          localIdentity?.id.includes(author),
-        ),
-      }"
+      }).format(getNormalizedAuthorsWithDids(reaction))}`"
     >
       <template v-if="reactions.flatMap((reaction) => reaction.authors).length <= 4">
         {{ reaction.emoji }}
@@ -41,29 +47,38 @@ function resolveRadicleIdentity(id: string): RadicleIdentity | undefined {
           v-for="(part, index) in new Intl.ListFormat('en', {
             style: 'short',
             type: 'unit',
-          }).formatToParts(
-            reaction.authors.map(
-              (author) => resolveRadicleIdentity(author)?.alias ?? truncateMiddle(author),
-            ),
-          )"
+          }).formatToParts(getNormalizedAuthorsWithoutDids(reaction))"
           :key="index"
         >
-          <span v-if="part.type === 'element'" class="font-mono">{{ part.value }}</span>
+          <span
+            v-if="part.type === 'element'"
+            class="font-mono"
+            :class="{
+              'involves-local-identity': part.value === 'you',
+            }"
+            >{{ part.value }}</span
+          >
           <template v-else-if="part.type === 'literal'">{{ part.value }}</template>
         </template>
       </template>
       <template v-else>
         {{ reaction.emoji }}
-        <span class="font-mono">{{ reaction.authors.length }}</span>
+        <span
+          class="font-mono"
+          :class="{
+            'involves-local-identity': reaction.authors.find(
+              (author) => localIdentity?.id === author.id,
+            ),
+          }"
+          >{{ reaction.authors.length }}</span
+        >
       </template>
     </span>
   </div>
 </template>
 
 <style scoped>
-.modified-by-local-identity {
-  @apply outline outline-offset-1;
-  background-color: color-mix(in srgb, var(--vscode-editor-foreground) 7%, transparent);
-  outline-color: color-mix(in srgb, var(--vscode-editor-foreground) 20%, transparent);
+.involves-local-identity {
+  font-style: italic;
 }
 </style>
