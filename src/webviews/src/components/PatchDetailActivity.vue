@@ -136,7 +136,7 @@ const patchEvents = computed(() =>
           <span v-if="event.review.inline?.length">with code-inlined comments</span>
           by
           <span :title="event.revision.author.id" class="font-mono">{{
-            getIdentityAliasOrId(event.revision.author)
+            getIdentityAliasOrId(event.review.author)
           }}</span>
           <template v-if="event.review.summary">
             <details v-if="event.review.summary && event.review.comment">
