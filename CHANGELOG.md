@@ -13,6 +13,10 @@
 
 - **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
 
+### 🏡 Chores
+
+- **scripts:** parallelize verifying extension and webview dependencies (runs before each dev/build script)
+
 -----
 
 ## **v0.4.0** (Feb 28th, 2023)
