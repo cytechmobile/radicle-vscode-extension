@@ -23,7 +23,7 @@ jobs:
         node-version: 20.x
         cache: 'pnpm'
     - name: Install Dependencies
-      run: pnpm run verify-deps
+      run: npx npm-run-all -l verify-deps:*
     - name: Lint Code
       run: pnpm run lint
     - name: Test Typings

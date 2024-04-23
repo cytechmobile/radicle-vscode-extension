@@ -15,7 +15,7 @@
 
 ### 🏡 Chores
 
-- **scripts:** parallelize verifying extension and webview dependencies (runs before each dev/build script)
+- **scripts:** parallelize verifying extension and webview dependencies
 
 ### 🤖 CI
 
