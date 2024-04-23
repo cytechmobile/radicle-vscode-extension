@@ -15,7 +15,11 @@
 
 ### 🏡 Chores
 
-- **scripts:** parallelize verifying extension and webview dependencies (runs before each dev/build script)
+- **scripts:** parallelize verifying extension and webview dependencies
+
+### 🤖 CI
+
+- **ci:** upgrade actions to their latest versions which are migrated from nodejs v16 to v20
 
 -----
 
