@@ -90,9 +90,7 @@ const selectedRevisionRejectedReviews = computed(() =>
         >
           <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
           <span v-for="review in selectedRevisionAcceptedReviews" :key="review.timestamp">
-            <pre :title="selectedRevision.author.id">{{
-              getIdentityAliasOrId(selectedRevision.author)
-            }}</pre>
+            <pre :title="review.author.id">{{ getIdentityAliasOrId(review.author) }}</pre>
           </span>
         </span>
         <span

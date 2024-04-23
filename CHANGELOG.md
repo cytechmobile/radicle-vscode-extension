@@ -12,6 +12,7 @@
 ### 🩹 Fixes
 
 - **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
+- **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown.
 
 ### 🏡 Chores
 
