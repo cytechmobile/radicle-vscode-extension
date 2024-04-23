@@ -17,6 +17,10 @@
 
 - **scripts:** parallelize verifying extension and webview dependencies (runs before each dev/build script)
 
+### 🤖 CI
+
+- **ci:** upgrade actions to their latest versions which are migrated from nodejs v16 to v20
+
 -----
 
 ## **v0.4.0** (Feb 28th, 2023)
