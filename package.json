@@ -14,8 +14,8 @@
     "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
   ],
   "license": "./LICENSE",
-  "repository": "https://github.com/cytechmobile/radicle-vscode-extension",
-  "bugs": "https://github.com/cytechmobile/radicle-vscode-extension/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc",
+  "repository": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk",
+  "bugs": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues",
   "pricing": "Free",
   "engines": {
     "vscode": "^1.86.0",

@@ -12,8 +12,6 @@
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** feat(patch-list): increase count of fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 
-Signed-off-by: Konstantinos Maninakis <maninak@protonmail.com>
-
 ### 🔥 Performance
 
 - **patch-list:** speed-up overall list rendering and reduce perf impact when it includes patches with high counts of changed files ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
@@ -30,6 +28,11 @@ Signed-off-by: Konstantinos Maninakis <maninak@protonmail.com>
 ### 🤖 CI
 
 - **ci:** upgrade actions to their latest versions which are migrated from nodejs v16 to v20 ([#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
+
+### 📖 Documentation
+
+- **readme:** add badges showcasing current published version, installation count & repository identifier (RID) of the extension ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
+- update readme links and marketplace metadata to point to Radicle instead of GitHub ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
 
 -----
 
