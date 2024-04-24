@@ -176,29 +176,46 @@ export interface DiffResponse {
 }
 
 export interface Changeset {
-  added: { diff: Diff; new: FileRef; path: string }[]
-  deleted: { diff: Diff; old: FileRef; path: string }[]
-  moved: MovedOrCopiedFilechange[]
-  copied: MovedOrCopiedFilechange[]
-  modified: { diff: Diff; new: FileRef; old: FileRef; path: string }[]
+  added: { diff: Diff; path: string; new: FileRef }[]
+  deleted: { diff: Diff; path: string; old: FileRef }[]
+  modified: { diff: Diff; path: string; old: FileRef; new: FileRef }[]
+  copied: CopiedOrMovedFilechange[]
+  moved: CopiedOrMovedFilechange[]
   stats: {
     filesChanged: number
     insertions: number
     deletions: number
   }
 }
-
-interface MovedOrCopiedFilechange {
-  diff: { type: 'empty' }
-  newPath: string
+export type CopiedOrMovedFilechange =
+  | CopiedOrMovedFilechangeWithoutDiff
+  | CopiedOrMovedFilechangeWithDiff
+export interface CopiedOrMovedFilechangeWithoutDiff {
   oldPath: string
+  newPath: string
+}
+export interface CopiedOrMovedFilechangeWithDiff {
+  diff: Diff
+  oldPath: string
+  newPath: string
+  old: FileRef
+  new: FileRef
 }
 
-export function isMovedOrCopiedFilechange(x: unknown): x is MovedOrCopiedFilechange {
-  const filechange = x as MovedOrCopiedFilechange | undefined
-  const isMoved = filechange && filechange.diff && filechange.newPath && filechange.oldPath
+export function isCopiedOrMovedFilechange(x: unknown): x is CopiedOrMovedFilechange {
+  const filechange = x as CopiedOrMovedFilechange | undefined
+  const isCopiedOrMoved = filechange?.newPath && filechange.oldPath
 
-  return Boolean(isMoved)
+  return Boolean(isCopiedOrMoved)
+}
+
+export function isCopiedOrMovedFilechangeWithDiff(
+  x: unknown,
+): x is CopiedOrMovedFilechangeWithDiff {
+  const filechange = x as CopiedOrMovedFilechangeWithDiff | undefined
+  const isWithDiff = filechange?.diff
+
+  return Boolean(isWithDiff)
 }
 
 export interface FileRef {

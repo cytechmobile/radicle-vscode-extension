@@ -232,12 +232,12 @@
         },
         {
           "command": "radicle.openOriginalVersionOfPatchedFile",
-          "when": "view == patches-view && viewItem =~ /filechange:(deleted|modified)/",
+          "when": "view == patches-view && viewItem =~ /filechange:(deleted|modified|copied|moved)/",
           "group": "contextMenu.diff@1"
         },
         {
           "command": "radicle.openChangedVersionOfPatchedFile",
-          "when": "view == patches-view && viewItem =~ /filechange:(added|modified)/",
+          "when": "view == patches-view && viewItem =~ /filechange:(added|modified|copied|moved)/",
           "group": "contextMenu.diff@2"
         }
       ],
