@@ -10,10 +10,13 @@
   - on hover show the truncated DId next to each identity
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-list:** feat(patch-list): increase count of fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+
+Signed-off-by: Konstantinos Maninakis <maninak@protonmail.com>
 
 ### 🔥 Performance
 
-- **patch-list:** improve overall list rendering and reduce perf impact when it includes patches with high counts of changed files ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-list:** speed-up overall list rendering and reduce perf impact when it includes patches with high counts of changed files ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 
 ### 🩹 Fixes
 
