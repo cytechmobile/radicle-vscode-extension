@@ -5,7 +5,7 @@
 First clone the repo locally with git
 
 ```sh
-git clone git@github.com:cytechmobile/radicle-vscode-extension.git
+rad clone rad:z3Makm6fsQQXmpSFE43DZqwupaEhk
 ```
 
 and open it with VS Code
