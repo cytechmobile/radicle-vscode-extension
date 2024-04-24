@@ -169,154 +169,148 @@ export const patchesTreeDataProvider: TreeDataProvider<
         )
       }
 
-      type FileChangeKind = keyof (typeof diffResponse)['diff']
+      const { added, deleted, modified, copied, moved } = diffResponse.diff
       const filechangeNodes: FilechangeNode[] = [
-        ...(
-          ['added', 'deleted', 'modified', 'copied', 'moved'] satisfies FileChangeKind[]
-        ).flatMap((filechangeKind) =>
-          diffResponse.diff[filechangeKind].map((filechange) => {
-            // TODO: maninak diffResponse without stats and files and then forEach?
-            const filePath = isCopiedOrMovedFilechange(filechange)
-              ? filechange.newPath
-              : filechange.path
-            const fileDir = Path.dirname(filePath)
-            const filename = Path.basename(filePath)
+        ...brand(added, 'added'),
+        ...brand(deleted, 'deleted'),
+        ...brand(modified, 'modified'),
+        ...brand(copied, 'copied'),
+        ...brand(moved, 'moved'),
+      ]
+        .map((filechange) => {
+          const filePath = isCopiedOrMovedFilechange(filechange)
+            ? filechange.newPath
+            : filechange.path
+          const fileDir = Path.dirname(filePath)
+          const filename = Path.basename(filePath)
 
-            const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
-              oldVersionCommitSha,
-            )}${sep}${fileDir}${sep}${filename}`
-            // TODO: should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
-            const newVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
-              newVersionCommitSha,
-            )}${sep}${fileDir}${sep}${filename}`
+          const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+            oldVersionCommitSha,
+          )}${sep}${fileDir}${sep}${filename}`
+          // TODO: should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
+          const newVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+            newVersionCommitSha,
+          )}${sep}${fileDir}${sep}${filename}`
 
-            const node: FilechangeNode = {
-              relativeInRepoUrl: filePath,
-              oldVersionUrl,
-              newVersionUrl,
-              patch,
-              getTreeItem: async () => {
-                // TODO: consider how to clean up httpd types so that infering those is easier or move them to the types file
-                type AddedFileChange = Unarray<(typeof diffResponse)['diff']['added']>
-                type DeletedFileChange = Unarray<(typeof diffResponse)['diff']['deleted']>
-                type ModifiedFileChange = Unarray<(typeof diffResponse)['diff']['modified']>
-                type FileContent = (typeof diffResponse)['files'][string]['content']
+          const node: FilechangeNode = {
+            relativeInRepoUrl: filePath,
+            oldVersionUrl,
+            newVersionUrl,
+            patch,
+            getTreeItem: async () => {
+              type ModifiedFileChange = Unarray<(typeof diffResponse)['diff']['modified']>
+              type FileContent = (typeof diffResponse)['files'][string]['content']
 
-                try {
-                  switch (filechangeKind) {
-                    case 'added':
-                      await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
-                      await fs.writeFile(
-                        newVersionUrl,
-                        diffResponse.files[(filechange as AddedFileChange).new.oid]
-                          ?.content as FileContent,
-                      )
-                      break
-                    case 'deleted':
-                      await fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true })
-                      await fs.writeFile(
+              try {
+                switch (filechange.kind) {
+                  case 'added':
+                    await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
+                    await fs.writeFile(
+                      newVersionUrl,
+                      diffResponse.files[filechange.new.oid]?.content as FileContent,
+                    )
+                    break
+                  case 'deleted':
+                    await fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true })
+                    await fs.writeFile(
+                      oldVersionUrl,
+                      diffResponse.files[filechange.old.oid]?.content as FileContent,
+                    )
+                    break
+                  case 'modified':
+                    await Promise.all([
+                      fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
+                      fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
+                    ])
+                    await Promise.all([
+                      fs.writeFile(
                         oldVersionUrl,
-                        diffResponse.files[(filechange as DeletedFileChange).old.oid]
-                          ?.content as FileContent,
-                      )
-                      break
-                    case 'modified':
-                      await Promise.all([
-                        fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
-                        fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
-                      ])
+                        diffResponse.files[filechange.old.oid]?.content as FileContent,
+                      ),
+                      fs.writeFile(
+                        newVersionUrl,
+                        diffResponse.files[filechange.new.oid]?.content as FileContent,
+                      ),
+                    ])
+                    break
+                  case 'copied':
+                  case 'moved':
+                    await Promise.all([
+                      fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
+                      fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
+                    ])
+                    if (isCopiedOrMovedFilechangeWithDiff(filechange)) {
                       await Promise.all([
                         fs.writeFile(
                           oldVersionUrl,
-                          diffResponse.files[(filechange as ModifiedFileChange).old.oid]
-                            ?.content as FileContent,
+                          diffResponse.files[filechange.old.oid]?.content as FileContent,
                         ),
                         fs.writeFile(
                           newVersionUrl,
-                          diffResponse.files[(filechange as ModifiedFileChange).new.oid]
-                            ?.content as FileContent,
+                          diffResponse.files[filechange.new.oid]?.content as FileContent,
                         ),
                       ])
-                      break
-                    case 'copied':
-                    case 'moved':
-                      await Promise.all([
-                        fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
-                        fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
-                      ])
-                      if (isCopiedOrMovedFilechangeWithDiff(filechange)) {
-                        await Promise.all([
-                          fs.writeFile(
-                            oldVersionUrl,
-                            diffResponse.files[filechange.old.oid]?.content as FileContent,
-                          ),
-                          fs.writeFile(
-                            newVersionUrl,
-                            diffResponse.files[filechange.new.oid]?.content as FileContent,
-                          ),
-                        ])
-                      }
-                      break
-                    default:
-                      assertUnreachable(filechangeKind)
-                  }
-                } catch (error) {
-                  log(
-                    `Failed saving temp files to enable diff for ${filePath}.`,
-                    'error',
-                    (error as Partial<Error | undefined>)?.message,
-                  )
+                    }
+                    break
+                  default:
+                    assertUnreachable(filechange)
                 }
+              } catch (error) {
+                log(
+                  `Failed saving temp files to enable diff for ${filePath}.`,
+                  'error',
+                  (error as Partial<Error | undefined>)?.message,
+                )
+              }
 
-                const filechangeTreeItem: TreeItem = {
-                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
-                  contextValue: (filechange as { diff: unknown }).diff
-                    ? `filechange:${filechangeKind}`
-                    : undefined,
-                  label: filename,
-                  description: fileDir === '.' ? undefined : fileDir,
-                  tooltip: `${
-                    isCopiedOrMovedFilechange(filechange)
-                      ? `${filechange.oldPath} ${filechangeKind === 'copied' ? '↦' : '➟'} ${
-                          filechange.newPath
-                        }`
-                      : filechange.path
-                  } ${dot} ${capitalizeFirstLetter(filechangeKind)}`,
-                  resourceUri: Uri.file(filePath),
-                  command: (filechange as { diff: unknown }).diff
-                    ? {
-                        command: 'radicle.openDiff',
-                        title: `Open changes`,
-                        tooltip: `Show this file's changes between its \
+              const filechangeTreeItem: TreeItem = {
+                id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
+                contextValue: (filechange as { diff?: unknown }).diff
+                  ? `filechange:${filechange.kind}`
+                  : undefined,
+                label: filename,
+                description: fileDir === '.' ? undefined : fileDir,
+                tooltip: `${
+                  isCopiedOrMovedFilechange(filechange)
+                    ? `${filechange.oldPath} ${filechange.kind === 'copied' ? '↦' : '➟'} ${
+                        filechange.newPath
+                      }`
+                    : filechange.path
+                } ${dot} ${capitalizeFirstLetter(filechange.kind)}`,
+                resourceUri: Uri.file(filePath),
+                command: (filechange as { diff?: unknown }).diff
+                  ? {
+                      command: 'radicle.openDiff',
+                      title: `Open changes`,
+                      tooltip: `Show this file's changes between its \
 before-the-Patch version and its latest version committed in the Radicle Patch`,
-                        arguments: [
-                          Uri.file(
-                            (filechange as Partial<ModifiedFileChange>).old?.oid
-                              ? oldVersionUrl
-                              : emptyFileUrl,
-                          ),
-                          Uri.file(
-                            (filechange as Partial<ModifiedFileChange>).new?.oid
-                              ? newVersionUrl
-                              : emptyFileUrl,
-                          ),
-                          `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
-                            newVersionCommitSha,
-                          )}) ${capitalizeFirstLetter(filechangeKind)}`,
-                          { preview: true } satisfies TextDocumentShowOptions,
-                        ],
-                      }
-                    : undefined,
-                }
+                      arguments: [
+                        Uri.file(
+                          (filechange as Partial<ModifiedFileChange>).old?.oid
+                            ? oldVersionUrl
+                            : emptyFileUrl,
+                        ),
+                        Uri.file(
+                          (filechange as Partial<ModifiedFileChange>).new?.oid
+                            ? newVersionUrl
+                            : emptyFileUrl,
+                        ),
+                        `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
+                          newVersionCommitSha,
+                        )}) ${capitalizeFirstLetter(filechange.kind)}`,
+                        { preview: true } satisfies TextDocumentShowOptions,
+                      ],
+                    }
+                  : undefined,
+              }
 
-                return filechangeTreeItem
-              },
-            }
+              return filechangeTreeItem
+            },
+          }
 
-            return node
-          }),
-        ),
-      ].sort((n1, n2) => (n1.relativeInRepoUrl < n2.relativeInRepoUrl ? -1 : 0))
+          return node
+        })
+        .sort((n1, n2) => (n1.relativeInRepoUrl < n2.relativeInRepoUrl ? -1 : 0))
 
       return filechangeNodes.length
         ? filechangeNodes
@@ -471,4 +465,14 @@ function getHtmlIconForPatch<P extends Patch>(patch: P): string {
 function getCssColor(themeColor: ThemeColor | undefined): string {
   // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
   return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
+}
+
+/**
+ * Brands each item in `objects` with a new property `kind`.
+ */
+function brand<T extends object, K extends string>(
+  objects: T[],
+  kind: K,
+): (T & { kind: K })[] {
+  return objects.map((obj) => ({ ...obj, kind }))
 }
