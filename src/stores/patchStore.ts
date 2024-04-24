@@ -93,10 +93,12 @@ export const usePatchStore = defineStore('patch', () => {
     lastFetchedTs.value = nowTs
     // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
     const promisedResponses = Promise.all([
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft' } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'open' } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'archived' } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'merged' } }),
+      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft', perPage: 500 } }),
+      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'open', perPage: 500 } }),
+      fetchFromHttpd(`/projects/${rid}/patches`, {
+        query: { state: 'archived', perPage: 500 },
+      }),
+      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'merged', perPage: 500 } }),
     ]).finally(() => (inProgressRequest = undefined))
     inProgressRequest = promisedResponses
 
