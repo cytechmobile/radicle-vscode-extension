@@ -18,7 +18,14 @@ import {
   fetchFromHttpd,
   memoizedGetCurrentProjectId,
 } from '../helpers'
-import { type AugmentedPatch, type Patch, type Unarray, isPatch } from '../types'
+import {
+  type AugmentedPatch,
+  type Patch,
+  type Unarray,
+  isCopiedOrMovedFilechange,
+  isCopiedOrMovedFilechangeWithDiff,
+  isPatch,
+} from '../types'
 import {
   assertUnreachable,
   capitalizeFirstLetter,
@@ -164,21 +171,17 @@ export const patchesTreeDataProvider: TreeDataProvider<
         )
       }
 
-      type FileChangeKindWithSourceFileAvailable = keyof Pick<
-        (typeof diffResponse)['diff'],
-        'added' | 'deleted' | 'modified'
-      >
-      type FileChangeKindWithoutSourceFileAvailable = keyof Pick<
-        (typeof diffResponse)['diff'],
-        'copied' | 'moved'
-      >
+      type FileChangeKind = keyof (typeof diffResponse)['diff']
       const filechangeNodes: FilechangeNode[] = [
         ...(
-          ['added', 'deleted', 'modified'] satisfies FileChangeKindWithSourceFileAvailable[]
+          ['added', 'deleted', 'modified', 'copied', 'moved'] satisfies FileChangeKind[]
         ).flatMap((filechangeKind) =>
           diffResponse.diff[filechangeKind].map((filechange) => {
-            const fileDir = Path.dirname(filechange.path)
-            const filename = Path.basename(filechange.path)
+            const filechangePath = isCopiedOrMovedFilechange(filechange)
+              ? filechange.newPath
+              : filechange.path
+            const fileDir = Path.dirname(filechangePath)
+            const filename = Path.basename(filechangePath)
 
             const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
               oldVersionCommitSha,
@@ -195,7 +198,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
 
             const node: FilechangeNode = {
               filename,
-              relativeInRepoUrl: filechange.path,
+              relativeInRepoUrl: filechangePath, // TODO: maninak remove leading `/`
               oldVersionUrl,
               newVersionUrl,
               patch,
@@ -210,9 +213,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
                 try {
                   switch (filechangeKind) {
                     case 'added':
-                      await fs.mkdir(Path.dirname(newVersionUrl), {
-                        recursive: true,
-                      })
+                      await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
                       await fs.writeFile(
                         newVersionUrl,
                         diffResponse.files[(filechange as AddedFileChange).new.oid]
@@ -220,9 +221,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
                       )
                       break
                     case 'deleted':
-                      await fs.mkdir(Path.dirname(oldVersionUrl), {
-                        recursive: true,
-                      })
+                      await fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true })
                       await fs.writeFile(
                         oldVersionUrl,
                         diffResponse.files[(filechange as DeletedFileChange).old.oid]
@@ -247,48 +246,75 @@ export const patchesTreeDataProvider: TreeDataProvider<
                         ),
                       ])
                       break
+                    case 'copied':
+                    case 'moved':
+                      await Promise.all([
+                        fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
+                        fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
+                      ])
+                      if (isCopiedOrMovedFilechangeWithDiff(filechange)) {
+                        await Promise.all([
+                          fs.writeFile(
+                            oldVersionUrl,
+                            diffResponse.files[filechange.old.oid]?.content as FileContent,
+                          ),
+                          fs.writeFile(
+                            newVersionUrl,
+                            diffResponse.files[filechange.new.oid]?.content as FileContent,
+                          ),
+                        ])
+                      }
+                      break
                     default:
                       assertUnreachable(filechangeKind)
                   }
                 } catch (error) {
                   log(
-                    `Failed saving temp files to enable diff for ${filechange.path}.`,
+                    `Failed saving temp files to enable diff for ${filechangePath}.`,
                     'error',
                     (error as Partial<Error | undefined>)?.message,
                   )
                 }
 
                 const filechangeTreeItem: TreeItem = {
-                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.path}`,
-                  contextValue: `filechange:${filechangeKind}`,
+                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechangePath}`,
+                  contextValue: (filechange as { diff: unknown }).diff
+                    ? `filechange:${filechangeKind}`
+                    : undefined,
                   label: filename,
                   description: shouldShowPathInDescription ? true : undefined,
-                  tooltip: `${filechange.path} ${dot} ${capitalizeFirstLetter(
-                    filechangeKind,
-                  )}`,
-                  resourceUri: Uri.file(filechange.path),
-                  command: {
-                    command: 'radicle.openDiff',
-                    title: `Open changes`,
-                    tooltip: `Show this file's changes between its \
+                  tooltip: `${
+                    isCopiedOrMovedFilechange(filechange)
+                      ? `${filechange.oldPath} ${filechangeKind === 'copied' ? '↦' : '➟'} ${
+                          filechange.newPath
+                        }`
+                      : filechange.path
+                  } ${dot} ${capitalizeFirstLetter(filechangeKind)}`,
+                  resourceUri: Uri.file(filechangePath),
+                  command: (filechange as { diff: unknown }).diff
+                    ? {
+                        command: 'radicle.openDiff',
+                        title: `Open changes`,
+                        tooltip: `Show this file's changes between its \
 before-the-Patch version and its latest version committed in the Radicle Patch`,
-                    arguments: [
-                      Uri.file(
-                        (filechange as Partial<ModifiedFileChange>).old?.oid
-                          ? oldVersionUrl
-                          : emptyFileUrl,
-                      ),
-                      Uri.file(
-                        (filechange as Partial<ModifiedFileChange>).new?.oid
-                          ? newVersionUrl
-                          : emptyFileUrl,
-                      ),
-                      `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
-                        newVersionCommitSha,
-                      )}) ${capitalizeFirstLetter(filechangeKind)}`,
-                      { preview: true } satisfies TextDocumentShowOptions,
-                    ],
-                  },
+                        arguments: [
+                          Uri.file(
+                            (filechange as Partial<ModifiedFileChange>).old?.oid
+                              ? oldVersionUrl
+                              : emptyFileUrl,
+                          ),
+                          Uri.file(
+                            (filechange as Partial<ModifiedFileChange>).new?.oid
+                              ? newVersionUrl
+                              : emptyFileUrl,
+                          ),
+                          `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
+                            newVersionCommitSha,
+                          )}) ${capitalizeFirstLetter(filechangeKind)}`,
+                          { preview: true } satisfies TextDocumentShowOptions,
+                        ],
+                      }
+                    : undefined,
                 }
 
                 return filechangeTreeItem
@@ -297,38 +323,6 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
 
             return node
           }),
-        ),
-        ...(['copied', 'moved'] satisfies FileChangeKindWithoutSourceFileAvailable[]).flatMap(
-          (filechangeKind) =>
-            diffResponse.diff[filechangeKind].map((filechange) => {
-              const filename = Path.basename(filechange.newPath)
-
-              let shouldShowPathInDescription = false
-              function enableShowingPathInDescription() {
-                shouldShowPathInDescription = true
-              }
-
-              const node: FilechangeNode = {
-                filename,
-                relativeInRepoUrl: filechange.newPath,
-                patch,
-                enableShowingPathInDescription,
-                getTreeItem: () =>
-                  ({
-                    id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechange.newPath}`,
-                    label: filename,
-                    description: shouldShowPathInDescription
-                      ? Path.dirname(filechange.newPath)
-                      : undefined,
-                    tooltip: `${filechange.oldPath} ➟ ${
-                      filechange.newPath
-                    } ${dot} ${capitalizeFirstLetter(filechangeKind)}`,
-                    resourceUri: Uri.file(filechange.newPath),
-                  } satisfies TreeItem),
-              }
-
-              return node
-            }),
         ),
       ]
         .map((filechangeNode, _, nodes) => {
@@ -351,7 +345,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
         : [
             `No changes between latest revision's base "${shortenHash(
               latestRevision.base,
-            )}" and head "${shortenHash(latestRevision.oid)}"`,
+            )}" and head "${shortenHash(latestRevision.oid)}" commits.`,
           ]
     }
 

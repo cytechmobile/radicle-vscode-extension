@@ -4,23 +4,24 @@
 
 ### 🚀 Enhancements
 
-- **patch-detail:** improve how reactions are shown
+- **patch-detail:** improve how reactions are shown ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
   - use more subtle styling when a reaction involves the local radicle identity (italic text vs border & background)
   - show "you" instead of local identity's alias
   - on hover show the truncated DId next to each identity
+- **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 
 ### 🩹 Fixes
 
-- **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd).
-- **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown.
+- **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
+- **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown. ([#110](https://github.com/cytechmobile/radicle-vscode-extension/pull/110))
 
 ### 🏡 Chores
 
-- **scripts:** parallelize verifying extension and webview dependencies
+- **scripts:** parallelize verifying extension and webview dependencies ([#108](https://github.com/cytechmobile/radicle-vscode-extension/pull/8), [#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
 
 ### 🤖 CI
 
-- **ci:** upgrade actions to their latest versions which are migrated from nodejs v16 to v20
+- **ci:** upgrade actions to their latest versions which are migrated from nodejs v16 to v20 ([#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
 
 -----
 
