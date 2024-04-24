@@ -31,7 +31,8 @@
 
 ### 📖 Documentation
 
-- update readme links and marketplace metadata to point to Radicle instead of GitHub
+- **readme:** add badges showcasing current published version, installation count & repository identifier (RID) of the extension ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
+- update readme links and marketplace metadata to point to Radicle instead of GitHub ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
 
 -----
 
