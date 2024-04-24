@@ -44,12 +44,10 @@ let timesPatchListFetchErroredConsecutively = 0
 // TODO: maninak show in item and tooltip if the chosen revision is approved, by whom and when
 
 export interface FilechangeNode {
-  filename: string
   relativeInRepoUrl: string
   oldVersionUrl?: string
   newVersionUrl?: string
   patch: AugmentedPatch
-  enableShowingPathInDescription: () => void
   getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
 }
 
@@ -177,11 +175,12 @@ export const patchesTreeDataProvider: TreeDataProvider<
           ['added', 'deleted', 'modified', 'copied', 'moved'] satisfies FileChangeKind[]
         ).flatMap((filechangeKind) =>
           diffResponse.diff[filechangeKind].map((filechange) => {
-            const filechangePath = isCopiedOrMovedFilechange(filechange)
+            // TODO: maninak diffResponse without stats and files and then forEach?
+            const filePath = isCopiedOrMovedFilechange(filechange)
               ? filechange.newPath
               : filechange.path
-            const fileDir = Path.dirname(filechangePath)
-            const filename = Path.basename(filechangePath)
+            const fileDir = Path.dirname(filePath)
+            const filename = Path.basename(filePath)
 
             const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
               oldVersionCommitSha,
@@ -191,18 +190,11 @@ export const patchesTreeDataProvider: TreeDataProvider<
               newVersionCommitSha,
             )}${sep}${fileDir}${sep}${filename}`
 
-            let shouldShowPathInDescription = false
-            function enableShowingPathInDescription() {
-              shouldShowPathInDescription = true
-            }
-
             const node: FilechangeNode = {
-              filename,
-              relativeInRepoUrl: filechangePath, // TODO: maninak remove leading `/`
+              relativeInRepoUrl: filePath,
               oldVersionUrl,
               newVersionUrl,
               patch,
-              enableShowingPathInDescription,
               getTreeItem: async () => {
                 // TODO: consider how to clean up httpd types so that infering those is easier or move them to the types file
                 type AddedFileChange = Unarray<(typeof diffResponse)['diff']['added']>
@@ -270,19 +262,19 @@ export const patchesTreeDataProvider: TreeDataProvider<
                   }
                 } catch (error) {
                   log(
-                    `Failed saving temp files to enable diff for ${filechangePath}.`,
+                    `Failed saving temp files to enable diff for ${filePath}.`,
                     'error',
                     (error as Partial<Error | undefined>)?.message,
                   )
                 }
 
                 const filechangeTreeItem: TreeItem = {
-                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filechangePath}`,
+                  id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
                   contextValue: (filechange as { diff: unknown }).diff
                     ? `filechange:${filechangeKind}`
                     : undefined,
                   label: filename,
-                  description: shouldShowPathInDescription ? true : undefined,
+                  description: fileDir === '.' ? undefined : fileDir,
                   tooltip: `${
                     isCopiedOrMovedFilechange(filechange)
                       ? `${filechange.oldPath} ${filechangeKind === 'copied' ? '↦' : '➟'} ${
@@ -290,7 +282,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
                         }`
                       : filechange.path
                   } ${dot} ${capitalizeFirstLetter(filechangeKind)}`,
-                  resourceUri: Uri.file(filechangePath),
+                  resourceUri: Uri.file(filePath),
                   command: (filechange as { diff: unknown }).diff
                     ? {
                         command: 'radicle.openDiff',
@@ -324,21 +316,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
             return node
           }),
         ),
-      ]
-        .map((filechangeNode, _, nodes) => {
-          const nodesExcludingFileChangeNode = nodes.filter((node) => node !== filechangeNode)
-          const hasSameFilenameWithAnotherFile = Boolean(
-            nodesExcludingFileChangeNode.find(
-              (node) => node.filename === filechangeNode.filename,
-            ),
-          )
-
-          // TODO: maninak always show path except if in project root
-          hasSameFilenameWithAnotherFile && filechangeNode.enableShowingPathInDescription()
-
-          return filechangeNode
-        })
-        .sort((n1, n2) => n1.relativeInRepoUrl.localeCompare(n2.relativeInRepoUrl))
+      ].sort((n1, n2) => (n1.relativeInRepoUrl < n2.relativeInRepoUrl ? -1 : 0))
 
       return filechangeNodes.length
         ? filechangeNodes

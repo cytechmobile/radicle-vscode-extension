@@ -9,6 +9,11 @@
   - show "you" instead of local identity's alias
   - on hover show the truncated DId next to each identity
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+
+### 🔥 Performance
+
+- **patch-list:** improve overall list rendering and reduce perf impact when it includes patches with high counts of changed files ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 
 ### 🩹 Fixes
 
