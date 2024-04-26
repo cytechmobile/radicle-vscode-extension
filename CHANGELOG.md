@@ -32,8 +32,10 @@
 
 ### 📖 Documentation
 
-- **readme:** add badges showcasing current published version, installation count & repository identifier (RID) of the extension ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
 - update readme links and marketplace metadata to point to Radicle instead of GitHub ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
+- **readme:** add badges showcasing current published version, installation count & repository identifier (RID) of the extension ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
+- **contributing:** suggest `rad clone` instead of git clone from GitHub ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
+- **contributing:** major improvement with new sections referencing zulip, creating a Radicle Issue and more
 
 -----
 
