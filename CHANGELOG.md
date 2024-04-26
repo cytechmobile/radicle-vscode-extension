@@ -20,6 +20,7 @@
 
 - **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
 - **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown. ([#110](https://github.com/cytechmobile/radicle-vscode-extension/pull/110))
+- **patch-list:** don't throw error when expanding patch item. Addresses breaking change in the httpd response schema. ([#109](https://github.com/cytechmobile/radicle-vscode-extension/pull/109))
 
 ### 🏡 Chores
 

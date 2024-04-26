@@ -22,8 +22,8 @@ import {
   type AugmentedPatch,
   type Patch,
   type Unarray,
-  isCopiedOrMovedFilechange,
   isCopiedOrMovedFilechangeWithDiff,
+  isMovedFilechangeWithoutDiff,
   isPatch,
 } from '../types'
 import {
@@ -169,18 +169,12 @@ export const patchesTreeDataProvider: TreeDataProvider<
         )
       }
 
-      const { added, deleted, modified, copied, moved } = diffResponse.diff
-      const filechangeNodes: FilechangeNode[] = [
-        ...brand(added, 'added'),
-        ...brand(deleted, 'deleted'),
-        ...brand(modified, 'modified'),
-        ...brand(copied, 'copied'),
-        ...brand(moved, 'moved'),
-      ]
+      const filechangeNodes: FilechangeNode[] = diffResponse.diff.files
         .map((filechange) => {
-          const filePath = isCopiedOrMovedFilechange(filechange)
-            ? filechange.newPath
-            : filechange.path
+          const filePath =
+            filechange.state === 'copied' || filechange.state === 'moved'
+              ? filechange.newPath
+              : filechange.path
           const fileDir = Path.dirname(filePath)
           const filename = Path.basename(filePath)
 
@@ -198,11 +192,23 @@ export const patchesTreeDataProvider: TreeDataProvider<
             newVersionUrl,
             patch,
             getTreeItem: async () => {
-              type ModifiedFileChange = Unarray<(typeof diffResponse)['diff']['modified']>
+              // god forgive me for I have sinned due to httpd's glorious schema...
+              type FileChangeWithOldAndNew = Extract<
+                Unarray<(typeof diffResponse)['diff']['files']>,
+                { old: NonNullable<unknown>; new: NonNullable<unknown> }
+              >
+              type FilechangeWithDiff = Extract<
+                Unarray<(typeof diffResponse)['diff']['files']>,
+                { diff: NonNullable<unknown> }
+              >
+              type FilechangeWithoutDiffButDiffViewerRegardless = Extract<
+                Unarray<(typeof diffResponse)['diff']['files']>,
+                { current: NonNullable<unknown> }
+              >
               type FileContent = (typeof diffResponse)['files'][string]['content']
 
               try {
-                switch (filechange.kind) {
+                switch (filechange.state) {
                   case 'added':
                     await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
                     await fs.writeFile(
@@ -218,28 +224,17 @@ export const patchesTreeDataProvider: TreeDataProvider<
                     )
                     break
                   case 'modified':
-                    await Promise.all([
-                      fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
-                      fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
-                    ])
-                    await Promise.all([
-                      fs.writeFile(
-                        oldVersionUrl,
-                        diffResponse.files[filechange.old.oid]?.content as FileContent,
-                      ),
-                      fs.writeFile(
-                        newVersionUrl,
-                        diffResponse.files[filechange.new.oid]?.content as FileContent,
-                      ),
-                    ])
-                    break
                   case 'copied':
                   case 'moved':
                     await Promise.all([
                       fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
                       fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
                     ])
-                    if (isCopiedOrMovedFilechangeWithDiff(filechange)) {
+
+                    if (
+                      filechange.state === 'modified' ||
+                      isCopiedOrMovedFilechangeWithDiff(filechange)
+                    ) {
                       await Promise.all([
                         fs.writeFile(
                           oldVersionUrl,
@@ -248,6 +243,17 @@ export const patchesTreeDataProvider: TreeDataProvider<
                         fs.writeFile(
                           newVersionUrl,
                           diffResponse.files[filechange.new.oid]?.content as FileContent,
+                        ),
+                      ])
+                    } else if (isMovedFilechangeWithoutDiff(filechange)) {
+                      await Promise.all([
+                        fs.writeFile(
+                          oldVersionUrl,
+                          diffResponse.files[filechange.current.oid]?.content as FileContent,
+                        ),
+                        fs.writeFile(
+                          newVersionUrl,
+                          diffResponse.files[filechange.current.oid]?.content as FileContent,
                         ),
                       ])
                     }
@@ -265,43 +271,51 @@ export const patchesTreeDataProvider: TreeDataProvider<
 
               const filechangeTreeItem: TreeItem = {
                 id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
-                contextValue: (filechange as { diff?: unknown }).diff
-                  ? `filechange:${filechange.kind}`
-                  : undefined,
+                contextValue:
+                  (filechange as FilechangeWithDiff).diff ??
+                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
+                    ? `filechange:${filechange.state}`
+                    : undefined,
                 label: filename,
                 description: fileDir === '.' ? undefined : fileDir,
                 tooltip: `${
-                  isCopiedOrMovedFilechange(filechange)
-                    ? `${filechange.oldPath} ${filechange.kind === 'copied' ? '↦' : '➟'} ${
+                  filechange.state === 'copied' || filechange.state === 'moved'
+                    ? `${filechange.oldPath} ${filechange.state === 'copied' ? '↦' : '➟'} ${
                         filechange.newPath
                       }`
                     : filechange.path
-                } ${dot} ${capitalizeFirstLetter(filechange.kind)}`,
+                } ${dot} ${capitalizeFirstLetter(filechange.state)}`,
                 resourceUri: Uri.file(filePath),
-                command: (filechange as { diff?: unknown }).diff
-                  ? {
-                      command: 'radicle.openDiff',
-                      title: `Open changes`,
-                      tooltip: `Show this file's changes between its \
+                command:
+                  (filechange as FilechangeWithDiff).diff ??
+                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
+                    ? {
+                        command: 'radicle.openDiff',
+                        title: `Open changes`,
+                        tooltip: `Show this file's changes between its \
 before-the-Patch version and its latest version committed in the Radicle Patch`,
-                      arguments: [
-                        Uri.file(
-                          (filechange as Partial<ModifiedFileChange>).old?.oid
-                            ? oldVersionUrl
-                            : emptyFileUrl,
-                        ),
-                        Uri.file(
-                          (filechange as Partial<ModifiedFileChange>).new?.oid
-                            ? newVersionUrl
-                            : emptyFileUrl,
-                        ),
-                        `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
-                          newVersionCommitSha,
-                        )}) ${capitalizeFirstLetter(filechange.kind)}`,
-                        { preview: true } satisfies TextDocumentShowOptions,
-                      ],
-                    }
-                  : undefined,
+                        arguments: [
+                          Uri.file(
+                            (filechange as Partial<FileChangeWithOldAndNew>).old?.oid ||
+                              (filechange as FilechangeWithoutDiffButDiffViewerRegardless)
+                                .current
+                              ? oldVersionUrl
+                              : emptyFileUrl,
+                          ),
+                          Uri.file(
+                            (filechange as Partial<FileChangeWithOldAndNew>).new?.oid ||
+                              (filechange as FilechangeWithoutDiffButDiffViewerRegardless)
+                                .current
+                              ? newVersionUrl
+                              : emptyFileUrl,
+                          ),
+                          `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
+                            newVersionCommitSha,
+                          )}) ${capitalizeFirstLetter(filechange.state)}`,
+                          { preview: true } satisfies TextDocumentShowOptions,
+                        ],
+                      }
+                    : undefined,
               }
 
               return filechangeTreeItem
@@ -465,14 +479,4 @@ function getHtmlIconForPatch<P extends Patch>(patch: P): string {
 function getCssColor(themeColor: ThemeColor | undefined): string {
   // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
   return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
-}
-
-/**
- * Brands each item in `objects` with a new property `kind`.
- */
-function brand<T extends object, K extends string>(
-  objects: T[],
-  kind: K,
-): (T & { kind: K })[] {
-  return objects.map((obj) => ({ ...obj, kind }))
 }

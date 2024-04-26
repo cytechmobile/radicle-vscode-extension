@@ -176,46 +176,47 @@ export interface DiffResponse {
 }
 
 export interface Changeset {
-  added: { diff: Diff; path: string; new: FileRef }[]
-  deleted: { diff: Diff; path: string; old: FileRef }[]
-  modified: { diff: Diff; path: string; old: FileRef; new: FileRef }[]
-  copied: CopiedOrMovedFilechange[]
-  moved: CopiedOrMovedFilechange[]
+  files: (
+    | { state: 'added'; diff: Diff; path: string; new: FileRef }
+    | { state: 'deleted'; diff: Diff; path: string; old: FileRef }
+    | { state: 'modified'; diff: Diff; path: string; old: FileRef; new: FileRef }
+    | ({ state: 'copied' } & (
+        | CopiedOrMovedFilechangeWithDiff
+        | CopiedOrMovedFilechangeWithoutDiff
+      ))
+    | ({ state: 'moved' } & (CopiedOrMovedFilechangeWithDiff | MovedFilechangeWithoutDiff))
+  )[]
   stats: {
     filesChanged: number
     insertions: number
     deletions: number
   }
 }
-export type CopiedOrMovedFilechange =
-  | CopiedOrMovedFilechangeWithoutDiff
-  | CopiedOrMovedFilechangeWithDiff
+export interface CopiedOrMovedFilechangeWithDiff extends CopiedOrMovedFilechangeWithoutDiff {
+  diff: Diff
+  old: FileRef
+  new: FileRef
+}
 export interface CopiedOrMovedFilechangeWithoutDiff {
   oldPath: string
   newPath: string
 }
-export interface CopiedOrMovedFilechangeWithDiff {
-  diff: Diff
-  oldPath: string
-  newPath: string
-  old: FileRef
-  new: FileRef
-}
-
-export function isCopiedOrMovedFilechange(x: unknown): x is CopiedOrMovedFilechange {
-  const filechange = x as CopiedOrMovedFilechange | undefined
-  const isCopiedOrMoved = filechange?.newPath && filechange.oldPath
-
-  return Boolean(isCopiedOrMoved)
+export interface MovedFilechangeWithoutDiff extends CopiedOrMovedFilechangeWithoutDiff {
+  current: FileRef
 }
 
 export function isCopiedOrMovedFilechangeWithDiff(
   x: unknown,
 ): x is CopiedOrMovedFilechangeWithDiff {
   const filechange = x as CopiedOrMovedFilechangeWithDiff | undefined
-  const isWithDiff = filechange?.diff
 
-  return Boolean(isWithDiff)
+  return Boolean(filechange?.diff)
+}
+
+export function isMovedFilechangeWithoutDiff(x: unknown): x is MovedFilechangeWithoutDiff {
+  const filechange = x as MovedFilechangeWithoutDiff | undefined
+
+  return Boolean(filechange?.current)
 }
 
 export interface FileRef {
