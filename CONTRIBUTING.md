@@ -1,20 +1,44 @@
 # Contribution Guide
 
-## Launching For Local Development
+If you are interested to contribute to the development of Radicle VS Code Extension keep reading for information and instructions.
 
-First clone the repo locally with git
+## Feedback, Questions and Ideas
+
+Please always be respectful to the maintainers and all other community members. Here's how to reach out:
+
+### Chat
+
+If there's anything you need to ask or share with the maintainers, we'd love to hear from you on our [Zulip channel](https://radicle.zulipchat.com/#narrow/stream/380896-integrations). Create a new topic prefixed with `[vscode]` e.g. `[vscode] <your topic's subject here>` and anything you want to say. Somebody will get back to you ASAP.
+
+### Issues
+
+For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.xyz/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
+
+When filing an issue please:
+
+1. try to provide as much context and be as clear as possible while also being terse and to the point
+2. if you are filing a bug then also provide reproduction steps as well as the expected and actual behaviours
+3. be patient, considerate of the maintainers' time and their existing priorities. In case your issue can't be addressed in your ideal timeframe, consider creating a patch, letting us know about it and which in the meantime you can [package and install in your vscode](#package-locally-from-source).
+
+## Cloning the `radicle-vscode-repo` Repo Locally
+
+Choose any of the following options:
+
+### Cloning using the Radicle extension itself
+
+Open VS Code's Command Palette (`Ctrl/Cmd + Shift + P`) and type in `> rad clone` then run the related command shown and follow the instructions.
+
+### Cloning using the Radicle CLI
 
 ```sh
 rad clone rad:z3Makm6fsQQXmpSFE43DZqwupaEhk
 ```
 
-and open it with VS Code
+You can find more info about `rad clone` in the [Radicle User Guide](https://radicle.xyz/guides/user#the-basics-of-seeding-and-cloning).
 
-```sh
-code radicle-vscode-extension
-```
+## Launching For Local Development
 
-Run the `Develop Extension` configuration in the "Run and Debug" View. This will:
+After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) and opening it in VS Code, run the `Develop Extension` configuration from the "Run and Debug" View. This will:
 
 - ensure you have the required dependencies and auto-align as needed
 - start the task `npm: dev` to compile the source code
@@ -25,7 +49,7 @@ Run the `Develop Extension` configuration in the "Run and Debug" View. This will
 
 ## Package locally from source
 
-After cloning run in your terminal:
+After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) and changing into the cloned repo's directory, run in your terminal:
 
 ```sh
 npx vsce package --no-dependencies
