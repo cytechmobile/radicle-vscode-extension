@@ -13,6 +13,7 @@ export interface ExtensionConfig {
   'radicle.advanced.pathToRadBinary': string
   'radicle.advanced.pathToNodeHome': string
   'radicle.advanced.httpApiEndpoint': string
+  'radicle.hideTempFiles': boolean
 }
 
 /**
@@ -23,7 +24,7 @@ export interface ExtensionConfig {
  */
 export function getConfig<K extends keyof ExtensionConfig>(
   configKey: K,
-): ExtensionConfig[typeof configKey] | undefined {
+): ExtensionConfig[K] | undefined {
   const config = workspace.getConfiguration()
 
   switch (configKey) {
@@ -31,7 +32,11 @@ export function getConfig<K extends keyof ExtensionConfig>(
     case 'radicle.advanced.pathToNodeHome':
     case 'radicle.advanced.httpApiEndpoint':
       // if the config has the value of the empty string (default) then return `undefined`
-      return config.get<ExtensionConfig[typeof configKey]>(configKey)?.trim() || undefined
+      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+      return config.get<ExtensionConfig[K]>(configKey)?.trim() || undefined
+    case 'radicle.hideTempFiles':
+      return config.get<ExtensionConfig[K]>(configKey)
     default:
       return assertUnreachable(configKey)
   }
@@ -42,7 +47,7 @@ export function getConfig<K extends keyof ExtensionConfig>(
  */
 export function setConfig<K extends keyof ExtensionConfig>(
   configKey: K,
-  value: ExtensionConfig[typeof configKey],
+  value: ExtensionConfig[K],
 ): Thenable<void> {
   const config = workspace.getConfiguration()
 
@@ -50,6 +55,8 @@ export function setConfig<K extends keyof ExtensionConfig>(
     case 'radicle.advanced.pathToRadBinary':
     case 'radicle.advanced.pathToNodeHome':
     case 'radicle.advanced.httpApiEndpoint':
+      return config.update(configKey, value, ConfigurationTarget.Global)
+    case 'radicle.hideTempFiles':
       return config.update(configKey, value, ConfigurationTarget.Global)
     default:
       return assertUnreachable(configKey)
