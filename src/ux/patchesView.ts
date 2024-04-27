@@ -1,5 +1,4 @@
 import Path, { sep } from 'node:path'
-import { tmpdir } from 'node:os'
 import * as fs from 'node:fs/promises'
 import {
   EventEmitter,
@@ -12,6 +11,7 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
+import { extTempDir } from '../constants'
 import { usePatchStore } from '../stores'
 import {
   debouncedClearMemoizedGetCurrentProjectIdCache,
@@ -155,8 +155,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
       }
 
       // create a placeholder empty file used to diff added or removed files
-      const tempFileUrlPrefix = `${tmpdir()}${sep}radicle`
-      const emptyFileUrl = `${tempFileUrlPrefix}${sep}empty`
+      const emptyFileUrl = `${extTempDir}${sep}empty`
 
       try {
         await fs.mkdir(Path.dirname(emptyFileUrl), { recursive: true })
@@ -178,11 +177,11 @@ export const patchesTreeDataProvider: TreeDataProvider<
           const fileDir = Path.dirname(filePath)
           const filename = Path.basename(filePath)
 
-          const oldVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+          const oldVersionUrl = `${extTempDir}${sep}${shortenHash(
             oldVersionCommitSha,
           )}${sep}${fileDir}${sep}${filename}`
           // TODO: should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
-          const newVersionUrl = `${tempFileUrlPrefix}${sep}${shortenHash(
+          const newVersionUrl = `${extTempDir}${sep}${shortenHash(
             newVersionCommitSha,
           )}${sep}${fileDir}${sep}${filename}`
 
