@@ -25,6 +25,10 @@ module.exports = {
     '!.*rc.*',
     '!*.config.js',
     '!*.d.ts',
+
+    // Ignore, since this file is vendored from VSCode and should not be changed.
+    // See `CONTRIBUTING.md`.
+    'src/types/git.ts',
   ],
   rules: {
     /*

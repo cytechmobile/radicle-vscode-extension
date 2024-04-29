@@ -140,3 +140,16 @@ npx vsce package --no-dependencies
 ```
 
 This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` +  "install vsix").
+
+## Vendored Dependencies
+
+Types for the [Git integration for VSCode](https://github.com/microsoft/vscode/tree/main/extensions/git) are vendored at [`src/types/git.ts`](src/types/git.ts).
+
+To update those, proceed as follows:
+
+```sh
+$ export VSCODE_TAG="1.88.1" # Adjust this to match desired version of VSCode.
+$ git remote add vscode "https://github.com/microsoft/vscode.git"
+$ git fetch --depth 1 vscode "$VSCODE_TAG"
+$ git show $(git ls-remote --refs --tags vscode "$VSCODE_TAG" | cut -d$'\t' -f1):extensions/git/src/api/git.ts > src/types/git.ts
+```
