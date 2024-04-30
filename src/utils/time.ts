@@ -90,3 +90,12 @@ export function convertLocaleFromLibcToBcp47(
   // https://wikinew.openoffice.org/wiki/LocaleMapping
   return libc?.replace(/(\.|@).*/, '').replace('_', '-')
 }
+
+/**
+ * While `Date.toISOString()` prints ~~"2024-04-30T15:40:17.661Z"~~, this functions
+ * instead prints "2024-04-30T15:40:17.661+00:00" which, which is easier for
+ * human brains to parse.
+ */
+export function getDateInIsoWithZeroedTimezone(unixTimestamp: number): string {
+  return new Date(unixTimestamp * 1000).toISOString().replace('Z', '+00:00')
+}
