@@ -27,7 +27,7 @@ const props = defineProps<{
 
 defineEmits<{ didSelectOption: [option: string] }>()
 
-const { firstRevision } = storeToRefs(usePatchDetailStore())
+const { firstRevision, timeLocale } = storeToRefs(usePatchDetailStore())
 
 const shouldHideRevisionDescription = computed(
   () =>
@@ -110,7 +110,7 @@ const selectedRevisionRejectedReviews = computed(() =>
       <span
         :title="new Date(selectedRevision.timestamp * 1000).toISOString()"
         class="font-mono"
-        >{{ getFormattedDate(selectedRevision.timestamp) }}</span
+        >{{ getFormattedDate(selectedRevision.timestamp, timeLocale) }}</span
       >
     </Metadatum>
     <Metadatum label="Latest commit">

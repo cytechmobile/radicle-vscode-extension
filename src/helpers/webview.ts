@@ -8,6 +8,7 @@ import {
 } from 'vscode'
 import {
   getExtensionContext,
+  useEnvStore,
   usePatchStore,
   useWebviewStore,
   webviewPatchDetailId,
@@ -192,6 +193,7 @@ function getStateForWebview(patch: AugmentedPatch): PatchDetailInjectedState {
     state: {
       patch: { ...patch, isCheckedOut },
       localIdentity,
+      timeLocale: useEnvStore().timeLocaleBcp47,
     },
   }
 

@@ -6,9 +6,8 @@ import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { getTimeAgo, getFormattedDate } from 'extensionUtils/time'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 
-const { patch, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
+const { patch, firstRevision, latestRevision, timeLocale } = storeToRefs(usePatchDetailStore())
 
-// TODO: use locale in `getFormattedDate()` from `vscode.env.language`
 // TODO: maninak show `accepted` review as major event, if the related revision got accepted?
 
 const latestMerge = computed(() =>
@@ -44,7 +43,7 @@ setInterval(() => {
       <span v-if="!shouldShowRevisionEvent"
         >at commit
         <pre :title="latestMerge.commit">{{ shortenHash(latestMerge.commit) }}</pre></span
-      >&ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp)">{{
+      >&ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
         mergedTimeAgo
       }}</pre>
     </div>
@@ -56,13 +55,13 @@ setInterval(() => {
       with revision
       <pre :title="latestRevision.id">{{ shortenHash(latestRevision.id) }}</pre> at commit
       <pre :title="latestRevision.oid">{{ shortenHash(latestRevision.oid) }}</pre
-      >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp)">{{
+      >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp, timeLocale)">{{
         updatedTimeAgo
       }}</pre>
     </div>
     <div class="leading-tight">
       Created by <pre :title="patch.author.id">{{ getIdentityAliasOrId(patch.author) }}</pre
-      >&ensp;<wbr /><pre :title="getFormattedDate(firstRevision.timestamp)">{{
+      >&ensp;<wbr /><pre :title="getFormattedDate(firstRevision.timestamp, timeLocale)">{{
         createdTimeAgo
       }}</pre>
     </div>
