@@ -28,6 +28,7 @@
 ### 🏡 Chores
 
 - **scripts:** parallelize verifying extension and webview dependencies ([#108](https://github.com/cytechmobile/radicle-vscode-extension/pull/8), [#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
+- **dev:** configure "Develop Extension" launch configuration to show the stack trace in case of nodejs deprecation warning, helping pinpoint the roote cause ([#132](https://github.com/cytechmobile/radicle-vscode-extension/issues/132))
 
 ### 🤖 CI
 
