@@ -4,14 +4,16 @@
 
 ### 🚀 Enhancements
 
+- **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-list:** increase count of maximum fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-detail:** improve how reactions are shown ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
   - use more subtle styling when a reaction involves the local radicle identity (italic text vs border & background)
   - show "you" instead of local identity's alias
   - on hover show the truncated DId next to each identity
-- **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed. ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
-- **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
-- **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
-- **patch-list:** feat(patch-list): increase count of fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
+- **patch-detail:** show all datestime strings in localized format according to the user's specified preference along the stack starting from the OS configuration (e.g. `LC_TIME`) until that of VS Code, in that oder of preference (e.g. with "de-AT" "Fr., 26. Apr. 2024, 10:00 MEZ" vs ~~"Fri, Apr 26, 2024, 10:00 AM Serbia Time"~~) ([#116](https://github.com/cytechmobile/radicle-vscode-extension/issues/116))
+- **patch-detail:** show zero-timezone-offset ISO datetimes instead of using Zulu notation which is easier for human brains to parse (e.g. "2024-04-30T15:40:17.661+00:00" vs ~~"2024-04-30T15:40:17.661Z"~~)
+- **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed and released (ETA beginning of May). ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
 
 ### 🔥 Performance
 
@@ -38,6 +40,10 @@
 - **readme:** add badges showcasing current published version, installation count & repository identifier (RID) of the extension ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
 - **contributing:** suggest `rad clone` instead of git clone from GitHub ([#113](https://github.com/cytechmobile/radicle-vscode-extension/pull/113))
 - **contributing:** major improvement with new sections referencing zulip, creating a Radicle Issue and more ([#122](https://github.com/cytechmobile/radicle-vscode-extension/issues/122))
+
+### ❤️ Code Contributors
+
+- Lorenz Leutgeb (`lorenz`, `did:key:z6MkkPvBfjP4bQmco5Dm7UGsX2ruDBieEHi8n9DVJWX5sTEz`)
 
 -----
 

@@ -8,7 +8,7 @@ import {
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
-import { getFormattedDate } from 'extensionUtils/time'
+import { getDateInIsoWithZeroedTimezone, getFormattedDate } from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
@@ -27,7 +27,7 @@ const props = defineProps<{
 
 defineEmits<{ didSelectOption: [option: string] }>()
 
-const { firstRevision } = storeToRefs(usePatchDetailStore())
+const { firstRevision, timeLocale } = storeToRefs(usePatchDetailStore())
 
 const shouldHideRevisionDescription = computed(
   () =>
@@ -108,9 +108,9 @@ const selectedRevisionRejectedReviews = computed(() =>
     </Metadatum>
     <Metadatum label="Date">
       <span
-        :title="new Date(selectedRevision.timestamp * 1000).toISOString()"
+        :title="getDateInIsoWithZeroedTimezone(selectedRevision.timestamp)"
         class="font-mono"
-        >{{ getFormattedDate(selectedRevision.timestamp) }}</span
+        >{{ getFormattedDate(selectedRevision.timestamp, timeLocale) }}</span
       >
     </Metadatum>
     <Metadatum label="Latest commit">

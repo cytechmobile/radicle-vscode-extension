@@ -1,6 +1,6 @@
 # Contribution Guide
 
-If you are interested to contribute to the development of Radicle VS Code Extension keep reading for information and instructions.
+If you are interested in contributing to the development of the Radicle VS Code Extension keep reading for information and instructions.
 
 ## Feedback, Questions and Ideas
 

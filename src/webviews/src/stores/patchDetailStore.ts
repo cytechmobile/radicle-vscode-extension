@@ -50,6 +50,8 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     return uniqueIds
   })
 
+  const timeLocale = computed(() => state.value.state.timeLocale)
+
   watchEffect(() => {
     // TODO: save and restore scroll position?
     vscode.setState(state.value)
@@ -67,7 +69,15 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     },
   )
 
-  return { patch, firstRevision, latestRevision, authors, localIdentity, identities }
+  return {
+    patch,
+    firstRevision,
+    latestRevision,
+    authors,
+    localIdentity,
+    identities,
+    timeLocale,
+  }
 })
 
 declare global {
