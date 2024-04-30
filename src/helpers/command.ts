@@ -8,7 +8,7 @@ import {
   copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
-  selectAndCloneRadicleProject,
+  selectAndCloneRadicleRepo,
   troubleshootRadCliInstallation,
 } from '../ux'
 import type { AugmentedPatch, Patch } from '../types'
@@ -89,7 +89,7 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.troubleshootRadCliInstallation', troubleshootRadCliInstallation)
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
-  registerVsCodeCmd('radicle.clone', selectAndCloneRadicleProject)
+  registerVsCodeCmd('radicle.clone', selectAndCloneRadicleRepo)
   registerVsCodeCmd('radicle.collapsePatches', () => {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
