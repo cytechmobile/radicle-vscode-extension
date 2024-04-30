@@ -8,7 +8,6 @@
   - use more subtle styling when a reaction involves the local radicle identity (italic text vs border & background)
   - show "you" instead of local identity's alias
   - on hover show the truncated DId next to each identity
-- **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed. ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** feat(patch-list): increase count of fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
