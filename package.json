@@ -9,9 +9,9 @@
   },
   "icon": "assets/marketplace-icon.png",
   "publisher": "radicle-ide-plugins-team",
-  "author": "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>",
+  "author": "Konstantinos Maninakis <maninak@protonmail.com>",
   "contributors": [
-    "Konstantinos Maninakis <konstantinos.maninakis@sclable.com>"
+    "Konstantinos Maninakis <maninak@protonmail.com>"
   ],
   "license": "./LICENSE",
   "repository": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk",
