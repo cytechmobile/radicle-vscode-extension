@@ -4,6 +4,7 @@
 
 ### 🚀 Enhancements
 
+- **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed and released (ETA beginning of May). ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** increase count of maximum fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
@@ -12,8 +13,7 @@
   - show "you" instead of local identity's alias
   - on hover show the truncated DId next to each identity
 - **patch-detail:** show all datestime strings in localized format according to the user's specified preference along the stack starting from the OS configuration (e.g. `LC_TIME`) until that of VS Code, in that oder of preference (e.g. with "de-AT" "Fr., 26. Apr. 2024, 10:00 MEZ" vs ~~"Fri, Apr 26, 2024, 10:00 AM Serbia Time"~~) ([#116](https://github.com/cytechmobile/radicle-vscode-extension/issues/116))
-- **patch-detail:** show zero-timezone-offset ISO datetimes instead of using Zulu notation which is easier for human brains to parse (e.g. "2024-04-30T15:40:17.661+00:00" vs ~~"2024-04-30T15:40:17.661Z"~~)
-- **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed and released (ETA beginning of May). ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
+- **patch-detail:** show zero-timezone-offset ISO datetimes instead of using Zulu notation which is easier for human brains to parse (e.g. "2024-04-30T15:40:17.661+00:00" vs ~~"2024-04-30T15:40:17.661Z"~~) ([#116](https://github.com/cytechmobile/radicle-vscode-extension/issues/116))
 
 ### 🔥 Performance
 
@@ -24,11 +24,11 @@
 - **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
 - **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown. ([#110](https://github.com/cytechmobile/radicle-vscode-extension/pull/110))
 - **patch-list:** don't throw error when expanding patch item. Addresses breaking change in the httpd response schema. ([#109](https://github.com/cytechmobile/radicle-vscode-extension/pull/109))
-- **auth:** address multiple UX issues with the auth request flow
+- **auth:** address multiple UX issues with the auth request flow  ([#115](https://github.com/cytechmobile/radicle-vscode-extension/issues/115))
   - use warning kind of notification instead of error when attempting to perform an auth-guarded command, since the user is also offered the option to launch the auth flow
   - improve copy of notification requesting auth for guarded commands
   - add missing log entry when the user dismisses the authentication request
-- **commands:** address multiple UX issues with rad clone
+- **commands:** address multiple UX issues with rad clone ([#115](https://github.com/cytechmobile/radicle-vscode-extension/issues/115))
   - require authentication before running command (align with CLI's behaviour)
   - don't explain erroneously that RID means Radicle ID
   - replace the term "project" with "repo" in user notifications
@@ -37,7 +37,7 @@
 ### 🏡 Chores
 
 - **scripts:** parallelize verifying extension and webview dependencies ([#108](https://github.com/cytechmobile/radicle-vscode-extension/pull/8), [#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
-- **dev:** configure "Develop Extension" launch configuration to show the stack trace in case of nodejs deprecation warning, helping pinpoint the roote cause ([#132](https://github.com/cytechmobile/radicle-vscode-extension/issues/132))
+- **dev:** configure "Develop Extension" launch configuration to show the stack trace in case of nodejs deprecation warning, helping pinpoint the root cause ([#132](https://github.com/cytechmobile/radicle-vscode-extension/issues/132))
 
 ### 🤖 CI
 
