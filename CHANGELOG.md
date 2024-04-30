@@ -24,6 +24,15 @@
 - **patch-detail:** restore showing reactions to comments and revisions. Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) ([#103](https://github.com/cytechmobile/radicle-vscode-extension/issues/103))
 - **patch-detail:** correctly show the review author in Activity and Revision sections. Previously the revision author was erroneously shown. ([#110](https://github.com/cytechmobile/radicle-vscode-extension/pull/110))
 - **patch-list:** don't throw error when expanding patch item. Addresses breaking change in the httpd response schema. ([#109](https://github.com/cytechmobile/radicle-vscode-extension/pull/109))
+- **auth:** address multiple UX issues with the auth request flow
+  - use warning kind of notification instead of error when attempting to perform an auth-guarded command, since the user is also offered the option to launch the auth flow
+  - improve copy of notification requesting auth for guarded commands
+  - add missing log entry when the user dismisses the authentication request
+- **commands:** address multiple UX issues with rad clone
+  - require authentication before running command (align with CLI's behaviour)
+  - don't explain erroneously that RID means Radicle ID
+  - replace the term "project" with "repo" in user notifications
+  - remove duplicate word on successful clone notification
 
 ### 🏡 Chores
 
