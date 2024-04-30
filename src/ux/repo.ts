@@ -4,17 +4,17 @@ import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import { exec, getRepoRoot, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
 
-export async function selectAndCloneRadicleProject(): Promise<void> {
-  const { data: projects, error } = await fetchFromHttpd('/projects', {
+export async function selectAndCloneRadicleRepo(): Promise<void> {
+  const { data: repos, error } = await fetchFromHttpd('/projects', {
     query: { show: 'all' },
   })
-  if (!projects) {
+  if (!repos) {
     notifyUserAboutFetchError(error)
 
     return
   }
 
-  const qPickItems: QuickPickItem[] = projects
+  const qPickItems: QuickPickItem[] = repos
     .sort((p1, p2) => p2.seeding - p1.seeding)
     .map((proj) => ({
       label: proj.name,
@@ -24,7 +24,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
     }))
 
   const projSelection = await window.showQuickPick(qPickItems, {
-    placeHolder: 'Choose a Radicle project to clone locally',
+    placeHolder: 'Choose a Radicle repo to clone locally',
     ignoreFocusOut: true,
     matchOnDescription: true,
     matchOnDetail: true,
@@ -33,7 +33,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
     return
   }
 
-  const selectedRid = projects.find((proj) => proj.name === projSelection.label)?.id
+  const selectedRid = repos.find((proj) => proj.name === projSelection.label)?.id
   if (!selectedRid) {
     return
   }
@@ -54,7 +54,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
     return
   }
 
-  const msgSuffix = `project "${projSelection.label}" with Radicle ID (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
+  const msgSuffix = `repo "${projSelection.label}" with id (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
   const didClone = exec(`${getRadCliRef()} clone ${selectedRid} --no-confirm`, {
     cwd: cloneTargetDir.fsPath,
     timeout: 60_000,
@@ -74,7 +74,7 @@ export async function selectAndCloneRadicleProject(): Promise<void> {
 
   const buttonOpenInVscode = 'Open in new window'
   const shouldOpenInNewWindow = await window.showInformationMessage(
-    `Cloned project ${msgSuffix}`,
+    `Cloned ${msgSuffix}`,
     buttonOpenInVscode,
   )
   shouldOpenInNewWindow &&
