@@ -34,6 +34,9 @@
     "app"
   ],
   "conventionalCommits.gitmoji": false,
+  "conventionalCommits.lineBreak": "\\n",
+  "git.inputValidation": true,
+  "git.inputValidationSubjectLength": 72,
   "prettier.enable": false,
   "editor.codeActionsOnSave": {
     "source.addMissingImports": "explicit",
