@@ -3,8 +3,15 @@ import { type QuickPickItem, Uri, commands, window } from 'vscode'
 import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import { exec, getRepoRoot, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
+import { launchAuthenticationFlow } from './radicleIdentityAuth'
 
 export async function selectAndCloneRadicleRepo(): Promise<void> {
+  if (!(await launchAuthenticationFlow())) {
+    window.showErrorMessage('Cannot clone without an authenticated Radicle identity.')
+
+    return
+  }
+
   const { data: repos, error } = await fetchFromHttpd('/projects', {
     query: { show: 'all' },
   })
