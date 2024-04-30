@@ -1,6 +1,5 @@
 import { workspace } from 'vscode'
 import {
-  validateHideTempFilesConfigAlignment,
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
@@ -52,11 +51,6 @@ const configWatchers = [
       usePatchStore().resetAllPatches()
     },
   },
-  {
-    configKey: 'radicle.hideTempFiles',
-    onConfigChange: validateHideTempFilesConfigAlignment,
-    onBeforeWatcherRegistration: validateHideTempFilesConfigAlignment,
-  },
 ] satisfies OnConfigChangeParam[]
 
 /**
@@ -65,7 +59,6 @@ const configWatchers = [
  */
 export function registerAllConfigWatchers(): void {
   configWatchers.forEach((cw) => {
-    cw.onBeforeWatcherRegistration?.()
     onConfigChange(cw.configKey, cw.onConfigChange)
   })
 }
