@@ -14,7 +14,7 @@
     "Konstantinos Maninakis <maninak@protonmail.com>"
   ],
   "license": "./LICENSE",
-  "repository": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk",
+  "repository": "https://github.com/cytechmobile/radicle-vscode-extension",
   "bugs": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues",
   "pricing": "Free",
   "engines": {
