@@ -5,6 +5,11 @@
 ### 🚀 Enhancements
 
 - **settings:** add config to toggle excluding temporary files created by the extension, e.g. those used to produce the diff of a patch's changed files, from the list of recently opened files. This is enabled by default. This currently works only partly, but should automatically be fully working when [the underlying VS Code bug](https://github.com/microsoft/vscode/issues/157395#issuecomment-2080293320) is fixed and released (ETA beginning of May). ([#94](https://github.com/cytechmobile/radicle-vscode-extension/issues/94))
+- **commands:** show (apropriate kind per case of) busy/progress indicators when the extension is busy executing a long-running task, which especially when initiated by the user, would otherwise leave them confused as to what the state of the execution is (non-initiated, initiated, succesful, failed). ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
+  Specifically:
+  - "sync", "fetch" and "announce" commands (launched either via buttons or the Command Palette) show an inditerminate busy indicator on the "CLI COMMANDS" View as well as on the Radicle icon of the Activity bar
+  - "rad clone" command indicates on the Status bar whether the extension is fetching the list of cloneable repos or later in the flow actively performing the cloning
+  **commands:** increase "rad clone" timeout to 120 seconds and add explicit success and failure logs ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** increase count of maximum fetched patches per status to 500 ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))

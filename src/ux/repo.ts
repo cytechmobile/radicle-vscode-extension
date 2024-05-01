@@ -1,20 +1,30 @@
 import { sep } from 'node:path'
-import { type QuickPickItem, Uri, commands, window } from 'vscode'
+import { ProgressLocation, type QuickPickItem, Uri, commands, window } from 'vscode'
 import { fetchFromHttpd, getRadCliRef } from '../helpers'
-import { exec, getRepoRoot, showLog } from '../utils'
+import { exec, getRepoRoot, log, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
 import { launchAuthenticationFlow } from './radicleIdentityAuth'
 
 export async function selectAndCloneRadicleRepo(): Promise<void> {
   if (!(await launchAuthenticationFlow())) {
-    window.showErrorMessage('Cannot clone without an authenticated Radicle identity.')
+    const msg = 'Cannot clone without an authenticated Radicle identity.'
+    log(msg, 'error')
+    window.showErrorMessage(msg)
 
     return
   }
 
-  const { data: repos, error } = await fetchFromHttpd('/projects', {
-    query: { show: 'all' },
-  })
+  const { data: repos, error } = await window.withProgress(
+    {
+      location: ProgressLocation.Window,
+      title: `‎$(radicle-logo) Fetching list of repos available for cloning…`,
+    },
+    async () => {
+      return await fetchFromHttpd('/projects', {
+        query: { show: 'all' },
+      })
+    },
+  )
   if (!repos) {
     notifyUserAboutFetchError(error)
 
@@ -62,28 +72,36 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
   }
 
   const msgSuffix = `repo "${projSelection.label}" with id (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
-  const didClone = exec(`${getRadCliRef()} clone ${selectedRid} --no-confirm`, {
-    cwd: cloneTargetDir.fsPath,
-    timeout: 60_000,
-    shouldLog: true,
-  })
+  const didClone = await window.withProgress(
+    {
+      location: ProgressLocation.Window,
+      title: `‎$(radicle-logo) Cloning ${msgSuffix}…`,
+    },
+    // eslint-disable-next-line require-await, @typescript-eslint/require-await
+    async () => {
+      return exec(`${getRadCliRef()} clone ${selectedRid} --no-confirm`, {
+        cwd: cloneTargetDir.fsPath,
+        timeout: 120_000,
+        shouldLog: true,
+      })
+    },
+  )
   if (!didClone) {
-    const buttonOutput = 'Show output'
-    const shouldShowOutput = await window.showErrorMessage(
-      `Failed cloning ${msgSuffix}`,
-      buttonOutput,
-    )
+    const msg = `Failed cloning ${msgSuffix}`
+    log(msg, 'error')
 
+    const buttonOutput = 'Show output'
+    const shouldShowOutput = await window.showErrorMessage(msg, buttonOutput)
     shouldShowOutput && showLog()
 
     return
   }
 
+  const msg = `Cloned ${msgSuffix}`
+  log(msg, 'info')
+
   const buttonOpenInVscode = 'Open in new window'
-  const shouldOpenInNewWindow = await window.showInformationMessage(
-    `Cloned ${msgSuffix}`,
-    buttonOpenInVscode,
-  )
+  const shouldOpenInNewWindow = await window.showInformationMessage(msg, buttonOpenInVscode)
   shouldOpenInNewWindow &&
     commands.executeCommand(
       'vscode.openFolder',

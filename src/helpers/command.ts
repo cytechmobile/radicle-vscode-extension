@@ -26,7 +26,7 @@ interface RadCliCmdMappedToVscodeCmdId {
   vscodeCmdId: `radicle.${string}`
   /**
    * The actual sub-command to be run by the Radicle CLI. Value will be appended to a
-   * reference to the rad binary before executing it in the shell:
+   * reference to the rad binary before executing it in the shell.
    *
    * @example 'sync --fetch' // `rad sync --fetch`
    */
@@ -59,12 +59,18 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
         const didAuth = await launchAuthenticationFlow()
         const didCmdSucceed =
           didAuth &&
-          Boolean(
-            exec(`${getRadCliRef()} ${cmdConfig.radCliCmdSuffix}`, {
-              cwd: '$workspaceDir',
-              shouldLog: true,
-            }),
-          )
+          (await window.withProgress(
+            { location: { viewId: 'cli-commands' } },
+            // eslint-disable-next-line require-await, @typescript-eslint/require-await
+            async () => {
+              return Boolean(
+                exec(`${getRadCliRef()} ${cmdConfig.radCliCmdSuffix}`, {
+                  cwd: '$workspaceDir',
+                  shouldLog: true,
+                }),
+              )
+            },
+          ))
 
         didCmdSucceed
           ? window.showInformationMessage(

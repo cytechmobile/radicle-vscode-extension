@@ -286,10 +286,10 @@ export function deAuthCurrentRadicleIdentity(): boolean {
     const button = 'Show output'
 
     const msg = `Failed de-authenticating Radicle identity ${radicleId}${composeNodeHomePathMsg()}.`
+    log(msg, 'error')
     window.showErrorMessage(msg, button).then((userSelection) => {
       userSelection === button && showLog()
     })
-    log(msg, 'error')
 
     return false
   }
