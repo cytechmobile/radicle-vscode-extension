@@ -41,6 +41,7 @@
 
 ### 🏡 Chores
 
+- **deps:** reduce minimum VS Code version requirement from 1.86.0 to 1.84.2 to allow the extension to auto-upgrade for most users, including those using the (outdated) stable nix repository. The latest extension version is often (as is the case for this version) necessary for compatibility with the latest Radicle CLI version. We currently don't depend on latest version APIs either. ([#136](https://github.com/cytechmobile/radicle-vscode-extension/issues/136))
 - **scripts:** parallelize verifying extension and webview dependencies ([#108](https://github.com/cytechmobile/radicle-vscode-extension/pull/8), [#111](https://github.com/cytechmobile/radicle-vscode-extension/pull/111))
 - **dev:** configure "Develop Extension" launch configuration to show the stack trace in case of nodejs deprecation warning, helping pinpoint the root cause ([#132](https://github.com/cytechmobile/radicle-vscode-extension/issues/132))
 

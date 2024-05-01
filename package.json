@@ -18,7 +18,7 @@
   "bugs": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues",
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.86.0",
+    "vscode": "^1.84.2",
     "npm": "^7"
   },
   "keywords": [
@@ -494,7 +494,7 @@
     "@types/javascript-time-ago": "^2.0.8",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.21",
-    "@types/vscode": "^1.86.0",
+    "@types/vscode": "^1.84.2",
     "esbuild": "^0.19.12",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
