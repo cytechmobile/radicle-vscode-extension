@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "verify-deps": "npx pnpm i --frozen-lockfile --prefer-offline",
+    "verify-deps": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
     "dev": "npm run build-only --watch",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
