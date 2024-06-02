@@ -1,3 +1,5 @@
+import * as vscode from 'vscode'
+import { type GitExtension, type GitExtensionAPI, Status } from '../types'
 import { exec } from '.'
 
 /**
@@ -33,4 +35,36 @@ export function getCurrentGitBranch(): string | undefined {
   const currentBranch = exec('git rev-parse --abbrev-ref HEAD', { cwd: '$workspaceDir' })
 
   return currentBranch
+}
+
+export function getGitExtensionAPI(): GitExtensionAPI {
+  const gitExtensionId = 'vscode.git'
+  const gitExtension = vscode.extensions.getExtension<GitExtension>(gitExtensionId)
+
+  if (gitExtension === undefined) {
+    throw new Error(`Could not load VSCode Git extension with id '${gitExtensionId}'`)
+  }
+
+  return gitExtension.exports.getAPI(1)
+}
+
+export function gitExtensionStatusToInternalFileChangeState(
+  status: Status,
+): 'added' | 'copied' | 'deleted' | 'modified' | 'moved' {
+  switch (status) {
+    case Status.INDEX_RENAMED:
+      return 'moved'
+    case Status.INDEX_COPIED:
+      return 'copied'
+    case Status.INDEX_MODIFIED:
+    case Status.MODIFIED:
+      return 'modified'
+    case Status.INDEX_DELETED:
+    case Status.DELETED:
+      return 'deleted'
+    case Status.INDEX_ADDED:
+      return 'added'
+    default:
+      throw new Error(`Encountered unexpected Git extension Status '${status}'`)
+  }
 }

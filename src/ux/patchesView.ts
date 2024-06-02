@@ -1,5 +1,4 @@
-import Path, { sep } from 'node:path'
-import * as fs from 'node:fs/promises'
+import Path from 'node:path'
 import {
   EventEmitter,
   MarkdownString,
@@ -11,28 +10,27 @@ import {
   TreeItemCollapsibleState,
   Uri,
 } from 'vscode'
-import { extTempDir } from '../constants'
 import { usePatchStore } from '../stores'
 import {
   debouncedClearMemoizedGetCurrentProjectIdCache,
-  fetchFromHttpd,
   memoizedGetCurrentProjectId,
 } from '../helpers'
 import {
   type AugmentedPatch,
+  type Change,
+  type GitExtensionAPI,
   type Patch,
-  type Unarray,
-  isCopiedOrMovedFilechangeWithDiff,
-  isMovedFilechangeWithoutDiff,
   isPatch,
 } from '../types'
 import {
   assertUnreachable,
   capitalizeFirstLetter,
   getFirstAndLatestRevisions,
+  getGitExtensionAPI,
   getIdentityAliasOrId,
+  getRepoRoot,
   getTimeAgo,
-  log,
+  gitExtensionStatusToInternalFileChangeState,
   shortenHash,
 } from '../utils'
 
@@ -45,8 +43,8 @@ let timesPatchListFetchErroredConsecutively = 0
 
 export interface FilechangeNode {
   relativeInRepoUrl: string
-  oldVersionUrl?: string
-  newVersionUrl?: string
+  oldVersionUri?: Uri
+  newVersionUri?: Uri
   patch: AugmentedPatch
   getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
 }
@@ -140,201 +138,96 @@ export const patchesTreeDataProvider: TreeDataProvider<
       return patchesSortedByRevisionTsPerStatus
     }
 
-    // get children of patch
-    else if (isPatch(elem)) {
-      const patch = elem
-      const { latestRevision } = getFirstAndLatestRevisions(patch)
-      const oldVersionCommitSha = latestRevision.base
-      const newVersionCommitSha = latestRevision.oid
-
-      const { data: diffResponse, error } = await fetchFromHttpd(
-        `/projects/${rid}/diff/${oldVersionCommitSha}/${newVersionCommitSha}`,
-      )
-      if (error) {
-        return ['Patch details could not be resolved due to an error!']
-      }
-
-      // create a placeholder empty file used to diff added or removed files
-      const emptyFileUrl = `${extTempDir}${sep}empty`
-
-      try {
-        await fs.mkdir(Path.dirname(emptyFileUrl), { recursive: true })
-        await fs.writeFile(emptyFileUrl, '')
-      } catch (error) {
-        log(
-          "Failed saving placeholder empty file to enable diff for Patch's changed files.",
-          'error',
-          (error as Partial<Error | undefined>)?.message,
-        )
-      }
-
-      const filechangeNodes: FilechangeNode[] = diffResponse.diff.files
-        .map((filechange) => {
-          const filePath =
-            filechange.state === 'copied' || filechange.state === 'moved'
-              ? filechange.newPath
-              : filechange.path
-          const fileDir = Path.dirname(filePath)
-          const filename = Path.basename(filePath)
-
-          const oldVersionUrl = `${extTempDir}${sep}${shortenHash(
-            oldVersionCommitSha,
-          )}${sep}${fileDir}${sep}${filename}`
-          // TODO: should the newVersionUrl be just the filechange.path (with full path to the actual file on the fs) if the current git commit is same as newVersionCommitSha and the file isn't on the git (un-)staged changes?
-          const newVersionUrl = `${extTempDir}${sep}${shortenHash(
-            newVersionCommitSha,
-          )}${sep}${fileDir}${sep}${filename}`
-
-          const node: FilechangeNode = {
-            relativeInRepoUrl: filePath,
-            oldVersionUrl,
-            newVersionUrl,
-            patch,
-            getTreeItem: async () => {
-              // god forgive me for I have sinned due to httpd's glorious schema...
-              type FileChangeWithOldAndNew = Extract<
-                Unarray<(typeof diffResponse)['diff']['files']>,
-                { old: NonNullable<unknown>; new: NonNullable<unknown> }
-              >
-              type FilechangeWithDiff = Extract<
-                Unarray<(typeof diffResponse)['diff']['files']>,
-                { diff: NonNullable<unknown> }
-              >
-              type FilechangeWithoutDiffButDiffViewerRegardless = Extract<
-                Unarray<(typeof diffResponse)['diff']['files']>,
-                { current: NonNullable<unknown> }
-              >
-              type FileContent = (typeof diffResponse)['files'][string]['content']
-
-              try {
-                switch (filechange.state) {
-                  case 'added':
-                    await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
-                    await fs.writeFile(
-                      newVersionUrl,
-                      diffResponse.files[filechange.new.oid]?.content as FileContent,
-                    )
-                    break
-                  case 'deleted':
-                    await fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true })
-                    await fs.writeFile(
-                      oldVersionUrl,
-                      diffResponse.files[filechange.old.oid]?.content as FileContent,
-                    )
-                    break
-                  case 'modified':
-                  case 'copied':
-                  case 'moved':
-                    await Promise.all([
-                      fs.mkdir(Path.dirname(oldVersionUrl), { recursive: true }),
-                      fs.mkdir(Path.dirname(newVersionUrl), { recursive: true }),
-                    ])
-
-                    if (
-                      filechange.state === 'modified' ||
-                      isCopiedOrMovedFilechangeWithDiff(filechange)
-                    ) {
-                      await Promise.all([
-                        fs.writeFile(
-                          oldVersionUrl,
-                          diffResponse.files[filechange.old.oid]?.content as FileContent,
-                        ),
-                        fs.writeFile(
-                          newVersionUrl,
-                          diffResponse.files[filechange.new.oid]?.content as FileContent,
-                        ),
-                      ])
-                    } else if (isMovedFilechangeWithoutDiff(filechange)) {
-                      await Promise.all([
-                        fs.writeFile(
-                          oldVersionUrl,
-                          diffResponse.files[filechange.current.oid]?.content as FileContent,
-                        ),
-                        fs.writeFile(
-                          newVersionUrl,
-                          diffResponse.files[filechange.current.oid]?.content as FileContent,
-                        ),
-                      ])
-                    }
-                    break
-                  default:
-                    assertUnreachable(filechange)
-                }
-              } catch (error) {
-                log(
-                  `Failed saving temp files to enable diff for ${filePath}.`,
-                  'error',
-                  (error as Partial<Error | undefined>)?.message,
-                )
-              }
-
-              const filechangeTreeItem: TreeItem = {
-                id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
-                contextValue:
-                  (filechange as FilechangeWithDiff).diff ??
-                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
-                    ? `filechange:${filechange.state}`
-                    : undefined,
-                label: filename,
-                description: fileDir === '.' ? undefined : fileDir,
-                tooltip: `${
-                  filechange.state === 'copied' || filechange.state === 'moved'
-                    ? `${filechange.oldPath} ${filechange.state === 'copied' ? '↦' : '➟'} ${
-                        filechange.newPath
-                      }`
-                    : filechange.path
-                } ${dot} ${capitalizeFirstLetter(filechange.state)}`,
-                resourceUri: Uri.file(filePath),
-                command:
-                  (filechange as FilechangeWithDiff).diff ??
-                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
-                    ? {
-                        command: 'radicle.openDiff',
-                        title: `Open changes`,
-                        tooltip: `Show this file's changes between its \
-before-the-Patch version and its latest version committed in the Radicle Patch`,
-                        arguments: [
-                          Uri.file(
-                            (filechange as Partial<FileChangeWithOldAndNew>).old?.oid ||
-                              (filechange as FilechangeWithoutDiffButDiffViewerRegardless)
-                                .current
-                              ? oldVersionUrl
-                              : emptyFileUrl,
-                          ),
-                          Uri.file(
-                            (filechange as Partial<FileChangeWithOldAndNew>).new?.oid ||
-                              (filechange as FilechangeWithoutDiffButDiffViewerRegardless)
-                                .current
-                              ? newVersionUrl
-                              : emptyFileUrl,
-                          ),
-                          `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
-                            newVersionCommitSha,
-                          )}) ${capitalizeFirstLetter(filechange.state)}`,
-                          { preview: true } satisfies TextDocumentShowOptions,
-                        ],
-                      }
-                    : undefined,
-              }
-
-              return filechangeTreeItem
-            },
-          }
-
-          return node
-        })
-        .sort((n1, n2) => (n1.relativeInRepoUrl < n2.relativeInRepoUrl ? -1 : 0))
-
-      return filechangeNodes.length
-        ? filechangeNodes
-        : [
-            `No changes between latest revision's base "${shortenHash(
-              latestRevision.base,
-            )}" and head "${shortenHash(latestRevision.oid)}" commits.`,
-          ]
+    if (!isPatch(elem)) {
+      return undefined
     }
 
-    return undefined
+    const patch = elem
+    const { latestRevision } = getFirstAndLatestRevisions(patch)
+    const range = {
+      old: latestRevision.base,
+      new: latestRevision.oid,
+    }
+
+    const gitExtensionApi: GitExtensionAPI = getGitExtensionAPI()
+
+    const repoRoot = getRepoRoot()
+    if (repoRoot === undefined) {
+      throw new Error(`Failed to determine Git repository root.`)
+    }
+
+    const repo = gitExtensionApi.getRepository(Uri.file(repoRoot))
+    if (repo === null) {
+      throw new Error(`Failed access Git repository.`)
+    }
+
+    const changes: Change[] = await repo?.diffBetween(range.old, range.new)
+    if (changes.length === 0) {
+      return [
+        `No changes between latest revision's base "${shortenHash(
+          latestRevision.base,
+        )}" and head "${shortenHash(latestRevision.oid)}" commits.`,
+      ]
+    }
+
+    return changes
+      .map((change: Change): FilechangeNode => {
+        const { originalUri, status } = change
+        const uri = change.renameUri || change.uri
+        const internalFileChangeState = gitExtensionStatusToInternalFileChangeState(status)
+        const isCopy = internalFileChangeState === 'copied'
+        const isMoveOrCopy = isCopy || internalFileChangeState === 'moved'
+        const humanReadable = capitalizeFirstLetter(internalFileChangeState)
+        const basename = Path.basename(uri.fsPath)
+        const git = {
+          originalUri: gitExtensionApi.toGitUri(originalUri, range.old),
+          uri: gitExtensionApi.toGitUri(uri, range.new),
+        }
+        const relative = {
+          originalUri: Path.relative(repoRoot, originalUri.fsPath),
+          uri: Path.relative(repoRoot, uri.fsPath),
+        }
+        const relativeDirname = Path.dirname(relative.uri)
+
+        return {
+          relativeInRepoUrl: relative.uri,
+          oldVersionUri: git.originalUri,
+          newVersionUri: git.uri,
+          patch,
+          getTreeItem: () => {
+            const filechangeTreeItem: TreeItem = {
+              id: `${patch.id} ${range.old}..${range.new} ${uri}`,
+              contextValue: `filechange:${internalFileChangeState}`,
+              label: basename,
+              description: relativeDirname === '.' ? '' : relativeDirname,
+              tooltip: `${
+                isMoveOrCopy ? `${relative.originalUri} ${isCopy ? '↦' : '➟'} ` : ''
+              }${relative.uri} ${dot} ${humanReadable}`,
+              resourceUri: uri,
+              command: {
+                command: 'radicle.openDiff',
+                title: `Open changes`,
+                tooltip: `Show this file's changes between its \
+before-the-Patch version and its latest version committed in the Radicle Patch`,
+                arguments: [
+                  git.originalUri,
+                  git.uri,
+                  `${basename} (${shortenHash(range.old)} ⟷ ${shortenHash(
+                    range.new,
+                  )}) ${humanReadable}`,
+                  { preview: true } satisfies TextDocumentShowOptions,
+                ],
+              },
+            }
+
+            return filechangeTreeItem
+          },
+        }
+      })
+      .sort((n1, n2) =>
+        // FIXME(lorenzleutgeb): Use user's locale for comparison once cytechmobile/radicle-vscode-extension#116 is resolved.
+        n1.relativeInRepoUrl.localeCompare(n2.relativeInRepoUrl),
+      )
   },
   getParent: (elem) => {
     if (typeof elem === 'string' || isPatch(elem)) {

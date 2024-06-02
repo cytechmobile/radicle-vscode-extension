@@ -1,4 +1,4 @@
-import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
+import { type TextDocumentShowOptions, type Uri, commands, window } from 'vscode'
 import { getExtensionContext, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
@@ -122,8 +122,8 @@ export function registerAllCommands(): void {
   registerVsCodeCmd(
     'radicle.openOriginalVersionOfPatchedFile',
     async (node: FilechangeNode | undefined) => {
-      if (node?.oldVersionUrl) {
-        await commands.executeCommand('vscode.open', Uri.file(node.oldVersionUrl))
+      if (node?.oldVersionUri) {
+        await commands.executeCommand('vscode.open', node.oldVersionUri)
         commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
       } else {
         log(
@@ -137,8 +137,8 @@ export function registerAllCommands(): void {
   registerVsCodeCmd(
     'radicle.openChangedVersionOfPatchedFile',
     async (node: FilechangeNode | undefined) => {
-      if (node?.newVersionUrl) {
-        await commands.executeCommand('vscode.open', Uri.file(node.newVersionUrl))
+      if (node?.newVersionUri) {
+        await commands.executeCommand('vscode.open', node.newVersionUri)
         commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
       } else {
         log(
