@@ -1,5 +1,14 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🏡 Chores
+
+- **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
+- **dev:** always use the latest pnpm version when verifying deps installation
+
+-----
+
 ## **v0.4.1** (May 1st, 2024)
 
 ### 🚀 Enhancements
