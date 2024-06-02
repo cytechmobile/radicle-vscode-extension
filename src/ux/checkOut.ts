@@ -46,7 +46,7 @@ export async function checkOutDefaultBranch(): Promise<boolean> {
  */
 export function checkOutPatch(patch: Pick<Patch, 'id'>): boolean {
   const didCheckoutPatchBranch = Boolean(
-    exec(`${getRadCliRef()} patch checkout ${patch.id}`, {
+    exec(`${getRadCliRef()} patch checkout ${patch.id} --force`, {
       cwd: '$workspaceDir',
       shouldLog: true,
     }),
