@@ -2,6 +2,10 @@
 
 ## _(WIP, yet unreleased version)_
 
+### 🩹 Fixes
+
+- **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
+
 ### 🏡 Chores
 
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
