@@ -2,6 +2,10 @@
 
 ## _(WIP, yet unreleased version)_
 
+### 🚀 Enhancements
+
+- **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+
 ### 🩹 Fixes
 
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out

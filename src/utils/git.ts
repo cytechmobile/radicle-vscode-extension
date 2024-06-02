@@ -26,11 +26,27 @@ export function getRepoRoot(): string | undefined {
  *
  * @example
  * ```ts
- * getCurrentGitBranch() // 'feat/75_checkout-patch'
+ * getCurrentGitBranch() // 'feat/75_fix-pesky-bug'
  * ```
  */
 export function getCurrentGitBranch(): string | undefined {
   const currentBranch = exec('git rev-parse --abbrev-ref HEAD', { cwd: '$workspaceDir' })
 
   return currentBranch
+}
+
+/**
+ * Resolves the upstream branch of the currently checked out branch if in a Git repository.
+ *
+ * @example
+ * ```ts
+ * getCurrentGitUpstreamBranch() // 'origin/main'
+ * ```
+ */
+export function getCurrentGitUpstreamBranch(): string | undefined {
+  const currentUpstreamBranch = exec('git rev-parse --abbrev-ref --symbolic-full-name @{u}', {
+    cwd: '$workspaceDir',
+  })
+
+  return currentUpstreamBranch
 }

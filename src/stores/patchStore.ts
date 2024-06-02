@@ -17,17 +17,17 @@ export const usePatchStore = defineStore('patch', () => {
       : rerenderAllItemsInPatchesView()
   })
 
+  // TODO: maninak do similar and use latest commit to resolve the currently checkout out revision?
   const prevCheckedOutPatch = ref<AugmentedPatch>()
   const checkedOutPatch = computed<AugmentedPatch | undefined>((_prevCheckedOutPatch) => {
     prevCheckedOutPatch.value = _prevCheckedOutPatch
-    const matchHexCharsAfterPatchRegex = /patch\/([0-9A-Fa-f]*)/
-    const checkedOutPatchPartialId = useGitStore().currentBranch?.match(
-      matchHexCharsAfterPatchRegex,
+
+    const matchPatchIdFromUpstreamBranchRegex = /rad\/patches\/([0-9A-Fa-f]*)/
+    const checkedOutPatchId = useGitStore().currentUpstreamBranch?.match(
+      matchPatchIdFromUpstreamBranchRegex,
     )?.[1]
 
-    const newCheckedOutPatch = checkedOutPatchPartialId
-      ? findPatchById(checkedOutPatchPartialId)
-      : undefined
+    const newCheckedOutPatch = checkedOutPatchId ? findPatchById(checkedOutPatchId) : undefined
 
     return newCheckedOutPatch
   })
