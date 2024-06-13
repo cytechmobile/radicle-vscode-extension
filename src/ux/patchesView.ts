@@ -97,7 +97,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
-    const rid = useEnvStore().currentProjectId
+    const rid = useEnvStore().currenRepoId
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
