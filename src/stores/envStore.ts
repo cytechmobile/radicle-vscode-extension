@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed } from '@vue/reactivity'
+import { computed, ref } from '@vue/reactivity'
 import { convertLocaleFromLibcToBcp47 } from '../utils'
 import { getCurrentRepoId } from '../helpers'
 
@@ -16,11 +16,16 @@ export const useEnvStore = defineStore('envStore', () => {
     )
   })
 
-  const currenRepoId = computed(getCurrentRepoId)
+  const currentRepoIdRecomputeSignal = ref(0)
+  const currentRepoId = computed(() => {
+    void currentRepoIdRecomputeSignal.value
+
+    return getCurrentRepoId()
+  })
 
   function refreshCurrentRepoId() {
-    currenRepoId.effect.dirty = true
+    currentRepoIdRecomputeSignal.value++
   }
 
-  return { timeLocaleBcp47, currenRepoId, refreshCurrentRepoId }
+  return { timeLocaleBcp47, currentRepoId, refreshCurrentRepoId }
 })

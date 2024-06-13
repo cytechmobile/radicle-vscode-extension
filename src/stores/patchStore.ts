@@ -16,7 +16,7 @@ export const usePatchStore = defineStore('patch', () => {
   })
   effect(
     () => {
-      useEnvStore().currenRepoId && resetAllPatches()
+      useEnvStore().currentRepoId && resetAllPatches()
     },
     { lazy: true },
   )
@@ -52,7 +52,7 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function refetchPatch(patchId: Patch['id']) {
-    const rid = useEnvStore().currenRepoId
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       return { error: new Error('Failed resolving RID') }
     }
@@ -93,7 +93,7 @@ export const usePatchStore = defineStore('patch', () => {
       }
     }
 
-    const rid = useEnvStore().currenRepoId
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       return false
     }

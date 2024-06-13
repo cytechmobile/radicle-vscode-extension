@@ -8,6 +8,7 @@
 
 ### 🩹 Fixes
 
+- **patch-list:** show show patch chek-out state as expected. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was shown.
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 
 ### 🏡 Chores

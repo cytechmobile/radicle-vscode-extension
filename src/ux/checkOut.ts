@@ -11,7 +11,7 @@ import { notifyUserAboutFetchError } from '.'
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export async function checkOutDefaultBranch(): Promise<boolean> {
-  const rid = useEnvStore().currenRepoId
+  const rid = useEnvStore().currentRepoId
   if (!rid) {
     log('Failed resolving RID', 'error')
 

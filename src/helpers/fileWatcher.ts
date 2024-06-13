@@ -29,8 +29,6 @@ function watchFileNotInWorkspace({ glob, handler, immediate }: FileWatcherConfig
 
 // TODO: maninak replace `getRepoRoot()` with gitStore access?
 const notInWorkspaceFileWatchers = [
-  // HACK: this is overzealous triggering for rad init detection. Detecting existence
-  // of `.git/refs/remotes/rad` dir should be better but doesn't seem to trigger when created.
   {
     glob: () =>
       new RelativePattern(

@@ -1,5 +1,5 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { ref } from '@vue/reactivity'
+import { computed, ref } from '@vue/reactivity'
 import { getCurrentGitBranch, getCurrentGitUpstreamBranch } from '../utils'
 
 setActivePinia(createPinia())
@@ -19,12 +19,20 @@ setActivePinia(createPinia())
  */
 
 export const useGitStore = defineStore('gitStore', () => {
-  const currentBranch = ref<string | undefined>()
-  const currentUpstreamBranch = ref<string | undefined>()
+  const currentBranchRecomputeSignal = ref(0)
+  const currentBranch = computed(() => {
+    void currentBranchRecomputeSignal.value
+
+    return getCurrentGitBranch()
+  })
+  const currentUpstreamBranch = computed(() => {
+    void currentBranchRecomputeSignal.value
+
+    return getCurrentGitUpstreamBranch()
+  })
 
   function refreshCurentBranch() {
-    currentBranch.value = getCurrentGitBranch()
-    currentUpstreamBranch.value = getCurrentGitUpstreamBranch()
+    currentBranchRecomputeSignal.value++
   }
 
   return {
