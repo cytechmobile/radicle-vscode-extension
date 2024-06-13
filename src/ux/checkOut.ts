@@ -1,5 +1,6 @@
 import { window } from 'vscode'
-import { fetchFromHttpd, getRadCliRef, memoizedGetCurrentProjectId } from '../helpers'
+import { useEnvStore } from 'src/stores'
+import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import type { Patch } from '../types'
 import { exec, log, shortenHash, showLog } from '../utils'
 import { notifyUserAboutFetchError } from '.'
@@ -10,8 +11,7 @@ import { notifyUserAboutFetchError } from '.'
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export async function checkOutDefaultBranch(): Promise<boolean> {
-  const rid = memoizedGetCurrentProjectId()
-
+  const rid = useEnvStore().currentProjectId
   if (!rid) {
     log('Failed resolving RID', 'error')
 

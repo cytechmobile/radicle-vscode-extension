@@ -1,9 +1,9 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, effect, ref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
-import { fetchFromHttpd, memoizedGetCurrentProjectId } from '../helpers'
+import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
-import { useGitStore } from '.'
+import { useEnvStore, useGitStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -42,7 +42,7 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function refetchPatch(patchId: Patch['id']) {
-    const rid = memoizedGetCurrentProjectId() // TODO: maninak get from a store instead
+    const rid = useEnvStore().currentProjectId
     if (!rid) {
       return { error: new Error('Failed resolving RID') }
     }
@@ -85,7 +85,7 @@ export const usePatchStore = defineStore('patch', () => {
       return true
     }
 
-    const rid = memoizedGetCurrentProjectId() // TODO: maninak get from a store instead
+    const rid = useEnvStore().currentProjectId
     if (!rid) {
       return false
     }

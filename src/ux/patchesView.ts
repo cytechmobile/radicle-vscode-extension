@@ -101,6 +101,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
+    // TODO: maninak detect when a file is rad inited properly and only _then_ clear the cache. Then just use useEnvStore().CurrentProjectId here
     debouncedClearMemoizedGetCurrentProjectIdCache()
     const rid = memoizedGetCurrentProjectId()
     if (!rid) {
