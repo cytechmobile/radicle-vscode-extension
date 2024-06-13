@@ -9,13 +9,17 @@ setActivePinia(createPinia())
 
 export const usePatchStore = defineStore('patch', () => {
   const patches = ref<AugmentedPatch[]>()
-
   effect(() => {
-    // TODO: diff prev-vs-new and re-render only those patches that got updated?
     patches.value
       ? rerenderSomeItemsInPatchesView(patches.value)
       : rerenderAllItemsInPatchesView()
   })
+  effect(
+    () => {
+      useEnvStore().currentProjectId && resetAllPatches()
+    },
+    { lazy: true },
+  )
 
   // TODO: maninak do similar and use latest commit to resolve the currently checkout out revision?
   const prevCheckedOutPatch = ref<AugmentedPatch>()
@@ -39,6 +43,12 @@ export const usePatchStore = defineStore('patch', () => {
 
   function resetAllPatches() {
     patches.value = undefined
+  }
+
+  function findPatchById(partialOrWholeId: string) {
+    const foundPatch = patches.value?.find((patch) => patch.id.includes(partialOrWholeId))
+
+    return foundPatch
   }
 
   async function refetchPatch(patchId: Patch['id']) {
@@ -70,19 +80,17 @@ export const usePatchStore = defineStore('patch', () => {
     return {}
   }
 
-  function findPatchById(partialOrWholeId: string) {
-    const foundPatch = patches.value?.find((patch) => patch.id.includes(partialOrWholeId))
-
-    return foundPatch
-  }
-
   const lastFetchedTs = ref<number>()
   let inProgressRequest: Promise<unknown> | undefined
   async function fetchAllPatches() {
     if (inProgressRequest) {
-      await inProgressRequest
+      try {
+        await inProgressRequest
 
-      return true
+        return true
+      } catch {
+        return false
+      }
     }
 
     const rid = useEnvStore().currentProjectId

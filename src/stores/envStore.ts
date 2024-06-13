@@ -1,8 +1,8 @@
 import vscode from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed } from '@vue/reactivity'
-import { memoizedGetCurrentProjectId } from '../helpers'
 import { convertLocaleFromLibcToBcp47 } from '../utils'
+import { getCurrentProjectId } from '../helpers'
 
 setActivePinia(createPinia())
 
@@ -16,7 +16,11 @@ export const useEnvStore = defineStore('envStore', () => {
     )
   })
 
-  const currentProjectId = computed(() => memoizedGetCurrentProjectId())
+  const currentProjectId = computed(getCurrentProjectId)
 
-  return { timeLocaleBcp47, currentProjectId }
+  function refreshCurrentProjectId() {
+    currentProjectId.effect.dirty = true
+  }
+
+  return { timeLocaleBcp47, currentProjectId, refreshCurrentProjectId }
 })

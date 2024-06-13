@@ -214,10 +214,6 @@ export function getCurrentProjectId(): `rad:${string}` | undefined {
 
   return isStrARid(maybeRid) ? maybeRid : undefined
 }
-export const {
-  memoizedFunc: memoizedGetCurrentProjectId,
-  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentProjectIdCache,
-} = memoizeWithDebouncedCacheClear(getCurrentProjectId, 10_000)
 
 /**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved

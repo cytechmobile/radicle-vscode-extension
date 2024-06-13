@@ -1,7 +1,7 @@
 import { RelativePattern, Uri, workspace } from 'vscode'
 import { getRepoRoot, getWorkspaceFolderPaths, setWhenClauseContext } from '../utils'
 import { validateRadCliInstallation } from '../ux'
-import { getExtensionContext, useGitStore } from '../stores'
+import { getExtensionContext, useEnvStore, useGitStore } from '../stores'
 import { getFullDefaultPathToRadBinaryDirectory, isRadInitialized } from '.'
 
 interface FileWatcherConfig {
@@ -29,6 +29,8 @@ function watchFileNotInWorkspace({ glob, handler, immediate }: FileWatcherConfig
 
 // TODO: maninak replace `getRepoRoot()` with gitStore access?
 const notInWorkspaceFileWatchers = [
+  // HACK: this is overzealous triggering for rad init detection. Detecting existence
+  // of `.git/refs/remotes/rad` dir should be better but doesn't seem to trigger when created.
   {
     glob: () =>
       new RelativePattern(
@@ -40,6 +42,7 @@ const notInWorkspaceFileWatchers = [
         'config',
       ),
     handler: () => {
+      useEnvStore().refreshCurrentProjectId() // doesn't _need_ to be immediate but ok for now
       setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
     },
     immediate: true,
@@ -54,7 +57,9 @@ const notInWorkspaceFileWatchers = [
         Uri.file(`${getRepoRoot() ?? getWorkspaceFolderPaths()?.[0] ?? ''}/.git/`),
         'HEAD',
       ),
-    handler: useGitStore().refreshCurentBranch,
+    handler: () => {
+      useGitStore().refreshCurentBranch()
+    },
   },
   // installation with package manager
   (() => {

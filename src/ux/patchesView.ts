@@ -12,12 +12,8 @@ import {
   Uri,
 } from 'vscode'
 import { extTempDir } from '../constants'
-import { usePatchStore } from '../stores'
-import {
-  debouncedClearMemoizedGetCurrentProjectIdCache,
-  fetchFromHttpd,
-  memoizedGetCurrentProjectId,
-} from '../helpers'
+import { useEnvStore, usePatchStore } from '../stores'
+import { fetchFromHttpd } from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -101,9 +97,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
-    // TODO: maninak detect when a file is rad inited properly and only _then_ clear the cache. Then just use useEnvStore().CurrentProjectId here
-    debouncedClearMemoizedGetCurrentProjectIdCache()
-    const rid = memoizedGetCurrentProjectId()
+    const rid = useEnvStore().currentProjectId
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
