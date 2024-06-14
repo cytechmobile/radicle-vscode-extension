@@ -318,17 +318,17 @@
       {
         "view": "getting-started",
         "contents": "No folder is currently opened in your workspace.\nTo use Radicle, you must open a folder containing a Git repository.\n[Open Folder](command:workbench.action.files.openFolder)\n[$(rad-clone)Clone from Radicle](command:radicle.clone)\n",
-        "when": "radicle.isExtensionActivated && workspaceFolderCount == 0"
+        "when": "radicle.isExtensionActivated && radicle.isRadCliInstalled && workspaceFolderCount == 0"
       },
       {
         "view": "getting-started",
         "contents": "The folder currently opened in your workspace is not a Git code repository.\nIn order to use Radicle with it, this folder must first be initialized as a Git code repository.\n[Initialize Repository With Git](command:git.init?%5Btrue%5D)\n[Choose a Different Folder](command:workbench.action.files.openFolder)\nTo learn more about how to use Git and source control in VS Code [read the docs](https://code.visualstudio.com/docs/sourcecontrol/overview).",
-        "when": "radicle.isExtensionActivated && workspaceFolderCount > 0 && gitOpenRepositoryCount == 0"
+        "when": "radicle.isExtensionActivated && radicle.isRadCliInstalled && workspaceFolderCount > 0 && gitOpenRepositoryCount == 0"
       },
       {
         "view": "getting-started",
         "contents": "The Git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle with it, please run `rad init` in your terminal.\nOnce rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.\nRad-initializing your Git repo is a reversible process during which you'll also get to choose whether your repo will be private or public.\nTo learn more [read the Radicle User Guide](https://docs.radicle.xyz/guides/user#git-going-with-repositories).",
-        "when": "radicle.isExtensionActivated && workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
+        "when": "radicle.isExtensionActivated && radicle.isRadCliInstalled && workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
       },
       {
         "view": "cli-commands",

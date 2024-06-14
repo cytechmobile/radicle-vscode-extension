@@ -4,7 +4,7 @@
 
 ### 🚀 Enhancements
 
-- **onboarding:** multiple improvements further polishing the onboarding flow:
+- **onboarding:** multiple improvements further polishing the getting-started flow:
   - better clarify _required_ next steps on each Welcome Views
   - better clarify that the existing init button will perform `git init` (not `rad init`)
   - better inform and reassure the user about `rad init` when offering it to them
@@ -17,6 +17,7 @@
 
 ### 🩹 Fixes
 
+- **onboarding:** don't show simulataneously cli-troubleshooting and getting-started Welcome Views when the rad CLI isn't installed
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 
 ### 🏡 Chores
