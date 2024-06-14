@@ -10,6 +10,9 @@
   - better inform and reassure the user about `rad init` when offering it to them
   - offer a link to the Radicle User Guide for further info
   - misc copy alignments between  Welcome Views
+- **onboarding:** multiple improvements further polishing the CLI installation troubleshooting flow:
+  - for the option with external link to install Radicle, it will now take the user directly to the "get-started" section of the Radicle website
+  - general copy improvements across all branches of the flow
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes

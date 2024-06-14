@@ -15,13 +15,13 @@ import { exec, log, setWhenClauseContext } from '../utils'
  */
 export async function troubleshootRadCliInstallation(): Promise<void> {
   const title = 'Radicle CLI Installation Troubleshooter'
-  const no = "No, I haven't installed Radicle"
-  const yes = 'Yes, I have already installed Radicle'
+  const no = "No, I haven't installed the Radicle CLI"
+  const yes = 'Yes, I have already installed Radicle CLI'
   const cliInstalledSelection = await window.showQuickPick(
     [
       {
         label: no,
-        detail: '$(link-external) Opens the Getting Started guide in your browser',
+        detail: '$(link-external) Opens the Installation Guide in your browser',
       },
       {
         label: yes,
@@ -30,13 +30,14 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
     ] satisfies QuickPickItem[],
     {
       title,
-      placeHolder: 'Have you already installed the Radicle CLI on your machine?',
+      placeHolder:
+        'Have you already installed the Radicle CLI (a.k.a. `rad`) on your machine?',
       ignoreFocusOut: true,
     },
   )
 
   if (cliInstalledSelection?.label === no) {
-    env.openExternal(Uri.parse('https://radicle.xyz/#try'))
+    env.openExternal(Uri.parse('https://radicle.xyz/#get-started'))
 
     return
   }
@@ -49,7 +50,8 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
   const inputBox = '$(edit) Enter path in input box'
   const pathSetMethodSelection = await window.showQuickPick([filePicker, inputBox], {
     title,
-    placeHolder: 'How do you prefer to set the path to the Radicle CLI binary?',
+    placeHolder:
+      'How do you prefer telling me the location of the Radicle CLI binary on your machine?',
     ignoreFocusOut: true,
   })
 
