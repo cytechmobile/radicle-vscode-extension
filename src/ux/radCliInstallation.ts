@@ -1,5 +1,6 @@
 import { type QuickPickItem, Uri, env, window } from 'vscode'
 import {
+  defaultRadBinaryLocation,
   getConfig,
   getRadCliPath,
   getRadCliRef,
@@ -74,7 +75,7 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
         title,
         prompt: 'Please enter the path to the Radicle CLI binary stored on your machine.',
         value: getConfig('radicle.advanced.pathToRadBinary'),
-        placeHolder: 'For example: /usr/bin/rad',
+        placeHolder: `For example: ${defaultRadBinaryLocation}`,
         validateInput: (input) => {
           const isPathToRadCli = Boolean(
             exec(`${input.trim()} --version`, { shouldLog: true }),

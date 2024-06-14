@@ -4,14 +4,15 @@
 
 ### 🚀 Enhancements
 
-- **onboarding:** multiple improvements further polishing the getting-started flow:
+- **onboarding:** multiple improvements on the getting-started flow:
   - better clarify _required_ next steps on each Welcome Views
   - better clarify that the existing init button will perform `git init` (not `rad init`)
   - better inform and reassure the user about `rad init` when offering it to them
   - offer a link to the Radicle User Guide for further info
-  - misc copy alignments between  Welcome Views
-- **onboarding:** multiple improvements further polishing the CLI installation troubleshooting flow:
+  - misc copy alignments between Welcome Views
+- **onboarding:** multiple improvements on the cli-troubleshooting flow:
   - for the option with external link to install Radicle, it will now take the user directly to the "get-started" section of the Radicle website
+  - suggest the modern `~/.radicle/bin/rad` vs the legacy ~~~/usr/bin/rad~~~ as a path to the CLI binary in the placeholder of the input for a custom path to CLI
   - general copy improvements across all branches of the flow
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
