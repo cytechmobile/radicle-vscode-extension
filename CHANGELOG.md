@@ -4,6 +4,12 @@
 
 ### 🚀 Enhancements
 
+- **onboarding:** multiple improvements further polishing the onboarding flow:
+  - better clarify _required_ next steps on each Welcome Views
+  - better clarify that the existing init button will perform `git init` (not `rad init`)
+  - better inform and reassure the user about `rad init` when offering it to them
+  - offer a link to the Radicle User Guide for further info
+  - misc copy alignments between  Welcome Views
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes
