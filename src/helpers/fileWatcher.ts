@@ -2,7 +2,7 @@ import { RelativePattern, Uri, workspace } from 'vscode'
 import { getRepoRoot, getWorkspaceFolderPaths, setWhenClauseContext } from '../utils'
 import { validateRadCliInstallation } from '../ux'
 import { getExtensionContext, useEnvStore, useGitStore } from '../stores'
-import { getFullDefaultPathToRadBinaryDirectory, isRadInitialized } from '.'
+import { getConfig, getFullDefaultPathToRadBinaryDirectory, isRadInitialized } from '.'
 
 interface FileWatcherConfig {
   glob:
@@ -27,6 +27,7 @@ function watchFileNotInWorkspace({ glob, handler, immediate }: FileWatcherConfig
   getExtensionContext().subscriptions.push(watcher)
 }
 
+// TODO: maninak call setWhenClauseContext inside the stores as an effect??
 // TODO: maninak replace `getRepoRoot()` with gitStore access?
 const notInWorkspaceFileWatchers = [
   {
@@ -95,6 +96,24 @@ const notInWorkspaceFileWatchers = [
     if (pathToRadBinaryDirWithTrailingSlash) {
       return {
         glob: new RelativePattern(Uri.file(pathToRadBinaryDirWithTrailingSlash), 'rad'),
+        handler: () => {
+          validateRadCliInstallation()
+          setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
+        },
+      }
+    }
+
+    return undefined
+  })(),
+  // installation into some user-selected directory
+  (() => {
+    // TODO: maninak re-register all file watchers when this config changes value
+    const customPathToRadBinaryDirWithTrailingSlash = getConfig(
+      'radicle.advanced.pathToRadBinary',
+    )?.replace(/rad$/, '')
+    if (customPathToRadBinaryDirWithTrailingSlash) {
+      return {
+        glob: new RelativePattern(Uri.file(customPathToRadBinaryDirWithTrailingSlash), 'rad'),
         handler: () => {
           validateRadCliInstallation()
           setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
