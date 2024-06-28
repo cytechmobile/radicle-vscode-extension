@@ -59,29 +59,6 @@ const notInWorkspaceFileWatchers = [
       useGitStore().refreshCurentBranch()
     },
   },
-  // installation with package manager
-  (() => {
-    switch (process.platform) {
-      case 'linux':
-        return {
-          glob: new RelativePattern(Uri.file('/usr/bin/'), 'rad'),
-          handler: () => {
-            validateRadCliInstallation()
-            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
-          },
-        }
-      case 'darwin':
-        return {
-          glob: new RelativePattern(Uri.file('~/.cargo/bin/'), 'rad'),
-          handler: () => {
-            validateRadCliInstallation()
-            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
-          },
-        }
-      default:
-        return undefined
-    }
-  })(),
   // installation with script from https://radicle.xyz/install
   (() => {
     const fullDefaultPathToRadBinaryDirectory = getFullDefaultPathToRadBinaryDirectory()
@@ -91,13 +68,6 @@ const notInWorkspaceFileWatchers = [
 
     switch (process.platform) {
       case 'linux':
-        return {
-          glob: new RelativePattern(Uri.file(fullDefaultPathToRadBinaryDirectory), 'rad'),
-          handler: () => {
-            validateRadCliInstallation()
-            setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
-          },
-        }
       case 'darwin':
         return {
           glob: new RelativePattern(Uri.file(fullDefaultPathToRadBinaryDirectory), 'rad'),
@@ -109,6 +79,30 @@ const notInWorkspaceFileWatchers = [
       default:
         return undefined
     }
+  })(),
+  // installation with package manager
+  (() => {
+    let pathToRadBinaryDirWithTrailingSlash: `${string}/` | undefined
+    switch (process.platform) {
+      case 'linux':
+        pathToRadBinaryDirWithTrailingSlash = '/usr/bin/'
+        break
+      case 'darwin':
+        pathToRadBinaryDirWithTrailingSlash = '~/.cargo/bin/'
+        break
+    }
+
+    if (pathToRadBinaryDirWithTrailingSlash) {
+      return {
+        glob: new RelativePattern(Uri.file(pathToRadBinaryDirWithTrailingSlash), 'rad'),
+        handler: () => {
+          validateRadCliInstallation()
+          setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
+        },
+      }
+    }
+
+    return undefined
   })(),
 ].filter(Boolean) satisfies FileWatcherConfig[]
 
