@@ -1,5 +1,5 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext, usePatchStore, webviewPatchDetailId } from '../stores'
+import { getExtensionContext, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
@@ -12,7 +12,7 @@ import {
   troubleshootRadCliInstallation,
 } from '../ux'
 import type { AugmentedPatch, Patch } from '../types'
-import { createOrShowWebview, getRadCliRef } from '.'
+import { createOrReuseWebviewPanel, getRadCliRef } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -150,6 +150,10 @@ export function registerAllCommands(): void {
     },
   )
   registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
-    createOrShowWebview(getExtensionContext(), webviewPatchDetailId, patch)
+    createOrReuseWebviewPanel({
+      webviewId: 'webview-patch-detail',
+      data: patch,
+      panelTitle: patch.title,
+    })
   })
 }

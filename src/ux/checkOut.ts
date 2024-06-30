@@ -1,5 +1,5 @@
 import { window } from 'vscode'
-import { useEnvStore } from 'src/stores'
+import { useEnvStore } from '../stores'
 import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import type { Patch } from '../types'
 import { exec, log, shortenHash, showLog } from '../utils'

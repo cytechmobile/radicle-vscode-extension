@@ -3,10 +3,10 @@ import { defineStore } from 'pinia'
 import { computed, ref, watchEffect } from 'vue'
 import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
-import type { Patch, PatchDetailInjectedState } from '../../../types'
+import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
-const vscode = getVscodeRef<PatchDetailInjectedState>()
+const vscode = getVscodeRef<PatchDetailWebviewInjectedState>()
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
   const state = ref(vscode.getState() ?? window.injectedWebviewState)
@@ -82,6 +82,6 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
 declare global {
   interface Window {
-    injectedWebviewState: PatchDetailInjectedState
+    injectedWebviewState: PatchDetailWebviewInjectedState
   }
 }

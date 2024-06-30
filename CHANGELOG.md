@@ -14,6 +14,10 @@
 - **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 
+### 💅 Refactors
+
+- **webview:** restructure architecture for better type-safety, easier maintenance and make the logic independent of the specific single webview available for now
+
 ### 🏡 Chores
 
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
