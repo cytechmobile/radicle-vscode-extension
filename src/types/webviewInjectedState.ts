@@ -1,9 +1,8 @@
-import type { PatchDetailWebviewId } from '../stores'
 import type { AugmentedPatch } from '../types'
 import type { Patch } from './httpd'
 
 export interface PatchDetailWebviewInjectedState {
-  kind: PatchDetailWebviewId
+  kind: 'webview-patch-detail' // should be `PatchDetailWebviewId` when refactoring to extract code shared by extension and webview to a `lib` root dir happens
   id: Patch['id']
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
