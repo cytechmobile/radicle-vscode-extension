@@ -1,4 +1,4 @@
-import { Uri, ViewColumn, type Webview, window } from 'vscode'
+import { Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
 import {
   type PatchDetailWebviewId,
   getExtensionContext,
@@ -64,7 +64,7 @@ export function createOrReuseWebviewPanel({
 }
 
 /**
- * Restores the webview across restarts using persisted state.
+ * Restores the webview across restarts using the persisted state, if available.
  *
  * @see https://code.visualstudio.com/api/extension-guides/webview#serialization
  */
@@ -77,9 +77,7 @@ export function registerAllWebviewRestorators() {
         state: ReturnType<typeof getStateForWebviewPatchDetail>,
         // eslint-disable-next-line @typescript-eslint/require-await
       ) => {
-        // TODO: maninak init webview with listeners and all
-        useWebviewStore().trackPanel(panel)
-        panel.webview.html = getWebviewHtml(panel.webview, state)
+        initializePanel(panel, 'webview-patch-detail', state)
       },
     }),
   )
@@ -112,7 +110,6 @@ function createAndShowWebviewPanel(
   column?: Parameters<typeof window.createWebviewPanel>['2'],
   state?: object,
 ) {
-  const webviewStore = useWebviewStore()
   const panel = window.createWebviewPanel(
     webviewId,
     getTruncatedTitle(panelTitle),
@@ -127,6 +124,22 @@ function createAndShowWebviewPanel(
       enableFindWidget: true,
     },
   )
+
+  initializePanel(panel, webviewId, state)
+}
+
+function getTruncatedTitle(title: string) {
+  const truncatedTitle = truncateKeepWords(title, 30)
+
+  return `${truncatedTitle}${truncatedTitle.length < title.length ? ' …' : ''}`
+}
+
+function initializePanel(
+  panel: WebviewPanel,
+  webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
+  state?: object,
+) {
+  const webviewStore = useWebviewStore()
   webviewStore.trackPanel(panel)
 
   panel.onDidDispose(
@@ -154,12 +167,6 @@ function createAndShowWebviewPanel(
   )
 
   panel.webview.html = getWebviewHtml(panel.webview, state)
-}
-
-function getTruncatedTitle(title: string) {
-  const truncatedTitle = truncateKeepWords(title, 30)
-
-  return `${truncatedTitle}${truncatedTitle.length < title.length ? ' …' : ''}`
 }
 
 async function handleMessageFromWebviewPatchDetail(
