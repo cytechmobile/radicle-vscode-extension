@@ -1,6 +1,8 @@
 import { Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
 import {
   type PatchDetailWebviewId,
+  type WebviewId,
+  allWebviewIds,
   getExtensionContext,
   useEnvStore,
   usePatchStore,
@@ -39,18 +41,9 @@ export function createOrReuseWebviewPanel({
   panelTitle: string
 }) {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
-
   const webviewStore = useWebviewStore()
   const foundPanel = webviewStore.findPanel(webviewId)
-
-  let stateForWebview
-  switch (webviewId) {
-    case 'webview-patch-detail':
-      stateForWebview = getStateForWebviewPatchDetail(data)
-      break
-    default:
-      assertUnreachable(webviewId)
-  }
+  const stateForWebview = getStateForWebview(webviewId, data)
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
     notifyWebview({ command: 'updateState', payload: stateForWebview }, foundPanel.webview)
@@ -69,39 +62,64 @@ export function createOrReuseWebviewPanel({
  * @see https://code.visualstudio.com/api/extension-guides/webview#serialization
  */
 export function registerAllWebviewRestorators() {
-  getExtensionContext().subscriptions.push(
-    window.registerWebviewPanelSerializer('webview-patch-detail', {
-      // eslint-disable-next-line require-await
-      deserializeWebviewPanel: async (
-        panel,
-        state: ReturnType<typeof getStateForWebviewPatchDetail>,
-        // eslint-disable-next-line @typescript-eslint/require-await
-      ) => {
-        initializePanel(panel, 'webview-patch-detail', state)
-      },
-    }),
-  )
+  for (const id of allWebviewIds) {
+    switch (id) {
+      case 'webview-patch-detail':
+        getExtensionContext().subscriptions.push(
+          window.registerWebviewPanelSerializer(id, {
+            // eslint-disable-next-line require-await
+            deserializeWebviewPanel: async (
+              panel,
+              state: ReturnType<typeof getStateForWebview>,
+              // eslint-disable-next-line @typescript-eslint/require-await
+            ) => {
+              initializePanel(panel, id, state)
+            },
+          }),
+        )
+        break
+      default:
+        assertUnreachable(id)
+    }
+  }
 }
 
-function getStateForWebviewPatchDetail(
-  patch: AugmentedPatch,
-): PatchDetailWebviewInjectedState {
-  const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
+function getStateForWebview(
+  webviewId: PatchDetailWebviewId,
+  data: AugmentedPatch,
+): PatchDetailWebviewInjectedState
+function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
+  let stateForWebview
 
-  const identity = getRadicleIdentity('DID')
-  const localIdentity = identity ? { id: identity.DID, alias: identity.alias } : undefined
+  switch (webviewId) {
+    case 'webview-patch-detail':
+      {
+        const patch = data as AugmentedPatch
+        const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
 
-  const state: PatchDetailWebviewInjectedState = {
-    kind: 'webview-patch-detail',
-    id: patch.id,
-    state: {
-      patch: { ...patch, isCheckedOut },
-      localIdentity,
-      timeLocale: useEnvStore().timeLocaleBcp47,
-    },
+        const identity = getRadicleIdentity('DID')
+        const localIdentity = identity
+          ? { id: identity.DID, alias: identity.alias }
+          : undefined
+
+        const state: PatchDetailWebviewInjectedState = {
+          kind: 'webview-patch-detail',
+          id: patch.id,
+          state: {
+            patch: { ...patch, isCheckedOut },
+            localIdentity,
+            timeLocale: useEnvStore().timeLocaleBcp47,
+          },
+        }
+
+        stateForWebview = state
+      }
+      break
+    default:
+      assertUnreachable(webviewId)
   }
 
-  return state
+  return stateForWebview
 }
 
 function createAndShowWebviewPanel(

@@ -7,8 +7,13 @@ setActivePinia(createPinia())
 // TODO: maninak check why webviews are not reused
 // TODO: maninak on shift/alt + click on item button to open webview, open always in newtab
 
-export type PatchDetailWebviewId = 'webview-patch-detail'
-export type WebviewId = 'webview-patch-detail' // unite more here as webviews get build
+export const allWebviewIds = ['webview-patch-detail'] as const
+export type PatchDetailWebviewId = (typeof allWebviewIds)[0]
+/**
+ * A collection of all our custom panel types under a (hopefully) a better name.
+ * @see WebviewPanel.viewType
+ */
+export type WebviewId = (typeof allWebviewIds)[number]
 
 export const useWebviewStore = defineStore('webviewStore', () => {
   const panels = reactive<Map<WebviewId, WebviewPanel>>(new Map())

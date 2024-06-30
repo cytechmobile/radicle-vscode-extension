@@ -97,8 +97,7 @@ export async function fetchFromHttpd(
 export async function fetchFromHttpd(
   path: '/',
   options?: FetchOptions<'json'> & { method?: 'GET' },
-): FetchFromHttpdReturn<HttpdRoot>
-
+): FetchFromHttpdReturn<HttpdRoot> // eslint-disable-next-line padding-line-between-statements
 export async function fetchFromHttpd<Data extends object>(
   path: string,
   options?: FetchOptions<'json'>,
