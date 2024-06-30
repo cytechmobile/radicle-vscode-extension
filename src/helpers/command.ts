@@ -1,5 +1,5 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext, usePatchStore } from '../stores'
+import { getExtensionContext, usePatchStore, webviewPatchDetailId } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
@@ -150,6 +150,6 @@ export function registerAllCommands(): void {
     },
   )
   registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
-    createOrShowWebview(getExtensionContext(), patch)
+    createOrShowWebview(getExtensionContext(), webviewPatchDetailId, patch)
   })
 }

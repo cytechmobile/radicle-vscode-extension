@@ -29,16 +29,16 @@ export const useWebviewStore = defineStore('webviewStore', () => {
     return panels.get(id)
   }
 
-  function isPanelDisposed(panel: WebviewPanel) {
-    try {
-      // eslint-disable-next-line no-unused-expressions
-      panel?.webview // getter will throw if panel is disposed
-
-      return false
-    } catch {
-      return true
-    }
-  }
-
   return { patchDetailPanel, trackPanel, untrackPanel, findPanel, isPanelDisposed }
 })
+
+function isPanelDisposed(panel: WebviewPanel) {
+  try {
+    // eslint-disable-next-line no-unused-expressions
+    panel.webview // getter will throw if panel is disposed
+
+    return false
+  } catch {
+    return true
+  }
+}
