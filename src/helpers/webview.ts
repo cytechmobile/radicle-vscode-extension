@@ -3,7 +3,6 @@ import {
   type PatchDetailWebviewId,
   type WebviewId,
   allWebviewIds,
-  getExtensionContext,
   useEnvStore,
   usePatchStore,
   useWebviewStore,
@@ -65,7 +64,7 @@ export function registerAllWebviewRestorators() {
   for (const id of allWebviewIds) {
     switch (id) {
       case 'webview-patch-detail':
-        getExtensionContext().subscriptions.push(
+        useEnvStore().extCtx.subscriptions.push(
           window.registerWebviewPanelSerializer(id, {
             // eslint-disable-next-line require-await
             deserializeWebviewPanel: async (
@@ -139,9 +138,9 @@ function createAndShowWebviewPanel(
     {
       enableScripts: true,
       localResourceRoots: [
-        Uri.joinPath(getExtensionContext().extensionUri, 'dist'),
-        Uri.joinPath(getExtensionContext().extensionUri, 'assets'),
-        Uri.joinPath(getExtensionContext().extensionUri, 'src', 'webviews', 'dist'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'dist'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'assets'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'src', 'webviews', 'dist'),
       ],
       enableFindWidget: true,
     },
@@ -167,7 +166,7 @@ function initializePanel(
   panel.onDidDispose(
     () => webviewStore.untrackPanel(panel),
     undefined,
-    getExtensionContext().subscriptions,
+    useEnvStore().extCtx.subscriptions,
   )
 
   let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
@@ -185,7 +184,7 @@ function initializePanel(
   panel.webview.onDidReceiveMessage(
     handleMessageFromWebview,
     undefined,
-    getExtensionContext().subscriptions,
+    useEnvStore().extCtx.subscriptions,
   )
 
   panel.webview.html = getWebviewHtml(panel.webview, stateForWebview)
@@ -225,14 +224,14 @@ async function handleMessageFromWebviewPatchDetail(
 }
 
 function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
-  const stylesUri = getUri(webview, getExtensionContext().extensionUri, [
+  const stylesUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
     'src',
     'webviews',
     'dist',
     'assets',
     'index.css',
   ])
-  const scriptUri = getUri(webview, getExtensionContext().extensionUri, [
+  const scriptUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
     'src',
     'webviews',
     'dist',

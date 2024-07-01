@@ -2,7 +2,7 @@ import { access, constants } from 'node:fs'
 import { RelativePattern, Uri, workspace } from 'vscode'
 import { getRepoRoot, getWorkspaceFolderPaths, setWhenClauseContext } from '../utils'
 import { validateRadCliInstallation } from '../ux'
-import { getExtensionContext, useEnvStore, useGitStore } from '../stores'
+import { useEnvStore, useGitStore } from '../stores'
 import {
   getAbsolutePathToDefaultRadBinaryDirectory,
   getConfig,
@@ -149,7 +149,7 @@ function watchFileNotInWorkspace({ glob, handler, immediate }: FileWatcherConfig
   watcher.onDidChange(handler)
   watcher.onDidDelete(handler)
 
-  getExtensionContext().subscriptions.push(watcher)
+  useEnvStore().extCtx.subscriptions.push(watcher)
 }
 
 function onRadCliInstallationChanged() {

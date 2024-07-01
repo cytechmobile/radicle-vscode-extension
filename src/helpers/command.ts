@@ -1,5 +1,5 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext, usePatchStore } from '../stores'
+import { useEnvStore, usePatchStore } from '../stores'
 import { exec, log, showLog } from '../utils'
 import {
   type FilechangeNode,
@@ -45,7 +45,7 @@ function registerVsCodeCmd(
   vscodeCmdId: RadCliCmdMappedToVscodeCmdId['vscodeCmdId'],
   action: Parameters<typeof commands.registerCommand>['1'],
 ): void {
-  getExtensionContext().subscriptions.push(commands.registerCommand(vscodeCmdId, action))
+  useEnvStore().extCtx.subscriptions.push(commands.registerCommand(vscodeCmdId, action))
 }
 
 function registerSimpleRadCliCmdsAsVsCodeCmds(
@@ -54,7 +54,7 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
   const button = 'Show Output'
 
   cmdConfigs.forEach((cmdConfig) =>
-    getExtensionContext().subscriptions.push(
+    useEnvStore().extCtx.subscriptions.push(
       commands.registerCommand(cmdConfig.vscodeCmdId, async () => {
         const didAuth = await launchAuthenticationFlow()
         const didCmdSucceed =
