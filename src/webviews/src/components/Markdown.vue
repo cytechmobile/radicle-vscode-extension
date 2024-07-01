@@ -34,8 +34,41 @@ defineProps<{ source: string }>()
     @apply max-w-max;
   }
 
+  ol {
+    @apply ps-[26px];
+
+    ul {
+      list-style-type: square;
+    }
+  }
+
+  ul {
+    @apply ps-[18px];
+    list-style-type: disc;
+
+    li {
+      @apply pl-2;
+    }
+  }
+
+  ul ul {
+    list-style-type: circle;
+  }
+
+  ul ul ul {
+    list-style-type: square;
+  }
+
+  ul ul ul ul {
+    list-style-type: disc;
+  }
+
+  ul ul ul ul ul {
+    list-style-type: circle;
+  }
+
   ul.contains-task-list {
-    @apply list-none -ml-[14px];
+    @apply list-none -ml-[30px];
 
     .task-list-item-checkbox {
       @apply align-middle;

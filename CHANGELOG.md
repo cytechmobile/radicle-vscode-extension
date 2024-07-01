@@ -10,6 +10,7 @@
 ### 🩹 Fixes
 
 - **patch-list:** show check-out state per patch item always reflecting git state. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was done.
+- **markdown:** polish and homogenize styles of (un-)ordered/task lists
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as with just opened webviews
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
