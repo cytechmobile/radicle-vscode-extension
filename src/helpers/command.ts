@@ -152,7 +152,7 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
     createOrReuseWebviewPanel({
       webviewId: 'webview-patch-detail',
-      data: patch,
+      data: patch.id,
       panelTitle: patch.title,
     })
   })

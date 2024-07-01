@@ -10,7 +10,7 @@ import {
 } from '../stores'
 import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
 import { type notifyExtension, notifyWebview } from '../utils/webview-messaging'
-import type { AugmentedPatch, PatchDetailWebviewInjectedState } from '../types'
+import type { Patch, PatchDetailWebviewInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
 import { getRadicleIdentity, revealPatch } from '.'
 
@@ -34,7 +34,7 @@ export function createOrReuseWebviewPanel({
   /**
    * The data to be used for the UI rendered on the webview.
    */
-  data: AugmentedPatch
+  data: Patch['id']
   /**
    * The title to be used for the webview panel's tab.
    */
@@ -84,17 +84,21 @@ export function registerAllWebviewRestorators() {
   }
 }
 
-function getStateForWebview(
+export function getStateForWebview(
   webviewId: PatchDetailWebviewId,
-  data: AugmentedPatch,
-): PatchDetailWebviewInjectedState
-function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
+  patchId: Patch['id'],
+): PatchDetailWebviewInjectedState // eslint-disable-next-line padding-line-between-statements
+export function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
   let stateForWebview
 
   switch (webviewId) {
     case 'webview-patch-detail':
       {
-        const patch = data as AugmentedPatch
+        const patch = usePatchStore().findPatchById(data as Patch['id'])
+        if (!patch) {
+          return undefined
+        }
+
         const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
 
         const identity = getRadicleIdentity('DID')
@@ -103,7 +107,7 @@ function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
           : undefined
 
         const state: PatchDetailWebviewInjectedState = {
-          kind: 'webview-patch-detail',
+          kind: webviewId,
           id: patch.id,
           state: {
             patch: { ...patch, isCheckedOut },

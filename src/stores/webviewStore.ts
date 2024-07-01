@@ -2,10 +2,9 @@ import type { WebviewPanel } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ReactiveEffectRunner, effect, reactive } from '@vue/reactivity'
 import { assertUnreachable } from 'src/utils'
-import type { Patch, PatchDetailWebviewInjectedState } from '../types'
-import { getRadicleIdentity } from '../helpers'
+import type { Patch } from '../types'
+import { getStateForWebview } from '../helpers'
 import { notifyWebview } from '../utils/webview-messaging'
-import { useEnvStore, usePatchStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -35,29 +34,13 @@ export const useWebviewStore = defineStore('webviewStore', () => {
       case 'webview-patch-detail':
         {
           const effectRunner = effect(() => {
-            const patch = usePatchStore().findPatchById(data as Patch['id'])
-            if (!patch) {
-              return
-            }
-
-            const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
-
-            const identity = getRadicleIdentity('DID')
-            const localIdentity = identity
-              ? { id: identity.DID, alias: identity.alias }
-              : undefined
-
-            const stateForWebview: PatchDetailWebviewInjectedState = {
-              kind: 'webview-patch-detail',
-              id: patch.id,
-              state: {
-                patch: { ...patch, isCheckedOut },
-                localIdentity,
-                timeLocale: useEnvStore().timeLocaleBcp47,
+            notifyWebview(
+              {
+                command: 'updateState',
+                payload: getStateForWebview(webviewId, data as Patch['id']),
               },
-            }
-
-            notifyWebview({ command: 'updateState', payload: stateForWebview }, panel.webview)
+              panel.webview,
+            )
           })
 
           panels.set(panel.viewType as WebviewId, { panel, effectRunner })
