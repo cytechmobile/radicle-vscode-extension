@@ -12,12 +12,8 @@ import {
   Uri,
 } from 'vscode'
 import { extTempDir } from '../constants'
-import { usePatchStore } from '../stores'
-import {
-  debouncedClearMemoizedGetCurrentProjectIdCache,
-  fetchFromHttpd,
-  memoizedGetCurrentProjectId,
-} from '../helpers'
+import { useEnvStore, usePatchStore } from '../stores'
+import { fetchFromHttpd } from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -101,8 +97,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
-    debouncedClearMemoizedGetCurrentProjectIdCache()
-    const rid = memoizedGetCurrentProjectId()
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.

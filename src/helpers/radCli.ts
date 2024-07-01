@@ -97,7 +97,7 @@ export function isRadCliInstalled(): boolean {
  * @returns `true` if the workspace is a rad-initialized repo, otherwise `false`.
  */
 export function isRadInitialized(): boolean {
-  const isInitialized = Boolean(getCurrentProjectId())
+  const isInitialized = Boolean(getCurrentRepoId())
 
   return isInitialized
 }
@@ -200,12 +200,12 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
 }
 
 /**
- * Resolves the Radicle project id (RID) of the currently open workspace
+ * Resolves the Radicle repository id (RID) of the currently open workspace
  * directory.
  *
  * @returns The RID if resolved, otherwise `undefined`.
  */
-export function getCurrentProjectId(): `rad:${string}` | undefined {
+export function getCurrentRepoId(): `rad:${string}` | undefined {
   const maybeRid = exec(`${getRadCliRef()} inspect --rid`, { cwd: '$workspaceDir' })
 
   function isStrARid(str: string | undefined): str is `rad:${string}` {
@@ -214,10 +214,6 @@ export function getCurrentProjectId(): `rad:${string}` | undefined {
 
   return isStrARid(maybeRid) ? maybeRid : undefined
 }
-export const {
-  memoizedFunc: memoizedGetCurrentProjectId,
-  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetCurrentProjectIdCache,
-} = memoizeWithDebouncedCacheClear(getCurrentProjectId, 10_000)
 
 /**
  * Resolves the cryptographic public key of the Radicle identity found in the resolved

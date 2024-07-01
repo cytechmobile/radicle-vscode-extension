@@ -1,5 +1,5 @@
 import type { Webview } from 'vscode'
-import type { AugmentedPatch, Patch, PatchDetailInjectedState } from '../types'
+import type { AugmentedPatch, Patch, PatchDetailWebviewInjectedState } from '../types'
 import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
 
 interface Message<Command extends string, Payload extends object | undefined = undefined> {
@@ -8,7 +8,7 @@ interface Message<Command extends string, Payload extends object | undefined = u
 }
 
 type MessageToWebview =
-  | Message<'updateState', PatchDetailInjectedState>
+  | Message<'updateState', PatchDetailWebviewInjectedState>
   | Message<'resetCount'>
 
 type MessageToExtension =

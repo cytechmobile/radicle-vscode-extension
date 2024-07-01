@@ -1,17 +1,17 @@
 import { window } from 'vscode'
-import { fetchFromHttpd, getRadCliRef, memoizedGetCurrentProjectId } from '../helpers'
+import { useEnvStore } from '../stores'
+import { fetchFromHttpd, getRadCliRef } from '../helpers'
 import type { Patch } from '../types'
 import { exec, log, shortenHash, showLog } from '../utils'
 import { notifyUserAboutFetchError } from '.'
 
 /**
- * Checks out the default Git branch of the Radicle project currently open in the workspace.
+ * Checks out the default Git branch of the Radicle repo currently open in the workspace.
  *
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export async function checkOutDefaultBranch(): Promise<boolean> {
-  const rid = memoizedGetCurrentProjectId()
-
+  const rid = useEnvStore().currentRepoId
   if (!rid) {
     log('Failed resolving RID', 'error')
 
@@ -19,14 +19,14 @@ export async function checkOutDefaultBranch(): Promise<boolean> {
   }
 
   // TODO: maninak move into gitStore?
-  const { data: project, error } = await fetchFromHttpd(`/projects/${rid}`)
+  const { data: repo, error } = await fetchFromHttpd(`/projects/${rid}`)
   if (error) {
     notifyUserAboutFetchError(error)
 
     return false
   }
 
-  const defaultBranch = project.defaultBranch
+  const defaultBranch = repo.defaultBranch
   const didCheckoutDefaultBranch =
     exec(`git checkout ${defaultBranch}`, { cwd: '$workspaceDir', shouldLog: true }) !==
     undefined

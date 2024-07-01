@@ -12,8 +12,8 @@
   type Letter: 'a' | 'b' | 'c'
 
   switch (myLetter: Letter) {
-    case: 'a': doSomething()
-    case: 'b': doSomethingElse()
+    case: 'a': doSomething(); break
+    case: 'b': doSomethingElse(); break
     default: assertUnreachable(myLetter)
     // Error: Argument of type 'string' is not assignable to parameter of type 'never'.
   }

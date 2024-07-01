@@ -1,28 +1,18 @@
+import { Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
 import {
-  type ExtensionContext,
-  Uri,
-  ViewColumn,
-  type Webview,
-  type WebviewPanel,
-  window,
-} from 'vscode'
-import {
-  getExtensionContext,
+  type PatchDetailWebviewId,
+  type WebviewId,
+  allWebviewIds,
   useEnvStore,
   usePatchStore,
   useWebviewStore,
-  webviewPatchDetailId,
 } from '../stores'
 import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
-import {
-  type notifyExtension,
-  notifyWebview as notifyWebviewBase,
-} from '../utils/webview-messaging'
-import type { AugmentedPatch, PatchDetailInjectedState } from '../types'
+import { type notifyExtension, notifyWebview } from '../utils/webview-messaging'
+import type { Patch, PatchDetailWebviewInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
 import { getRadicleIdentity, revealPatch } from '.'
 
-// TODO: make the solution in file more generic, not only useful to a specific webview
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
 /**
@@ -30,115 +20,218 @@ import { getRadicleIdentity, revealPatch } from '.'
  *
  * If the webview is already open and visible in another column it will be moved to the active
  * column without getting re-created.
- *
- * @param [title] - The title shown on the webview panel's tab
  */
-export function createOrShowWebview(ctx: ExtensionContext, patch: AugmentedPatch) {
+export function createOrReuseWebviewPanel({
+  webviewId,
+  data,
+  panelTitle,
+}: /* unite here alternative `webviewId` & `data` pairs as new webviews get built */ {
+  /**
+   * The identifier specifying the kind of the panel to be (re-)used.
+   */
+  webviewId: PatchDetailWebviewId
+  /**
+   * The data to be used for the UI rendered on the webview.
+   */
+  data: Patch['id']
+  /**
+   * The title to be used for the webview panel's tab.
+   */
+  panelTitle: string
+}) {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
-
   const webviewStore = useWebviewStore()
-  const foundPanel = webviewStore.findPanel(webviewPatchDetailId)
-
-  // If panel already exists and is usable then re-use it
+  const foundPanel = webviewStore.findPanel(webviewId)
+  const stateForWebview = getStateForWebview(webviewId, data)
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
-    notifyWebview({ command: 'updateState', payload: getStateForWebview(patch) })
-    foundPanel.title = getPanelTitle(patch)
-
+    notifyWebview({ command: 'updateState', payload: stateForWebview }, foundPanel.webview)
+    foundPanel.title = panelTitle
     foundPanel.reveal(column)
 
     return
   }
 
-  // Otherwise create new panel from scratch
+  createAndShowWebviewPanel(webviewId, panelTitle, stateForWebview, column)
+}
 
-  const newPanel = window.createWebviewPanel(
-    webviewPatchDetailId,
-    getPanelTitle(patch),
-    column || ViewColumn.One,
+/**
+ * Restores the webview across restarts using the persisted state, if available.
+ *
+ * @see https://code.visualstudio.com/api/extension-guides/webview#serialization
+ */
+export function registerAllWebviewRestorators() {
+  for (const id of allWebviewIds) {
+    switch (id) {
+      case 'webview-patch-detail':
+        useEnvStore().extCtx.subscriptions.push(
+          window.registerWebviewPanelSerializer(id, {
+            // eslint-disable-next-line require-await
+            deserializeWebviewPanel: async (
+              panel,
+              state?: ReturnType<typeof getStateForWebview>,
+              // eslint-disable-next-line @typescript-eslint/require-await
+            ) => {
+              state ? initializePanel(panel, id, state) : panel.dispose()
+            },
+          }),
+        )
+        break
+      default:
+        assertUnreachable(id)
+    }
+  }
+}
+
+export function getStateForWebview(
+  webviewId: PatchDetailWebviewId,
+  patchId: Patch['id'],
+): PatchDetailWebviewInjectedState // eslint-disable-next-line padding-line-between-statements
+export function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
+  let stateForWebview
+
+  switch (webviewId) {
+    case 'webview-patch-detail':
+      {
+        const patch = usePatchStore().findPatchById(data as Patch['id'])
+        if (!patch) {
+          return undefined
+        }
+
+        const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
+
+        const identity = getRadicleIdentity('DID')
+        const localIdentity = identity
+          ? { id: identity.DID, alias: identity.alias }
+          : undefined
+
+        const state: PatchDetailWebviewInjectedState = {
+          kind: webviewId,
+          id: patch.id,
+          state: {
+            patch: { ...patch, isCheckedOut },
+            localIdentity,
+            timeLocale: useEnvStore().timeLocaleBcp47,
+          },
+        }
+
+        stateForWebview = state
+      }
+      break
+    default:
+      assertUnreachable(webviewId)
+  }
+
+  return stateForWebview
+}
+
+function createAndShowWebviewPanel(
+  webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
+  panelTitle: string,
+  stateForWebview: ReturnType<typeof getStateForWebview>,
+  column?: Parameters<typeof window.createWebviewPanel>['2'],
+) {
+  const panel = window.createWebviewPanel(
+    webviewId,
+    getTruncatedTitle(panelTitle),
+    column ?? ViewColumn.One,
     {
       enableScripts: true,
       localResourceRoots: [
-        Uri.joinPath(getExtensionContext().extensionUri, 'dist'),
-        Uri.joinPath(getExtensionContext().extensionUri, 'assets'),
-        Uri.joinPath(getExtensionContext().extensionUri, 'src', 'webviews', 'dist'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'dist'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'assets'),
+        Uri.joinPath(useEnvStore().extCtx.extensionUri, 'src', 'webviews', 'dist'),
       ],
       enableFindWidget: true,
     },
   )
-  webviewStore.trackPanel(newPanel)
 
-  newPanel.webview.html = getWebviewHtml(newPanel.webview, getStateForWebview(patch))
+  initializePanel(panel, webviewId, stateForWebview)
+}
 
-  newPanel.webview.onDidReceiveMessage(
-    async (message: Parameters<typeof notifyExtension>['0']) => {
-      switch (message.command) {
-        case 'showInfoNotification': {
-          const button = 'Reset Count'
-          window.showInformationMessage(message.payload.text, button).then((userSelection) => {
-            userSelection === button &&
-              notifyWebview({ command: 'resetCount', payload: undefined })
-          })
-          break
-        }
-        case 'copyToClipboardAndNotify':
-          copyToClipboardAndNotify(message.payload.textToCopy)
-          break
-        case 'refreshPatchData':
-          usePatchStore().refetchPatch(message.payload.patchId)
-          break
-        case 'checkOutPatchBranch':
-          checkOutPatch(message.payload.patch)
-          break
-        case 'checkOutDefaultBranch':
-          await checkOutDefaultBranch()
-          break
-        case 'revealInPatchesView':
-          revealPatch(message.payload.patch)
-          break
-        default:
-          assertUnreachable(message)
+function getTruncatedTitle(title: string) {
+  const truncatedTitle = truncateKeepWords(title, 30)
+
+  return `${truncatedTitle}${truncatedTitle.length < title.length ? ' …' : ''}`
+}
+
+function initializePanel(
+  panel: WebviewPanel,
+  webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
+  stateForWebview: ReturnType<typeof getStateForWebview>,
+) {
+  const webviewStore = useWebviewStore()
+  webviewStore.trackPanel(panel, webviewId, stateForWebview.state.patch.id)
+
+  panel.onDidDispose(
+    () => webviewStore.untrackPanel(panel),
+    undefined,
+    useEnvStore().extCtx.subscriptions,
+  )
+
+  let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
+  switch (webviewId) {
+    case 'webview-patch-detail':
+      handleMessageFromWebview = async (
+        message: Parameters<typeof handleMessageFromWebviewPatchDetail>[0],
+      ) => {
+        await handleMessageFromWebviewPatchDetail(message, panel.webview)
       }
-    },
+      break
+    default:
+      assertUnreachable(webviewId)
+  }
+  panel.webview.onDidReceiveMessage(
+    handleMessageFromWebview,
     undefined,
-    ctx.subscriptions,
+    useEnvStore().extCtx.subscriptions,
   )
 
-  newPanel.onDidDispose(
-    () => webviewStore.untrackPanel(newPanel),
-    undefined,
-    ctx.subscriptions,
-  )
+  panel.webview.html = getWebviewHtml(panel.webview, stateForWebview)
 }
 
-export function notifyWebview(message: Parameters<typeof notifyWebviewBase>['0']): void {
-  const panel = useWebviewStore().patchDetailPanel
-  panel && notifyWebviewBase(message, panel.webview)
-}
-
-// Restores the webview across restarts using persisted state.
-// See https://code.visualstudio.com/api/extension-guides/webview#serialization
-export function registerAllWebviewRestorators() {
-  getExtensionContext().subscriptions.push(
-    window.registerWebviewPanelSerializer(webviewPatchDetailId, {
-      // eslint-disable-next-line @typescript-eslint/require-await, require-await
-      deserializeWebviewPanel: async (_panel: WebviewPanel, _state: unknown) => {
-        _panel.webview.html = getWebviewHtml(_panel.webview)
-        useWebviewStore().trackPanel(_panel)
-      },
-    }),
-  )
+async function handleMessageFromWebviewPatchDetail(
+  message: Parameters<typeof notifyExtension>['0'],
+  webview: Webview,
+) {
+  switch (message.command) {
+    case 'showInfoNotification': {
+      const button = 'Reset Count'
+      window.showInformationMessage(message.payload.text, button).then((userSelection) => {
+        userSelection === button &&
+          notifyWebview({ command: 'resetCount', payload: undefined }, webview)
+      })
+      break
+    }
+    case 'copyToClipboardAndNotify':
+      copyToClipboardAndNotify(message.payload.textToCopy)
+      break
+    case 'refreshPatchData':
+      usePatchStore().refetchPatch(message.payload.patchId)
+      break
+    case 'checkOutPatchBranch':
+      checkOutPatch(message.payload.patch)
+      break
+    case 'checkOutDefaultBranch':
+      await checkOutDefaultBranch()
+      break
+    case 'revealInPatchesView':
+      revealPatch(message.payload.patch)
+      break
+    default:
+      assertUnreachable(message)
+  }
 }
 
 function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
-  const stylesUri = getUri(webview, getExtensionContext().extensionUri, [
+  const stylesUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
     'src',
     'webviews',
     'dist',
     'assets',
     'index.css',
   ])
-  const scriptUri = getUri(webview, getExtensionContext().extensionUri, [
+  const scriptUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
     'src',
     'webviews',
     'dist',
@@ -179,31 +272,6 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
   `
 
   return html
-}
-
-function getStateForWebview(patch: AugmentedPatch): PatchDetailInjectedState {
-  const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
-
-  const identity = getRadicleIdentity('DID')
-  const localIdentity = identity ? { id: identity.DID, alias: identity.alias } : undefined
-
-  const state: PatchDetailInjectedState = {
-    kind: webviewPatchDetailId,
-    id: patch.id,
-    state: {
-      patch: { ...patch, isCheckedOut },
-      localIdentity,
-      timeLocale: useEnvStore().timeLocaleBcp47,
-    },
-  }
-
-  return state
-}
-
-function getPanelTitle(patch: AugmentedPatch) {
-  const truncatedTitle = truncateKeepWords(patch.title, 30)
-
-  return `${truncatedTitle}${truncatedTitle.length < patch.title.length ? ' …' : ''}`
 }
 
 function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {

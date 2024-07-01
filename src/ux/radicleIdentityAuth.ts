@@ -1,6 +1,6 @@
 import { InputBoxValidationSeverity, window } from 'vscode'
 import { askUser, exec, log, showLog } from '../utils'
-import { getExtensionContext } from '../stores'
+import { useEnvStore } from '../stores'
 import {
   composeNodeHomePathMsg,
   getNodeSshKey,
@@ -61,7 +61,7 @@ function authenticate({ alias, passphrase }: { alias?: string; passphrase: strin
   }
 
   const radicleId = getRadicleIdentity('DID')
-  radicleId && getExtensionContext().secrets.store(radicleId.DID, passphrase)
+  radicleId && useEnvStore().extCtx.secrets.store(radicleId.DID, passphrase)
 
   const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'didCreatedId' : 'didUnlockId')
   log(authSuccessMsg, 'info')
@@ -85,7 +85,7 @@ export async function launchAuthenticationFlow(
   }
 
   const radicleId = getRadicleIdentity('DID')
-  const secrets = getExtensionContext().secrets
+  const secrets = useEnvStore().extCtx.secrets
 
   /* Attempt automatic authentication */
 
@@ -294,7 +294,7 @@ export function deAuthCurrentRadicleIdentity(): boolean {
     return false
   }
 
-  radicleId && getExtensionContext().secrets.delete(radicleId.DID)
+  radicleId && useEnvStore().extCtx.secrets.delete(radicleId.DID)
 
   const msg = `De-authenticated Radicle identity ${radicleId}${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)

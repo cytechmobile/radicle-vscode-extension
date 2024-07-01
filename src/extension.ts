@@ -1,5 +1,5 @@
 import type { ExtensionContext } from 'vscode'
-import { initExtensionContext } from './stores'
+import { useEnvStore } from './stores'
 import {
   logExtensionActivated,
   registerAllCommands,
@@ -16,7 +16,7 @@ import {
 import { setWhenClauseContext } from './utils'
 
 export function activate(ctx: ExtensionContext) {
-  initExtensionContext(ctx)
+  useEnvStore().setExtensionContext(ctx)
 
   registerAllCommands()
   registerAllViews()

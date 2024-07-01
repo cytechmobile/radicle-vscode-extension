@@ -1,9 +1,8 @@
 import type { AugmentedPatch } from '../types'
 import type { Patch } from './httpd'
 
-// TODO: maninak rename as PatchDetailWebviewState to account for more webviews in the future?
-export interface PatchDetailInjectedState {
-  kind: 'webview-patch-detail'
+export interface PatchDetailWebviewInjectedState {
+  kind: 'webview-patch-detail' // should be `PatchDetailWebviewId` when refactoring to extract code shared by extension and webview to a `lib` root dir happens
   id: Patch['id']
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
