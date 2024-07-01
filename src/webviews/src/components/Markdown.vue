@@ -79,6 +79,10 @@ defineProps<{ source: string }>()
     max-width: unset;
   }
 
+  hr {
+    @apply ml-0;
+  }
+
   code.hljs[class*='language-'] {
     @apply relative;
 
