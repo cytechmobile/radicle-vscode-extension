@@ -17,7 +17,7 @@ const { patch, authors, firstRevision } = storeToRefs(usePatchDetailStore())
   <aside>
     <pre
       v-if="patch.isCheckedOut"
-      title="The Git branch associated with this Radicle patch is currently checked out"
+      title="The Git Branch Associated with This Radicle Patch Is Currently Checked Out"
       class="min-h-[1.5em]"
     >
 ✓ Checked out</pre

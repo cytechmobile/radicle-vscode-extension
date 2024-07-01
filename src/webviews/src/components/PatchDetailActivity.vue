@@ -22,7 +22,7 @@ const emit = defineEmits<{ showRevision: [revision: Revision] }>()
 const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
 
 function getRevisionHoverTitle(text: string) {
-  return `Click to show Revision details.\n\nRevision description:\n"${text}"`
+  return `Click to Show Revision Details.\n\nRevision Description:\n"${text}"`
 }
 
 const commentRefs = ref<InstanceType<typeof EventItem>[]>()
@@ -142,7 +142,7 @@ const patchEvents = computed(() =>
             <details v-if="event.review.summary && event.review.comment">
               <summary
                 style="color: var(--vscode-foreground)"
-                title="Click to expand/collapse"
+                title="Click to Expand/Collapse"
                 class="mt-1 max-w-prose break-words text-sm font-mono"
                 >{{ event.review.summary }}</summary
               >
@@ -183,7 +183,7 @@ const patchEvents = computed(() =>
             in reply to
             <span
               @click="scrollToComment(event.discussion.replyTo)"
-              title="Click to show parent comment"
+              title="Click to Show Parent Comment"
               class="font-mono hover:cursor-pointer"
               >another</span
             ></span
@@ -194,7 +194,7 @@ const patchEvents = computed(() =>
           >
             <summary
               style="color: var(--vscode-foreground)"
-              title="Click to expand/collapse"
+              title="Click to Expand/Collapse"
               class="mt-1 max-w-prose text-sm font-mono"
               >{{ truncateMarkdown(event.discussion.body) }}</summary
             >

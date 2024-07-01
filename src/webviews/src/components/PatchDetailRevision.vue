@@ -47,7 +47,7 @@ const selectedRevisionRejectedReviews = computed(() =>
     <vscode-dropdown
       @change="(ev: CustomEvent) => $emit('didSelectOption', ev.detail._value)"
       :value="selectedRevisionOption"
-      title="Select a patch revision to see more info about it"
+      title="Select a Patch Revision to See More Info About It"
       class="max-w-full mb-3 font-mono rounded-none"
     >
       <vscode-option
@@ -88,7 +88,7 @@ const selectedRevisionRejectedReviews = computed(() =>
           v-if="selectedRevisionAcceptedReviews.length"
           class="flex items-start gap-x-[0.5em]"
         >
-          <span class="codicon codicon-thumbsup" title="Accepted revision"></span>
+          <span class="codicon codicon-thumbsup" title="Accepted Revision"></span>
           <span v-for="review in selectedRevisionAcceptedReviews" :key="review.timestamp">
             <pre :title="review.author.id">{{ getIdentityAliasOrId(review.author) }}</pre>
           </span>
@@ -97,7 +97,7 @@ const selectedRevisionRejectedReviews = computed(() =>
           v-if="selectedRevisionRejectedReviews.length"
           class="flex items-start gap-x-[0.5em]"
         >
-          <span class="codicon codicon-thumbsdown" title="Rejected revision"></span>
+          <span class="codicon codicon-thumbsdown" title="Rejected Revision"></span>
           <span v-for="review in selectedRevisionRejectedReviews" :key="review.timestamp">
             <pre :title="selectedRevision.author.id">{{
               getIdentityAliasOrId(selectedRevision.author)
@@ -125,7 +125,7 @@ const selectedRevisionRejectedReviews = computed(() =>
     <!-- TODO: show names of all unique committers -->
     <div v-if="selectedRevision.description" class="mt-4">
       <details v-if="shouldHideRevisionDescription">
-        <summary style="color: var(--vscode-foreground)" title="Click to expand/collapse"
+        <summary style="color: var(--vscode-foreground)" title="Click to Expand/Collapse"
           >Description</summary
         >
         <Markdown :source="selectedRevision.description" class="mt-[0.25em] text-sm" />
