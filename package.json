@@ -91,7 +91,7 @@
       },
       {
         "command": "radicle.clone",
-        "title": "Clone a Radicle Project Locally",
+        "title": "Clone a Radicle Repository Locally",
         "shortTitle": "Clone",
         "category": "Radicle",
         "icon": "$(rad-clone)"
@@ -143,7 +143,7 @@
       },
       {
         "command": "radicle.checkoutDefaultBranch",
-        "title": "Check Out Project's Default Git Branch",
+        "title": "Check Out Current Repository's Default Git Branch",
         "shortTitle": "Check Out Default",
         "category": "Radicle",
         "icon": "$(home)"
