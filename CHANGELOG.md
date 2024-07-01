@@ -12,11 +12,12 @@
 - **patch-list:** show check-out state per patch item always reflecting git state. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was done.
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
-- **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
-- **markdown:** align horizontal rule with text column instead of it being always in the middle
 - **webview:** make webview restoration across sessions more robust and less likely to result in an blank panel
 - **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
+- **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
+- **markdown:** align horizontal rule with text column instead of it being always in the middle
+- **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
 
 ### 💅 Refactors
 

@@ -27,7 +27,7 @@ function revealPatch() {
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Refresh all data rendered on this page"
+    title="Refresh All Data Rendered on This Page"
     @click="refetchPatchData"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
@@ -37,7 +37,7 @@ function revealPatch() {
     v-if="!patch.isCheckedOut"
     class="self-center"
     appearance="secondary"
-    title="Check out the Git branch associated with this Radicle patch"
+    title="Check Out the Git Branch Associated with This Radicle Patch"
     @click="checkOutPatchBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
@@ -47,7 +47,7 @@ function revealPatch() {
     v-else
     class="self-center"
     appearance="secondary"
-    title="Switch from the Git branch associated with this patch to the repo's default branch"
+    title="Switch from the Git Branch Associated with This Patch to the Repo’s Default Branch"
     @click="checkOutDefaultBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
@@ -56,7 +56,7 @@ function revealPatch() {
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Reveal In Patches View"
+    title="Reveal in Patches View"
     @click="revealPatch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->

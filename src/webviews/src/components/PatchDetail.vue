@@ -137,16 +137,18 @@ onMounted(() => {
         aria-label="Detailed patch information"
       >
         <vscode-panel-tab
-          title="Click to see all events that took place during the lifetime of the patch"
+          title="Click to See All Events That Took Place During the Lifetime of the Patch"
           class="text-lg"
-          >Activity</vscode-panel-tab
         >
+          Activity
+        </vscode-panel-tab>
         <vscode-panel-tab
           ref="revisionTabRef"
-          title="Click to see details of a specific revision of the patch"
+          title="Click to See Details of a Specific Revision of the Patch"
           class="text-lg"
-          >Revision</vscode-panel-tab
         >
+          Revision
+        </vscode-panel-tab>
         <vscode-panel-view class="pt-5 px-0 pb-0">
           <PatchDetailActivity
             @show-revision="selectAndScrollToRevision"
