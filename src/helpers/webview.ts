@@ -70,10 +70,10 @@ export function registerAllWebviewRestorators() {
             // eslint-disable-next-line require-await
             deserializeWebviewPanel: async (
               panel,
-              state: ReturnType<typeof getStateForWebview>,
+              state?: ReturnType<typeof getStateForWebview>,
               // eslint-disable-next-line @typescript-eslint/require-await
             ) => {
-              initializePanel(panel, id, state)
+              state ? initializePanel(panel, id, state) : panel.dispose()
             },
           }),
         )
