@@ -47,7 +47,7 @@ function revealPatch() {
     v-else
     class="self-center"
     appearance="secondary"
-    title="Switch from the Git Branch Associated with This Patch to the Repo’s Default Branch"
+    title="Switch from the Git Branch Associated with This Patch to the Repo's Default Branch"
     @click="checkOutDefaultBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->

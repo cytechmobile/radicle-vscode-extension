@@ -2,11 +2,12 @@
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
+  vsCodeTextArea,
   vsCodePanels,
   vsCodePanelTab,
   vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, nextTick, computed, watchEffect } from 'vue'
 import {
   breakpointsTailwind,
   useBreakpoints,
@@ -29,6 +30,7 @@ import Markdown from '@/components/Markdown.vue'
 
 provideVSCodeDesignSystem().register(
   vsCodeButton(),
+  vsCodeTextArea(),
   vsCodePanels(),
   vsCodePanelTab(),
   vsCodePanelView(),
@@ -106,6 +108,42 @@ onMounted(() => {
 })
 
 // TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
+
+const isEditingTitle = ref(false)
+const editedTitle = ref(patch.value.title)
+const titleTextAreaEl = ref<HTMLElement>()
+
+// TODO: maninak add button to toggle between markdown preview and editing
+// TODO: maninak add ctrl/cmd + (B | I | E | K) listeners to toggle bold | italics | backtick-quote | link
+// TODO: maninak assign cb to a wellnamed function and use that one instead
+watchEffect(() => {
+  const el = titleTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  if (!el) {
+    return
+  }
+
+  // TODO: maninak use useEventListener from vueUse instead?
+
+  el.addEventListener('keypress', (ev) => {
+    if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+      submitTitleEdit()
+    }
+  })
+
+  el.addEventListener('focus', () => resetTextAreaHeight(el))
+  el.addEventListener('input', () => resetTextAreaHeight(el))
+})
+
+function submitTitleEdit() {
+  editedTitle.value = editedTitle.value.trim()
+  patch.value.title = editedTitle.value // TODO: maninak delete and notify extension to change title instead
+  isEditingTitle.value = false
+}
+
+function resetTextAreaHeight(el: HTMLTextAreaElement) {
+  el.style.height = ''
+  el.style.height = `${el.scrollHeight + 3}px`
+}
 </script>
 
 <template>
@@ -126,7 +164,63 @@ onMounted(() => {
     >
       <section style="grid-area: section-patch">
         <PatchMetadata />
-        <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
+        <div class="my-4">
+          <div v-if="!isEditingTitle
+        " class="max-w-fit flex align-top gap-x-[0.5em] group">
+            <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
+            <vscode-button
+              appearance="icon"
+              title="Edit Title and Description"
+              class="invisible group-hover:visible"
+              @click="
+                isEditingTitle= true;
+                $nextTick(() => titleTextAreaEl?.focus());
+              "
+            >
+              <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+              <span class="codicon codicon-edit"></span>
+            </vscode-button>
+          </div>
+          <form v-else @submit.prevent class="w-fit flex flex-col gap-y-3">
+            <vscode-text-area
+              ref="titleTextAreaEl"
+              :value="editedTitle"
+              @input="(ev: CustomEvent) => (editedTitle = ev.target?._value)"
+              rows="1"
+              cols="80"
+              resize="vertical"
+              maxlength="400"
+            >
+              Patch Title:
+            </vscode-text-area>
+            <div class="w-full flex flex-row-reverse justify-start gap-x-2">
+              <vscode-button
+                appearance="primary"
+                title="Save Changes to Radicle"
+                @click="submitTitleEdit"
+              >
+                Save
+              </vscode-button>
+              <vscode-button
+                appearance="secondary"
+                title="Stop Editing but Preserve Current Changes for Future Re-editing"
+                @click="isEditingTitle = false"
+              >
+                Stash
+              </vscode-button>
+              <vscode-button
+                appearance="secondary"
+                title="Stop Editing and Discard Current Changes"
+                @click="
+                  isEditingTitle = false;
+                  editedTitle = patch.title;
+                "
+              >
+                Discard
+              </vscode-button>
+            </div>
+          </form>
+        </div>
         <Markdown :source="firstRevision.description" class="text-sm" />
       </section>
 
@@ -190,6 +284,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
+vscode-text-area::part(control) {
+  min-height: 5ch;
+  max-height: 80ch;
+  field-sizing: content;
+}
+
+vscode-text-area::part(label) {
+  margin-bottom: 0.5em;
+}
+
 .grid-areas-patch {
   grid-template-areas:
     'header           '
