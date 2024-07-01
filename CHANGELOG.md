@@ -19,6 +19,7 @@
 ### 💅 Refactors
 
 - **webview:** restructure architecture for better type-safety, easier maintenance and make the logic independent of the specific single webview available for now
+- **commands:** replace the deprecated term "project" with "repository" in the title of `radicle.clone` and `radicle.checkoutDefaultBranch`
 
 ### 🏡 Chores
 
