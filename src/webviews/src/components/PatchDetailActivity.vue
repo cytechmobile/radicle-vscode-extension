@@ -22,7 +22,7 @@ const emit = defineEmits<{ showRevision: [revision: Revision] }>()
 const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
 
 function getRevisionHoverTitle(text: string) {
-  return `Click to Show Revision Details.\n\nRevision Description:\n"${text}"`
+  return `Click to See Revision Details\n⸻\nRevision Description:\n"${text}"`
 }
 
 const commentRefs = ref<InstanceType<typeof EventItem>[]>()
