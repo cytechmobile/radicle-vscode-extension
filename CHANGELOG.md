@@ -4,6 +4,7 @@
 
 ### 🚀 Enhancements
 
+- **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes
@@ -21,6 +22,7 @@
 
 ### 🏡 Chores
 
+- **store:** further progress on migrating formerly procedural state management to a reactive, declarative paradigm. See Chores of v0.4.0 for more info.
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
 

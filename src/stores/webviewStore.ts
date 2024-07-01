@@ -1,6 +1,11 @@
 import type { WebviewPanel } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed, reactive } from '@vue/reactivity'
+import { type ReactiveEffectRunner, effect, reactive } from '@vue/reactivity'
+import { assertUnreachable } from 'src/utils'
+import type { Patch, PatchDetailWebviewInjectedState } from '../types'
+import { getRadicleIdentity } from '../helpers'
+import { notifyWebview } from '../utils/webview-messaging'
+import { useEnvStore, usePatchStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -16,26 +21,68 @@ export type PatchDetailWebviewId = (typeof allWebviewIds)[0]
 export type WebviewId = (typeof allWebviewIds)[number]
 
 export const useWebviewStore = defineStore('webviewStore', () => {
-  const panels = reactive<Map<WebviewId, WebviewPanel>>(new Map())
+  const panels = reactive<
+    Map<WebviewId, { panel: WebviewPanel; effectRunner: ReactiveEffectRunner }>
+  >(new Map())
 
-  const patchDetailPanel = computed(() => panels.get('webview-patch-detail'))
+  function trackPanel(
+    panel: WebviewPanel,
+    webviewId: PatchDetailWebviewId,
+    data: Patch['id'],
+  ): void
+  function trackPanel(panel: WebviewPanel, webviewId: WebviewId, data: unknown): void {
+    switch (webviewId) {
+      case 'webview-patch-detail':
+        {
+          const effectRunner = effect(() => {
+            const patch = usePatchStore().findPatchById(data as Patch['id'])
+            if (!patch) {
+              return
+            }
 
-  function trackPanel(panel: WebviewPanel) {
-    // TODO: maninak create a `const stateForWebview = computed(...)` and store it along with this panel?
-    // Then call `effect(...)` that notifiesWebview to update its state whenever that computed is updated?
-    // Maybe move `getStateForWebview()` from webview.ts in here and rename it `getComputedStateForPatchDetailWebview()`?
-    return panels.set(panel.viewType as WebviewId, panel)
+            const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
+
+            const identity = getRadicleIdentity('DID')
+            const localIdentity = identity
+              ? { id: identity.DID, alias: identity.alias }
+              : undefined
+
+            const stateForWebview: PatchDetailWebviewInjectedState = {
+              kind: 'webview-patch-detail',
+              id: patch.id,
+              state: {
+                patch: { ...patch, isCheckedOut },
+                localIdentity,
+                timeLocale: useEnvStore().timeLocaleBcp47,
+              },
+            }
+
+            notifyWebview({ command: 'updateState', payload: stateForWebview }, panel.webview)
+          })
+
+          panels.set(panel.viewType as WebviewId, { panel, effectRunner })
+        }
+        break
+      default:
+        assertUnreachable(webviewId)
+    }
   }
 
   function untrackPanel(panel: WebviewPanel) {
-    return panels.delete(panel.viewType as WebviewId)
+    const webviewId = panel.viewType as WebviewId
+
+    // TODO: maninak uncomment code below when we've fixed panels getting insta-disposed. Also shouldn't we keep multiple panel/effect entries per webviewId? I think we currently keep only the latest tracked panel.
+    // const effectRunner = panels.get(webviewId)?.effectRunner
+    // effectRunner && stop(effectRunner) // `stop` is from @vue/reactivity
+
+    return panels.delete(webviewId)
   }
 
   function findPanel(id: WebviewId) {
-    return panels.get(id)
+    return panels.get(id)?.panel
   }
 
-  return { patchDetailPanel, trackPanel, untrackPanel, findPanel, isPanelDisposed }
+  return { trackPanel, untrackPanel, findPanel, isPanelDisposed }
 })
 
 function isPanelDisposed(panel: WebviewPanel) {

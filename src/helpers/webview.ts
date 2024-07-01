@@ -53,7 +53,7 @@ export function createOrReuseWebviewPanel({
     return
   }
 
-  createAndShowWebviewPanel(webviewId, panelTitle, column, stateForWebview)
+  createAndShowWebviewPanel(webviewId, panelTitle, stateForWebview, column)
 }
 
 /**
@@ -125,8 +125,8 @@ function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
 function createAndShowWebviewPanel(
   webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
   panelTitle: string,
+  stateForWebview: ReturnType<typeof getStateForWebview>,
   column?: Parameters<typeof window.createWebviewPanel>['2'],
-  state?: object,
 ) {
   const panel = window.createWebviewPanel(
     webviewId,
@@ -143,7 +143,7 @@ function createAndShowWebviewPanel(
     },
   )
 
-  initializePanel(panel, webviewId, state)
+  initializePanel(panel, webviewId, stateForWebview)
 }
 
 function getTruncatedTitle(title: string) {
@@ -155,10 +155,10 @@ function getTruncatedTitle(title: string) {
 function initializePanel(
   panel: WebviewPanel,
   webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
-  state?: object,
+  stateForWebview: ReturnType<typeof getStateForWebview>,
 ) {
   const webviewStore = useWebviewStore()
-  webviewStore.trackPanel(panel)
+  webviewStore.trackPanel(panel, webviewId, stateForWebview.state.patch.id)
 
   panel.onDidDispose(
     () => webviewStore.untrackPanel(panel),
@@ -184,7 +184,7 @@ function initializePanel(
     getExtensionContext().subscriptions,
   )
 
-  panel.webview.html = getWebviewHtml(panel.webview, state)
+  panel.webview.html = getWebviewHtml(panel.webview, stateForWebview)
 }
 
 async function handleMessageFromWebviewPatchDetail(
