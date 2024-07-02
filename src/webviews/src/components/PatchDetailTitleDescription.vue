@@ -128,6 +128,8 @@ function discardPatchEditForm() {
           title="Save Changes to Radicle"
           @click="submitPatchEditForm"
         >
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <span slot="start" class="codicon codicon-save"></span>
           Save
         </vscode-button>
         <vscode-button
@@ -135,6 +137,8 @@ function discardPatchEditForm() {
           title="Stop Editing and Discard Current Changes"
           @click="discardPatchEditForm"
         >
+          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+          <span slot="start" class="codicon codicon-discard"></span>
           Discard
         </vscode-button>
       </div>
