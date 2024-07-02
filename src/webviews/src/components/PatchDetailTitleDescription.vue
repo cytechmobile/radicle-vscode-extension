@@ -68,6 +68,8 @@ function submitPatchEditForm() {
 
 function discardPatchEditForm() {
   patchEditForm.value.isEditing = false
+  patchEditForm.value.title = ''
+  patchEditForm.value.descr = ''
 }
 </script>
 
