@@ -224,20 +224,8 @@ async function handleMessageFromWebviewPatchDetail(
 }
 
 function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
-  const stylesUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
-    'src',
-    'webviews',
-    'dist',
-    'assets',
-    'index.css',
-  ])
-  const scriptUri = getUri(webview, useEnvStore().extCtx.extensionUri, [
-    'src',
-    'webviews',
-    'dist',
-    'assets',
-    'index.js',
-  ])
+  const stylesUri = getUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.css'])
+  const scriptUri = getUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.js'])
   const allowedSource = webview.cspSource
   const nonce = getNonce()
 
@@ -274,6 +262,6 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
   return html
 }
 
-function getUri(webview: Webview, extensionUri: Uri, pathList: string[]): Uri {
-  return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList))
+function getUri(webview: Webview, pathList: string[]): Uri {
+  return webview.asWebviewUri(Uri.joinPath(useEnvStore().extCtx.extensionUri, ...pathList))
 }

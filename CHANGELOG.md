@@ -28,6 +28,7 @@
   - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted along the same VS Code usage session
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated e.g. patch checked-out indicator between the patch list and patch detail view
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+- **patch-detail:** use a better icon and improved hover copy for "Reveal" button
 
 ### 🩹 Fixes
 
@@ -51,6 +52,7 @@
 - **store:** further progress on migrating formerly procedural state management to a reactive, declarative paradigm. See Chores of v0.4.0 for more info.
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
+- **deps:** upgrade to the latest version of codicons
 
 -----
 
