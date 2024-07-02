@@ -24,7 +24,7 @@ import { getRadicleIdentity, revealPatch } from '.'
 export function createOrReuseWebviewPanel({
   webviewId,
   data,
-  panelTitle,
+  proposedPanelTitle,
 }: /* unite here alternative `webviewId` & `data` pairs as new webviews get built */ {
   /**
    * The identifier specifying the kind of the panel to be (re-)used.
@@ -35,9 +35,9 @@ export function createOrReuseWebviewPanel({
    */
   data: Patch['id']
   /**
-   * The title to be used for the webview panel's tab.
+   * The proposed title to be used for the webview panel's tab. May be further processed.
    */
-  panelTitle: string
+  proposedPanelTitle: string
 }) {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
   const webviewStore = useWebviewStore()
@@ -46,13 +46,13 @@ export function createOrReuseWebviewPanel({
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
     notifyWebview({ command: 'updateState', payload: stateForWebview }, foundPanel.webview)
-    foundPanel.title = panelTitle
+    foundPanel.title = getFormatedPanelTitle(proposedPanelTitle)
     foundPanel.reveal(column)
 
     return
   }
 
-  createAndShowWebviewPanel(webviewId, panelTitle, stateForWebview, column)
+  createAndShowWebviewPanel(webviewId, proposedPanelTitle, stateForWebview, column)
 }
 
 /**
@@ -61,24 +61,39 @@ export function createOrReuseWebviewPanel({
  * @see https://code.visualstudio.com/api/extension-guides/webview#serialization
  */
 export function registerAllWebviewRestorators() {
-  for (const id of allWebviewIds) {
-    switch (id) {
+  for (const webviewId of allWebviewIds) {
+    switch (webviewId) {
       case 'webview-patch-detail':
         useEnvStore().extCtx.subscriptions.push(
-          window.registerWebviewPanelSerializer(id, {
-            // eslint-disable-next-line require-await
+          window.registerWebviewPanelSerializer(webviewId, {
             deserializeWebviewPanel: async (
               panel,
               state?: ReturnType<typeof getStateForWebview>,
-              // eslint-disable-next-line @typescript-eslint/require-await
             ) => {
-              state ? initializePanel(panel, id, state) : panel.dispose()
+              if (state) {
+                initializePanel(panel, webviewId, state)
+              } else {
+                const patchesStore = usePatchStore()
+                await patchesStore.initStoreIfNeeded()
+                const foundPatch = patchesStore.findPatchByTitle(
+                  panel.title.replace(/…?$/, ''),
+                )
+
+                if (!foundPatch) {
+                  panel.dispose()
+
+                  return
+                }
+
+                const recreatedState = getStateForWebview(webviewId, foundPatch.id)
+                initializePanel(panel, webviewId, recreatedState)
+              }
             },
           }),
         )
         break
       default:
-        assertUnreachable(id)
+        assertUnreachable(webviewId)
     }
   }
 }
@@ -133,7 +148,7 @@ function createAndShowWebviewPanel(
 ) {
   const panel = window.createWebviewPanel(
     webviewId,
-    getTruncatedTitle(panelTitle),
+    getFormatedPanelTitle(panelTitle),
     column ?? ViewColumn.One,
     {
       enableScripts: true,
@@ -149,10 +164,10 @@ function createAndShowWebviewPanel(
   initializePanel(panel, webviewId, stateForWebview)
 }
 
-function getTruncatedTitle(title: string) {
+function getFormatedPanelTitle(title: string) {
   const truncatedTitle = truncateKeepWords(title, 30)
 
-  return `${truncatedTitle}${truncatedTitle.length < title.length ? ' …' : ''}`
+  return truncatedTitle
 }
 
 function initializePanel(

@@ -1,8 +1,9 @@
 import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, reactive, watchEffect, unrea } from 'vue'
 import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
@@ -10,13 +11,13 @@ const vscode = getVscodeRef<PatchDetailWebviewInjectedState>()
 const initialExtraState = { patchEditForm: { title: '', descr: '', isEditing: false } }
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
-  const state = ref({
+  const state = reactive({
     ...initialExtraState,
     ...vscode.getState(),
-    ...window.injectedWebviewState,
+    ...window?.injectedWebviewState,
   })
 
-  const patch = computed(() => state.value.state.patch)
+  const patch = computed(() => state.state.patch)
 
   const firstAndLatestRevisions = computed(() => getFirstAndLatestRevisions(patch.value))
   const firstRevision = computed(() => firstAndLatestRevisions.value.firstRevision)
@@ -34,7 +35,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       ),
   )
 
-  const localIdentity = computed(() => state.value.state.localIdentity)
+  const localIdentity = computed(() => state.state.localIdentity)
   const identities = computed(() => {
     const mergers = patch.value.merges.map((merge) => merge.author)
     const commenters = patch.value.revisions.flatMap((revision) =>
@@ -55,11 +56,11 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     return uniqueIds
   })
 
-  const timeLocale = computed(() => state.value.state.timeLocale)
+  const timeLocale = computed(() => state.state.timeLocale)
 
   watchEffect(() => {
     // TODO: save and restore scroll position?
-    vscode.setState(state.value)
+    vscode.setState(state)
   })
 
   useEventListener(
@@ -69,7 +70,8 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       const message = event.data
 
       if (message.command === 'updateState') {
-        state.value = { ...initialExtraState, ...state, ...message.payload }
+        const stateBak = { ...state }
+        Object.assign(state, initialExtraState, stateBak, message.payload)
       }
     },
   )
@@ -82,7 +84,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     localIdentity,
     identities,
     timeLocale,
-    patchEditForm: state.value.patchEditForm,
+    patchEditForm: state.patchEditForm,
   }
 })
 

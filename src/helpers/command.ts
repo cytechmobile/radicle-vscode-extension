@@ -153,7 +153,7 @@ export function registerAllCommands(): void {
     createOrReuseWebviewPanel({
       webviewId: 'webview-patch-detail',
       data: patch.id,
-      panelTitle: patch.title,
+      proposedPanelTitle: patch.title,
     })
   })
 }
