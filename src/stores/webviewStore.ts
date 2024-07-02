@@ -33,11 +33,11 @@ export const useWebviewStore = defineStore('webviewStore', () => {
     switch (webviewId) {
       case 'webview-patch-detail':
         {
-          const effectRunner = effect(() => {
+          const effectRunner = effect(async () => {
             notifyWebview(
               {
                 command: 'updateState',
-                payload: getStateForWebview(webviewId, data as Patch['id']),
+                payload: await getStateForWebview(webviewId, data as Patch['id']),
               },
               panel.webview,
             )

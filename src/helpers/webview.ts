@@ -4,6 +4,7 @@ import {
   type WebviewId,
   allWebviewIds,
   useEnvStore,
+  useGitStore,
   usePatchStore,
   useWebviewStore,
 } from '../stores'
@@ -21,7 +22,7 @@ import { getRadicleIdentity, revealPatch } from '.'
  * If the webview is already open and visible in another column it will be moved to the active
  * column without getting re-created.
  */
-export function createOrReuseWebviewPanel({
+export async function createOrReuseWebviewPanel({
   webviewId,
   data,
   proposedPanelTitle,
@@ -42,7 +43,7 @@ export function createOrReuseWebviewPanel({
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
   const webviewStore = useWebviewStore()
   const foundPanel = webviewStore.findPanel(webviewId)
-  const stateForWebview = getStateForWebview(webviewId, data)
+  const stateForWebview = await getStateForWebview(webviewId, data)
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
     notifyWebview({ command: 'updateState', payload: stateForWebview }, foundPanel.webview)
@@ -68,7 +69,7 @@ export function registerAllWebviewRestorators() {
           window.registerWebviewPanelSerializer(webviewId, {
             deserializeWebviewPanel: async (
               panel,
-              state?: ReturnType<typeof getStateForWebview>,
+              state?: Awaited<ReturnType<typeof getStateForWebview>>,
             ) => {
               if (state) {
                 initializePanel(panel, webviewId, state)
@@ -85,7 +86,7 @@ export function registerAllWebviewRestorators() {
                   return
                 }
 
-                const recreatedState = getStateForWebview(webviewId, foundPatch.id)
+                const recreatedState = await getStateForWebview(webviewId, foundPatch.id)
                 initializePanel(panel, webviewId, recreatedState)
               }
             },
@@ -98,52 +99,54 @@ export function registerAllWebviewRestorators() {
   }
 }
 
-export function getStateForWebview(
+export async function getStateForWebview(
   webviewId: PatchDetailWebviewId,
   patchId: Patch['id'],
-): PatchDetailWebviewInjectedState // eslint-disable-next-line padding-line-between-statements
-export function getStateForWebview(webviewId: WebviewId, data: unknown): unknown {
-  let stateForWebview
-
+): Promise<PatchDetailWebviewInjectedState> // eslint-disable-next-line padding-line-between-statements, consistent-return
+export async function getStateForWebview(
+  webviewId: WebviewId,
+  data: unknown,
+): Promise<unknown> {
   switch (webviewId) {
-    case 'webview-patch-detail':
-      {
-        const patch = usePatchStore().findPatchById(data as Patch['id'])
-        if (!patch) {
-          return undefined
-        }
-
-        const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
-
-        const identity = getRadicleIdentity('DID')
-        const localIdentity = identity
-          ? { id: identity.DID, alias: identity.alias }
-          : undefined
-
-        const state: PatchDetailWebviewInjectedState = {
-          kind: webviewId,
-          id: patch.id,
-          state: {
-            patch: { ...patch, isCheckedOut },
-            localIdentity,
-            timeLocale: useEnvStore().timeLocaleBcp47,
-          },
-        }
-
-        stateForWebview = state
+    case 'webview-patch-detail': {
+      const patchStore = usePatchStore()
+      const patchId = data as Patch['id']
+      let patch = patchStore.findPatchById(patchId)
+      if (!patch) {
+        await patchStore.refetchPatch(patchId)
+        patch = patchStore.findPatchById(patchId)
       }
-      break
+      if (!patch) {
+        throw new Error(`Failed resolving patch when getting state for webview "${webviewId}"`)
+      }
+
+      const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
+
+      const identity = getRadicleIdentity('DID')
+      const localIdentity = identity ? { id: identity.DID, alias: identity.alias } : undefined
+
+      const state: PatchDetailWebviewInjectedState = {
+        kind: webviewId,
+        id: patch.id,
+        state: {
+          patch: { ...patch, isCheckedOut },
+          timeLocale: useEnvStore().timeLocaleBcp47,
+          localIdentity,
+          defaultBranch: await useGitStore().getDefaultBranch(),
+        },
+      }
+
+      return state
+    }
     default:
       assertUnreachable(webviewId)
   }
-
-  return stateForWebview
 }
 
 function createAndShowWebviewPanel(
   webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
   panelTitle: string,
-  stateForWebview: ReturnType<typeof getStateForWebview>,
+  stateForWebview: Awaited<ReturnType<typeof getStateForWebview>>,
   column?: Parameters<typeof window.createWebviewPanel>['2'],
 ) {
   const panel = window.createWebviewPanel(
@@ -173,7 +176,7 @@ function getFormatedPanelTitle(title: string) {
 function initializePanel(
   panel: WebviewPanel,
   webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
-  stateForWebview: ReturnType<typeof getStateForWebview>,
+  stateForWebview: Awaited<ReturnType<typeof getStateForWebview>>,
 ) {
   const webviewStore = useWebviewStore()
   webviewStore.trackPanel(panel, webviewId, stateForWebview.state.patch.id)

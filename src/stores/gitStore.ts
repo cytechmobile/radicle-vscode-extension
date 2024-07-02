@@ -1,6 +1,9 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, ref } from '@vue/reactivity'
-import { getCurrentGitBranch, getCurrentGitUpstreamBranch } from '../utils'
+import { fetchFromHttpd } from '../helpers'
+import { getCurrentGitBranch, getCurrentGitUpstreamBranch, log } from '../utils'
+import { notifyUserAboutFetchError } from '../ux'
+import { useEnvStore } from './'
 
 setActivePinia(createPinia())
 
@@ -35,9 +38,36 @@ export const useGitStore = defineStore('gitStore', () => {
     currentBranchRecomputeSignal.value++
   }
 
+  const defaultBranch = ref<string>()
+
+  async function getDefaultBranch() {
+    if (defaultBranch.value) {
+      return defaultBranch.value
+    }
+
+    const rid = useEnvStore().currentRepoId
+    if (!rid) {
+      log('Failed resolving RID of current repo while trying to `getDefaultBranch()`', 'error')
+
+      return undefined
+    }
+
+    const { data: repo, error } = await fetchFromHttpd(`/projects/${rid}`)
+    if (error) {
+      notifyUserAboutFetchError(error)
+
+      return undefined
+    }
+
+    defaultBranch.value = repo.defaultBranch
+
+    return repo.defaultBranch
+  }
+
   return {
     currentBranch,
-    refreshCurentBranch,
     currentUpstreamBranch,
+    refreshCurentBranch,
+    getDefaultBranch,
   }
 })

@@ -1,9 +1,8 @@
 import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { computed, reactive, watchEffect, unrea } from 'vue'
+import { computed, reactive, watchEffect } from 'vue'
 import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
-import { notifyExtension } from 'extensionUtils/webview-messaging'
 import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
@@ -57,6 +56,9 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   })
 
   const timeLocale = computed(() => state.state.timeLocale)
+  const defaultBranch = computed(() => state.state.defaultBranch)
+
+  const patchEditForm = computed(() => state.patchEditForm)
 
   watchEffect(() => {
     // TODO: save and restore scroll position?
@@ -84,7 +86,8 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     localIdentity,
     identities,
     timeLocale,
-    patchEditForm: state.patchEditForm,
+    defaultBranch,
+    patchEditForm,
   }
 })
 

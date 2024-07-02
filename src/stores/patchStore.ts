@@ -133,7 +133,7 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function initStoreIfNeeded() {
-    return !patches.value && (await fetchAllPatches())
+    return !lastFetchedTs.value && (await fetchAllPatches())
   }
 
   return {

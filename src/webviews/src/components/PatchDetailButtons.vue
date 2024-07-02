@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
-const { patch } = storeToRefs(usePatchDetailStore())
+const { patch, defaultBranch } = storeToRefs(usePatchDetailStore())
 
 function refetchPatchData() {
   notifyExtension({ command: 'refreshPatchData', payload: { patchId: patch.value.id } })
@@ -44,15 +44,16 @@ function revealPatch() {
     <span slot="start" class="codicon codicon-check"></span>Check Out</vscode-button
   >
   <vscode-button
-    v-else
+    v-else-if="defaultBranch"
     class="self-center"
     appearance="secondary"
     title="Switch from the Git Branch Associated with This Patch to the Repo's Default Branch"
     @click="checkOutDefaultBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-home"></span>Check Out Default</vscode-button
-  >
+    <span slot="start" class="codicon codicon-home"></span>Check&nbsp;Out&ThickSpace;<wbr />
+    <pre>{{ defaultBranch }} </pre>
+  </vscode-button>
   <vscode-button
     class="self-center"
     appearance="secondary"
@@ -60,6 +61,6 @@ function revealPatch() {
     @click="revealPatch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-diff-single"></span>Browse</vscode-button
+    <span slot="start" class="codicon codicon-diff-single"></span>Browse Diff</vscode-button
   >
 </template>
