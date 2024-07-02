@@ -4,7 +4,29 @@
 
 ### 🚀 Enhancements
 
-- **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
+- **patch-detail:** support mutating patch titles and descriptions
+  - a new button has been added next to the title, shown on hover, clicking which will show a text-area with additional buttons
+    - the button is able to be tabbed into, which will make it visible again, despite it being conditionally hidden (accessibility)
+  - the buttons relating to the text-area are:
+    - "Save" updates the changed title to Radicle
+    - "Stash" stops editing but preserves current changes for future re-editing
+    - "Discard" stops the editing mode and discards both the value currently entered in the text-area as well as the stashed value (if any)
+    - their tabbing order (tabbing into them past the text-areas) is set so that "Save" is first, as expected in a form, despite them being right-aligned
+  - the text-area:
+    - gets keyboard focus when the edit button is clicked
+    - auto-expands and auto-shrinks vertically to optimally fit its content, up to a viewport-relative maximum. Applies on focus and while typing.
+    - keeps the viewport pinned at an optimal scroll position regardless how the text-area resizes
+    - can be manually resized (but only vertically to keep the interaction less chaotic)
+    - has maximum and minimum height after which scrolling of the contents is enabled
+    - will respond to viewport size applying sizing limits on top of the aforementioned content-relative resizing
+    - is set with (generous) max char count limits to limit abuse
+    - pressing the Enter key will enter a new line but pressing Ctrl/Cmd+Enter will behave as if the "Save" button was clicked
+  - the value of each text-area is auto-saved locally while typing and will be attempted to be restored
+    - if the editor panel is closed (same session)
+    - if VS Code is terminated or crashes (across sessions)
+    - if the form submission fails
+  - if Escape key is pressed the editing session gets terminated, the current text-area values discarded and previously stashed values (if any) remain unaffected
+- **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated e.g. patch checked-out indicator between the patch list and patch detail view
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes

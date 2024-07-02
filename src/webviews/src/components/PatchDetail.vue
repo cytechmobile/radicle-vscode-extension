@@ -7,9 +7,10 @@ import {
   vsCodePanelTab,
   vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
-import { ref, onMounted, nextTick, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, nextTick } from 'vue'
 import {
   breakpointsTailwind,
+  onKeyStroke,
   useBreakpoints,
   useEventListener,
   useThrottleFn,
@@ -90,59 +91,74 @@ function assembleRevisionOptionLabel(revision: Revision): string {
   return label
 }
 
-onMounted(() => {
-  nextTick(() => {
-    document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
-      const highlightedCodeElClass = highlightedCodeEl.classList.value
-
-      const langTagEl = document.createElement('span')
-      langTagEl.textContent = highlightedCodeElClass
-        .replace('hljs ', '')
-        .replaceAll(/language-/g, '')
-        .trim()
-      langTagEl.classList.add('langTag')
-
-      highlightedCodeEl.insertBefore(langTagEl, highlightedCodeEl.firstChild)
-    })
-  })
-})
-
 // TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 
-const isEditingTitle = ref(false)
-const editedTitle = ref(patch.value.title)
+const isEditingPatch = ref(false)
+const formEl = ref<HTMLElement>()
 const titleTextAreaEl = ref<HTMLElement>()
+const descrTextAreaEl = ref<HTMLElement>()
+const editedTitle = ref(patch.value.title)
+const editedDescr = ref(patch.value.revisions[0].description)
+let titleBeforeEdit: string
+let descrBeforeEdit: string
 
 // TODO: maninak add button to toggle between markdown preview and editing
 // TODO: maninak add ctrl/cmd + (B | I | E | K) listeners to toggle bold | italics | backtick-quote | link
-// TODO: maninak assign cb to a wellnamed function and use that one instead
 watchEffect(() => {
-  const el = titleTextAreaEl.value?.shadowRoot?.querySelector('textarea')
-  if (!el) {
-    return
-  }
+  const titleEl = titleTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  const descrEl = descrTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  const els = [titleEl, descrEl].filter(Boolean)
 
-  // TODO: maninak use useEventListener from vueUse instead?
-
-  el.addEventListener('keypress', (ev) => {
-    if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
-      submitTitleEdit()
-    }
+  els.forEach((el) => {
+    useEventListener(
+      el,
+      'keydown',
+      (ev) => {
+        if (ev.key === 'Escape') {
+          isEditingPatch.value = false
+          editedTitle.value = titleBeforeEdit
+          editedDescr.value = descrBeforeEdit
+        }
+        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+          submitPatchEditForm()
+        }
+      },
+      { passive: true },
+    )
+    useEventListener(el, 'focus', () => resetTextAreaHeight(el), { passive: true })
+    useEventListener(el, 'input', () => resetTextAreaHeight(el), { passive: true })
   })
-
-  el.addEventListener('focus', () => resetTextAreaHeight(el))
-  el.addEventListener('input', () => resetTextAreaHeight(el))
 })
-
-function submitTitleEdit() {
-  editedTitle.value = editedTitle.value.trim()
-  patch.value.title = editedTitle.value // TODO: maninak delete and notify extension to change title instead
-  isEditingTitle.value = false
-}
 
 function resetTextAreaHeight(el: HTMLTextAreaElement) {
   el.style.height = ''
-  el.style.height = `${el.scrollHeight + 3}px`
+  el.style.height = `${el.scrollHeight + 3}px` // additional offset needed to avoid scrollbar
+  formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
+}
+
+function beginPatchEditing() {
+  titleBeforeEdit = editedTitle.value
+  descrBeforeEdit = editedDescr.value
+  isEditingPatch.value = true
+  nextTick(() => titleTextAreaEl.value?.focus())
+}
+
+function submitPatchEditForm() {
+  editedTitle.value = editedTitle.value.trim()
+  patch.value.title = editedTitle.value // TODO: maninak delete and notify extension to change title instead
+  editedDescr.value = editedDescr.value.trim()
+  patch.value.revisions[0].description = editedDescr.value // TODO: maninak delete and notify extension to change title instead
+  isEditingPatch.value = false
+}
+
+function stashPatchEditForm() {
+  isEditingPatch.value = false
+}
+
+function discardPatchEditForm() {
+  isEditingPatch.value = false
+  editedTitle.value = patch.value.title
+  editedDescr.value = patch.value.title
 }
 </script>
 
@@ -162,66 +178,78 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
     <main
       class="grid grid-rows-subgrid grid-cols-subgrid row-span-3 sm:row-span-2 sm:col-span-2"
     >
-      <section style="grid-area: section-patch">
+      <section class="flex flex-col gap-y-4" style="grid-area: section-patch">
         <PatchMetadata />
-        <div class="my-4">
-          <div v-if="!isEditingTitle
-        " class="max-w-fit flex align-top gap-x-[0.5em] group">
+        <div v-if="!isEditingPatch" class="max-w-fit flex flex-col gap-y-4 group">
+          <div class="flex gap-x-2">
             <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
             <vscode-button
               appearance="icon"
-              title="Edit Title and Description"
-              class="invisible group-hover:visible"
-              @click="
-                isEditingTitle= true;
-                $nextTick(() => titleTextAreaEl?.focus());
-              "
+              title="Edit Patch Title and Description"
+              class="opacity-0 focus:opacity-100 group-hover:opacity-100"
+              @click="beginPatchEditing"
             >
               <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
               <span class="codicon codicon-edit"></span>
             </vscode-button>
           </div>
-          <form v-else @submit.prevent class="w-fit flex flex-col gap-y-3">
-            <vscode-text-area
-              ref="titleTextAreaEl"
-              :value="editedTitle"
-              @input="(ev: CustomEvent) => (editedTitle = ev.target?._value)"
-              rows="1"
-              cols="80"
-              resize="vertical"
-              maxlength="400"
-            >
-              Patch Title:
-            </vscode-text-area>
-            <div class="w-full flex flex-row-reverse justify-start gap-x-2">
-              <vscode-button
-                appearance="primary"
-                title="Save Changes to Radicle"
-                @click="submitTitleEdit"
-              >
-                Save
-              </vscode-button>
-              <vscode-button
-                appearance="secondary"
-                title="Stop Editing but Preserve Current Changes for Future Re-editing"
-                @click="isEditingTitle = false"
-              >
-                Stash
-              </vscode-button>
-              <vscode-button
-                appearance="secondary"
-                title="Stop Editing and Discard Current Changes"
-                @click="
-                  isEditingTitle = false;
-                  editedTitle = patch.title;
-                "
-              >
-                Discard
-              </vscode-button>
-            </div>
-          </form>
+          <Markdown :source="firstRevision.description" class="text-sm" />
         </div>
-        <Markdown :source="firstRevision.description" class="text-sm" />
+        <form
+          v-else
+          @submit.prevent
+          ref="formEl"
+          name="Edit patch title and description"
+          class="pb-2 w-fit flex flex-col gap-y-3"
+        >
+          <vscode-text-area
+            ref="titleTextAreaEl"
+            :value="editedTitle"
+            @input="(ev: CustomEvent) => (editedTitle = ev.target?._value)"
+            name="patch title"
+            rows="1"
+            cols="100"
+            resize="vertical"
+            maxlength="400"
+          >
+            Patch Title:
+          </vscode-text-area>
+          <vscode-text-area
+            ref="descrTextAreaEl"
+            :value="editedDescr"
+            @input="(ev: CustomEvent) => (editedDescr = ev.target?._value)"
+            name="patch description"
+            rows="5"
+            cols="100"
+            resize="vertical"
+            maxlength="500000"
+          >
+            Patch Description:
+          </vscode-text-area>
+          <div class="w-full flex flex-row-reverse justify-start gap-x-2">
+            <vscode-button
+              appearance="primary"
+              title="Save Changes to Radicle"
+              @click="submitPatchEditForm"
+            >
+              Save
+            </vscode-button>
+            <vscode-button
+              appearance="secondary"
+              title="Stop Editing but Preserve Current Changes for Future Re-editing"
+              @click="stashPatchEditForm"
+            >
+              Stash
+            </vscode-button>
+            <vscode-button
+              appearance="secondary"
+              title="Stop Editing and Discard Current Changes"
+              @click="discardPatchEditForm"
+            >
+              Discard
+            </vscode-button>
+          </div>
+        </form>
       </section>
 
       <vscode-panels
@@ -286,8 +314,9 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
 <style scoped>
 vscode-text-area::part(control) {
   min-height: 5ch;
-  max-height: 80ch;
+  max-height: min(80ch, 65vh);
   field-sizing: content;
+  @apply font-mono text-sm;
 }
 
 vscode-text-area::part(label) {
