@@ -7,9 +7,13 @@ import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
 const vscode = getVscodeRef<PatchDetailWebviewInjectedState>()
+const initialExtraState = { patchEditForm: { title: '', descr: '', isEditing: false } }
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
-  const state = ref(vscode.getState() ?? window.injectedWebviewState)
+  const state = ref({
+    ...initialExtraState,
+    ...(vscode.getState() ?? window.injectedWebviewState),
+  })
 
   const patch = computed(() => state.value.state.patch)
 
@@ -64,7 +68,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       const message = event.data
 
       if (message.command === 'updateState') {
-        state.value = message.payload
+        state.value = { ...initialExtraState, ...state, ...message.payload }
       }
     },
   )
@@ -77,6 +81,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     localIdentity,
     identities,
     timeLocale,
+    patchEditForm: state.value.patchEditForm,
   }
 })
 

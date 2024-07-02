@@ -10,7 +10,6 @@ import {
 import { ref, computed, watchEffect, nextTick } from 'vue'
 import {
   breakpointsTailwind,
-  onKeyStroke,
   useBreakpoints,
   useEventListener,
   useThrottleFn,
@@ -37,7 +36,8 @@ provideVSCodeDesignSystem().register(
   vsCodePanelView(),
 )
 
-const { patch, authors, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
+const { patch, authors, firstRevision, latestRevision, patchEditForm } =
+  storeToRefs(usePatchDetailStore())
 
 const revisionTabRef = ref<HTMLElement>()
 const revisionSectionRef = ref<HTMLElement>()
@@ -93,14 +93,9 @@ function assembleRevisionOptionLabel(revision: Revision): string {
 
 // TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 
-const isEditingPatch = ref(false)
 const formEl = ref<HTMLElement>()
 const titleTextAreaEl = ref<HTMLElement>()
 const descrTextAreaEl = ref<HTMLElement>()
-const editedTitle = ref(patch.value.title)
-const editedDescr = ref(patch.value.revisions[0].description)
-let titleBeforeEdit: string
-let descrBeforeEdit: string
 
 // TODO: maninak add button to toggle between markdown preview and editing
 // TODO: maninak add ctrl/cmd + (B | I | E | K) listeners to toggle bold | italics | backtick-quote | link
@@ -115,9 +110,7 @@ watchEffect(() => {
       'keydown',
       (ev) => {
         if (ev.key === 'Escape') {
-          isEditingPatch.value = false
-          editedTitle.value = titleBeforeEdit
-          editedDescr.value = descrBeforeEdit
+          patchEditForm.value.isEditing = false
         }
         if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
           submitPatchEditForm()
@@ -137,28 +130,22 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
 }
 
 function beginPatchEditing() {
-  titleBeforeEdit = editedTitle.value
-  descrBeforeEdit = editedDescr.value
-  isEditingPatch.value = true
+  patchEditForm.value.title = patchEditForm.value.title || patch.value.title
+  patchEditForm.value.descr = patchEditForm.value.descr || patch.value.revisions[0].description
+  patchEditForm.value.isEditing = true
   nextTick(() => titleTextAreaEl.value?.focus())
 }
 
 function submitPatchEditForm() {
-  editedTitle.value = editedTitle.value.trim()
-  patch.value.title = editedTitle.value // TODO: maninak delete and notify extension to change title instead
-  editedDescr.value = editedDescr.value.trim()
-  patch.value.revisions[0].description = editedDescr.value // TODO: maninak delete and notify extension to change title instead
-  isEditingPatch.value = false
-}
-
-function stashPatchEditForm() {
-  isEditingPatch.value = false
+  patchEditForm.value.isEditing = false
+  patch.value.title = patchEditForm.value.title.trim() // TODO: maninak delete and notify extension to change title instead
+  patchEditForm.value.title = ''
+  patch.value.revisions[0].description = patchEditForm.value.descr.trim() // TODO: maninak delete and notify extension to change title instead
+  patchEditForm.value.descr = ''
 }
 
 function discardPatchEditForm() {
-  isEditingPatch.value = false
-  editedTitle.value = patch.value.title
-  editedDescr.value = patch.value.title
+  patchEditForm.value.isEditing = false
 }
 </script>
 
@@ -180,7 +167,7 @@ function discardPatchEditForm() {
     >
       <section class="flex flex-col gap-y-4" style="grid-area: section-patch">
         <PatchMetadata />
-        <div v-if="!isEditingPatch" class="max-w-fit flex flex-col gap-y-4 group">
+        <div v-if="!patchEditForm.isEditing" class="max-w-fit flex flex-col gap-y-4 group">
           <div class="flex gap-x-2">
             <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
             <vscode-button
@@ -204,8 +191,8 @@ function discardPatchEditForm() {
         >
           <vscode-text-area
             ref="titleTextAreaEl"
-            :value="editedTitle"
-            @input="(ev: CustomEvent) => (editedTitle = ev.target?._value)"
+            :value="patchEditForm.title"
+            @input="(ev: CustomEvent) => (patchEditForm.title = ev.target?._value)"
             name="patch title"
             rows="1"
             cols="100"
@@ -216,8 +203,8 @@ function discardPatchEditForm() {
           </vscode-text-area>
           <vscode-text-area
             ref="descrTextAreaEl"
-            :value="editedDescr"
-            @input="(ev: CustomEvent) => (editedDescr = ev.target?._value)"
+            :value="patchEditForm.descr"
+            @input="(ev: CustomEvent) => (patchEditForm.descr = ev.target?._value)"
             name="patch description"
             rows="5"
             cols="100"
@@ -233,13 +220,6 @@ function discardPatchEditForm() {
               @click="submitPatchEditForm"
             >
               Save
-            </vscode-button>
-            <vscode-button
-              appearance="secondary"
-              title="Stop Editing but Preserve Current Changes for Future Re-editing"
-              @click="stashPatchEditForm"
-            >
-              Stash
             </vscode-button>
             <vscode-button
               appearance="secondary"
