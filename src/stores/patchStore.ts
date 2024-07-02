@@ -1,5 +1,5 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed, effect, ref } from '@vue/reactivity'
+import { computed, effect, ref, unref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
@@ -86,7 +86,7 @@ export const usePatchStore = defineStore('patch', () => {
     return {}
   }
 
-  const lastFetchedTs = ref<number>()
+  const lastFetchedAllTs = ref<number>()
   let inProgressRequest: Promise<unknown> | undefined
   async function fetchAllPatches() {
     if (inProgressRequest) {
@@ -104,7 +104,7 @@ export const usePatchStore = defineStore('patch', () => {
       return false
     }
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
-    lastFetchedTs.value = nowTs
+    lastFetchedAllTs.value = nowTs
     // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
     const promisedResponses = Promise.all([
       fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft', perPage: 500 } }),
@@ -133,8 +133,16 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function initStoreIfNeeded() {
-    return !lastFetchedTs.value && (await fetchAllPatches())
+    return !lastFetchedAllTs.value && (await fetchAllPatches())
   }
+
+  const lastFetchedTs = computed(() => {
+    const ts = unref(
+      patches.value?.length === 1 ? patches.value[0]?.lastFetchedTs : lastFetchedAllTs,
+    )
+
+    return ts
+  })
 
   return {
     patches,

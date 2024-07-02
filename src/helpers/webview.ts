@@ -1,4 +1,4 @@
-import { Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
+import { Uri, ViewColumn, type Webview, type WebviewPanel, commands, window } from 'vscode'
 import {
   type PatchDetailWebviewId,
   type WebviewId,
@@ -8,11 +8,11 @@ import {
   usePatchStore,
   useWebviewStore,
 } from '../stores'
-import { assertUnreachable, getNonce, truncateKeepWords } from '../utils'
+import { assertUnreachable, getNonce, shortenHash, showLog, truncateKeepWords } from '../utils'
 import { type notifyExtension, notifyWebview } from '../utils/webview-messaging'
 import type { Patch, PatchDetailWebviewInjectedState } from '../types'
 import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
-import { getRadicleIdentity, revealPatch } from '.'
+import { getRadicleIdentity, revealPatch, updatePatchTitleAndDescription } from '.'
 
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
@@ -167,7 +167,7 @@ function createAndShowWebviewPanel(
   initializePanel(panel, webviewId, stateForWebview)
 }
 
-function getFormatedPanelTitle(title: string) {
+export function getFormatedPanelTitle(title: string) {
   const truncatedTitle = truncateKeepWords(title, 30)
 
   return truncatedTitle
@@ -235,6 +235,49 @@ async function handleMessageFromWebviewPatchDetail(
       break
     case 'revealInPatchesView':
       revealPatch(message.payload.patch, { expand: true, focus: true })
+      break
+    case 'updatePatchTitleAndDescription':
+      // TODO: maninak move to UX
+      // TODO: maninak show loading notification while the cmd is running
+      {
+        const operation = updatePatchTitleAndDescription(message.payload)
+        const patchId = message.payload.patchId
+        const buttonOutput = 'Show Output'
+
+        // TODO: maninak if error contains `ETIMEDOUT` offer to retry with longer timeout
+        if (operation.outcome === 'failure') {
+          window
+            .showErrorMessage(`Failed updating patch "${shortenHash(patchId)}"`, buttonOutput)
+            .then((userSelection) => {
+              userSelection === buttonOutput && showLog()
+            })
+
+          return
+        }
+
+        usePatchStore().refetchPatch(patchId)
+        if (operation.didAnnounce) {
+          window.showInformationMessage(
+            `Updated patch "${shortenHash(
+              patchId,
+            )}" and successfully announced it to the network`,
+          )
+        } else {
+          const buttonRetry = 'Retry Announce'
+          const userSelection = await window.showWarningMessage(
+            `Updated patch "${shortenHash(
+              patchId,
+            )}" locally but failed announcing it to the network`,
+            buttonRetry,
+            buttonOutput,
+          )
+          if (userSelection === buttonOutput) {
+            showLog()
+          } else if (userSelection === buttonRetry) {
+            commands.executeCommand('radicle.announce')
+          }
+        }
+      }
       break
     default:
       assertUnreachable(message)

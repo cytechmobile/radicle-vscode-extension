@@ -10,6 +10,7 @@ import { storeToRefs } from 'pinia'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchMetadata from '@/components/PatchMetadata.vue'
 import Markdown from '@/components/Markdown.vue'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
@@ -55,18 +56,22 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
 }
 
 function beginPatchEditing() {
-  patchEditForm.value.title = patchEditForm.value.title || patch.value.title
-  patchEditForm.value.descr = patchEditForm.value.descr || firstRevision.value.description
+  patchEditForm.value.title ||= patch.value.title
+  patchEditForm.value.descr ||= firstRevision.value.description
   patchEditForm.value.isEditing = true
   nextTick(() => titleTextAreaEl.value?.focus())
 }
 
 function submitPatchEditForm() {
   patchEditForm.value.isEditing = false
-  patch.value.title = patchEditForm.value.title.trim() // TODO: maninak delete and notify extension to change title instead
-  patchEditForm.value.title = ''
-  patch.value.revisions[0].description = patchEditForm.value.descr.trim() // TODO: maninak delete and notify extension to change title instead
-  patchEditForm.value.descr = ''
+  notifyExtension({
+    command: 'updatePatchTitleAndDescription',
+    payload: {
+      patchId: patch.value.id,
+      newTitle: patchEditForm.value.title.trim(),
+      newDescr: patchEditForm.value.descr.trim(),
+    },
+  })
 }
 
 function discardPatchEditForm() {

@@ -1,9 +1,9 @@
 import type { WebviewPanel } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ReactiveEffectRunner, effect, reactive } from '@vue/reactivity'
-import { assertUnreachable } from 'src/utils'
+import { assertUnreachable } from '../utils'
 import type { Patch } from '../types'
-import { getStateForWebview } from '../helpers'
+import { getFormatedPanelTitle, getStateForWebview } from '../helpers'
 import { notifyWebview } from '../utils/webview-messaging'
 
 setActivePinia(createPinia())
@@ -34,13 +34,15 @@ export const useWebviewStore = defineStore('webviewStore', () => {
       case 'webview-patch-detail':
         {
           const effectRunner = effect(async () => {
+            const stateForWebview = await getStateForWebview(webviewId, data as Patch['id'])
             notifyWebview(
               {
                 command: 'updateState',
-                payload: await getStateForWebview(webviewId, data as Patch['id']),
+                payload: stateForWebview,
               },
               panel.webview,
             )
+            panel.title = getFormatedPanelTitle(stateForWebview.state.patch.title)
           })
 
           panels.set(panel.viewType as WebviewId, { panel, effectRunner })

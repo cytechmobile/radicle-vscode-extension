@@ -1,3 +1,5 @@
+import type { Patch } from '../types'
+import { useEnvStore } from '../stores'
 import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../utils'
 import {
   defaultRadBinaryLocation,
@@ -240,4 +242,30 @@ export function getNodeSshKey(format: 'fingerprint' | 'full'): string | undefine
   const nodeSshKey = exec(`${getRadCliRef()} self ${flag}`)
 
   return nodeSshKey
+}
+
+export function updatePatchTitleAndDescription({
+  patchId,
+  newTitle,
+  newDescr,
+}: {
+  patchId: Patch['id']
+  newTitle: string
+  newDescr: string
+}): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure' } {
+  // TODO: maninak pass params to spawn programmatically so that they are escaped
+  const successMsg = exec(
+    `${getRadCliRef()} patch edit ${patchId} --repo ${
+      useEnvStore().currentRepoId
+    } --message "${newTitle}" --message "${newDescr}"`,
+    { shouldLog: true },
+  )
+
+  if (!successMsg) {
+    return { outcome: 'failure' }
+  } else if (successMsg?.includes('Node is stopped')) {
+    return { outcome: 'success', didAnnounce: false }
+  } else {
+    return { outcome: 'success', didAnnounce: true }
+  }
 }

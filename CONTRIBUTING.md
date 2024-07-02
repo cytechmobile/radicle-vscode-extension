@@ -75,7 +75,7 @@ A pretty powerful linter configuration and setup will cover most superficial top
 
 If you notice anything fishy, annoying (red squiggle should be yellow, conflicting rules, common false positive etc), broken or missing, please let the maintainers know.
 
-## Code Style
+### Code Style
 
 - Keep it simple, not "smart"
 - Code must be understandable without the need for any comments. If you feel the need for a comment improve your code instead.
@@ -128,6 +128,13 @@ If necessary, specific code shared between extension and webviews should be extr
 ### Getting User Input
 
 Use custom wrapper `askUser()` instead of the native [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) which would result in procedural, verbose and brittle client code.
+
+### Copywriting
+
+- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case  (Wikipedia style)](https://titlecaseconverter.com)
+- Notifications should not contain a trailing fullstop unless multiple sentences are used.
+- Success and Warning notifications should begin with what happened first e.g. "Updated patch title successfully"
+- Error notifications should begin with "Failed" e.g. "Failed updating patch title"
 
 ## Packaging Locally From Source
 

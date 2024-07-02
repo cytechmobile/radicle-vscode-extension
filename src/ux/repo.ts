@@ -71,7 +71,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
     return
   }
 
-  const msgSuffix = `repo "${projSelection.label}" with id (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
+  const msgSuffix = `repo "${projSelection.label}" with id "${selectedRid}" into "${cloneTargetDir.fsPath}"`
   const didClone = await window.withProgress(
     {
       location: ProgressLocation.Window,
