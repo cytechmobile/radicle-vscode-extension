@@ -56,10 +56,10 @@ function revealPatch() {
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Reveal Patch Among Those Listed in the Patches View"
+    title="See All Files Changed in the Latest Revision"
     @click="revealPatch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-go-to-search"></span>Reveal</vscode-button
+    <span slot="start" class="codicon codicon-diff-single"></span>Browse</vscode-button
   >
 </template>

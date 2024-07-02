@@ -216,7 +216,7 @@ async function handleMessageFromWebviewPatchDetail(
       await checkOutDefaultBranch()
       break
     case 'revealInPatchesView':
-      revealPatch(message.payload.patch)
+      revealPatch(message.payload.patch, { expand: true, focus: true })
       break
     default:
       assertUnreachable(message)

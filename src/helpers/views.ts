@@ -38,6 +38,9 @@ function registerPatchesView() {
   return patchesView
 }
 
-export function revealPatch(patch: AugmentedPatch): void {
-  patchesView?.reveal(patch)
+export function revealPatch(
+  patch: AugmentedPatch,
+  options?: Parameters<NonNullable<typeof patchesView>['reveal']>['1'],
+): void {
+  patchesView?.reveal(patch, options)
 }
