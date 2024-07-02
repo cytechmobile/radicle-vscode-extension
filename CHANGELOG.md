@@ -5,11 +5,11 @@
 ### 🚀 Enhancements
 
 - **patch-detail:** support mutating patch titles and descriptions
-  - a new "Edit" button has been added next to the title, shown on hover, clicking which will show two text-areas, for the title and description, and additional buttons
+  - a new "Edit" button has been added next to the title, shown when hovering on the title or description. Clicking it will show two text-areas, one for each of the aforementioned, and additional buttons
     - the Edit button is able to be tabbed into with the keyboard, which will make it visible again, despite it being conditionally hidden (accessibility)
   - while editing the following buttons are shown:
     - "Save" updates the changed title to Radicle
-    - "Discard" stops the editing mode and discards the values currently entered in the text-areas
+    - "Discard" stops the editing mode and discards the values currently entered in the text-area as well as drafts stored, if any (see below the functionality of Escape key)
     - their tabbing order (tabbing into them past the text-areas) is set so that "Save" is first, as expected in a form, despite them being right-aligned
   - the text-area:
     - gets keyboard focus when the edit button is clicked
@@ -20,8 +20,8 @@
     - responds to viewport size changes applying sizing limits on top of the aforementioned content-relative resizing
     - is set with (generous) max char count limits to limit abuse
     - pressing the Enter key will enter a new line but pressing Ctrl/Cmd+Enter will behave as if the "Save" button was clicked
-  - the value of each text-area is auto-saved locally while typing and will be attempted to be restored
-    - if the editor panel is closed (same session)
+  - the value of each text-area is auto-saved locally while typing, as well as the "is editing" status, and those will be attempted to be restored
+    - if the editor panel is hidden (another panel is selected placing it in the background) and then re-viewed (same session)
     - if VS Code is terminated or crashes (across sessions)
     - if the form submission fails
   - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted along the same VS Code usage session
