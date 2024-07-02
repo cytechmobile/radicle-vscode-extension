@@ -12,7 +12,8 @@ const initialExtraState = { patchEditForm: { title: '', descr: '', isEditing: fa
 export const usePatchDetailStore = defineStore('patch-detail', () => {
   const state = ref({
     ...initialExtraState,
-    ...(vscode.getState() ?? window.injectedWebviewState),
+    ...vscode.getState(),
+    ...window.injectedWebviewState,
   })
 
   const patch = computed(() => state.value.state.patch)
