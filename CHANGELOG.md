@@ -7,6 +7,7 @@
 - **patch-detail:** support mutating patch titles and descriptions
   - a new "Edit" button has been added next to the title, shown when hovering on the title or description. Clicking it will show two text-areas, one for each of the aforementioned, and additional buttons
     - the Edit button is able to be tabbed into with the keyboard, which will make it visible again, despite it being conditionally hidden (accessibility)
+    - the Edit button gets thinner on narrower viewports to allow maximum space for the already constricted title
   - while editing the following buttons are shown:
     - "Save" updates the changed title to Radicle
     - "Discard" stops the editing mode and discards the values currently entered in the text-area as well as drafts stored, if any (see below the functionality of Escape key)

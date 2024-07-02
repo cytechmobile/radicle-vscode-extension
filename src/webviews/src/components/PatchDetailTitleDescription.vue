@@ -82,7 +82,7 @@ function discardPatchEditForm() {
         <vscode-button
           appearance="icon"
           title="Edit Patch Title and Description"
-          class="opacity-0 focus:opacity-100 group-hover:opacity-100"
+          class="opacity-0 focus:opacity-100 group-hover:opacity-100 sm:p-2"
           @click="beginPatchEditing"
         >
           <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
