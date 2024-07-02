@@ -15,6 +15,9 @@ provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
 const { patch, firstRevision, patchEditForm } = storeToRefs(usePatchDetailStore())
 
+interface VscodeTextAreaEvent {
+  target: { _value: string }
+}
 const formEl = ref<HTMLElement>()
 const titleTextAreaEl = ref<HTMLElement>()
 const descrTextAreaEl = ref<HTMLElement>()
@@ -101,7 +104,7 @@ function discardPatchEditForm() {
       <vscode-text-area
         ref="titleTextAreaEl"
         :value="patchEditForm.title"
-        @input="(ev: CustomEvent) => (patchEditForm.title = ev.target?._value)"
+        @input="(ev: VscodeTextAreaEvent) => (patchEditForm.title = ev.target._value)"
         name="patch title"
         rows="1"
         cols="100"
@@ -113,7 +116,7 @@ function discardPatchEditForm() {
       <vscode-text-area
         ref="descrTextAreaEl"
         :value="patchEditForm.descr"
-        @input="(ev: CustomEvent) => (patchEditForm.descr = ev.target?._value)"
+        @input="(ev: VscodeTextAreaEvent) => (patchEditForm.descr = ev.target._value)"
         name="patch description"
         rows="6"
         cols="100"
