@@ -4,15 +4,39 @@
 
 ### 🚀 Enhancements
 
+- **patch-detail:** support mutating patch titles and descriptions
+  - a new "Edit" button has been added next to the title, shown when hovering on the title or description. Clicking it will show two text-areas, one for each of the aforementioned, and additional buttons
+    - the Edit button is able to be tabbed into with the keyboard, which will make it visible again, despite it being conditionally hidden (accessibility)
+    - the Edit button gets thinner on narrower viewports to allow maximum space for the already constricted title
+  - while editing the following buttons are shown:
+    - "Save" updates the changed title to Radicle
+    - "Discard" stops the editing mode and discards the values currently entered in the text-area as well as drafts stored, if any (see below the functionality of Escape key)
+    - their tabbing order (tabbing into them past the text-areas) is set so that "Save" is first, as expected in a form, despite them being right-aligned
+  - the text-area:
+    - gets keyboard focus when the edit button is clicked
+    - auto-expands and auto-shrinks vertically to optimally fit its content, up to a viewport-relative maximum. Applies on focus and while typing.
+    - keeps the viewport pinned at an optimal scroll position regardless how the text-area resizes
+    - can be manually resized by dragging its bottom-right corner, but only vertically to keep the interaction less chaotic
+    - has maximum and minimum height defined, after which internal scrolling of the contents is enabled
+    - responds to viewport size changes applying sizing limits on top of the aforementioned content-relative resizing
+    - is set with (generous) max char count limits to limit abuse
+    - pressing the Enter key will enter a new line but pressing Ctrl/Cmd+Enter will behave as if the "Save" button was clicked
+  - the value of each text-area is auto-saved locally while typing, as well as the "is editing" status, and those will be attempted to be restored
+    - if the editor panel is hidden (another panel is selected placing it in the background) and then re-viewed (same session)
+    - if VS Code is terminated or crashes (across sessions)
+    - if the form submission fails
+  - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted along the same VS Code usage session
+- **patch-detail:** replace former "Reveal" button with a "Browse Diff" one that still reveals the patch in among the list of others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
+- **patch-detail:** the former "Check Out Default" button will now have a dynamic copy "Check Out $defaultBranch"
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes
 
-- **patch-list:** show check-out state per patch item always reflecting git state. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was done.
-- **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
+- **webview:** make webview restoration, for example switching to its panel after switching away from it in a way that would put it to the background, signigicantly more robust and less likely to result in an blank panel
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
-- **webview:** make webview restoration across sessions more robust and less likely to result in an blank panel
+- **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
+- **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
@@ -29,6 +53,7 @@
 - **store:** further progress on migrating formerly procedural state management to a reactive, declarative paradigm. See Chores of v0.4.0 for more info.
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
+- **deps:** upgrade to the latest version of codicons
 
 -----
 

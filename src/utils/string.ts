@@ -3,12 +3,25 @@ import type { DId, RadicleIdentity } from '../types'
 /**
  * Return the given string shortened to less than `maxLen` characters without truncating words.
  */
-export function truncateKeepWords(str: string, maxLen: number, separator = ' '): string {
+export function truncateKeepWords(
+  str: string,
+  maxLen: number,
+  appendEllipses = true,
+  separator = ' ',
+): string {
   if (str.length <= maxLen) {
     return str
   }
 
-  return str.substring(0, str.lastIndexOf(separator, maxLen))
+  const shortStr = str.substring(0, str.lastIndexOf(separator, maxLen))
+
+  if (appendEllipses) {
+    const shortStrMaybeWithEllipses = `${shortStr}${shortStr.length < str.length ? '…' : ''}`
+
+    return shortStrMaybeWithEllipses
+  }
+
+  return shortStr
 }
 
 export const maxCharsForUntruncatedMdText = 65 // TailWindCSS class `w-prose` has `65ch` length

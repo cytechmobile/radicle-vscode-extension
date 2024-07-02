@@ -51,6 +51,12 @@ export const usePatchStore = defineStore('patch', () => {
     return foundPatch
   }
 
+  function findPatchByTitle(partialTitle: string) {
+    const foundPatch = patches.value?.find((patch) => patch.title.includes(partialTitle))
+
+    return foundPatch
+  }
+
   async function refetchPatch(patchId: Patch['id']) {
     const rid = useEnvStore().currentRepoId
     if (!rid) {
@@ -127,7 +133,7 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function initStoreIfNeeded() {
-    return !patches.value && (await fetchAllPatches())
+    return !lastFetchedTs.value && (await fetchAllPatches())
   }
 
   return {
@@ -135,6 +141,7 @@ export const usePatchStore = defineStore('patch', () => {
     checkedOutPatch,
     lastFetchedTs,
     findPatchById,
+    findPatchByTitle,
     resetAllPatches,
     refetchPatch,
     initStoreIfNeeded,
