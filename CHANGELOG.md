@@ -28,13 +28,13 @@
   - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted along the same VS Code usage session
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated e.g. patch checked-out indicator between the patch list and patch detail view
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
-- **patch-detail:** use a better icon and improved hover copy for "Reveal" button
 
 ### 🩹 Fixes
 
 - **patch-list:** show check-out state per patch item always reflecting git state. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was done.
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
+- **patch-detail:** use a better icon and improved hover copy for "Reveal" button
 - **webview:** make webview restoration across sessions more robust and less likely to result in an blank panel
 - **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
