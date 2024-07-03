@@ -240,12 +240,14 @@ async function handleMessageFromWebviewPatchDetail(
       // TODO: maninak move to UX
       // TODO: maninak show loading notification while the cmd is running
       {
-        const operation = updatePatchTitleAndDescription(message.payload)
         const patchId = message.payload.patchId
-        const buttonOutput = 'Show Output'
 
+        const updateOp = updatePatchTitleAndDescription({ ...message.payload, patchId })
+        usePatchStore().refetchPatch(patchId)
+
+        const buttonOutput = 'Show Output'
         // TODO: maninak if error contains `ETIMEDOUT` offer to retry with longer timeout
-        if (operation.outcome === 'failure') {
+        if (updateOp.outcome === 'failure') {
           window
             .showErrorMessage(`Failed updating patch "${shortenHash(patchId)}"`, buttonOutput)
             .then((userSelection) => {
@@ -255,19 +257,15 @@ async function handleMessageFromWebviewPatchDetail(
           return
         }
 
-        usePatchStore().refetchPatch(patchId)
-        if (operation.didAnnounce) {
+        const patchName = `"${truncateKeepWords(message.payload.newTitle, 20)}"`
+        if (updateOp.didAnnounce) {
           window.showInformationMessage(
-            `Updated patch "${shortenHash(
-              patchId,
-            )}" and successfully announced it to the network`,
+            `Updated and announced patch ${patchName} to the network`,
           )
         } else {
           const buttonRetry = 'Retry Announce'
           const userSelection = await window.showWarningMessage(
-            `Updated patch "${shortenHash(
-              patchId,
-            )}" locally but failed announcing it to the network`,
+            `Updated patch ${patchName} locally but failed announcing it to the network`,
             buttonRetry,
             buttonOutput,
           )

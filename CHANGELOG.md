@@ -30,7 +30,7 @@
   - clicking "Save" executes a CLI command updating both the title and description from the form after trimming any leading and trailing whitespace.
   - depending on the outcome of the patch edit command the user is be presented with
     - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
-    - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
+    - TODO: maninak keep? a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
     - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout they are also offered to retry with an increased timeout
 - **patch-detail:** replace former "Reveal" button with a "Browse Diff" one that still reveals the patch in among the list of others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $defaultBranch"
