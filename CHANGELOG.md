@@ -13,7 +13,8 @@
     - "Discard" stops the editing mode and discards the values currently entered in the text-area as well as the preserved drafts, if any (see below the functionality of Escape key)
     - their tabbing order (tabbing into them past the text-areas) is set so that "Save" is first, as expected in a form, despite them being right-aligned
   - the text-area:
-    - gets keyboard focus when the edit button is clicked
+    - supports any text content, including markdown and any special or uncommon characters
+    - gets keyboard focus automatically when the edit button is clicked
     - auto-expands and auto-shrinks vertically to optimally fit its content, up to a viewport-relative maximum. Applies on focus and while typing.
     - keeps the viewport pinned at an optimal and stable scroll position regardless of how the text-area resizes
     - can be manually resized by dragging its bottom-right corner, but only vertically to keep the interaction less chaotic

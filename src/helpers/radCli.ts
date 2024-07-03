@@ -1,6 +1,6 @@
 import type { Patch } from '../types'
 import { useEnvStore } from '../stores'
-import { assertUnreachable, exec, memoizeWithDebouncedCacheClear } from '../utils'
+import { assertUnreachable, exec, log, memoizeWithDebouncedCacheClear } from '../utils'
 import {
   defaultRadBinaryLocation,
   getConfig,
@@ -253,13 +253,27 @@ export function updatePatchTitleAndDescription({
   newTitle: string
   newDescr: string
 }): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure' } {
-  // TODO: maninak pass params to spawn programmatically so that they are escaped
-  const successMsg = exec(
-    `${getRadCliRef()} patch edit ${patchId} --repo ${
-      useEnvStore().currentRepoId
-    } --message "${newTitle}" --message "${newDescr}"`,
-    { shouldLog: true },
-  )
+  const rid = useEnvStore().currentRepoId
+  if (!rid) {
+    log('Unable to resolve current repo id in `updatePatchTitleAndDescription()`', 'error')
+
+    return { outcome: 'failure' }
+  }
+
+  const successMsg = exec(getRadCliRef(), {
+    args: [
+      'patch',
+      'edit',
+      patchId,
+      '--repo',
+      rid,
+      '--message',
+      newTitle,
+      '--message',
+      newDescr,
+    ],
+    shouldLog: true,
+  })
 
   if (!successMsg) {
     return { outcome: 'failure' }

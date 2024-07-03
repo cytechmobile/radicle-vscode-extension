@@ -20,6 +20,10 @@ export function exec(
   cmd: string | (() => string),
   options?: {
     /**
+     * List of string arguments for the given command.
+     */
+    args?: string[]
+    /**
      * Specifies whether the output of the shell command should be logged in the Output panel
      * or not. If set to `false` and a command execution error occurs, then the error will be
      * logged in the Debug panel regardless (only visible during development).
@@ -73,25 +77,43 @@ export function exec(
       cwd = opts.cwd
     }
 
-    const execResult = spawnSync(resolvedCmd, {
+    const spawnOpts: SpawnSyncOptionsWithStringEncoding = {
       shell: true,
       cwd,
       timeout: opts.timeout ?? 30_000,
       encoding: 'utf-8',
       env: { ...process.env, ...opts.env },
-    })
-    if (execResult.error || execResult.status) {
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw execResult.error ?? (execResult.stderr || execResult.stdout)
     }
 
-    const parsedResult =
-      opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
-    if (opts.shouldLog ?? false) {
-      log(parsedResult, 'info', resolvedCmd)
-    }
+    if (options?.args) {
+      const execResult = spawnSync(resolvedCmd, options.args.map(maybeEscapeArg), spawnOpts)
+      if (execResult.error || execResult.status) {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw execResult.error ?? (execResult.stderr || execResult.stdout)
+      }
 
-    return parsedResult
+      const parsedResult =
+        opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
+      if (opts.shouldLog ?? false) {
+        log(parsedResult, 'info', resolvedCmd)
+      }
+
+      return parsedResult
+    } else {
+      const execResult = spawnSync(resolvedCmd, spawnOpts)
+      if (execResult.error || execResult.status) {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw execResult.error ?? (execResult.stderr || execResult.stdout)
+      }
+
+      const parsedResult =
+        opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
+      if (opts.shouldLog ?? false) {
+        log(parsedResult, 'info', resolvedCmd)
+      }
+
+      return parsedResult
+    }
   } catch (error) {
     const parsedError =
       typeof error === 'string'
@@ -101,7 +123,11 @@ export function exec(
         : `Failed executing shell command: "${resolvedCmd}"`
 
     if (opts.shouldLog ?? false) {
-      log(opts.outputTrimming ?? true ? parsedError.trim() : parsedError, 'error', resolvedCmd)
+      log(
+        opts.outputTrimming ?? true ? parsedError.trim() : parsedError,
+        'error',
+        `${resolvedCmd} ${options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''}`,
+      )
     } else {
       // will show up only in the Debug console during development
       console.error(parsedError)
@@ -109,4 +135,14 @@ export function exec(
 
     return undefined
   }
+}
+
+function maybeEscapeArg(cliArg: string): string {
+  const arg = cliArg
+  /**
+   * @see https://stackoverflow.com/questions/15783701/which-characters-need-to-be-escaped-when-using-bash/20053121#20053121
+   */
+  const maybeEscapedArg = arg.includes("'") ? `'${arg.replace(/'/g, "'\\''")}'` : arg
+
+  return maybeEscapedArg
 }
