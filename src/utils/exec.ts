@@ -109,7 +109,11 @@ export function exec(
       const parsedResult =
         opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
       if (opts.shouldLog ?? false) {
-        log(parsedResult, 'info', resolvedCmd)
+        log(
+          parsedResult,
+          'info',
+          `${resolvedCmd} ${options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''}`,
+        )
       }
 
       return parsedResult
