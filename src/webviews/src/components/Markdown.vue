@@ -1,28 +1,32 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { defineProps, nextTick, onMounted } from 'vue'
+import { defineProps, nextTick, onMounted, onUpdated } from 'vue'
 import Markdown from 'vue3-markdown-it'
 import 'highlight.js/styles/vs2015.css'
 
 defineProps<{ source: string }>()
 // TODO: add control to toggle raw/parsed markdown
 
-onMounted(() => {
+function showLangTagOnCodeBlocks() {
   nextTick(() => {
     document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
       const highlightedCodeElClass = highlightedCodeEl.classList.value
-
-      const langTagEl = document.createElement('span')
-      langTagEl.textContent = highlightedCodeElClass
         .replace('hljs ', '')
         .replaceAll(/language-/g, '')
         .trim()
+
+      const langTagEl = document.createElement('span')
+      langTagEl.textContent = highlightedCodeElClass
       langTagEl.classList.add('langTag')
+      langTagEl.style.userSelect = 'none'
 
       highlightedCodeEl.insertBefore(langTagEl, highlightedCodeEl.firstChild)
     })
   })
-})
+}
+
+onMounted(showLangTagOnCodeBlocks)
+onUpdated(showLangTagOnCodeBlocks)
 </script>
 
 <template>

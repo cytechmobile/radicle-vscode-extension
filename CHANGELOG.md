@@ -49,6 +49,8 @@
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
 - **markdown:** align horizontal rule with text column instead of it being always in the middle
+- **markdown:** ensure the language tag on (recognised) code blocks is still shown after re-rendering them
+- **markdown:** make the language tag on (recognised) code blocks not user-selectable
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
 
 ### 💅 Refactors
