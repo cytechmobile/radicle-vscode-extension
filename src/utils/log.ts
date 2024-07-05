@@ -27,10 +27,10 @@ export function log(
   const ts = new Date().toTimeString().split(' ')[0] ?? new Date().toTimeString()
   const copy =
     (context && body ? `${context}\n${body}` : body || context) ?? '<unresolved message>'
-
   const logEntry = `[${ts} ${severity.padEnd(5).toUpperCase()}] ${copy}`
 
   outputLog.appendLine(logEntry)
+  severity === 'error' && console.error(new Error(logEntry))
 }
 
 /**

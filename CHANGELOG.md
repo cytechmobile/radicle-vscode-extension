@@ -64,6 +64,7 @@
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
 - **deps:** upgrade to the latest version of codicons
+- **log:** always log errors in the debug console too (during development), in addition to the Output panel
 
 ### 📖 Documentation
 

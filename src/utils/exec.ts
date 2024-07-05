@@ -119,6 +119,9 @@ export function exec(
       return parsedResult
     }
   } catch (error) {
+    const fullCmd = `${resolvedCmd} ${
+      options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''
+    }`
     const parsedError =
       typeof error === 'string'
         ? error
@@ -127,15 +130,11 @@ export function exec(
         : `Failed executing shell command: "${resolvedCmd}"`
 
     if (opts.shouldLog ?? false) {
-      log(
-        opts.outputTrimming ?? true ? parsedError.trim() : parsedError,
-        'error',
-        `${resolvedCmd} ${options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''}`,
-      )
-    } else {
-      // will show up only in the Debug console during development
-      console.error(parsedError)
+      log(opts.outputTrimming ?? true ? parsedError.trim() : parsedError, 'error', fullCmd)
     }
+
+    // will show up only in the Debug console during development
+    console.error(fullCmd)
 
     return undefined
   }
