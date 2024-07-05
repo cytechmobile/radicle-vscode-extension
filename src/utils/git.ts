@@ -44,9 +44,12 @@ export function getCurrentGitBranch(): string | undefined {
  * ```
  */
 export function getCurrentGitUpstreamBranch(): string | undefined {
-  const currentUpstreamBranch = exec('git rev-parse --abbrev-ref --symbolic-full-name @{u}', {
-    cwd: '$workspaceDir',
-  })
+  const currentUpstreamBranch = exec(
+    `git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)"`,
+    {
+      cwd: '$workspaceDir',
+    },
+  )
 
   return currentUpstreamBranch
 }
