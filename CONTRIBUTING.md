@@ -135,6 +135,8 @@ Use custom wrapper `askUser()` instead of the native [InputBox API](https://code
 - Notifications should not contain a trailing fullstop unless multiple sentences are used.
 - Success and Warning notifications should begin with what happened first e.g. "Updated patch title successfully"
 - Error notifications should begin with "Failed" e.g. "Failed updating patch title"
+- Copy, or parts of it, that represents data and which is dynamic should be depicted using monotype font. Similarly copy that is static should be depicted using non-monotype font. e.g. in the copy "Check Out master", where "master" is the name of the default branch of a repo, "master" should be depicted with monotype font "Check Out" without.
+- The above is usually possible in webviews and impossible in extension UIs. In the latter case the dynamic values should be depicted as being wrapped by double quotes e.g. 'Using Radicle identity "maninak"'
 
 ## Packaging Locally From Source
 
