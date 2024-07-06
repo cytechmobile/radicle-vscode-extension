@@ -13,8 +13,14 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   const state = reactive({
     ...initialExtraState,
     ...vscode.getState(),
-    ...window?.injectedWebviewState,
+    ...window.injectedWebviewState,
   })
+  /*
+   * Let's invalidate the injected state we just used since it's stale beyond now.
+   * Theoretically it should always get overwritten anyway but best to be safe.
+   * It's going to be preserved with setState anyway.
+   */
+  window.injectedWebviewState = undefined as unknown as PatchDetailWebviewInjectedState
 
   const patch = computed(() => state.state.patch)
 

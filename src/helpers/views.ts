@@ -21,6 +21,10 @@ function registerPatchesView() {
   })
 
   const updatePatchesViewDescription = effect(() => {
+    if (!patchesView.visible) {
+      return
+    }
+
     const patchCount = usePatchStore().patches?.length
     const formattedPatchCount = typeof patchCount === 'number' ? `${patchCount} · ` : ''
 

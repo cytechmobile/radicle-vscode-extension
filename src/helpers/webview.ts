@@ -46,8 +46,7 @@ export async function createOrReuseWebviewPanel({
   const stateForWebview = await getStateForWebview(webviewId, data)
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
-    notifyWebview({ command: 'updateState', payload: stateForWebview }, foundPanel.webview)
-    foundPanel.title = getFormatedPanelTitle(proposedPanelTitle)
+    alignUiWithWebviewPatchDetailState(foundPanel, stateForWebview)
     foundPanel.reveal(column)
 
     return
@@ -187,6 +186,16 @@ function initializePanel(
     useEnvStore().extCtx.subscriptions,
   )
 
+  panel.onDidChangeViewState(async (viewChangedPanel) => {
+    if (viewChangedPanel.webviewPanel.visible) {
+      const newSateForWebview = await getStateForWebview(
+        webviewId,
+        stateForWebview.state.patch.id,
+      )
+      alignUiWithWebviewPatchDetailState(viewChangedPanel.webviewPanel, newSateForWebview)
+    }
+  })
+
   let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
   switch (webviewId) {
     case 'webview-patch-detail':
@@ -206,6 +215,14 @@ function initializePanel(
   )
 
   panel.webview.html = getWebviewHtml(panel.webview, stateForWebview)
+}
+
+export function alignUiWithWebviewPatchDetailState(
+  panel: WebviewPanel,
+  state: PatchDetailWebviewInjectedState,
+) {
+  notifyWebview({ command: 'updateState', payload: state }, panel.webview)
+  panel.title = getFormatedPanelTitle(state.state.patch.title)
 }
 
 async function handleMessageFromWebviewPatchDetail(
