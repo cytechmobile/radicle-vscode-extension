@@ -69,6 +69,7 @@
 ### 📖 Documentation
 
 - **contributing:** add new "Copywriting" section under "Conventions" with the directives followed when writing user-facing copy for this repo
+- **readme:** show correct RID of the Radicle VS Code repo in the rad badge
 
 -----
 
