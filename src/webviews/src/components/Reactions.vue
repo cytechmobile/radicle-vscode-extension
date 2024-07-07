@@ -9,7 +9,7 @@ defineProps<{ reactions: Reaction[] }>()
 
 const { localIdentity } = storeToRefs(usePatchDetailStore())
 
-// TODO: delete delete `identities` from `patchDetailStore` or move it into patchesStore across all patches if not too slow
+// TODO: delete delete `identities` from `patchDetailStore` or move it into patchStore across all patches if not too slow
 function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[] {
   const normalizedAuthors = reaction.authors.map((author) =>
     localIdentity.value?.id === author.id ? 'you' : author.alias ?? truncateDid(author.id),

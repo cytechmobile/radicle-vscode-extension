@@ -72,11 +72,9 @@ export function registerAllWebviewRestorators() {
               if (state) {
                 initializePanel(panel, webviewId, state)
               } else {
-                const patchesStore = usePatchStore()
-                await patchesStore.initStoreIfNeeded()
-                const foundPatch = patchesStore.findPatchByTitle(
-                  panel.title.replace(/…?$/, ''),
-                )
+                const patchStore = usePatchStore()
+                await patchStore.initStoreIfNeeded()
+                const foundPatch = patchStore.findPatchByTitle(panel.title.replace(/…?$/, ''))
 
                 if (!foundPatch) {
                   panel.dispose()
