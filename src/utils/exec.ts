@@ -145,7 +145,8 @@ function maybeEscapeArg(cliArg: string): string {
   /**
    * @see https://stackoverflow.com/questions/15783701/which-characters-need-to-be-escaped-when-using-bash/20053121#20053121
    */
-  const maybeEscapedArg = arg.includes("'") ? `'${arg.replace(/'/g, "'\\''")}'` : arg
+  const maybeEscapedArg =
+    arg.includes("'") || arg.includes(' ') ? `'${arg.replace(/'/g, "'\\''")}'` : arg
 
   return maybeEscapedArg
 }
