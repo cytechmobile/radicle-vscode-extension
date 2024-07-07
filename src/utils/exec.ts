@@ -85,39 +85,23 @@ export function exec(
       env: { ...process.env, ...opts.env },
     }
 
-    if (options?.args) {
-      const execResult = spawnSync(resolvedCmd, options.args.map(maybeEscapeArg), spawnOpts)
-      if (execResult.error || execResult.status) {
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
-        throw execResult.error ?? (execResult.stderr || execResult.stdout)
-      }
-
-      const parsedResult =
-        opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
-      if (opts.shouldLog ?? false) {
-        log(parsedResult, 'info', resolvedCmd)
-      }
-
-      return parsedResult
-    } else {
-      const execResult = spawnSync(resolvedCmd, spawnOpts)
-      if (execResult.error || execResult.status) {
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
-        throw execResult.error ?? (execResult.stderr || execResult.stdout)
-      }
-
-      const parsedResult =
-        opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
-      if (opts.shouldLog ?? false) {
-        log(
-          parsedResult,
-          'info',
-          `${resolvedCmd} ${options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''}`,
-        )
-      }
-
-      return parsedResult
+    const execResult = spawnSync(resolvedCmd, (opts.args ?? []).map(maybeEscapeArg), spawnOpts)
+    if (execResult.error || execResult.status) {
+      // eslint-disable-next-line @typescript-eslint/no-throw-literal
+      throw execResult.error ?? (execResult.stderr || execResult.stdout)
     }
+
+    const parsedResult =
+      opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
+    if (opts.shouldLog ?? false) {
+      log(
+        parsedResult,
+        'info',
+        `${resolvedCmd} ${options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''}`,
+      )
+    }
+
+    return parsedResult
   } catch (error) {
     const fullCmd = `${resolvedCmd} ${
       options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''
