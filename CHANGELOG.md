@@ -39,7 +39,7 @@
 
 ### 🩹 Fixes
 
-- **webview:** make webview restoration, for example switching to its panel after switching away from it in a way that would put it to the background, signigicantly more robust and less likely to result in an blank panel
+- **webview:** make webview restoration, for example switching to its panel after switching away from it in a way that would put it to the background, signigicantly more robust and much less likely to result in an blank panel
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from us or others
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.

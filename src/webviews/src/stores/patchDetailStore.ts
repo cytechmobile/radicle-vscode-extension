@@ -6,21 +6,27 @@ import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
 import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
-const vscode = getVscodeRef<PatchDetailWebviewInjectedState>()
-const initialExtraState = { patchEditForm: { title: '', descr: '', isEditing: false } }
+type SavedPanelState = Omit<PatchDetailWebviewInjectedState, 'id'> & typeof initialExtraState
+
+const vscode = getVscodeRef<SavedPanelState>()
+const initialExtraState = {
+  injectedStateIds: [] as number[],
+  patchEditForm: { title: '', descr: '', isEditing: false },
+}
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
+  const savedVscodeState = vscode.getState()
+  const shouldRejectInjectedState = savedVscodeState?.injectedStateIds.includes(
+    window.injectedWebviewState.id,
+  )
   const state = reactive({
     ...initialExtraState,
-    ...vscode.getState(),
-    ...window.injectedWebviewState,
-  })
-  /*
-   * Let's invalidate the injected state we just used since it's stale beyond now.
-   * Theoretically it should always get overwritten anyway but best to be safe.
-   * It's going to be preserved with setState anyway.
-   */
-  window.injectedWebviewState = undefined as unknown as PatchDetailWebviewInjectedState
+    ...savedVscodeState,
+    ...(shouldRejectInjectedState
+      ? undefined
+      : { ...window.injectedWebviewState, id: undefined }),
+  } as SavedPanelState)
+  state.injectedStateIds.push(window.injectedWebviewState.id)
 
   const patch = computed(() => state.state.patch)
 

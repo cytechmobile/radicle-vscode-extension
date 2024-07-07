@@ -11,7 +11,6 @@ setActivePinia(createPinia())
 // TODO: maninak on shift/alt + click on item button to open webview, open always in newtab
 
 export const allWebviewIds = ['webview-patch-detail'] as const
-export type PatchDetailWebviewId = (typeof allWebviewIds)[0]
 /**
  * A collection of all our custom panel types under a (hopefully) a better name.
  * @see WebviewPanel.viewType
@@ -25,7 +24,7 @@ export const useWebviewStore = defineStore('webviewStore', () => {
 
   function trackPanel(
     panel: WebviewPanel,
-    webviewId: PatchDetailWebviewId,
+    webviewId: 'webview-patch-detail',
     data: Patch['id'],
   ): void
   function trackPanel(panel: WebviewPanel, webviewId: WebviewId, data: unknown): void {

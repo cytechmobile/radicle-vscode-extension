@@ -1,6 +1,5 @@
 import { Uri, ViewColumn, type Webview, type WebviewPanel, commands, window } from 'vscode'
 import {
-  type PatchDetailWebviewId,
   type WebviewId,
   allWebviewIds,
   useEnvStore,
@@ -30,7 +29,7 @@ export async function createOrReuseWebviewPanel({
   /**
    * The identifier specifying the kind of the panel to be (re-)used.
    */
-  webviewId: PatchDetailWebviewId
+  webviewId: 'webview-patch-detail'
   /**
    * The data to be used for the UI rendered on the webview.
    */
@@ -99,7 +98,7 @@ export function registerAllWebviewRestorators() {
 }
 
 export async function getStateForWebview(
-  webviewId: PatchDetailWebviewId,
+  webviewId: 'webview-patch-detail',
   patchId: Patch['id'],
 ): Promise<PatchDetailWebviewInjectedState> // eslint-disable-next-line padding-line-between-statements, consistent-return
 export async function getStateForWebview(
@@ -126,7 +125,7 @@ export async function getStateForWebview(
 
       const state: PatchDetailWebviewInjectedState = {
         kind: webviewId,
-        id: patch.id,
+        id: Date.now(),
         state: {
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
