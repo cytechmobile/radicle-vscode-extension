@@ -10,9 +10,7 @@ setActivePinia(createPinia())
 export const usePatchStore = defineStore('patch', () => {
   const patches = ref<AugmentedPatch[]>()
   effect(() => {
-    patches.value
-      ? rerenderSomeItemsInPatchesView(patches.value)
-      : rerenderAllItemsInPatchesView()
+    patches.value && rerenderAllItemsInPatchesView()
   })
   effect(
     () => {
@@ -71,17 +69,13 @@ export const usePatchStore = defineStore('patch', () => {
       return { error }
     }
 
-    const outdatedPatch = findPatchById(fetchedPatch.id)
     const augmentedFetchedPatch = { ...fetchedPatch, ...{ lastFetchedTs: nowTs } }
-    if (outdatedPatch) {
-      // we use `Object.assign()` to keep the same object ref
-      Object.assign(outdatedPatch, augmentedFetchedPatch)
-    } else {
-      if (!patches.value) {
-        patches.value = []
-      }
-      patches.value.push(augmentedFetchedPatch)
-    }
+    patches.value = [
+      augmentedFetchedPatch,
+      ...(patches.value ? patches.value.filter((patch) => patch.id !== patchId) : []),
+    ]
+
+    rerenderSomeItemsInPatchesView(augmentedFetchedPatch)
 
     return {}
   }
