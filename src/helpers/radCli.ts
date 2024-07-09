@@ -244,15 +244,18 @@ export function getNodeSshKey(format: 'fingerprint' | 'full'): string | undefine
   return nodeSshKey
 }
 
-export function updatePatchTitleAndDescription({
-  patchId,
-  newTitle,
-  newDescr,
-}: {
-  patchId: Patch['id']
-  newTitle: string
-  newDescr: string
-}): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure' } {
+/**
+ * Performs edition of the patch's title and description on Radicle. Effectively
+ * it's editing the first patch revision.
+ *
+ * @returns An object with the outcome of the editing operation plus additional details
+ * when available
+ */
+export function editPatch(
+  patchId: Patch['id'],
+  newTitle: string,
+  newDescr: string,
+): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure' } {
   const rid = useEnvStore().currentRepoId
   if (!rid) {
     log('Unable to resolve current repo id in `updatePatchTitleAndDescription()`', 'error')

@@ -1,6 +1,7 @@
 export * from './checkOut'
 export * from './clipboard'
 export * from './httpdConnection'
+export * from './patch'
 export * from './patchesView'
 export * from './radCliInstallation'
 export * from './radicleIdentityAuth'
