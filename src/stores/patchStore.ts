@@ -10,7 +10,9 @@ setActivePinia(createPinia())
 export const usePatchStore = defineStore('patch', () => {
   const patches = ref<AugmentedPatch[]>()
   effect(() => {
-    patches.value && rerenderAllItemsInPatchesView()
+    patches.value
+      ? rerenderSomeItemsInPatchesView(patches.value)
+      : rerenderAllItemsInPatchesView()
   })
   effect(
     () => {
@@ -39,10 +41,6 @@ export const usePatchStore = defineStore('patch', () => {
     )
   })
 
-  function resetAllPatches() {
-    patches.value = undefined
-  }
-
   function findPatchById(partialOrWholeId: string) {
     const foundPatch = patches.value?.find((patch) => patch.id.includes(partialOrWholeId))
 
@@ -69,13 +67,18 @@ export const usePatchStore = defineStore('patch', () => {
       return { error }
     }
 
+    const existingPatch = findPatchById(fetchedPatch.id)
     const augmentedFetchedPatch = { ...fetchedPatch, ...{ lastFetchedTs: nowTs } }
-    patches.value = [
-      augmentedFetchedPatch,
-      ...(patches.value ? patches.value.filter((patch) => patch.id !== patchId) : []),
-    ]
-
-    rerenderSomeItemsInPatchesView(augmentedFetchedPatch)
+    if (existingPatch) {
+      // we use `Object.assign()` to keep the same object ref
+      Object.assign(existingPatch, augmentedFetchedPatch)
+      rerenderSomeItemsInPatchesView(existingPatch)
+    } else {
+      if (!patches.value) {
+        patches.value = []
+      }
+      patches.value.push(augmentedFetchedPatch)
+    }
 
     return {}
   }
@@ -128,6 +131,11 @@ export const usePatchStore = defineStore('patch', () => {
 
   async function initStoreIfNeeded() {
     return !lastFetchedAllTs.value && (await fetchAllPatches())
+  }
+
+  function resetAllPatches() {
+    patches.value = undefined
+    lastFetchedAllTs.value = undefined
   }
 
   const lastFetchedTs = computed(() => {
