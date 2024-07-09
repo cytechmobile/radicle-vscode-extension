@@ -28,6 +28,7 @@
     - if the form submission fails
   - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted during the same VS Code usage session
   - clicking "Save" executes a CLI command updating both the title and description from the form after trimming any leading and trailing whitespace.
+  - busy/progress indicator is shown in the Patches view while the patch-update command is executing
   - depending on the outcome of the patch edit command the user is be presented with
     - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
     - TODO: maninak keep? a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".

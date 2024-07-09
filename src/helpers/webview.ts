@@ -7,10 +7,15 @@ import {
   usePatchStore,
   useWebviewStore,
 } from '../stores'
-import { assertUnreachable, getNonce, shortenHash, showLog, truncateKeepWords } from '../utils'
+import { assertUnreachable, getNonce, showLog, truncateKeepWords } from '../utils'
 import { type notifyExtension, notifyWebview } from '../utils/webview-messaging'
 import type { Patch, PatchDetailWebviewInjectedState } from '../types'
-import { checkOutDefaultBranch, checkOutPatch, copyToClipboardAndNotify } from '../ux'
+import {
+  checkOutDefaultBranch,
+  checkOutPatch,
+  copyToClipboardAndNotify,
+  patchesViewId,
+} from '../ux'
 import { getRadicleIdentity, revealPatch, updatePatchTitleAndDescription } from '.'
 
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
@@ -252,18 +257,23 @@ async function handleMessageFromWebviewPatchDetail(
       break
     case 'updatePatchTitleAndDescription':
       // TODO: maninak move to UX
-      // TODO: maninak show loading notification while the cmd is running
       {
         const patchId = message.payload.patchId
+        const patchName = `"${truncateKeepWords(message.payload.newTitle, 20)}"`
 
-        const updateOp = updatePatchTitleAndDescription({ ...message.payload, patchId })
-        usePatchStore().refetchPatch(patchId)
+        const updateOp = await window.withProgress(
+          { location: { viewId: patchesViewId } },
+          // eslint-disable-next-line require-await, @typescript-eslint/require-await
+          async () => updatePatchTitleAndDescription({ ...message.payload, patchId }),
+        )
 
         const buttonOutput = 'Show Output'
+
         // TODO: maninak if error contains `ETIMEDOUT` offer to retry with longer timeout
         if (updateOp.outcome === 'failure') {
+          const patchName = `"${truncateKeepWords(message.payload.newTitle, 41)}"`
           window
-            .showErrorMessage(`Failed updating patch "${shortenHash(patchId)}"`, buttonOutput)
+            .showErrorMessage(`Failed updating patch ${patchName}`, buttonOutput)
             .then((userSelection) => {
               userSelection === buttonOutput && showLog()
             })
@@ -271,7 +281,8 @@ async function handleMessageFromWebviewPatchDetail(
           return
         }
 
-        const patchName = `"${truncateKeepWords(message.payload.newTitle, 20)}"`
+        usePatchStore().refetchPatch(patchId)
+
         if (updateOp.didAnnounce) {
           window.showInformationMessage(
             `Updated and announced patch ${patchName} to the network`,

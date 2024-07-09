@@ -3,7 +3,7 @@ import { effect } from '@vue/reactivity'
 import { usePatchStore } from '../stores'
 import { getTimeAgo } from '../utils'
 import type { AugmentedPatch } from '../types'
-import { patchesTreeDataProvider } from '../ux'
+import { patchesTreeDataProvider, patchesViewId } from '../ux'
 
 let patchesView: ReturnType<typeof registerPatchesView> | undefined
 
@@ -15,7 +15,7 @@ export function registerAllViews(): void {
 }
 
 function registerPatchesView() {
-  const patchesView = window.createTreeView('patches-view', {
+  const patchesView = window.createTreeView(patchesViewId, {
     treeDataProvider: patchesTreeDataProvider,
     showCollapseAll: true,
   })

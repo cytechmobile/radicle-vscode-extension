@@ -48,6 +48,12 @@ export interface FilechangeNode {
 }
 
 /**
+ * PRE-CONDITIONS:
+ * - Must match an entry defined in package.json's `contributes.views`
+ */
+export const patchesViewId = 'patches-view'
+
+/**
  * Event emitter dedicated to refreshing the Patch view's tree data.
  */
 const rerenderPatchesViewEventEmitter = new EventEmitter<
