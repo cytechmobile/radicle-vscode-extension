@@ -1,5 +1,3 @@
-import { log } from './log'
-
 /**
  * Asserts that the code is unreachable.
  *
@@ -35,18 +33,16 @@ export function assertUnreachable(x: never): never {
  *
  * Should be used as a last resort tool when inference cannot be otherwise leveraged for TS to
  * reach the same conclusion and as a better alternative to a type assertion (a.k.a. `as`).
+ *
+ * @example
+ * ```ts
+ * const maybeValue: string | undefined = getValue()
+ * assertIsDefined(maybeValue)
+ * // henceforth `maybeValue` is of type "string" as far as TS is concerned
+ * ```
  */
 export function assertIsDefined<T>(value: T): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
-    const error = new Error("Value was expected to be defined but isn't")
-    const caller = error.stack?.split('\n')[2]?.trim().split(' ')[1]
-
-    log(
-      error.stack ?? '',
-      'error',
-      `Value in "${caller}()" was expected to be defined but isn't`,
-    )
-
-    throw error
+    throw new Error("Value was expected to be defined but wasn't")
   }
 }

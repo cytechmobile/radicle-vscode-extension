@@ -1,4 +1,5 @@
 import { window } from 'vscode'
+import { assertIsDefined } from './assertions'
 
 // Accessible in the Output panel's dropdown, under the declared channel name
 const outputLog = window.createOutputChannel('Radicle')
@@ -40,4 +41,38 @@ export function log(
  */
 export function showLog(shouldFocusOutput = true): void {
   outputLog.show(!shouldFocusOutput)
+}
+
+/**
+ * Asserts that the value passed will be defined at runtime. Logs before
+ * throwing if the assertion fails.
+ *
+ * Best suited to let TypeScript know that an otherwise optional value is actually
+ * expected to be always defined at this point of the execution and onwards.
+ *
+ * Should be used as a last resort tool when inference cannot be otherwise leveraged for TS to
+ * reach the same conclusion and as a better alternative to a type assertion (a.k.a. `as`).
+ *
+ * @example
+ * ```ts
+ * const maybeValue: string | undefined = getValue()
+ * assertIsDefinedAndLog(maybeValue)
+ * // henceforth `maybeValue` is of type "string" as far as TS is concerned
+ * ```
+ */
+export function assert<T>(value: T): asserts value is NonNullable<T> {
+  try {
+    assertIsDefined(value)
+  } catch (err) {
+    const error = err as Error
+    const caller = error.stack?.split('\n')[3]?.trim().split(' ')[1]
+
+    log(
+      error.stack ?? '',
+      'error',
+      `Value in "${caller}()" was expected to be defined but wasn't`,
+    )
+
+    throw error
+  }
 }

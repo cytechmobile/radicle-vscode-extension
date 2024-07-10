@@ -62,21 +62,10 @@ export const useGitStore = defineStore('gitStore', () => {
     return (repoInfo.value = repo)
   }
 
-  const defaultBranch = ref<string>() // eslint-disable-next-line padding-line-between-statements
-  async function getDefaultBranch() {
-    // TODO: maninak delete?
-    if (defaultBranch.value) {
-      return defaultBranch.value
-    }
-
-    return (defaultBranch.value = (await getRepoInfo())?.defaultBranch)
-  }
-
   return {
     currentBranch,
     currentUpstreamBranch,
     refreshCurentBranch,
-    getDefaultBranch,
     getRepoInfo,
   }
 })

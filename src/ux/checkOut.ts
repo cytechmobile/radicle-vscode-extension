@@ -10,7 +10,7 @@ import { exec, log, shortenHash, showLog } from '../utils'
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export async function checkOutDefaultBranch(): Promise<boolean> {
-  const defaultBranch = await useGitStore().getDefaultBranch()
+  const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
   if (!defaultBranch) {
     return false
   }

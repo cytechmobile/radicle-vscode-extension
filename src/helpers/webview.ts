@@ -7,7 +7,7 @@ import {
   usePatchStore,
   useWebviewStore,
 } from '../stores'
-import { assertIsDefined, assertUnreachable, getNonce, truncateKeepWords } from '../utils'
+import { assert, assertUnreachable, getNonce, truncateKeepWords } from '../utils'
 import { type notifyExtension, notifyWebview } from '../utils/webview-messaging'
 import type { Patch, PatchDetailWebviewInjectedState } from '../types'
 import {
@@ -124,12 +124,12 @@ export async function getStateForWebview(
       const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
 
       const delegates = (await useGitStore().getRepoInfo())?.delegates
-      const defaultBranch = await useGitStore().getDefaultBranch()
-      assertIsDefined(delegates)
-      assertIsDefined(defaultBranch)
+      const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
+      assert(delegates)
+      assert(defaultBranch)
 
       const identity = getRadicleIdentity('DID')
-      assertIsDefined(identity)
+      assert(identity)
       const localIdentity = { id: identity.DID, alias: identity.alias }
 
       const state: PatchDetailWebviewInjectedState = {
