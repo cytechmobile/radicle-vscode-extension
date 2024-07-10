@@ -13,6 +13,7 @@
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
+    "rootDir": "..",
     "composite": true,
     "lib": ["ES2022", "DOM"],
     "noEmit": true,
