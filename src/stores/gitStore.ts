@@ -3,7 +3,8 @@ import { computed, ref } from '@vue/reactivity'
 import { fetchFromHttpd } from '../helpers'
 import { getCurrentGitBranch, getCurrentGitUpstreamBranch, log } from '../utils'
 import { notifyUserAboutFetchError } from '../ux'
-import { useEnvStore } from './'
+import type { Project } from '../types'
+import { useEnvStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -38,16 +39,15 @@ export const useGitStore = defineStore('gitStore', () => {
     currentBranchRecomputeSignal.value++
   }
 
-  const defaultBranch = ref<string>()
-
-  async function getDefaultBranch() {
-    if (defaultBranch.value) {
-      return defaultBranch.value
+  const repoInfo = ref<Project>() // eslint-disable-next-line padding-line-between-statements
+  async function getRepoInfo() {
+    if (repoInfo.value) {
+      return repoInfo.value
     }
 
     const rid = useEnvStore().currentRepoId
     if (!rid) {
-      log('Failed resolving RID of current repo while trying to `getDefaultBranch()`', 'error')
+      log('Failed resolving RID of current repo while trying to `getrepoInfo()`', 'error')
 
       return undefined
     }
@@ -59,9 +59,17 @@ export const useGitStore = defineStore('gitStore', () => {
       return undefined
     }
 
-    defaultBranch.value = repo.defaultBranch
+    return (repoInfo.value = repo)
+  }
 
-    return repo.defaultBranch
+  const defaultBranch = ref<string>() // eslint-disable-next-line padding-line-between-statements
+  async function getDefaultBranch() {
+    // TODO: maninak delete?
+    if (defaultBranch.value) {
+      return defaultBranch.value
+    }
+
+    return (defaultBranch.value = (await getRepoInfo())?.defaultBranch)
   }
 
   return {
@@ -69,5 +77,6 @@ export const useGitStore = defineStore('gitStore', () => {
     currentUpstreamBranch,
     refreshCurentBranch,
     getDefaultBranch,
+    getRepoInfo,
   }
 })

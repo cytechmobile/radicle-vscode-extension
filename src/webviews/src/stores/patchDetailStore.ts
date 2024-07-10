@@ -68,6 +68,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   })
 
   const timeLocale = computed(() => state.state.timeLocale)
+  const delegates = computed(() => state.state.delegates)
   const defaultBranch = computed(() => state.state.defaultBranch)
 
   const patchEditForm = computed(() => state.patchEditForm)
@@ -97,6 +98,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     authors,
     localIdentity,
     identities,
+    delegates,
     timeLocale,
     defaultBranch,
     patchEditForm,

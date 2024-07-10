@@ -4,7 +4,7 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { ref, watchEffect, nextTick } from 'vue'
+import { ref, watchEffect, nextTick, computed } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
@@ -14,7 +14,8 @@ import { notifyExtension } from 'extensionUtils/webview-messaging'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
-const { patch, firstRevision, patchEditForm } = storeToRefs(usePatchDetailStore())
+const { patch, firstRevision, patchEditForm, delegates, localIdentity } =
+  storeToRefs(usePatchDetailStore())
 
 interface VscodeTextAreaEvent {
   target: { _value: string }
@@ -55,6 +56,13 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
   formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
 }
 
+const canEditTitleAndDescr = computed(() => {
+  return [
+    ...(delegates.value ?? []).map((delegate) => delegate.id),
+    firstRevision.value.author.id,
+  ].includes(localIdentity.value?.id ?? '')
+})
+
 function beginPatchEditing() {
   patchEditForm.value.title ||= patch.value.title
   patchEditForm.value.descr ||= firstRevision.value.description
@@ -88,6 +96,7 @@ function discardPatchEditForm() {
       <div class="flex gap-x-2">
         <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <vscode-button
+          v-if="canEditTitleAndDescr"
           appearance="icon"
           title="Edit Patch Title and Description"
           class="opacity-0 focus:opacity-100 group-hover:opacity-100 sm:p-2"

@@ -126,6 +126,8 @@ export async function getStateForWebview(
       const identity = getRadicleIdentity('DID')
       const localIdentity = identity ? { id: identity.DID, alias: identity.alias } : undefined
 
+      const delegates = (await useGitStore().getRepoInfo())?.delegates
+
       const state: PatchDetailWebviewInjectedState = {
         kind: webviewId,
         id: Date.now(),
@@ -133,6 +135,7 @@ export async function getStateForWebview(
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
           localIdentity,
+          delegates,
           defaultBranch: await useGitStore().getDefaultBranch(),
         },
       }

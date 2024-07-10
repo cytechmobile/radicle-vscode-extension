@@ -1,4 +1,4 @@
-import type { AugmentedPatch } from '../types'
+import type { AugmentedPatch, Project } from '../types'
 
 export interface PatchDetailWebviewInjectedState {
   kind: 'webview-patch-detail'
@@ -7,6 +7,7 @@ export interface PatchDetailWebviewInjectedState {
     patch: AugmentedPatch & { isCheckedOut: boolean }
     timeLocale: Parameters<Date['toLocaleDateString']>['0']
     localIdentity?: { id: `did:key:${string}`; alias?: string }
+    delegates?: Project['delegates']
     defaultBranch?: string
   }
 }
