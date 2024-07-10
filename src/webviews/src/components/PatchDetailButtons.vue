@@ -44,7 +44,7 @@ function revealPatch() {
     <span slot="start" class="codicon codicon-check"></span>Check Out</vscode-button
   >
   <vscode-button
-    v-else-if="defaultBranch"
+    v-else
     class="self-center"
     appearance="secondary"
     title="Switch from the Git Branch Associated with This Patch to the Repo's Default Branch"

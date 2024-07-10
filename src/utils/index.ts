@@ -1,5 +1,5 @@
 export * from './askUser'
-export * from './assertUnreachable'
+export * from './assertions'
 export * from './exec'
 export * from './getNonce'
 export * from './git'

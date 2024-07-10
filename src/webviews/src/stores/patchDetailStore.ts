@@ -58,9 +58,9 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
     const uniqueIds = [
       ...new Map(
-        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers]
-          .filter(Boolean)
-          .map((identity) => [identity.id, identity]),
+        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers].map(
+          (identity) => [identity.id, identity],
+        ),
       ).values(),
     ]
 
@@ -98,8 +98,8 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     authors,
     localIdentity,
     identities,
-    delegates,
     timeLocale,
+    delegates,
     defaultBranch,
     patchEditForm,
   }

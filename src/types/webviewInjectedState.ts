@@ -6,8 +6,8 @@ export interface PatchDetailWebviewInjectedState {
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
     timeLocale: Parameters<Date['toLocaleDateString']>['0']
-    localIdentity?: { id: `did:key:${string}`; alias?: string }
-    delegates?: Project['delegates']
-    defaultBranch?: string
+    delegates: Project['delegates']
+    defaultBranch: string
+    localIdentity: { id: `did:key:${string}`; alias?: string }
   }
 }

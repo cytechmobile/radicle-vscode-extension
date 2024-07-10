@@ -56,11 +56,11 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
   formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
 }
 
-const canEditTitleAndDescr = computed(() => {
+const isAuthedToEditTitleAndDescr = computed(() => {
   return [
-    ...(delegates.value ?? []).map((delegate) => delegate.id),
+    ...delegates.value.map((delegate) => delegate.id),
     firstRevision.value.author.id,
-  ].includes(localIdentity.value?.id ?? '')
+  ].includes(localIdentity.value?.id)
 })
 
 function beginPatchEditing() {
@@ -96,7 +96,7 @@ function discardPatchEditForm() {
       <div class="flex gap-x-2">
         <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
         <vscode-button
-          v-if="canEditTitleAndDescr"
+          v-if="isAuthedToEditTitleAndDescr"
           appearance="icon"
           title="Edit Patch Title and Description"
           class="opacity-0 focus:opacity-100 group-hover:opacity-100 sm:p-2"

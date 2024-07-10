@@ -6,7 +6,7 @@
     "src/**/*.vue",
     "../helpers/patch.ts",
     "../types/**/*.ts",
-    "../utils/assertUnreachable.ts",
+    "../utils/assertions.ts",
     "../utils/string.ts",
     "../utils/time.ts",
     "../utils/webview-messaging.ts"

@@ -12,7 +12,7 @@ const { localIdentity } = storeToRefs(usePatchDetailStore())
 // TODO: delete delete `identities` from `patchDetailStore` or move it into patchStore across all patches if not too slow
 function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[] {
   const normalizedAuthors = reaction.authors.map((author) =>
-    localIdentity.value?.id === author.id ? 'you' : author.alias ?? truncateDid(author.id),
+    localIdentity.value.id === author.id ? 'you' : author.alias ?? truncateDid(author.id),
   )
 
   return normalizedAuthors
@@ -20,8 +20,8 @@ function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[]
 
 function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
   const normalizedAuthors = reaction.authors.map((author) =>
-    localIdentity.value?.id === author.id
-      ? `you (${truncateDid(localIdentity.value!.id)})`
+    localIdentity.value.id === author.id
+      ? `you (${truncateDid(localIdentity.value.id)})`
       : author.alias
         ? `${author.alias} (${truncateDid(author.id)})`
         : truncateDid(author.id),
@@ -67,7 +67,7 @@ function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
           class="font-mono"
           :class="{
             'involves-local-identity': reaction.authors.find(
-              (author) => localIdentity?.id === author.id,
+              (author) => localIdentity.id === author.id,
             ),
           }"
           >{{ reaction.authors.length }}</span
