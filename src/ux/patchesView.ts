@@ -13,7 +13,7 @@ import {
 } from 'vscode'
 import { extTempDir } from '../constants'
 import { useEnvStore, usePatchStore } from '../stores'
-import { fetchFromHttpd } from '../helpers'
+import { fetchFromHttpd, getFirstAndLatestRevisions } from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -25,7 +25,6 @@ import {
 import {
   assertUnreachable,
   capitalizeFirstLetter,
-  getFirstAndLatestRevisions,
   getIdentityAliasOrId,
   getTimeAgo,
   log,

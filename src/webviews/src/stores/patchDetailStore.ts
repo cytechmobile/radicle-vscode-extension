@@ -2,7 +2,7 @@ import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, reactive, watchEffect } from 'vue'
 import { type notifyWebview } from 'extensionUtils/webview-messaging'
-import { getFirstAndLatestRevisions } from 'extensionUtils/patch'
+import { getFirstAndLatestRevisions } from 'extensionHelpers/patch'
 import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
