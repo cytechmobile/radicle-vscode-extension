@@ -18,25 +18,27 @@ export const allWebviewIds = ['webview-patch-detail'] as const
 export type WebviewId = (typeof allWebviewIds)[number]
 
 export const useWebviewStore = defineStore('webviewStore', () => {
-  const panels = reactive<
-    Map<WebviewId, { panel: WebviewPanel; effectRunner: ReactiveEffectRunner }>
+  const store = reactive<
+    Map<`${WebviewId}_${string}`, { panel: WebviewPanel; effectRunner: ReactiveEffectRunner }>
   >(new Map())
 
-  function trackPanel(
+  function track(
     panel: WebviewPanel,
     webviewId: 'webview-patch-detail',
     data: Patch['id'],
   ): void
-  function trackPanel(panel: WebviewPanel, webviewId: WebviewId, data: unknown): void {
+  function track(panel: WebviewPanel, webviewId: WebviewId, data: unknown): void {
     switch (webviewId) {
       case 'webview-patch-detail':
         {
+          const patchId = data as Patch['id']
+
           const effectRunner = effect(async () => {
-            const stateForWebview = await getStateForWebview(webviewId, data as Patch['id'])
+            const stateForWebview = await getStateForWebview(webviewId, patchId)
             alignUiWithWebviewPatchDetailState(panel, stateForWebview)
           })
 
-          panels.set(panel.viewType as WebviewId, { panel, effectRunner })
+          store.set(`${panel.viewType as WebviewId}_${patchId}`, { panel, effectRunner })
         }
         break
       default:
@@ -44,21 +46,23 @@ export const useWebviewStore = defineStore('webviewStore', () => {
     }
   }
 
-  function untrackPanel(panel: WebviewPanel) {
-    const webviewId = panel.viewType as WebviewId
-
-    // TODO: maninak uncomment code below when we've fixed panels getting insta-disposed. Also shouldn't we keep multiple panel/effect entries per webviewId? I think we currently keep only the latest tracked panel.
+  function untrack(entryId: `webview-patch-detail_${Patch['id']}`): boolean
+  function untrack(entryId: `${WebviewId}_${string}`) {
+    // TODO: maninak uncomment code below when we've fixed panels getting insta-disposed.
     // const effectRunner = panels.get(webviewId)?.effectRunner
     // effectRunner && stop(effectRunner) // `stop` is from @vue/reactivity
 
-    return panels.delete(webviewId)
+    return store.delete(entryId)
   }
 
-  function findPanel(id: WebviewId) {
-    return panels.get(id)?.panel
+  function find(
+    entryId: `webview-patch-detail_${Patch['id']}`,
+  ): { panel: WebviewPanel; effectRunner: ReactiveEffectRunner } | undefined
+  function find(entryId: `${WebviewId}_${string}`) {
+    return store.get(entryId)
   }
 
-  return { trackPanel, untrackPanel, findPanel, isPanelDisposed }
+  return { track, untrack, find, isPanelDisposed }
 })
 
 function isPanelDisposed(panel: WebviewPanel) {

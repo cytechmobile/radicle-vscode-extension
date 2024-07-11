@@ -46,7 +46,7 @@ export async function createOrReuseWebviewPanel({
 }) {
   const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined
   const webviewStore = useWebviewStore()
-  const foundPanel = webviewStore.findPanel(webviewId)
+  const foundPanel = webviewStore.find(`${webviewId}_${data}`)?.panel
   const stateForWebview = await getStateForWebview(webviewId, data)
 
   if (foundPanel && !webviewStore.isPanelDisposed(foundPanel)) {
@@ -117,9 +117,7 @@ export async function getStateForWebview(
         await patchStore.refetchPatch(patchId)
         patch = patchStore.findPatchById(patchId)
       }
-      if (!patch) {
-        throw new Error(`Failed resolving patch when getting state for webview "${webviewId}"`)
-      }
+      assert(patch)
 
       const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
 
@@ -136,6 +134,13 @@ export async function getStateForWebview(
         kind: webviewId,
         id: Date.now(),
         state: {
+          // Spreading the patch definitely breaks original patch proxy's reactivity,
+          // but not doing it seems to have no positive effect (as of writing this)
+          // and may well also introduce regressions. A cleaner alternative could be
+          // to have a new additional property `isPatchCheckedOut` but a quick try
+          // with that introduced reactivity __regressions__ regarding patch checkout.
+          // Alas, a fight for another day... Perhaps when the webview insta-disposing
+          // issue is resolved? :thinking:
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
           delegates,
@@ -186,22 +191,21 @@ function initializePanel(
   webviewId: Parameters<typeof createOrReuseWebviewPanel>['0']['webviewId'],
   stateForWebview: Awaited<ReturnType<typeof getStateForWebview>>,
 ) {
+  const patchId = stateForWebview.state.patch.id
+
   const webviewStore = useWebviewStore()
-  webviewStore.trackPanel(panel, webviewId, stateForWebview.state.patch.id)
+  webviewStore.track(panel, webviewId, patchId)
 
   panel.onDidDispose(
-    () => webviewStore.untrackPanel(panel),
+    () => webviewStore.untrack(`${panel.viewType as WebviewId}_${patchId}`),
     undefined,
     useEnvStore().extCtx.subscriptions,
   )
 
   panel.onDidChangeViewState(async (viewChangedPanel) => {
     if (viewChangedPanel.webviewPanel.visible) {
-      const newSateForWebview = await getStateForWebview(
-        webviewId,
-        stateForWebview.state.patch.id,
-      )
-      alignUiWithWebviewPatchDetailState(viewChangedPanel.webviewPanel, newSateForWebview)
+      const newStateForWebview = await getStateForWebview(webviewId, patchId)
+      alignUiWithWebviewPatchDetailState(viewChangedPanel.webviewPanel, newStateForWebview)
     }
   })
 

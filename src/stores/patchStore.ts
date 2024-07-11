@@ -3,7 +3,7 @@ import { computed, effect, ref, unref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
-import { useEnvStore, useGitStore } from '.'
+import { useEnvStore, useGitStore, useWebviewStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -72,7 +72,9 @@ export const usePatchStore = defineStore('patch', () => {
     if (existingPatch) {
       // we use `Object.assign()` to keep the same object ref
       Object.assign(existingPatch, augmentedFetchedPatch)
+      // HACK: these below should be getting triggered reactively but they don't :/
       rerenderSomeItemsInPatchesView(existingPatch)
+      useWebviewStore().find(`webview-patch-detail_${patchId}`)?.effectRunner()
     } else {
       if (!patches.value) {
         patches.value = []

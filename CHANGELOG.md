@@ -33,17 +33,18 @@
   - busy/progress indicator is shown in the Patches view while the patch-update command is executing
   - depending on the outcome of the patch edit command the user is be presented with
     - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
-    - TODO: maninak keep? a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
+    - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
     - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout they are also offered to retry with an increased timeout
-- **patch-detail:** replace former "Reveal" button with a "Browse Diff" one that still reveals the patch in among the list of others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
+- **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $defaultBranch"
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 
 ### 🩹 Fixes
 
-- **webview:** make webview restoration, for example switching to its panel after switching away from it in a way that would put it to the background, signigicantly more robust and much less likely to result in an blank panel
-- **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from us or others
+- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch Detail view and the Patches view that each would occur only following very specific reproduction steps.
+- **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, _signigicantly_ more robust and much less likely to result in an blank panel
+- **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
 - **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the curently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
@@ -63,7 +64,7 @@
 
 ### 🏡 Chores
 
-- **store:** further progress on migrating formerly procedural state management to a reactive, declarative paradigm. See Chores of v0.4.0 for more info.
+- **store:** further progress on migrating formerly imperative state management to a declarative, reactive paradigm. See Chores of [v0.4.0](#v040-feb-28th-2024) for more info.
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
 - **deps:** upgrade to the latest version of codicons
