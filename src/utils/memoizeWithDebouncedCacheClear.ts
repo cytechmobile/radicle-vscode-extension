@@ -9,7 +9,7 @@ import debounce from 'lodash/debounce'
  * which should not be memoized for long e.g. because they aren't pure.
  *
  * @param func The function we want to memoize
- * @param {number} [wait=0] The minimum amount of time to wait after the last time a cache clear was
+ * @param {number} [cacheTtl=0] The minimum amount of time to wait after the last time a cache clear was
  * requested, before it actually happens
  *
  * @example
@@ -31,10 +31,13 @@ import debounce from 'lodash/debounce'
 // eslint-disable-next-line space-before-function-paren, @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
 export function memoizeWithDebouncedCacheClear<T extends (...args: any) => unknown>(
   func: T,
-  wait = 0,
+  cacheTtl = 0,
 ) {
   const memoizedFunc = memoize(func)
-  const debouncedClearMemoizedFuncCache = debounce(() => memoizedFunc.cache.clear?.(), wait)
+  const debouncedClearMemoizedFuncCache = debounce(
+    () => memoizedFunc.cache.clear?.(),
+    cacheTtl,
+  )
 
   return { memoizedFunc, debouncedClearMemoizedFuncCache }
 }
