@@ -197,17 +197,21 @@ function initializePanel(
   webviewStore.track(panel, webviewId, patchId)
 
   panel.onDidDispose(
-    () => webviewStore.untrack(`${panel.viewType as WebviewId}_${patchId}`),
+    () => webviewStore.untrack(`${webviewId}_${patchId}`),
     undefined,
     useEnvStore().extCtx.subscriptions,
   )
 
-  panel.onDidChangeViewState(async (viewChangedPanel) => {
-    if (viewChangedPanel.webviewPanel.visible) {
-      const newStateForWebview = await getStateForWebview(webviewId, patchId)
-      alignUiWithWebviewPatchDetailState(viewChangedPanel.webviewPanel, newStateForWebview)
-    }
-  })
+  panel.onDidChangeViewState(
+    async (viewChangedPanel) => {
+      if (viewChangedPanel.webviewPanel.visible) {
+        const newStateForWebview = await getStateForWebview(webviewId, patchId)
+        alignUiWithWebviewPatchDetailState(viewChangedPanel.webviewPanel, newStateForWebview)
+      }
+    },
+    undefined,
+    useEnvStore().extCtx.subscriptions,
+  )
 
   let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
   switch (webviewId) {
@@ -234,8 +238,10 @@ export function alignUiWithWebviewPatchDetailState(
   panel: WebviewPanel,
   state: PatchDetailWebviewInjectedState,
 ) {
-  notifyWebview({ command: 'updateState', payload: state }, panel.webview)
-  panel.title = getFormatedPanelTitle(state.state.patch.title)
+  if (!useWebviewStore().isPanelDisposed(panel)) {
+    notifyWebview({ command: 'updateState', payload: state }, panel.webview)
+    panel.title = getFormatedPanelTitle(state.state.patch.title)
+  }
 }
 
 async function handleMessageFromWebviewPatchDetail(
