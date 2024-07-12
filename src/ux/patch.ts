@@ -17,8 +17,6 @@ export async function updatePatchTitleAndDescription(
   newTitle: string,
   newDescr: string,
 ) {
-  const patchName = `"${truncateKeepWords(newTitle, 20)}"`
-
   const updateOp = await window.withProgress(
     { location: { viewId: patchesViewId } },
     // eslint-disable-next-line require-await, @typescript-eslint/require-await
@@ -29,7 +27,7 @@ export async function updatePatchTitleAndDescription(
 
   // TODO: maninak if error contains `ETIMEDOUT` offer to retry with longer timeout
   if (updateOp.outcome === 'failure') {
-    const patchName = `"${truncateKeepWords(newTitle, 41)}"`
+    const patchName = `"${truncateKeepWords(newTitle, 41)}"` // magic int to fit one line
     window
       .showErrorMessage(`Failed updating patch ${patchName}`, buttonOutput)
       .then((userSelection) => {
@@ -42,8 +40,10 @@ export async function updatePatchTitleAndDescription(
   usePatchStore().refetchPatch(patchId)
 
   if (updateOp.didAnnounce) {
+    const patchName = `"${truncateKeepWords(newTitle, 20)}"` // magic int to fit one line
     window.showInformationMessage(`Updated and announced patch ${patchName} to the network`)
   } else {
+    const patchName = `"${truncateKeepWords(newTitle, 60)}"`
     const buttonRetry = 'Retry Announce'
     const userSelection = await window.showWarningMessage(
       `Updated patch ${patchName} locally but failed announcing it to the network`,
