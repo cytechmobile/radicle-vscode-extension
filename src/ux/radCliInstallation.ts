@@ -6,7 +6,7 @@ import {
   getResolvedAbsolutePathToRadBinaryLocation,
   setConfig,
 } from '../helpers'
-import { log, setWhenClauseContext } from '../utils'
+import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 
 /**
  * Launches a branching flow of interactive steps helping the user troubleshoot their
@@ -73,9 +73,10 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
         value: getConfig('radicle.advanced.pathToRadBinary'),
         placeHolder: 'For example: /usr/bin/rad',
         validateInput: (input) => {
-          const isPathToRadCli = Boolean(
-            exec(`${input.trim()} --version`, { shouldLog: true }),
-          )
+          const trimmedInput = input.trim()
+          const isPathToRadCli =
+            isRealFsPath(trimmedInput) &&
+            exec(trimmedInput, { shouldLog: true })?.startsWith('rad ')
 
           return isPathToRadCli
             ? undefined

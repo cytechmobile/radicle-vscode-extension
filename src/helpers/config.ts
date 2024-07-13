@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { ConfigurationTarget, workspace } from 'vscode'
-import { assertUnreachable } from '../utils'
+import { assertUnreachable, isRealFsPath } from '../utils'
 import { exec } from '.'
 
 /**
@@ -107,7 +107,7 @@ export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
     return undefined
   }
 
-  const isBinaryAtAliasedPath = Boolean(exec(aliasedPath))
+  const isBinaryAtAliasedPath = isRealFsPath(aliasedPath) && Boolean(exec(aliasedPath))
 
   return isBinaryAtAliasedPath ? aliasedPath : undefined
 }

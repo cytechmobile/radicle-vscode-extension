@@ -1,6 +1,6 @@
 import type { Patch } from '../types'
 import { useEnvStore } from '../stores'
-import { assertUnreachable, log } from '../utils'
+import { assertUnreachable, isRealFsPath, log } from '../utils'
 import {
   exec,
   execRad,
@@ -74,9 +74,12 @@ export function isRadInitialized(): boolean {
  * is unsuccessful.
  */
 export function isRadicleIdentityKeyEncrypted(): boolean | undefined {
-  const keyInfo = exec(
-    `openssl base64 -d -in ${getResolvedPathToNodeHome()}/keys/radicle | strings`,
-  )
+  const pathToNodeHome = getResolvedPathToNodeHome()
+  if (!isRealFsPath(pathToNodeHome)) {
+    return undefined
+  }
+
+  const keyInfo = exec(`openssl base64 -d -in ${pathToNodeHome}/keys/radicle | strings`)
   if (!keyInfo) {
     return undefined
   }

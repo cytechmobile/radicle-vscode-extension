@@ -16,8 +16,11 @@ export async function checkOutDefaultBranch(): Promise<boolean> {
   }
 
   const didCheckoutDefaultBranch =
-    exec(`git checkout ${defaultBranch}`, { cwd: '$workspaceDir', shouldLog: true }) !==
-    undefined
+    exec('git', {
+      args: ['checkout', defaultBranch],
+      cwd: '$workspaceDir',
+      shouldLog: true,
+    }) !== undefined
   if (!didCheckoutDefaultBranch) {
     notifyUserGitCheckoutFailed(`Failed checking out branch "${defaultBranch}"`)
 

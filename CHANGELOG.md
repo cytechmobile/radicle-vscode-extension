@@ -43,7 +43,6 @@
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 - call Radicle CLI binary directly for rad commands without spawning a shell TODO: improve changelog items, maybe split them under perf, security etc?
-  - increased security via massively increased protection against shell injection attacks
   - increased performance via around 2x faster execution of most rad commands which results in all-around speed-up of the extension including its activation time TODO: measure and say how much
   - increased robustness by making our exposure to OS/shell-specific edge cases obsolete
   - improved user experience (UX) by
@@ -51,6 +50,10 @@
     - enabling streaming of rad command output to the extension's logs in the Output panel TODO: implement
   - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **config:** disallow usage of now unsupported relative paths for option `radicle.advanced.pathToRadBinary` in settings
+
+### 🛡️ Security Fixes
+
+- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or fogo spawning a shell altogether, massively enhancing protection against shell injection attacks
 
 ### 🩹 Fixes
 

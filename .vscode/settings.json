@@ -33,7 +33,8 @@
     "patch-detail",
     "cli",
     "webview",
-    "markdown"
+    "markdown",
+    "exec"
   ],
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.lineBreak": "\\n",
