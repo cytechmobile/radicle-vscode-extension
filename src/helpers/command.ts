@@ -55,9 +55,9 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
   cmdConfigs.forEach((cmdConfig) =>
     useEnvStore().extCtx.subscriptions.push(
       commands.registerCommand(cmdConfig.vscodeCmdId, async () => {
-        const didAuth = await launchAuthenticationFlow()
+        const isAuthed = await launchAuthenticationFlow()
         const didCmdSucceed =
-          didAuth &&
+          isAuthed &&
           (await window.withProgress(
             { location: { viewId: 'cli-commands' } },
             // eslint-disable-next-line require-await, @typescript-eslint/require-await

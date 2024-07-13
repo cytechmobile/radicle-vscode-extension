@@ -29,13 +29,14 @@
     - if VS Code is terminated or crashes (across sessions)
     - if the form submission fails
   - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted during the same VS Code usage session
-  - clicking "Save" executes a CLI command updating both the title and description from the form after trimming any leading and trailing whitespace.
+  - clicking "Save" executes a rad CLI command updating both the title and description from the form after trimming any leading and trailing whitespace
+  - if the user is not authed when clicking "Save", the Authentication Flow is launched interstitially, upon the successful completion of which the patch edit command will follow
   - busy/progress indicator is shown in the Patches view while the patch-update command is executing
   - depending on the outcome of the patch edit command the user is be presented with
     - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
     - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
     - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout (either nodejs or rad CLI-based) they are also offered to "Retry With Longer Timeout".
-      - if "Retry With Longer Timeout" is pressed the patch edit command will be retried with a two minute timeout
+      - if "Retry With Longer Timeout" is clicked, the patch edit command will be retried with a two minute timeout
       - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is insteaf shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
       - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
@@ -53,7 +54,7 @@
 
 ### 🛡️ Security Fixes
 
-- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or fogo spawning a shell altogether, massively enhancing protection against shell injection attacks
+- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, massively enhancing protection against shell injection attacks
 
 ### 🩹 Fixes
 

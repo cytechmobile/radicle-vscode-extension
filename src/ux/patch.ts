@@ -1,9 +1,10 @@
 import { ProgressLocation, commands, window } from 'vscode'
 import { editPatch } from '../helpers'
 import { usePatchStore } from '../stores'
-import { showLog, truncateKeepWords } from '../utils'
+import { log, showLog, truncateKeepWords } from '../utils'
 import type { Patch } from '../types'
 import { patchesViewId } from './patchesView'
+import { launchAuthenticationFlow } from './radicleIdentityAuth'
 
 // TODO: maninak when there are more mutations this should perhaps become more generic
 // `runPatchMutation` that takes a callback for the mutation to execute and depending on the
@@ -18,16 +19,22 @@ export async function updatePatchTitleAndDescription(
   newDescr: string,
   timeoutSeconds?: number,
 ) {
-  const updateOp = await window.withProgress(
-    (timeoutSeconds ?? -1) < 30
-      ? { location: { viewId: patchesViewId } }
-      : {
-          location: ProgressLocation.Window,
-          title: `‎$(radicle-logo) Updating patch "${truncateKeepWords(newTitle, 60)}"…`,
-        },
-    // eslint-disable-next-line require-await, @typescript-eslint/require-await
-    async () => editPatch(patchId, newTitle, newDescr, timeoutSeconds),
-  )
+  let updateOp: ReturnType<typeof editPatch>
+  const isAuthed = await launchAuthenticationFlow()
+  if (isAuthed) {
+    updateOp = await window.withProgress(
+      (timeoutSeconds ?? -1) < 30
+        ? { location: { viewId: patchesViewId } }
+        : {
+            location: ProgressLocation.Window,
+            title: `‎$(radicle-logo) Updating patch "${truncateKeepWords(newTitle, 60)}"…`,
+          },
+      // eslint-disable-next-line require-await, @typescript-eslint/require-await
+      async () => editPatch(patchId, newTitle, newDescr, timeoutSeconds),
+    )
+  } else {
+    updateOp = { outcome: 'failure', errorMsg: "User isn't authorized to perform action" }
+  }
 
   const buttonOutput = 'Show Output'
 
@@ -60,10 +67,10 @@ export async function updatePatchTitleAndDescription(
 
   usePatchStore().refetchPatch(patchId)
 
-  if (updateOp.didAnnounce) {
+  if (updateOp.outcome === 'success' && updateOp.didAnnounce) {
     const patchName = `"${truncateKeepWords(newTitle, 20)}"` // magic number to fit in one line
     window.showInformationMessage(`Updated and announced patch ${patchName} to the network`)
-  } else {
+  } else if (updateOp.outcome === 'success' && !updateOp.didAnnounce) {
     const patchName = `"${truncateKeepWords(newTitle, 60)}"`
     const buttonRetry = 'Retry Announce'
     const userSelection = await window.showWarningMessage(
@@ -77,4 +84,6 @@ export async function updatePatchTitleAndDescription(
       commands.executeCommand('radicle.announce')
     }
   }
+
+  log(new Error(' ').stack || '', 'error', "Reached no man's land")
 }
