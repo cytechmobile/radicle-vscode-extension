@@ -52,17 +52,13 @@ const notInWorkspaceFileWatchers = [
     },
   },
   // installation with script from https://radicle.xyz/install
-  (() => {
-    const radDir = getAbsolutePathToDefaultRadBinaryDirectory()
-    if (!radDir) {
-      return undefined
-    }
-
-    return {
-      glob: new RelativePattern(Uri.file(radDir), 'rad'),
-      handler: onRadCliInstallationChanged,
-    }
-  })(),
+  {
+    glob: new RelativePattern(
+      Uri.file(`${getAbsolutePathToDefaultRadBinaryDirectory()}/`),
+      'rad',
+    ),
+    handler: onRadCliInstallationChanged,
+  },
   // installation with package manager
   (() => {
     let pathToRadBinaryDirWithTrailingSlash: `${string}/` | undefined

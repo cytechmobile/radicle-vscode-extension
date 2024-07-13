@@ -34,11 +34,23 @@
   - depending on the outcome of the patch edit command the user is be presented with
     - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
     - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
-    - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout they are also offered to retry with an increased timeout
+    - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout (either nodejs or rad CLI-based) they are also offered to "Retry With Longer Timeout".
+      - if "Retry With Longer Timeout" is pressed the patch edit command will be retried with a two minute timeout
+      - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is insteaf shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
+      - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
-- **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $defaultBranch"
+- **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+- call Radicle CLI binary directly for rad commands without spawning a shell TODO: improve changelog items, maybe split them under perf, security etc?
+  - increased security via massively increased protection against shell injection attacks
+  - increased performance via around 2x faster execution of most rad commands which results in all-around speed-up of the extension including its activation time TODO: measure and say how much
+  - increased robustness by making our exposure to OS/shell-specific edge cases obsolete
+  - improved user experience (UX) by
+    - allowing rad commands to be cancelled mid-run instead of always waiting for them to complete, blocking the main JavaScript thread TODO: maninak verify the last thing is true
+    - enabling streaming of rad command output to the extension's logs in the Output panel TODO: implement
+  - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
+- **config:** disallow usage of now unsupported relative paths for option `radicle.advanced.pathToRadBinary` in settings
 
 ### 🩹 Fixes
 
@@ -56,6 +68,7 @@
 - **markdown:** ensure the language tag on (recognised) code blocks is still shown after re-rendering them
 - **markdown:** make the language tag on (recognised) code blocks not user-selectable
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
+- **log:** show the actual output of failed rad commands (which explains _why_ it failed...) instead of sometimes showing the CLI's progress-spinnner characters spammed en masse
 
 ### 💅 Refactors
 
@@ -69,6 +82,7 @@
 - **dev:** always use the latest pnpm version when verifying deps installation
 - **deps:** upgrade to the latest version of codicons
 - **log:** always log errors in the debug console too (during development), in addition to the Output panel
+- **deps:** bump minimum VS Code version requirement from 1.84.2 to 1.91.0
 
 ### 📖 Documentation
 
@@ -85,7 +99,7 @@
 - **commands:** show (apropriate kind per case of) busy/progress indicators when the extension is busy executing a long-running task, which especially when initiated by the user, would otherwise leave them confused as to what the state of the execution is (non-initiated, initiated, succesful, failed). ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
   Specifically:
   - "sync", "fetch" and "announce" commands (launched either via buttons or the Command Palette) show an inditerminate busy indicator on the "CLI COMMANDS" View as well as on the Radicle icon of the Activity bar
-  - "rad clone" command indicates on the Status bar whether the extension is fetching the list of cloneable repos or later in the flow actively performing the cloning
+  - "rad clone" command indicates on the Status Bar whether the extension is fetching the list of cloneable repos or later in the flow actively performing the cloning
   **commands:** increase "rad clone" timeout to 120 seconds and add explicit success and failure logs ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))

@@ -1,6 +1,5 @@
 export * from './askUser'
 export * from './assertions'
-export * from './exec'
 export * from './getNonce'
 export * from './git'
 export * from './log'

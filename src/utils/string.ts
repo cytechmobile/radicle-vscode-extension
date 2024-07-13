@@ -6,7 +6,7 @@ import type { DId, RadicleIdentity } from '../types'
 export function truncateKeepWords(
   str: string,
   maxLen: number,
-  appendEllipses = true,
+  truncationMarker = '…',
   separator = ' ',
 ): string {
   if (str.length <= maxLen) {
@@ -15,10 +15,12 @@ export function truncateKeepWords(
 
   const shortStr = str.substring(0, str.lastIndexOf(separator, maxLen))
 
-  if (appendEllipses) {
-    const shortStrMaybeWithEllipses = `${shortStr}${shortStr.length < str.length ? '…' : ''}`
+  if (truncationMarker) {
+    const shortStrMaybeWithMarker = `${shortStr}${
+      shortStr.length < str.length ? truncationMarker : ''
+    }`
 
-    return shortStrMaybeWithEllipses
+    return shortStrMaybeWithMarker
   }
 
   return shortStr

@@ -1,8 +1,8 @@
 import { window } from 'vscode'
 import { useGitStore } from '../stores'
-import { getRadCliRef } from '../helpers'
+import { exec, execRad } from '../helpers'
 import type { Patch } from '../types'
-import { exec, log, shortenHash, showLog } from '../utils'
+import { log, shortenHash, showLog } from '../utils'
 
 /**
  * Checks out the default Git branch of the Radicle repo currently open in the workspace.
@@ -33,12 +33,11 @@ export async function checkOutDefaultBranch(): Promise<boolean> {
  * @returns `true` if successful, otherwise `false`
  */
 export function checkOutPatch(patch: Pick<Patch, 'id'>): boolean {
-  const didCheckoutPatchBranch = Boolean(
-    exec(`${getRadCliRef()} patch checkout ${patch.id} --force`, {
-      cwd: '$workspaceDir',
-      shouldLog: true,
-    }),
-  )
+  const { errorCode } = execRad(['patch', 'checkout', patch.id, '--force'], {
+    cwd: '$workspaceDir',
+    shouldLog: true,
+  })
+  const didCheckoutPatchBranch = !errorCode
   if (!didCheckoutPatchBranch) {
     notifyUserGitCheckoutFailed(`Failed checking out Patch "${shortenHash(patch.id)}"`)
 

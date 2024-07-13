@@ -1,69 +1,27 @@
 import type { Patch } from '../types'
 import { useEnvStore } from '../stores'
-import { assertUnreachable, exec, log, memoizeWithDebouncedCacheClear } from '../utils'
+import { assertUnreachable, log } from '../utils'
 import {
-  defaultRadBinaryLocation,
+  exec,
+  execRad,
+  getAbsolutePathToDefaultRadBinaryLocation,
   getConfig,
   getResolvedPathToNodeHome,
-  getValidatedPathToDefaultRadBinaryLocation,
   getValidatedPathToRadBinaryWhenAliased,
 } from '.'
 
+// TODO: maninak move out to config or envStore as a computed, should defo be cached?
 /**
- * Non-debounced variant of `getRadCliRef()`.
+ * Resolves the absolute path to the Radicle CLI binary among user configured
+ * option, defaults etc.
  *
- * @see {@link getRadCliRef()} for more info
+ * @returns The path to the rad binary. It may or may not point to an existing working binary.
  */
-export function getRadCliRefNow(): string {
-  const configPathToNodeHome = getConfig('radicle.advanced.pathToNodeHome')
-  const envPathToNodeHome = configPathToNodeHome && `RAD_HOME=${configPathToNodeHome}`
-  const envVars = [envPathToNodeHome]
-  const parsedEnvVars = envVars.filter(Boolean).length ? `${envVars.join(' ')} ` : ''
-
-  const radCliRef =
-    getConfig('radicle.advanced.pathToRadBinary') ||
-    (Boolean(getValidatedPathToRadBinaryWhenAliased()) && 'rad') ||
-    defaultRadBinaryLocation
-
-  const radCliRefWithEnvVars = `${parsedEnvVars}${radCliRef}`
-
-  return radCliRefWithEnvVars
-}
-const {
-  memoizedFunc: memoizedGetRadCliRef,
-  debouncedClearMemoizedFuncCache: debouncedClearMemoizedGetRadCliRefCache,
-} = memoizeWithDebouncedCacheClear(getRadCliRefNow, 1_000)
-
-/**
- * Resolves a reference to Radicle CLI to be used for executing shell commands.
- *
- * Memoized for temporaly proximal calls!
- *
- * @returns Either the path to the `rad` binary defined manually by the user via
- * config, or otherwise just the string `"rad"`
- * @throws If the reference to the Radicle Cli binary was not resolved successfully
- */
-export function getRadCliRef() {
-  debouncedClearMemoizedGetRadCliRefCache()
-  const cliRef = memoizedGetRadCliRef()
-
-  return cliRef
-}
-
-/**
- * Resolves the absolute path to the _resolved_ Radicle CLI binary.
- *
- * @returns The path to the rad binary, if successfully resolved.
- */
-export function getRadCliPath(): string | undefined {
-  let radCliPath: string | undefined
-
-  if (isRadCliInstalled()) {
-    radCliPath =
-      getConfig('radicle.advanced.pathToRadBinary') ??
-      getValidatedPathToDefaultRadBinaryLocation() ??
-      getValidatedPathToRadBinaryWhenAliased()
-  }
+export function getResolvedAbsolutePathToRadBinaryLocation(): string {
+  const radCliPath =
+    getConfig('radicle.advanced.pathToRadBinary') ??
+    getValidatedPathToRadBinaryWhenAliased() ??
+    getAbsolutePathToDefaultRadBinaryLocation()
 
   return radCliPath
 }
@@ -74,24 +32,26 @@ export function getRadCliPath(): string | undefined {
  * @returns The version of the Radicle CLI, if successfully resolved.
  */
 export function getRadCliVersion(): string | undefined {
-  const version = exec(`${getRadCliRef()} --version`)
+  const { stdout: version } = execRad(['--version'])
   const semverRegex = /\d+\.\d+\S*/g // https://regexr.com/7bevi
   const semver = version?.match(semverRegex)?.[0]
 
   return semver ?? version
 }
 
+// TODO: maninak move to envStore and make reactive
 /**
  * Answers whether the Radicle CLI is installed and resolveable on the host OS.
  *
  * @returns `true` if found, otherwise `false`.
  */
 export function isRadCliInstalled(): boolean {
-  const isInstalled = Boolean(exec(getRadCliRef()))
+  const { stdout } = execRad()
 
-  return isInstalled
+  return Boolean(stdout)
 }
 
+// TODO: maninak move to envStore and make reactive
 /**
  * Answers whether the currently open workspace folder contains a Radicle initialized
  * git repository.
@@ -114,12 +74,9 @@ export function isRadInitialized(): boolean {
  * is unsuccessful.
  */
 export function isRadicleIdentityKeyEncrypted(): boolean | undefined {
-  const pathToNodeHome = getResolvedPathToNodeHome()
-  if (!pathToNodeHome) {
-    return undefined
-  }
-
-  const keyInfo = exec(`openssl base64 -d -in ${pathToNodeHome}/keys/radicle | strings`)
+  const keyInfo = exec(
+    `openssl base64 -d -in ${getResolvedPathToNodeHome()}/keys/radicle | strings`,
+  )
   if (!keyInfo) {
     return undefined
   }
@@ -173,9 +130,7 @@ export function getRadicleIdentity(
 ): { DID: `did:key:${string}`; alias: string; toString: () => string } | undefined
 export function getRadicleIdentity(
   format: 'NID',
-): { NID: string; alias: string; toString: () => string } | undefined
-
-// TODO: maninak call http://127.0.0.1:8080/api/v1/node to collect that info instead
+): { NID: string; alias: string; toString: () => string } | undefined // eslint-disable-next-line padding-line-between-statements
 export function getRadicleIdentity(format: 'DID' | 'NID') {
   let flag: string
   switch (format) {
@@ -189,14 +144,15 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
       assertUnreachable(format)
   }
 
-  // TODO: maninak reuse shell for second exec
-  const id = exec(`${getRadCliRef()} self ${flag}`)
-  const alias = exec(`${getRadCliRef()} self --alias`)
+  const { stdout: id } = execRad(['self', flag])
+  const { stdout: alias } = execRad(['self', '--alias'])
 
   if (!id || !alias) {
-    // assumes each Radicle identity always comes with an associated alias
+    // assumes each local Radicle identity always comes with an associated alias
     return undefined
   }
+
+  // TODO: maninak use proxies for id and alias and only really resolve each with a cli command when called for 2x perf?
 
   return { [format]: id, alias, toString: () => `"${alias}" "${id}"` } as const
 }
@@ -208,7 +164,7 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
  * @returns The RID if resolved, otherwise `undefined`.
  */
 export function getCurrentRepoId(): `rad:${string}` | undefined {
-  const maybeRid = exec(`${getRadCliRef()} inspect --rid`, { cwd: '$workspaceDir' })
+  const { stdout: maybeRid } = execRad(['inspect', '--rid'], { cwd: '$workspaceDir' })
 
   function isStrARid(str: string | undefined): str is `rad:${string}` {
     return Boolean(str?.startsWith('rad:'))
@@ -239,9 +195,9 @@ export function getNodeSshKey(format: 'fingerprint' | 'full'): string | undefine
       assertUnreachable(format)
   }
 
-  const nodeSshKey = exec(`${getRadCliRef()} self ${flag}`)
+  const { stdout: nodeSshKey, errorCode } = execRad(['self', flag])
 
-  return nodeSshKey
+  return errorCode ? undefined : nodeSshKey
 }
 
 /**
@@ -255,32 +211,28 @@ export function editPatch(
   patchId: Patch['id'],
   newTitle: string,
   newDescr: string,
-): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure' } {
+  timeoutSeconds?: number,
+): { outcome: 'success'; didAnnounce: boolean } | { outcome: 'failure'; errorMsg: string } {
   const rid = useEnvStore().currentRepoId
   if (!rid) {
-    log('Unable to resolve current repo id in `updatePatchTitleAndDescription()`', 'error')
+    const errorMsg = 'Unable to resolve current repo id in `updatePatchTitleAndDescription()`'
+    log(errorMsg, 'error')
 
-    return { outcome: 'failure' }
+    return { outcome: 'failure', errorMsg }
   }
 
-  const successMsg = exec(getRadCliRef(), {
-    args: [
-      'patch',
-      'edit',
-      patchId,
-      '--repo',
-      rid,
-      '--message',
-      newTitle,
-      '--message',
-      newDescr,
-    ],
-    shouldLog: true,
-  })
+  // TODO: maninak authguard
+  const execResult = execRad(
+    ['patch', 'edit', patchId, '--repo', rid, '--message', newTitle, '--message', newDescr],
+    { shouldLog: true, timeout: timeoutSeconds ? timeoutSeconds * 1000 : undefined },
+  )
 
-  if (!successMsg) {
-    return { outcome: 'failure' }
-  } else if (successMsg?.includes('Node is stopped')) {
+  if (execResult.errorCode) {
+    return {
+      outcome: 'failure',
+      errorMsg: `${execResult.stdout}\n${execResult.stderr}\n${execResult.errorCode}`,
+    }
+  } else if (execResult.stdout?.includes('Node is stopped')) {
     return { outcome: 'success', didAnnounce: false }
   } else {
     return { outcome: 'success', didAnnounce: true }

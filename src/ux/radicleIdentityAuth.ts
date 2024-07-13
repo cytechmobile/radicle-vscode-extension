@@ -1,10 +1,11 @@
 import { InputBoxValidationSeverity, window } from 'vscode'
-import { askUser, exec, log, showLog } from '../utils'
+import { askUser, log, showLog } from '../utils'
 import { useEnvStore } from '../stores'
 import {
   composeNodeHomePathMsg,
+  exec,
+  execRad,
   getNodeSshKey,
-  getRadCliRef,
   getRadicleIdentity,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
@@ -51,12 +52,12 @@ function composeRadAuthSuccessMsg(
   return msg
 }
 
-function authenticate({ alias, passphrase }: { alias?: string; passphrase: string }): boolean {
-  const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
-  const didAuth = exec(`${getRadCliRef()} auth ${radAuthCmdSuffix}`, {
+function authenticate({ alias, passphrase }: { passphrase: string; alias?: string }): boolean {
+  const radAuthCmdSuffix = alias ? `--alias ${alias}` : undefined
+  const { errorCode } = execRad(['auth', radAuthCmdSuffix].filter(Boolean), {
     env: { RAD_PASSPHRASE: passphrase },
   })
-  if (!didAuth) {
+  if (errorCode) {
     return false
   }
 
@@ -94,8 +95,8 @@ export async function launchAuthenticationFlow(
     const storedPass = await secrets.get(radicleId.DID)
 
     if (storedPass) {
-      const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: storedPass } })
-      if (didAuth) {
+      const { errorCode } = execRad(['auth'], { env: { RAD_PASSPHRASE: storedPass } })
+      if (!errorCode) {
         log(composeRadAuthSuccessMsg('didAutoUnlockId'), 'info')
 
         return true
@@ -135,8 +136,8 @@ export async function launchAuthenticationFlow(
         prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
         placeHolder: '************',
         validateInput: (input) => {
-          const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: input } })
-          if (!didAuth) {
+          const { errorCode } = execRad(['auth'], { env: { RAD_PASSPHRASE: input } })
+          if (errorCode) {
             return "Current input isn't the correct passphrase to unlock the identity."
           }
 

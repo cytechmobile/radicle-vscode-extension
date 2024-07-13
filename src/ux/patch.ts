@@ -1,4 +1,4 @@
-import { commands, window } from 'vscode'
+import { ProgressLocation, commands, window } from 'vscode'
 import { editPatch } from '../helpers'
 import { usePatchStore } from '../stores'
 import { showLog, truncateKeepWords } from '../utils'
@@ -16,23 +16,44 @@ export async function updatePatchTitleAndDescription(
   patchId: Patch['id'],
   newTitle: string,
   newDescr: string,
+  timeoutSeconds?: number,
 ) {
   const updateOp = await window.withProgress(
-    { location: { viewId: patchesViewId } },
+    (timeoutSeconds ?? -1) < 30
+      ? { location: { viewId: patchesViewId } }
+      : {
+          location: ProgressLocation.Window,
+          title: `‎$(radicle-logo) Updating patch "${truncateKeepWords(newTitle, 60)}"…`,
+        },
     // eslint-disable-next-line require-await, @typescript-eslint/require-await
-    async () => editPatch(patchId, newTitle, newDescr),
+    async () => editPatch(patchId, newTitle, newDescr, timeoutSeconds),
   )
 
   const buttonOutput = 'Show Output'
 
-  // TODO: maninak if error contains `ETIMEDOUT` offer to retry with longer timeout
   if (updateOp.outcome === 'failure') {
-    const patchName = `"${truncateKeepWords(newTitle, 41)}"` // magic int to fit one line
-    window
-      .showErrorMessage(`Failed updating patch ${patchName}`, buttonOutput)
-      .then((userSelection) => {
-        userSelection === buttonOutput && showLog()
-      })
+    let didTimeOut = false
+    if (updateOp.errorMsg.replaceAll(' ', '').toLowerCase().includes('timedout')) {
+      didTimeOut = true
+    }
+
+    const buttonRetryHarder = 'Retry With Longer Timeout'
+    const patchName = `"${truncateKeepWords(newTitle, 41)}"` // magic number to fit in one line
+    const userSelection = await window.showErrorMessage(
+      `Failed updating patch ${patchName}`,
+      ...[didTimeOut ? buttonRetryHarder : undefined, buttonOutput].filter(Boolean),
+    )
+
+    if (userSelection === buttonOutput) {
+      showLog()
+    } else if (userSelection === buttonRetryHarder) {
+      await updatePatchTitleAndDescription(
+        patchId,
+        newTitle,
+        newDescr,
+        (timeoutSeconds ?? 60) * 4,
+      )
+    }
 
     return
   }
@@ -40,7 +61,7 @@ export async function updatePatchTitleAndDescription(
   usePatchStore().refetchPatch(patchId)
 
   if (updateOp.didAnnounce) {
-    const patchName = `"${truncateKeepWords(newTitle, 20)}"` // magic int to fit one line
+    const patchName = `"${truncateKeepWords(newTitle, 20)}"` // magic number to fit in one line
     window.showInformationMessage(`Updated and announced patch ${patchName} to the network`)
   } else {
     const patchName = `"${truncateKeepWords(newTitle, 60)}"`

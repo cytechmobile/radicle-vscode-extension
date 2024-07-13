@@ -1,6 +1,7 @@
 export * from './command'
 export * from './config'
 export * from './configWatcher'
+export * from './exec'
 export * from './fetchFromHttpd'
 export * from './fileWatcher'
 export * from './logExtensionActivated'

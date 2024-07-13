@@ -1,4 +1,4 @@
-import { exec } from '.'
+import { exec } from '../helpers'
 
 /**
  * Returns `true` if the opened workspace folder is an initialized git repo, otherwise `false`.
