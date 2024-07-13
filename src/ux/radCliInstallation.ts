@@ -1,11 +1,6 @@
 import { type QuickPickItem, Uri, env, window } from 'vscode'
-import {
-  exec,
-  getConfig,
-  getRadCliVersion,
-  getResolvedAbsolutePathToRadBinaryLocation,
-  setConfig,
-} from '../helpers'
+import { useEnvStore } from 'src/stores'
+import { exec, getConfig, getRadCliVersion, setConfig } from '../helpers'
 import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 
 /**
@@ -102,10 +97,10 @@ export function validateRadCliInstallation(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): boolean {
   const radVersion = getRadCliVersion()
-  const isRadInstalled = Boolean(getRadCliVersion())
+  const isRadInstalled = Boolean(radVersion)
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
 
-  const radPath = getResolvedAbsolutePathToRadBinaryLocation()
+  const radPath = useEnvStore().resolvedAbsolutePathToRadBinary
 
   if (isRadInstalled) {
     const msg = `Using Radicle CLI v${radVersion} from "${radPath}"`

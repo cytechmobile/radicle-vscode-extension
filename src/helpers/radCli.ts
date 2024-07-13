@@ -1,30 +1,7 @@
 import type { Patch } from '../types'
 import { useEnvStore } from '../stores'
 import { assertUnreachable, isRealFsPath, log } from '../utils'
-import {
-  exec,
-  execRad,
-  getAbsolutePathToDefaultRadBinaryLocation,
-  getConfig,
-  getResolvedPathToNodeHome,
-  getValidatedPathToRadBinaryWhenAliased,
-} from '.'
-
-// TODO: maninak move out to config or envStore as a computed, should defo be cached?
-/**
- * Resolves the absolute path to the Radicle CLI binary among user configured
- * option, defaults etc.
- *
- * @returns The path to the rad binary. It may or may not point to an existing working binary.
- */
-export function getResolvedAbsolutePathToRadBinaryLocation(): string {
-  const radCliPath =
-    getConfig('radicle.advanced.pathToRadBinary') ??
-    getValidatedPathToRadBinaryWhenAliased() ??
-    getAbsolutePathToDefaultRadBinaryLocation()
-
-  return radCliPath
-}
+import { exec, execRad, getResolvedPathToNodeHome } from '.'
 
 /**
  * Resolves the version of the resolved Radicle CLI binary, if possible in semver format.
@@ -154,8 +131,6 @@ export function getRadicleIdentity(format: 'DID' | 'NID') {
     // assumes each local Radicle identity always comes with an associated alias
     return undefined
   }
-
-  // TODO: maninak use proxies for id and alias and only really resolve each with a cli command when called for 2x perf?
 
   return { [format]: id, alias, toString: () => `"${alias}" "${id}"` } as const
 }

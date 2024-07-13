@@ -2,7 +2,12 @@ import vscode, { type ExtensionContext } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ShallowRef, computed, ref, shallowRef } from '@vue/reactivity'
 import { convertLocaleFromLibcToBcp47 } from '../utils'
-import { getCurrentRepoId } from '../helpers'
+import {
+  getAbsolutePathToDefaultRadBinaryLocation,
+  getConfig,
+  getCurrentRepoId,
+  getValidatedPathToRadBinaryWhenAliased,
+} from '../helpers'
 
 setActivePinia(createPinia())
 
@@ -44,11 +49,32 @@ export const useEnvStore = defineStore('envStore', () => {
     currentRepoIdRecomputeSignal.value++
   }
 
+  const radPathRecomputeSignal = ref(0)
+  /**
+   * The most preferable absolute path to the Radicle CLI binary resolved among user configured
+   * option, default path etc. It may or may not actually point to an existing working binary.
+   */
+  const resolvedAbsolutePathToRadBinary = computed(() => {
+    void radPathRecomputeSignal.value
+    const radCliPath =
+      getConfig('radicle.advanced.pathToRadBinary') ??
+      getValidatedPathToRadBinaryWhenAliased() ??
+      getAbsolutePathToDefaultRadBinaryLocation()
+
+    return radCliPath
+  })
+
+  function refreshResolvedAbsolutePathToRadBinary() {
+    radPathRecomputeSignal.value++
+  }
+
   return {
     extCtx,
     setExtensionContext,
     timeLocaleBcp47,
     currentRepoId,
     refreshCurrentRepoId,
+    resolvedAbsolutePathToRadBinary,
+    refreshResolvedAbsolutePathToRadBinary,
   }
 })

@@ -5,9 +5,9 @@ import {
   spawnSync,
 } from 'node:child_process'
 import type { XOR } from 'ts-xor'
+import { useEnvStore } from 'src/stores'
 import { getWorkspaceFolderPaths, log, truncateKeepWords } from '../utils'
 import { getConfig } from './config'
-import { getResolvedAbsolutePathToRadBinaryLocation } from './radCli'
 
 /**
  * Executes a shell command and returns a promise that resolves with the stdout of the
@@ -202,7 +202,7 @@ export function execRad(
     }
 
     const stdout = execFileSync(
-      getResolvedAbsolutePathToRadBinaryLocation(),
+      useEnvStore().resolvedAbsolutePathToRadBinary,
       args,
       spawnOpts,
     ).trim()
