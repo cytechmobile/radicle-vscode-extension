@@ -1,13 +1,13 @@
-import type { AugmentedPatch } from '../types'
-import type { Patch } from './httpd'
+import type { AugmentedPatch, Project } from '../types'
 
-// TODO: maninak rename as PatchDetailWebviewState to account for more webviews in the future?
-export interface PatchDetailInjectedState {
+export interface PatchDetailWebviewInjectedState {
   kind: 'webview-patch-detail'
-  id: Patch['id']
+  id: number
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
-    localIdentity?: { id: `did:key:${string}`; alias?: string }
     timeLocale: Parameters<Date['toLocaleDateString']>['0']
+    delegates: Project['delegates']
+    defaultBranch: string
+    localIdentity: { id: `did:key:${string}`; alias?: string }
   }
 }

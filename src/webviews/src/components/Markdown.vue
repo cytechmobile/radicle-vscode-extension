@@ -1,11 +1,32 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { defineProps, nextTick, onMounted, onUpdated } from 'vue'
 import Markdown from 'vue3-markdown-it'
 import 'highlight.js/styles/vs2015.css'
 
 defineProps<{ source: string }>()
 // TODO: add control to toggle raw/parsed markdown
+
+function showLangTagOnCodeBlocks() {
+  nextTick(() => {
+    document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
+      const highlightedCodeElClass = highlightedCodeEl.classList.value
+        .replace('hljs ', '')
+        .replaceAll(/language-/g, '')
+        .trim()
+
+      const langTagEl = document.createElement('span')
+      langTagEl.textContent = highlightedCodeElClass
+      langTagEl.classList.add('langTag')
+      langTagEl.style.userSelect = 'none'
+
+      highlightedCodeEl.insertBefore(langTagEl, highlightedCodeEl.firstChild)
+    })
+  })
+}
+
+onMounted(showLangTagOnCodeBlocks)
+onUpdated(showLangTagOnCodeBlocks)
 </script>
 
 <template>
@@ -34,8 +55,41 @@ defineProps<{ source: string }>()
     @apply max-w-max;
   }
 
+  ol {
+    @apply ps-[26px];
+
+    ul {
+      list-style-type: square;
+    }
+  }
+
+  ul {
+    @apply ps-[18px];
+    list-style-type: disc;
+
+    li {
+      @apply pl-2;
+    }
+  }
+
+  ul ul {
+    list-style-type: circle;
+  }
+
+  ul ul ul {
+    list-style-type: square;
+  }
+
+  ul ul ul ul {
+    list-style-type: disc;
+  }
+
+  ul ul ul ul ul {
+    list-style-type: circle;
+  }
+
   ul.contains-task-list {
-    @apply list-none -ml-[14px];
+    @apply list-none -ml-[30px];
 
     .task-list-item-checkbox {
       @apply align-middle;
@@ -44,6 +98,10 @@ defineProps<{ source: string }>()
 
   p:has(img):not(:has(:not(img))) {
     max-width: unset;
+  }
+
+  hr {
+    @apply ml-0;
   }
 
   code.hljs[class*='language-'] {

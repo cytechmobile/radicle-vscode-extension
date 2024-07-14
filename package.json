@@ -18,7 +18,7 @@
   "bugs": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues",
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.84.2",
+    "vscode": "^1.91.0",
     "npm": "^7"
   },
   "keywords": [
@@ -91,7 +91,7 @@
       },
       {
         "command": "radicle.clone",
-        "title": "Clone a Radicle Project Locally",
+        "title": "Clone a Radicle Repository Locally",
         "shortTitle": "Clone",
         "category": "Radicle",
         "icon": "$(rad-clone)"
@@ -143,7 +143,7 @@
       },
       {
         "command": "radicle.checkoutDefaultBranch",
-        "title": "Check Out Project's Default Git Branch",
+        "title": "Check Out Current Repository's Default Git Branch",
         "shortTitle": "Check Out Default",
         "category": "Radicle",
         "icon": "$(home)"
@@ -459,8 +459,10 @@
           "radicle.advanced.pathToRadBinary": {
             "scope": "machine-overridable",
             "type": "string",
+            "pattern": "^$|^(/[^/ ]*)+/?$",
+            "patternErrorMessage": "Current input doesn't match any supported path patterns.",
             "default": "",
-            "markdownDescription": "Specifies the path to the Radicle CLI binary stored on your machine. \n\nLeave empty to use the default path or if command `rad` is already globally available in your shell."
+            "markdownDescription": "Specifies the _absolute_ path to the Radicle CLI binary stored on your machine. \n\nLeave empty to use the default path for your OS or if command `rad` is already globally available in your shell."
           },
           "radicle.advanced.pathToNodeHome": {
             "scope": "machine-overridable",
@@ -472,6 +474,7 @@
             "scope": "machine-overridable",
             "type": "string",
             "default": "http://127.0.0.1:8080",
+            "format": "uri",
             "markdownDescription": "Specifies the endpoint to the root of the Radicle HTTP API connected to a seed node. This is commonly served via `radicle-httpd` and can be any Fully-Qualified Domain Name (FQDN) i.e. $protocol://$host:$port/$path ."
           }
         }
@@ -492,10 +495,10 @@
     "@antfu/eslint-config": "^0.39.8",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/javascript-time-ago": "^2.0.8",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.6",
     "@types/node": "^20.11.21",
-    "@types/vscode": "^1.84.2",
-    "esbuild": "^0.19.12",
+    "@types/vscode": "^1.91.0",
+    "esbuild": "^0.23.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-prettier-vue": "^4.2.0",

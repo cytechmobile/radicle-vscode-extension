@@ -1,14 +1,13 @@
 import { type QuickPickItem, Uri, env, window } from 'vscode'
 import {
-  defaultRadBinaryLocation,
+  exec,
+  getAbsolutePathToDefaultRadBinaryDirectory,
   getConfig,
-  getRadCliPath,
-  getRadCliRef,
   getRadCliVersion,
-  isRadCliInstalled,
   setConfig,
 } from '../helpers'
-import { exec, log, setWhenClauseContext } from '../utils'
+import { isRealFsPath, log, setWhenClauseContext } from '../utils'
+import { useEnvStore } from '../stores'
 
 /**
  * Launches a branching flow of interactive steps helping the user troubleshoot their
@@ -73,17 +72,19 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
     const typedInPath = (
       await window.showInputBox({
         title,
-        prompt: 'Please enter the path to the Radicle CLI binary stored on your machine.',
+        prompt:
+          'Please enter the absolute path to the Radicle CLI binary stored on your machine.',
         value: getConfig('radicle.advanced.pathToRadBinary'),
-        placeHolder: `For example: ${defaultRadBinaryLocation}`,
+        placeHolder: `For example: ${getAbsolutePathToDefaultRadBinaryDirectory()}`,
         validateInput: (input) => {
-          const isPathToRadCli = Boolean(
-            exec(`${input.trim()} --version`, { shouldLog: true }),
-          )
+          const trimmedInput = input.trim()
+          const isPathToRadCli =
+            isRealFsPath(trimmedInput) &&
+            exec(trimmedInput, { shouldLog: true })?.startsWith('rad ')
 
           return isPathToRadCli
             ? undefined
-            : 'Input must be a valid path to a Radicle CLI binary!'
+            : "Input isn't a valid path to a known Radicle CLI binary."
         },
         ignoreFocusOut: true,
       })
@@ -104,24 +105,22 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
 export function validateRadCliInstallation(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): boolean {
-  const isRadInstalled = isRadCliInstalled()
+  const radVersion = getRadCliVersion()
+  const isRadInstalled = Boolean(radVersion)
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
+  isRadInstalled && useEnvStore().refreshCurrentRepoId() // TODO: maninak remove this when isRadInstalled is in a store and make currentRepoId depend on it
+
+  const radPath = useEnvStore().resolvedAbsolutePathToRadBinary
 
   if (isRadInstalled) {
-    const cliVersion = getRadCliVersion()
-    const cliPath = getRadCliPath()
-    const msg = `Using Radicle CLI v${cliVersion} from "${cliPath}"`
-
+    const msg = `Using Radicle CLI v${radVersion} from "${radPath}"`
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
     return true
   }
 
-  log(
-    `Failed resolving Radicle CLI binary. Tried invoking it in the shell as "${getRadCliRef()}".`,
-    'error',
-  )
+  log(`Failed resolving Radicle CLI binary. Tried spawning it from "${radPath}".`, 'error')
 
   return false
 }

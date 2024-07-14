@@ -5,14 +5,14 @@ import {
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from '../ux/'
-import { getExtensionContext, usePatchStore } from '../stores'
+import { useEnvStore, usePatchStore } from '../stores'
 import { type ExtensionConfig, resetHttpdConnection } from '.'
 
 function onConfigChange(
   configKey: keyof ExtensionConfig,
   onChangeCallback: Parameters<typeof workspace.onDidChangeConfiguration>['0'],
 ): void {
-  getExtensionContext().subscriptions.push(
+  useEnvStore().extCtx.subscriptions.push(
     workspace.onDidChangeConfiguration((ev) => {
       if (ev.affectsConfiguration(configKey)) {
         onChangeCallback(ev)
@@ -32,6 +32,7 @@ const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToRadBinary',
     onConfigChange: () => {
+      useEnvStore().refreshResolvedAbsolutePathToRadBinary()
       validateRadCliInstallation()
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
     },

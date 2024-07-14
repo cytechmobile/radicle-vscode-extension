@@ -1,7 +1,7 @@
 import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import type { XOR } from 'ts-xor'
 import type { DiffResponse, HttpdRoot, Patch, PatchStatus, Project } from '../types'
-import { log } from '../utils'
+import { log, removeTrailingSlashes } from '../utils'
 import { getConfig } from './config'
 
 // if we ever use a proper reactive global store like pinia, `doFetch()` should move in there
@@ -97,8 +97,7 @@ export async function fetchFromHttpd(
 export async function fetchFromHttpd(
   path: '/',
   options?: FetchOptions<'json'> & { method?: 'GET' },
-): FetchFromHttpdReturn<HttpdRoot>
-
+): FetchFromHttpdReturn<HttpdRoot> // eslint-disable-next-line padding-line-between-statements
 export async function fetchFromHttpd<Data extends object>(
   path: string,
   options?: FetchOptions<'json'>,
@@ -149,11 +148,4 @@ function getResolvedHttpdRootUrl(): string {
   const resolvedUrl = removeTrailingSlashes(`${httpEndpoint}${apiRootPath}`)
 
   return resolvedUrl
-}
-
-function removeTrailingSlashes(str: string): string {
-  const trailingSlashesRegex = /\/*$/
-  const strWithoutTrailingSlashes = str.replace(trailingSlashesRegex, '')
-
-  return strWithoutTrailingSlashes
 }

@@ -1,4 +1,4 @@
-import { getExtensionContext } from '../stores'
+import { useEnvStore } from '../stores'
 import { log } from '../utils'
 
 /**
@@ -9,7 +9,7 @@ export function logExtensionActivated(): void {
     displayName?: string
     version?: string
   }
-  const packageJson = getExtensionContext().extension.packageJSON as PackageJson
+  const packageJson = useEnvStore().extCtx.extension.packageJSON as PackageJson
   const name = packageJson.displayName
   const version = packageJson.version
 

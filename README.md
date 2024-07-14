@@ -4,7 +4,7 @@
 
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/radicle-ide-plugins-team.radicle?include_prereleases&style=flat&logo=radicle&logoColor=FFFFFF&color=7FBA00)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
 [![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/radicle-ide-plugins-team.radicle?style=flat&logo=radicle&logoColor=FFFFFF&color=66B3FF)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
-[![rad: - z2BdUVZFvHdxRfdtGJQdSH2kyXNM6](https://img.shields.io/static/v1?label=rad%3A&message=z2BdUVZFvHdxRfdtGJQdSH2kyXNM6&color=6666FF&logo=radicle&logoColor=FFFFFF)](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
+[![rad: - z3Makm6fsQQXmpSFE43DZqwupaEhk](https://img.shields.io/static/v1?label=rad%3A&message=z3Makm6fsQQXmpSFE43DZqwupaEhk&color=6666FF&logo=radicle&logoColor=FFFFFF)](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
 
 A VS Code extension bringing support for the Radicle network to your IDE.
 

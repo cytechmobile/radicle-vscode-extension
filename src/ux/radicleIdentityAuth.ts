@@ -1,10 +1,11 @@
 import { InputBoxValidationSeverity, window } from 'vscode'
-import { askUser, exec, log, showLog } from '../utils'
-import { getExtensionContext } from '../stores'
+import { askUser, log, showLog } from '../utils'
+import { useEnvStore } from '../stores'
 import {
   composeNodeHomePathMsg,
+  exec,
+  execRad,
   getNodeSshKey,
-  getRadCliRef,
   getRadicleIdentity,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
@@ -51,17 +52,17 @@ function composeRadAuthSuccessMsg(
   return msg
 }
 
-function authenticate({ alias, passphrase }: { alias?: string; passphrase: string }): boolean {
-  const radAuthCmdSuffix = alias ? `--alias ${alias}` : ''
-  const didAuth = exec(`${getRadCliRef()} auth ${radAuthCmdSuffix}`, {
+function authenticate({ alias, passphrase }: { passphrase: string; alias?: string }): boolean {
+  const radAuthCmdSuffix = alias ? `--alias ${alias}` : undefined
+  const { errorCode } = execRad(['auth', radAuthCmdSuffix].filter(Boolean), {
     env: { RAD_PASSPHRASE: passphrase },
   })
-  if (!didAuth) {
+  if (errorCode) {
     return false
   }
 
   const radicleId = getRadicleIdentity('DID')
-  radicleId && getExtensionContext().secrets.store(radicleId.DID, passphrase)
+  radicleId && useEnvStore().extCtx.secrets.store(radicleId.DID, passphrase)
 
   const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'didCreatedId' : 'didUnlockId')
   log(authSuccessMsg, 'info')
@@ -85,7 +86,7 @@ export async function launchAuthenticationFlow(
   }
 
   const radicleId = getRadicleIdentity('DID')
-  const secrets = getExtensionContext().secrets
+  const secrets = useEnvStore().extCtx.secrets
 
   /* Attempt automatic authentication */
 
@@ -94,8 +95,8 @@ export async function launchAuthenticationFlow(
     const storedPass = await secrets.get(radicleId.DID)
 
     if (storedPass) {
-      const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: storedPass } })
-      if (didAuth) {
+      const { errorCode } = execRad(['auth'], { env: { RAD_PASSPHRASE: storedPass } })
+      if (!errorCode) {
         log(composeRadAuthSuccessMsg('didAutoUnlockId'), 'info')
 
         return true
@@ -135,8 +136,8 @@ export async function launchAuthenticationFlow(
         prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
         placeHolder: '************',
         validateInput: (input) => {
-          const didAuth = exec(`${getRadCliRef()} auth`, { env: { RAD_PASSPHRASE: input } })
-          if (!didAuth) {
+          const { errorCode } = execRad(['auth'], { env: { RAD_PASSPHRASE: input } })
+          if (errorCode) {
             return "Current input isn't the correct passphrase to unlock the identity."
           }
 
@@ -294,7 +295,7 @@ export function deAuthCurrentRadicleIdentity(): boolean {
     return false
   }
 
-  radicleId && getExtensionContext().secrets.delete(radicleId.DID)
+  radicleId && useEnvStore().extCtx.secrets.delete(radicleId.DID)
 
   const msg = `De-authenticated Radicle identity ${radicleId}${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)

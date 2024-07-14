@@ -10,14 +10,14 @@ import Reactions from '@/components/Reactions.vue'
 provideVSCodeDesignSystem().register(vsCodeButton())
 
 const { patch, authors, firstRevision } = storeToRefs(usePatchDetailStore())
-// TODO: add an (orange?) info icon next to authors who's DID is seen for the first time among revisions of patches of this project with text "This is the first time a user with this DID submits a patch revision in this project"
+// TODO: add an (orange?) info icon next to authors who's DID is seen for the first time among revisions of patches of this repo with text "This is the first time a user with this DID submits a patch revision in this repo"
 </script>
 
 <template>
   <aside>
     <pre
       v-if="patch.isCheckedOut"
-      title="The Git branch associated with this Radicle patch is currently checked out"
+      title="The Git Branch Associated with This Radicle Patch Is Currently Checked Out"
       class="min-h-[1.5em]"
     >
 ✓ Checked out</pre

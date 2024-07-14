@@ -1,6 +1,6 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
-import { getExtensionContext, usePatchStore } from '../stores'
-import { exec, log, showLog } from '../utils'
+import { useEnvStore, usePatchStore } from '../stores'
+import { log, showLog } from '../utils'
 import {
   type FilechangeNode,
   checkOutDefaultBranch,
@@ -12,7 +12,7 @@ import {
   troubleshootRadCliInstallation,
 } from '../ux'
 import type { AugmentedPatch, Patch } from '../types'
-import { createOrShowWebview, getRadCliRef } from '.'
+import { createOrReuseWebviewPanel, execRad } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -25,27 +25,26 @@ interface RadCliCmdMappedToVscodeCmdId {
    */
   vscodeCmdId: `radicle.${string}`
   /**
-   * The actual sub-command to be run by the Radicle CLI. Value will be appended to a
-   * reference to the rad binary before executing it in the shell.
+   * The actual params for rad command.
    *
-   * @example 'sync --fetch' // `rad sync --fetch`
+   * @example ['sync, '--fetch'] // `rad sync --fetch`
    */
-  radCliCmdSuffix: string
+  radCliCmdParams: string[]
 }
 
 const simpleRadCliCmdsToRegisterInVsCode: Parameters<
   typeof registerSimpleRadCliCmdsAsVsCodeCmds
 >['0'] = [
-  { vscodeCmdId: 'radicle.sync', radCliCmdSuffix: 'sync' },
-  { vscodeCmdId: 'radicle.fetch', radCliCmdSuffix: 'sync --fetch' },
-  { vscodeCmdId: 'radicle.announce', radCliCmdSuffix: 'sync --announce' },
+  { vscodeCmdId: 'radicle.sync', radCliCmdParams: ['sync'] },
+  { vscodeCmdId: 'radicle.fetch', radCliCmdParams: ['sync', '--fetch'] },
+  { vscodeCmdId: 'radicle.announce', radCliCmdParams: ['sync', '--announce'] },
 ] as const
 
 function registerVsCodeCmd(
   vscodeCmdId: RadCliCmdMappedToVscodeCmdId['vscodeCmdId'],
   action: Parameters<typeof commands.registerCommand>['1'],
 ): void {
-  getExtensionContext().subscriptions.push(commands.registerCommand(vscodeCmdId, action))
+  useEnvStore().extCtx.subscriptions.push(commands.registerCommand(vscodeCmdId, action))
 }
 
 function registerSimpleRadCliCmdsAsVsCodeCmds(
@@ -54,30 +53,33 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
   const button = 'Show Output'
 
   cmdConfigs.forEach((cmdConfig) =>
-    getExtensionContext().subscriptions.push(
+    useEnvStore().extCtx.subscriptions.push(
       commands.registerCommand(cmdConfig.vscodeCmdId, async () => {
-        const didAuth = await launchAuthenticationFlow()
+        const isAuthed = await launchAuthenticationFlow()
         const didCmdSucceed =
-          didAuth &&
+          isAuthed &&
           (await window.withProgress(
             { location: { viewId: 'cli-commands' } },
             // eslint-disable-next-line require-await, @typescript-eslint/require-await
             async () => {
-              return Boolean(
-                exec(`${getRadCliRef()} ${cmdConfig.radCliCmdSuffix}`, {
-                  cwd: '$workspaceDir',
-                  shouldLog: true,
-                }),
-              )
+              const { errorCode } = execRad(cmdConfig.radCliCmdParams, {
+                cwd: '$workspaceDir',
+                shouldLog: true,
+              })
+
+              return !errorCode
             },
           ))
 
         didCmdSucceed
           ? window.showInformationMessage(
-              `Command "rad ${cmdConfig.radCliCmdSuffix}" succeeded`,
+              `Command "rad ${cmdConfig.radCliCmdParams.join(' ')}" succeeded`,
             )
           : window
-              .showErrorMessage(`Command "rad ${cmdConfig.radCliCmdSuffix}" failed`, button)
+              .showErrorMessage(
+                `Command "rad ${cmdConfig.radCliCmdParams.join(' ')}" failed`,
+                button,
+              )
               .then((userSelection) => {
                 userSelection === button && showLog()
               })
@@ -150,6 +152,10 @@ export function registerAllCommands(): void {
     },
   )
   registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
-    createOrShowWebview(getExtensionContext(), patch)
+    createOrReuseWebviewPanel({
+      webviewId: 'webview-patch-detail',
+      data: patch.id,
+      proposedPanelTitle: patch.title,
+    })
   })
 }

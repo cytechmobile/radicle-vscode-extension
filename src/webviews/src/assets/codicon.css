@@ -1,9 +1,9 @@
 /*
   This is a vendored copy of the codicon.css build file pulled directly from:
-  https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.css
+  https://www.npmjs.com/package/@vscode/codicons?activeTab=code
+  Look for the file in the `dist` directory.
 
-  The same applies to the required codicon.ttf build file as well:
-  https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.ttf
+  The same applies to the required codicon.ttf file that needs to be updated in tandem.
 
   Local edits vs original:
   - `src: url('@/assets/codicon.ttf') format('truetype');`
@@ -585,7 +585,11 @@
 .codicon-blank:before { content: "\ec03" }
 .codicon-heart-filled:before { content: "\ec04" }
 .codicon-map:before { content: "\ec05" }
+.codicon-map-horizontal:before { content: "\ec05" }
+.codicon-fold-horizontal:before { content: "\ec05" }
 .codicon-map-filled:before { content: "\ec06" }
+.codicon-map-horizontal-filled:before { content: "\ec06" }
+.codicon-fold-horizontal-filled:before { content: "\ec06" }
 .codicon-circle-small:before { content: "\ec07" }
 .codicon-bell-slash:before { content: "\ec08" }
 .codicon-bell-slash-dot:before { content: "\ec09" }
@@ -626,4 +630,12 @@
 .codicon-run-coverage:before { content: "\ec2c" }
 .codicon-run-all-coverage:before { content: "\ec2d" }
 .codicon-coverage:before { content: "\ec2e" }
+.codicon-github-project:before { content: "\ec2f" }
+.codicon-map-vertical:before { content: "\ec30" }
+.codicon-fold-vertical:before { content: "\ec30" }
+.codicon-map-vertical-filled:before { content: "\ec31" }
+.codicon-fold-vertical-filled:before { content: "\ec31" }
+.codicon-go-to-search:before { content: "\ec32" }
+.codicon-percentage:before { content: "\ec33" }
+.codicon-sort-percentage:before { content: "\ec33" }
 .codicon-git-fetch:before { content: "\f101" }

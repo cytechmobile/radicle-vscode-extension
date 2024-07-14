@@ -1,6 +1,10 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { ref } from '@vue/reactivity'
-import { getCurrentGitBranch, getCurrentGitUpstreamBranch } from '../utils'
+import { computed, ref } from '@vue/reactivity'
+import { fetchFromHttpd } from '../helpers'
+import { getCurrentGitBranch, getCurrentGitUpstreamBranch, log } from '../utils'
+import { notifyUserAboutFetchError } from '../ux'
+import type { Project } from '../types'
+import { useEnvStore } from '.'
 
 setActivePinia(createPinia())
 
@@ -19,17 +23,49 @@ setActivePinia(createPinia())
  */
 
 export const useGitStore = defineStore('gitStore', () => {
-  const currentBranch = ref<string | undefined>()
-  const currentUpstreamBranch = ref<string | undefined>()
+  const currentBranchRecomputeSignal = ref(0)
+  const currentBranch = computed(() => {
+    void currentBranchRecomputeSignal.value
+
+    return getCurrentGitBranch()
+  })
+  const currentUpstreamBranch = computed(() => {
+    void currentBranchRecomputeSignal.value
+
+    return getCurrentGitUpstreamBranch()
+  })
 
   function refreshCurentBranch() {
-    currentBranch.value = getCurrentGitBranch()
-    currentUpstreamBranch.value = getCurrentGitUpstreamBranch()
+    currentBranchRecomputeSignal.value++
+  }
+
+  const repoInfo = ref<Project>() // eslint-disable-next-line padding-line-between-statements
+  async function getRepoInfo() {
+    if (repoInfo.value) {
+      return repoInfo.value
+    }
+
+    const rid = useEnvStore().currentRepoId
+    if (!rid) {
+      log('Failed resolving RID of current repo while trying to `getrepoInfo()`', 'error')
+
+      return undefined
+    }
+
+    const { data: repo, error } = await fetchFromHttpd(`/projects/${rid}`)
+    if (error) {
+      notifyUserAboutFetchError(error)
+
+      return undefined
+    }
+
+    return (repoInfo.value = repo)
   }
 
   return {
     currentBranch,
-    refreshCurentBranch,
     currentUpstreamBranch,
+    refreshCurentBranch,
+    getRepoInfo,
   }
 })

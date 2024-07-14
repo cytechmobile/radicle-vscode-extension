@@ -4,21 +4,23 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
+    "../helpers/patch.ts",
     "../types/**/*.ts",
-    "../utils/assertUnreachable.ts",
-    "../utils/patch.ts",
+    "../utils/assertions.ts",
     "../utils/string.ts",
     "../utils/time.ts",
     "../utils/webview-messaging.ts"
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
+    "rootDir": "..",
     "composite": true,
     "lib": ["ES2022", "DOM"],
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "extensionHelpers/*": ["../helpers/*"],
       "extensionUtils/*": ["../utils/*"]
     }
   }

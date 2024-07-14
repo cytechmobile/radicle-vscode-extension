@@ -1,4 +1,3 @@
-export * from './context'
 export * from './envStore'
 export * from './gitStore'
 export * from './patchStore'

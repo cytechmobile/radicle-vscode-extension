@@ -1,21 +1,25 @@
 import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed, effect, ref } from '@vue/reactivity'
+import { computed, effect, ref, unref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
-import { fetchFromHttpd, memoizedGetCurrentProjectId } from '../helpers'
+import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
-import { useGitStore } from '.'
+import { useEnvStore, useGitStore, useWebviewStore } from '.'
 
 setActivePinia(createPinia())
 
 export const usePatchStore = defineStore('patch', () => {
   const patches = ref<AugmentedPatch[]>()
-
   effect(() => {
-    // TODO: diff prev-vs-new and re-render only those patches that got updated?
     patches.value
       ? rerenderSomeItemsInPatchesView(patches.value)
       : rerenderAllItemsInPatchesView()
   })
+  effect(
+    () => {
+      useEnvStore().currentRepoId && resetAllPatches()
+    },
+    { lazy: true },
+  )
 
   // TODO: maninak do similar and use latest commit to resolve the currently checkout out revision?
   const prevCheckedOutPatch = ref<AugmentedPatch>()
@@ -37,12 +41,20 @@ export const usePatchStore = defineStore('patch', () => {
     )
   })
 
-  function resetAllPatches() {
-    patches.value = undefined
+  function findPatchById(partialOrWholeId: string) {
+    const foundPatch = patches.value?.find((patch) => patch.id.includes(partialOrWholeId))
+
+    return foundPatch
+  }
+
+  function findPatchByTitle(partialTitle: string) {
+    const foundPatch = patches.value?.find((patch) => patch.title.includes(partialTitle))
+
+    return foundPatch
   }
 
   async function refetchPatch(patchId: Patch['id']) {
-    const rid = memoizedGetCurrentProjectId() // TODO: maninak get from a store instead
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       return { error: new Error('Failed resolving RID') }
     }
@@ -55,11 +67,14 @@ export const usePatchStore = defineStore('patch', () => {
       return { error }
     }
 
-    const outdatedPatch = findPatchById(fetchedPatch.id)
+    const existingPatch = findPatchById(fetchedPatch.id)
     const augmentedFetchedPatch = { ...fetchedPatch, ...{ lastFetchedTs: nowTs } }
-    if (outdatedPatch) {
+    if (existingPatch) {
       // we use `Object.assign()` to keep the same object ref
-      Object.assign(outdatedPatch, augmentedFetchedPatch)
+      Object.assign(existingPatch, augmentedFetchedPatch)
+      // HACK: these below should be getting triggered reactively but they don't :/
+      rerenderSomeItemsInPatchesView(existingPatch)
+      useWebviewStore().find(`webview-patch-detail_${patchId}`)?.effectRunner()
     } else {
       if (!patches.value) {
         patches.value = []
@@ -70,27 +85,25 @@ export const usePatchStore = defineStore('patch', () => {
     return {}
   }
 
-  function findPatchById(partialOrWholeId: string) {
-    const foundPatch = patches.value?.find((patch) => patch.id.includes(partialOrWholeId))
-
-    return foundPatch
-  }
-
-  const lastFetchedTs = ref<number>()
+  const lastFetchedAllTs = ref<number>()
   let inProgressRequest: Promise<unknown> | undefined
   async function fetchAllPatches() {
     if (inProgressRequest) {
-      await inProgressRequest
+      try {
+        await inProgressRequest
 
-      return true
+        return true
+      } catch {
+        return false
+      }
     }
 
-    const rid = memoizedGetCurrentProjectId() // TODO: maninak get from a store instead
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       return false
     }
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
-    lastFetchedTs.value = nowTs
+    lastFetchedAllTs.value = nowTs
     // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
     const promisedResponses = Promise.all([
       fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft', perPage: 500 } }),
@@ -119,14 +132,28 @@ export const usePatchStore = defineStore('patch', () => {
   }
 
   async function initStoreIfNeeded() {
-    return !patches.value && (await fetchAllPatches())
+    return !lastFetchedAllTs.value && (await fetchAllPatches())
   }
+
+  function resetAllPatches() {
+    patches.value = undefined
+    lastFetchedAllTs.value = undefined
+  }
+
+  const lastFetchedTs = computed(() => {
+    const ts = unref(
+      patches.value?.length === 1 ? patches.value[0]?.lastFetchedTs : lastFetchedAllTs,
+    )
+
+    return ts
+  })
 
   return {
     patches,
     checkedOutPatch,
     lastFetchedTs,
     findPatchById,
+    findPatchByTitle,
     resetAllPatches,
     refetchPatch,
     initStoreIfNeeded,

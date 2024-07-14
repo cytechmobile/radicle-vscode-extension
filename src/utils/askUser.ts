@@ -197,7 +197,6 @@ export async function askUser<
           'error',
           'requestUserInput()',
         )
-        console.error(error)
       }
     } finally {
       disposables.forEach((disposable) => {
