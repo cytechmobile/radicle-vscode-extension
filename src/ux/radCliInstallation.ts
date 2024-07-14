@@ -1,5 +1,5 @@
 import { type QuickPickItem, Uri, env, window } from 'vscode'
-import { useEnvStore } from 'src/stores'
+import { useEnvStore } from '../stores'
 import { exec, getConfig, getRadCliVersion, setConfig } from '../helpers'
 import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 

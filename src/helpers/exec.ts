@@ -5,7 +5,7 @@ import {
   spawnSync,
 } from 'node:child_process'
 import type { XOR } from 'ts-xor'
-import { useEnvStore } from 'src/stores'
+import { useEnvStore } from '../stores'
 import { getWorkspaceFolderPaths, log, truncateKeepWords } from '../utils'
 import { getConfig } from './config'
 
