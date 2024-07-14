@@ -32,7 +32,9 @@
     "patch-list",
     "patch-detail",
     "cli",
-    "webview"
+    "webview",
+    "markdown",
+    "exec"
   ],
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.lineBreak": "\\n",

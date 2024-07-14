@@ -3,7 +3,7 @@ import { effect } from '@vue/reactivity'
 import { usePatchStore } from '../stores'
 import { getTimeAgo } from '../utils'
 import type { AugmentedPatch } from '../types'
-import { patchesTreeDataProvider } from '../ux'
+import { patchesTreeDataProvider, patchesViewId } from '../ux'
 
 let patchesView: ReturnType<typeof registerPatchesView> | undefined
 
@@ -15,12 +15,16 @@ export function registerAllViews(): void {
 }
 
 function registerPatchesView() {
-  const patchesView = window.createTreeView('patches-view', {
+  const patchesView = window.createTreeView(patchesViewId, {
     treeDataProvider: patchesTreeDataProvider,
     showCollapseAll: true,
   })
 
   const updatePatchesViewDescription = effect(() => {
+    if (!patchesView.visible) {
+      return
+    }
+
     const patchCount = usePatchStore().patches?.length
     const formattedPatchCount = typeof patchCount === 'number' ? `${patchCount} · ` : ''
 
@@ -38,6 +42,9 @@ function registerPatchesView() {
   return patchesView
 }
 
-export function revealPatch(patch: AugmentedPatch): void {
-  patchesView?.reveal(patch)
+export function revealPatch(
+  patch: AugmentedPatch,
+  options?: Parameters<NonNullable<typeof patchesView>['reveal']>['1'],
+): void {
+  patchesView?.reveal(patch, options)
 }

@@ -1,12 +1,13 @@
-import type { AugmentedPatch } from '../types'
-import type { Patch } from './httpd'
+import type { AugmentedPatch, Project } from '../types'
 
 export interface PatchDetailWebviewInjectedState {
-  kind: 'webview-patch-detail' // should be `PatchDetailWebviewId` when refactoring to extract code shared by extension and webview to a `lib` root dir happens
-  id: Patch['id']
+  kind: 'webview-patch-detail'
+  id: number
   state: {
     patch: AugmentedPatch & { isCheckedOut: boolean }
-    localIdentity?: { id: `did:key:${string}`; alias?: string }
     timeLocale: Parameters<Date['toLocaleDateString']>['0']
+    delegates: Project['delegates']
+    defaultBranch: string
+    localIdentity: { id: `did:key:${string}`; alias?: string }
   }
 }

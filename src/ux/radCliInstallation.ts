@@ -1,13 +1,7 @@
 import { type QuickPickItem, Uri, env, window } from 'vscode'
-import {
-  getConfig,
-  getRadCliPath,
-  getRadCliRef,
-  getRadCliVersion,
-  isRadCliInstalled,
-  setConfig,
-} from '../helpers'
-import { exec, log, setWhenClauseContext } from '../utils'
+import { useEnvStore } from '../stores'
+import { exec, getConfig, getRadCliVersion, setConfig } from '../helpers'
+import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 
 /**
  * Launches a branching flow of interactive steps helping the user troubleshoot their
@@ -74,9 +68,10 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
         value: getConfig('radicle.advanced.pathToRadBinary'),
         placeHolder: 'For example: /usr/bin/rad',
         validateInput: (input) => {
-          const isPathToRadCli = Boolean(
-            exec(`${input.trim()} --version`, { shouldLog: true }),
-          )
+          const trimmedInput = input.trim()
+          const isPathToRadCli =
+            isRealFsPath(trimmedInput) &&
+            exec(trimmedInput, { shouldLog: true })?.startsWith('rad ')
 
           return isPathToRadCli
             ? undefined
@@ -101,24 +96,22 @@ export async function troubleshootRadCliInstallation(): Promise<void> {
 export function validateRadCliInstallation(
   options: { minimizeUserNotifications: boolean } = { minimizeUserNotifications: false },
 ): boolean {
-  const isRadInstalled = isRadCliInstalled()
+  const radVersion = getRadCliVersion()
+  const isRadInstalled = Boolean(radVersion)
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
+  isRadInstalled && useEnvStore().refreshCurrentRepoId() // TODO: maninak remove this when isRadInstalled is in a store and make currentRepoId depend on it
+
+  const radPath = useEnvStore().resolvedAbsolutePathToRadBinary
 
   if (isRadInstalled) {
-    const cliVersion = getRadCliVersion()
-    const cliPath = getRadCliPath()
-    const msg = `Using Radicle CLI v${cliVersion} from "${cliPath}"`
-
+    const msg = `Using Radicle CLI v${radVersion} from "${radPath}"`
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
     return true
   }
 
-  log(
-    `Failed resolving Radicle CLI binary. Tried invoking it in the shell as "${getRadCliRef()}".`,
-    'error',
-  )
+  log(`Failed resolving Radicle CLI binary. Tried spawning it from "${radPath}".`, 'error')
 
   return false
 }

@@ -75,7 +75,7 @@ A pretty powerful linter configuration and setup will cover most superficial top
 
 If you notice anything fishy, annoying (red squiggle should be yellow, conflicting rules, common false positive etc), broken or missing, please let the maintainers know.
 
-## Code Style
+### Code Style
 
 - Keep it simple, not "smart"
 - Code must be understandable without the need for any comments. If you feel the need for a comment improve your code instead.
@@ -128,6 +128,15 @@ If necessary, specific code shared between extension and webviews should be extr
 ### Getting User Input
 
 Use custom wrapper `askUser()` instead of the native [InputBox API](https://code.visualstudio.com/api/references/vscode-api#InputBox) which would result in procedural, verbose and brittle client code.
+
+### Copywriting
+
+- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case  (Wikipedia style)](https://titlecaseconverter.com)
+- Notifications should not contain a trailing fullstop unless multiple sentences are used.
+- Success and Warning notifications should begin with what happened first e.g. "Updated patch title successfully"
+- Error notifications should begin with "Failed" e.g. "Failed updating patch title"
+- Copy, or parts of it, that represents data and which is dynamic should be depicted using monotype font. Similarly copy that is static should be depicted using non-monotype font. e.g. in the copy "Check Out master", where "master" is the name of the default branch of a repo, "master" should be depicted with monotype font "Check Out" without.
+- The above is usually possible in webviews and impossible in extension UIs. In the latter case the dynamic values should be depicted as being wrapped by double quotes e.g. 'Using Radicle identity "maninak"'
 
 ## Packaging Locally From Source
 

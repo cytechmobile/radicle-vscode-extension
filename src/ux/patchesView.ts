@@ -13,7 +13,7 @@ import {
 } from 'vscode'
 import { extTempDir } from '../constants'
 import { useEnvStore, usePatchStore } from '../stores'
-import { fetchFromHttpd } from '../helpers'
+import { fetchFromHttpd, getFirstAndLatestRevisions } from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -25,7 +25,6 @@ import {
 import {
   assertUnreachable,
   capitalizeFirstLetter,
-  getFirstAndLatestRevisions,
   getIdentityAliasOrId,
   getTimeAgo,
   log,
@@ -46,6 +45,12 @@ export interface FilechangeNode {
   patch: AugmentedPatch
   getTreeItem: () => ReturnType<(typeof patchesTreeDataProvider)['getTreeItem']>
 }
+
+/**
+ * PRE-CONDITIONS:
+ * - Must match an entry defined in package.json's `contributes.views`
+ */
+export const patchesViewId = 'patches-view'
 
 /**
  * Event emitter dedicated to refreshing the Patch view's tree data.

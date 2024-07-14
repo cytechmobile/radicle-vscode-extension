@@ -1,5 +1,7 @@
+import { homedir } from 'node:os'
 import { ConfigurationTarget, workspace } from 'vscode'
-import { assertUnreachable, exec } from '../utils'
+import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
+import { exec } from '.'
 
 /**
  * Lists they keys of configuration options available to the user along with
@@ -69,34 +71,28 @@ export function setConfig<K extends keyof ExtensionConfig>(
  *
  * @example
  * ```ts
- * getAbsolutePathToDefaultRadBinaryDirectory() // "/home/maninak/.radicle/bin/"
+ * getAbsolutePathToDefaultRadBinaryDirectory() // "/home/maninak/.radicle/bin"
  * ```
- *
- * @returns The path if successfully resolved, otherwise `undefined`
  */
-export function getAbsolutePathToDefaultRadBinaryDirectory(): string | undefined {
-  const homeDir = exec('echo $HOME')
-  const defaultPath = homeDir ? `${homeDir}/.radicle/bin/` : undefined
+export function getAbsolutePathToDefaultRadBinaryDirectory(): string {
+  const defaultPath = `${homedir()}/.radicle/bin`
 
   return defaultPath
 }
 
-export const defaultRadBinaryLocation =
-  process.platform === 'linux' || process.platform === 'darwin'
-    ? '~/.radicle/bin/rad' // as per https://radicle.xyz/install
-    : undefined
-
 /**
- * Resolves the default path to the Radicle CLI binary _after having confirmed_ that the binary
- * is indeed there and accessible for command execution.
+ * Resolves the absolute path to the Radicle CLI binary's __expected__ location
+ * as per the https://radicle.xyz/install script
  *
- * @returns The path if successfully resolved, otherwise `undefined`
+ * @example
+ * ```ts
+ * getAbsolutePathToDefaultRadBinaryLocation() // "/home/maninak/.radicle/bin/rad"
+ * ```
  */
-export function getValidatedPathToDefaultRadBinaryLocation(): string | undefined {
-  const isBinaryAtDefaultPath =
-    defaultRadBinaryLocation && Boolean(exec(defaultRadBinaryLocation))
+export function getAbsolutePathToDefaultRadBinaryLocation(): string {
+  const defaultPath = `${getAbsolutePathToDefaultRadBinaryDirectory()}/rad`
 
-  return isBinaryAtDefaultPath ? defaultRadBinaryLocation : undefined
+  return defaultPath
 }
 
 /**
@@ -111,7 +107,7 @@ export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
     return undefined
   }
 
-  const isBinaryAtAliasedPath = Boolean(exec(aliasedPath))
+  const isBinaryAtAliasedPath = isRealFsPath(aliasedPath) && Boolean(exec(aliasedPath))
 
   return isBinaryAtAliasedPath ? aliasedPath : undefined
 }
@@ -123,10 +119,8 @@ export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
  * @returns The path if successfully resolved, otherwise `undefined`
  * @see https://radicle.xyz/install
  */
-// TODO: maninak memoize
-export function getDefaultPathToNodeHome(): string | undefined {
-  const homeDir = exec('echo $HOME')
-  const defaultPath = homeDir ? `${homeDir}/.radicle` : undefined
+export function getDefaultPathToNodeHome(): string {
+  const defaultPath = `${homedir()}/.radicle`
 
   return defaultPath
 }
@@ -137,12 +131,13 @@ export function getDefaultPathToNodeHome(): string | undefined {
  *
  * If no home is is located at the resolved path, the CLI may create one automatically.
  *
- * @returns The path if successfully resolved, otherwise `undefined`
+ * @returns The path if successfully resolved without any trailing slashes,
+ * otherwise `undefined`
  */
-export function getResolvedPathToNodeHome(): string | undefined {
+export function getResolvedPathToNodeHome(): string {
   const path = getConfig('radicle.advanced.pathToNodeHome') ?? getDefaultPathToNodeHome()
 
-  return path
+  return removeTrailingSlashes(path)
 }
 
 /**

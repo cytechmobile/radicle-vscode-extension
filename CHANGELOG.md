@@ -4,20 +4,76 @@
 
 ### 🚀 Enhancements
 
+- **patch-detail:** support mutating patch titles and descriptions
+  - a new "Edit" button has been added next to the title, shown when hovering on the title or description. Clicking it will show two text-areas, one for each of the aforementioned, and additional buttons
+  - the Edit button:
+    - is only available if the local identity is the author of the patch or among the repository's delegates
+    - is able to be tabbed into with the keyboard, which will make it visible again, despite it being conditionally hidden (accessibility)
+    - gets thinner on narrower viewports to allow maximum space for the already constricted title
+  - while editing the following buttons are shown:
+    - "Save" updates the changed title to Radicle
+    - "Discard" stops the editing mode and discards the values currently entered in the text-area as well as the preserved drafts, if any (see below the functionality of Escape key)
+    - their tabbing order (tabbing into them past the text-areas) is set so that "Save" is first, as expected in a form, despite them being right-aligned
+  - the text-area:
+    - supports any text content, including markdown and any special or uncommon characters
+    - gets keyboard focus automatically when the edit button is clicked
+    - auto-expands and auto-shrinks vertically to optimally fit its content, up to a viewport-relative maximum. Applies on focus and while typing.
+    - keeps the viewport pinned at an optimal and stable scroll position regardless of how the text-area resizes
+    - can be manually resized by dragging its bottom-right corner, but only vertically to keep the interaction less chaotic
+    - has maximum and minimum height defined, after which internal scrolling of the contents is enabled
+    - responds to viewport size changes applying sizing limits on top of the aforementioned content-relative resizing
+    - is set with (generous) max char count limits to limit abuse
+    - pressing the Enter key enters a new line but pressing Ctrl/Cmd+Enter behaves as if the "Save" button was clicked
+  - the value of each text-area is auto-saved in memory as a draft while typing, as well as the "is editing" status of the form, and those will be attempted to be restored:
+    - if the editor panel is hidden (another panel is selected placing it in the background) and then re-viewed (same session)
+    - if VS Code is terminated or crashes (across sessions)
+    - if the form submission fails
+  - if Escape key is pressed editing stops. The current changes get stored as a draft that will be reused if editing is restarted during the same VS Code usage session
+  - clicking "Save" executes a rad CLI command updating both the title and description from the form after trimming any leading and trailing whitespace
+  - if the user is not authed when clicking "Save", the Authentication Flow is launched interstitially, upon the successful completion of which the patch edit command will follow
+  - busy/progress indicator is shown in the Patches view while the patch-update command is executing
+  - depending on the outcome of the patch edit command the user is be presented with
+    - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
+    - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
+    - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout (either nodejs or rad CLI-based) they are also offered to "Retry With Longer Timeout".
+      - if "Retry With Longer Timeout" is clicked, the patch edit command will be retried with a two minute timeout
+      - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is insteaf shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
+      - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
+- **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
+- **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+- **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
+  - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
+  - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
+- **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
+- **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
+
+### 🔥 Performance
+
+- **exec:** invoke Radicle CLI binary directly for rad commands to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
+
+### 🛡️ Security Fixes
+
+- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, massively enhancing protection against shell injection attacks
 
 ### 🩹 Fixes
 
-- **patch-list:** show check-out state per patch item always reflecting git state. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patches list unless a check out AND a list refresh was done.
-- **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
+- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch Detail view and the Patches view that each would occur only following very specific reproduction steps.
+- **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, _signigicantly_ more robust and much less likely to result in an blank panel
+- **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
-- **webview:** make webview restoration across sessions more robust and less likely to result in an blank panel
-- **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
+- **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
+- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the curently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
+- **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
+- **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
 - **markdown:** align horizontal rule with text column instead of it being always in the middle
+- **markdown:** ensure the language tag on (recognised) code blocks is still shown after re-rendering them
+- **markdown:** make the language tag on (recognised) code blocks not user-selectable
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
+- **log:** show the actual output of failed rad commands (which explains _why_ it failed...) instead of sometimes showing the CLI's progress-spinnner characters spammed en masse
 
 ### 💅 Refactors
 
@@ -26,9 +82,17 @@
 
 ### 🏡 Chores
 
-- **store:** further progress on migrating formerly procedural state management to a reactive, declarative paradigm. See Chores of v0.4.0 for more info.
+- **store:** further progress on migrating formerly imperative state management to a declarative, reactive paradigm. See Chores of [v0.4.0](#v040-feb-28th-2024) for more info.
 - **dev:** don't pause awaiting user approval to temporarily install pnpm when verifying deps installation
 - **dev:** always use the latest pnpm version when verifying deps installation
+- **deps:** upgrade to the latest version of codicons
+- **log:** always log errors in the debug console too (during development), in addition to the Output panel
+- **deps:** bump minimum VS Code version requirement from 1.84.2 to 1.91.0
+
+### 📖 Documentation
+
+- **contributing:** add new "Copywriting" section under "Conventions" with the directives followed when writing user-facing copy for this repo
+- **readme:** show correct RID of the Radicle VS Code repo in the rad badge
 
 -----
 
@@ -40,7 +104,7 @@
 - **commands:** show (apropriate kind per case of) busy/progress indicators when the extension is busy executing a long-running task, which especially when initiated by the user, would otherwise leave them confused as to what the state of the execution is (non-initiated, initiated, succesful, failed). ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
   Specifically:
   - "sync", "fetch" and "announce" commands (launched either via buttons or the Command Palette) show an inditerminate busy indicator on the "CLI COMMANDS" View as well as on the Radicle icon of the Activity bar
-  - "rad clone" command indicates on the Status bar whether the extension is fetching the list of cloneable repos or later in the flow actively performing the cloning
+  - "rad clone" command indicates on the Status Bar whether the extension is fetching the list of cloneable repos or later in the flow actively performing the cloning
   **commands:** increase "rad clone" timeout to 120 seconds and add explicit success and failure logs ([#134](https://github.com/cytechmobile/radicle-vscode-extension/issues/134))
 - **patch-list:** show diff for copied and moved files of a patch too when available ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))
 - **patch-list:** show path to containing directory for each changed file of a patch ([#100](https://github.com/cytechmobile/radicle-vscode-extension/issues/100))

@@ -52,17 +52,13 @@ const notInWorkspaceFileWatchers = [
     },
   },
   // installation with script from https://radicle.xyz/install
-  (() => {
-    const radDir = getAbsolutePathToDefaultRadBinaryDirectory()
-    if (!radDir) {
-      return undefined
-    }
-
-    return {
-      glob: new RelativePattern(Uri.file(radDir), 'rad'),
-      handler: onRadCliInstallationChanged,
-    }
-  })(),
+  {
+    glob: new RelativePattern(
+      Uri.file(`${getAbsolutePathToDefaultRadBinaryDirectory()}/`),
+      'rad',
+    ),
+    handler: onRadCliInstallationChanged,
+  },
   // installation with package manager
   (() => {
     let pathToRadBinaryDirWithTrailingSlash: `${string}/` | undefined
@@ -123,11 +119,10 @@ export function registerAllFileWatchers() {
       if (resolvedGlob.pattern.match(/rad$/)) {
         const pathToRadBinary = `${resolvedGlob.baseUri.path}${resolvedGlob.pattern}`
 
-        const radCliInstallationCheckIntervalId = setInterval(() => {
+        setTimeout(() => {
           access(pathToRadBinary, constants.R_OK | constants.X_OK, (err) => {
             if (!err) {
               onRadCliInstallationChanged()
-              clearInterval(radCliInstallationCheckIntervalId)
               registerAllFileWatchers()
             }
           })

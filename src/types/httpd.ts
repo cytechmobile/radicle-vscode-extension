@@ -34,7 +34,7 @@ export interface Project {
   name: string
   description: string
   defaultBranch: string
-  delegates: DId[]
+  delegates: RadicleIdentity[]
   head: string
   patches: { [K in PatchStatus]: number }
   issues: { open: number; closed: number }

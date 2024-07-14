@@ -1,9 +1,8 @@
 import { window } from 'vscode'
-import { useEnvStore } from '../stores'
-import { fetchFromHttpd, getRadCliRef } from '../helpers'
+import { useGitStore } from '../stores'
+import { exec, execRad } from '../helpers'
 import type { Patch } from '../types'
-import { exec, log, shortenHash, showLog } from '../utils'
-import { notifyUserAboutFetchError } from '.'
+import { log, shortenHash, showLog } from '../utils'
 
 /**
  * Checks out the default Git branch of the Radicle repo currently open in the workspace.
@@ -11,25 +10,17 @@ import { notifyUserAboutFetchError } from '.'
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export async function checkOutDefaultBranch(): Promise<boolean> {
-  const rid = useEnvStore().currentRepoId
-  if (!rid) {
-    log('Failed resolving RID', 'error')
-
+  const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
+  if (!defaultBranch) {
     return false
   }
 
-  // TODO: maninak move into gitStore?
-  const { data: repo, error } = await fetchFromHttpd(`/projects/${rid}`)
-  if (error) {
-    notifyUserAboutFetchError(error)
-
-    return false
-  }
-
-  const defaultBranch = repo.defaultBranch
   const didCheckoutDefaultBranch =
-    exec(`git checkout ${defaultBranch}`, { cwd: '$workspaceDir', shouldLog: true }) !==
-    undefined
+    exec('git', {
+      args: ['checkout', defaultBranch],
+      cwd: '$workspaceDir',
+      shouldLog: true,
+    }) !== undefined
   if (!didCheckoutDefaultBranch) {
     notifyUserGitCheckoutFailed(`Failed checking out branch "${defaultBranch}"`)
 
@@ -45,12 +36,11 @@ export async function checkOutDefaultBranch(): Promise<boolean> {
  * @returns `true` if successful, otherwise `false`
  */
 export function checkOutPatch(patch: Pick<Patch, 'id'>): boolean {
-  const didCheckoutPatchBranch = Boolean(
-    exec(`${getRadCliRef()} patch checkout ${patch.id} --force`, {
-      cwd: '$workspaceDir',
-      shouldLog: true,
-    }),
-  )
+  const { errorCode } = execRad(['patch', 'checkout', patch.id, '--force'], {
+    cwd: '$workspaceDir',
+    shouldLog: true,
+  })
+  const didCheckoutPatchBranch = !errorCode
   if (!didCheckoutPatchBranch) {
     notifyUserGitCheckoutFailed(`Failed checking out Patch "${shortenHash(patch.id)}"`)
 

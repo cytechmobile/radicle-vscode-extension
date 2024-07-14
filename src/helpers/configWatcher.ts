@@ -32,6 +32,7 @@ const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToRadBinary',
     onConfigChange: () => {
+      useEnvStore().refreshResolvedAbsolutePathToRadBinary()
       validateRadCliInstallation()
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
     },

@@ -1,7 +1,7 @@
 import { sep } from 'node:path'
 import { ProgressLocation, type QuickPickItem, Uri, commands, window } from 'vscode'
-import { fetchFromHttpd, getRadCliRef } from '../helpers'
-import { exec, getRepoRoot, log, showLog } from '../utils'
+import { execRad, fetchFromHttpd } from '../helpers'
+import { getRepoRoot, log, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
 import { launchAuthenticationFlow } from './radicleIdentityAuth'
 
@@ -71,7 +71,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
     return
   }
 
-  const msgSuffix = `repo "${projSelection.label}" with id (RID) "${selectedRid}" into "${cloneTargetDir.fsPath}"`
+  const msgSuffix = `repo "${projSelection.label}" with id "${selectedRid}" into "${cloneTargetDir.fsPath}"`
   const didClone = await window.withProgress(
     {
       location: ProgressLocation.Window,
@@ -79,11 +79,13 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
     },
     // eslint-disable-next-line require-await, @typescript-eslint/require-await
     async () => {
-      return exec(`${getRadCliRef()} clone ${selectedRid} --no-confirm`, {
+      const { errorCode } = execRad(['clone', 'selectedRid', '--no-confirm'], {
         cwd: cloneTargetDir.fsPath,
         timeout: 120_000,
         shouldLog: true,
       })
+
+      return !errorCode
     },
   )
   if (!didClone) {

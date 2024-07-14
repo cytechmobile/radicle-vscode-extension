@@ -18,6 +18,10 @@ type MessageToExtension =
   | Message<'checkOutPatchBranch', { patch: Patch }>
   | Message<'revealInPatchesView', { patch: AugmentedPatch }>
   | Message<'checkOutDefaultBranch'>
+  | Message<
+      'updatePatchTitleAndDescription',
+      { patchId: Patch['id']; newTitle: string; newDescr: string }
+    >
 
 /**
  * Sends a message, usually from the host window, to the provided webview.

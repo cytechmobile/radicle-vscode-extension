@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
   provideVSCodeDesignSystem,
-  vsCodeButton,
   vsCodePanels,
   vsCodePanelTab,
   vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, computed } from 'vue'
 import {
   breakpointsTailwind,
   useBreakpoints,
@@ -22,17 +21,11 @@ import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
 import PatchStatusBadge from '@/components/PatchStatusBadge.vue'
 import PatchMajorEvents from '@/components/PatchMajorEvents.vue'
 import PatchDetailButtons from '@/components/PatchDetailButtons.vue'
-import PatchMetadata from '@/components/PatchMetadata.vue'
+import PatchDetailTitleDescription from '@/components/PatchDetailTitleDescription.vue'
 import PatchDetailActivity from '@/components/PatchDetailActivity.vue'
 import PatchDetailRevision from '@/components/PatchDetailRevision.vue'
-import Markdown from '@/components/Markdown.vue'
 
-provideVSCodeDesignSystem().register(
-  vsCodeButton(),
-  vsCodePanels(),
-  vsCodePanelTab(),
-  vsCodePanelView(),
-)
+provideVSCodeDesignSystem().register(vsCodePanels(), vsCodePanelTab(), vsCodePanelView())
 
 const { patch, authors, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
 
@@ -88,23 +81,6 @@ function assembleRevisionOptionLabel(revision: Revision): string {
   return label
 }
 
-onMounted(() => {
-  nextTick(() => {
-    document.querySelectorAll("code.hljs[class*='language-']").forEach((highlightedCodeEl) => {
-      const highlightedCodeElClass = highlightedCodeEl.classList.value
-
-      const langTagEl = document.createElement('span')
-      langTagEl.textContent = highlightedCodeElClass
-        .replace('hljs ', '')
-        .replaceAll(/language-/g, '')
-        .trim()
-      langTagEl.classList.add('langTag')
-
-      highlightedCodeEl.insertBefore(langTagEl, highlightedCodeEl.firstChild)
-    })
-  })
-})
-
 // TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
@@ -124,11 +100,7 @@ onMounted(() => {
     <main
       class="grid grid-rows-subgrid grid-cols-subgrid row-span-3 sm:row-span-2 sm:col-span-2"
     >
-      <section style="grid-area: section-patch">
-        <PatchMetadata />
-        <h1 class="my-4 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
-        <Markdown :source="firstRevision.description" class="text-sm" />
-      </section>
+      <PatchDetailTitleDescription />
 
       <vscode-panels
         v-if="isWindowNarrowerThanSm"

@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
-const { patch } = storeToRefs(usePatchDetailStore())
+const { patch, defaultBranch } = storeToRefs(usePatchDetailStore())
 
 function refetchPatchData() {
   notifyExtension({ command: 'refreshPatchData', payload: { patchId: patch.value.id } })
@@ -27,7 +27,7 @@ function revealPatch() {
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Refresh All Data Rendered on This Page"
+    title="Refresh All Data on This Page"
     @click="refetchPatchData"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
@@ -47,19 +47,20 @@ function revealPatch() {
     v-else
     class="self-center"
     appearance="secondary"
-    title="Switch from the Git Branch Associated with This Patch to the Repo’s Default Branch"
+    title="Switch from the Git Branch Associated with This Patch to the Repo's Default Branch"
     @click="checkOutDefaultBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-home"></span>Check Out Default</vscode-button
-  >
+    <span slot="start" class="codicon codicon-home"></span>Check&nbsp;Out&ThickSpace;<wbr />
+    <pre>{{ defaultBranch }} </pre>
+  </vscode-button>
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Reveal in Patches View"
+    title="Show All Files Changed in the Latest Revision of This Patch"
     @click="revealPatch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-export"></span>Reveal</vscode-button
+    <span slot="start" class="codicon codicon-diff-single"></span>Browse Diff</vscode-button
   >
 </template>
