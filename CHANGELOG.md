@@ -32,12 +32,12 @@
   - clicking "Save" executes a rad CLI command updating both the title and description from the form after trimming any leading and trailing whitespace
   - if the user is not authed when clicking "Save", the Authentication Flow is launched interstitially, upon the successful completion of which the patch edit command will follow
   - busy/progress indicator is shown in the Patches view while the patch-update command is executing
-  - depending on the outcome of the patch edit command the user is be presented with
-    - an info notification that the patch was updated and the changes announced over the network. Those changes also immediatly propagate across all UI elements of the extension and its webviews.
+  - depending on the outcome of the patch edit command the user is presented with
+    - an info notification that the patch was updated and the changes announced over the network. Those changes also immediately propagate across all UI elements of the extension and its webviews.
     - a warning notification that the patch was updated but only locally without the changes reaching the network. The user is offered the options to "Retry Announce" or "Show Output".
-    - an error notification that the update failed alltogether. The user is offered the option to "Show Output" and if the error was due to a timeout (either nodejs or rad CLI-based) they are also offered to "Retry With Longer Timeout".
+    - an error notification that the update failed altogether. The user is offered the option to "Show Output" and if the error was due to a timeout (either nodejs or rad CLI-based) they are also offered to "Retry With Longer Timeout".
       - if "Retry With Longer Timeout" is clicked, the patch edit command will be retried with a two minute timeout
-      - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is insteaf shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
+      - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is instead shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
       - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
@@ -45,13 +45,13 @@
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
   - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
-  - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
+  - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 
 ### 🔥 Performance
 
-- **exec:** invoke Radicle CLI binary directly for rad commands to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
+- **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
 
 ### 🛡️ Security Fixes
 
@@ -64,7 +64,7 @@
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
-- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the curently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
+- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
