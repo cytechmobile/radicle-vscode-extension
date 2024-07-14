@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { ConfigurationTarget, workspace } from 'vscode'
-import { assertUnreachable, isRealFsPath } from '../utils'
+import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
 import { exec } from '.'
 
 /**
@@ -131,12 +131,13 @@ export function getDefaultPathToNodeHome(): string {
  *
  * If no home is is located at the resolved path, the CLI may create one automatically.
  *
- * @returns The path if successfully resolved, otherwise `undefined`
+ * @returns The path if successfully resolved without any trailing slashes,
+ * otherwise `undefined`
  */
 export function getResolvedPathToNodeHome(): string {
   const path = getConfig('radicle.advanced.pathToNodeHome') ?? getDefaultPathToNodeHome()
 
-  return path
+  return removeTrailingSlashes(path)
 }
 
 /**

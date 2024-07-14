@@ -50,7 +50,8 @@
     - allowing rad commands to be cancelled mid-run instead of always waiting for them to complete, blocking the main JavaScript thread TODO: maninak verify the last thing is true
     - enabling streaming of rad command output to the extension's logs in the Output panel TODO: implement
   - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
-- **config:** disallow usage of now unsupported relative paths for option `radicle.advanced.pathToRadBinary` in settings
+- **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
+- **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 
 ### 🛡️ Security Fixes
 
@@ -65,7 +66,7 @@
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
 - **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the curently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
-- **config:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
+- **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
 - **markdown:** align horizontal rule with text column instead of it being always in the middle
