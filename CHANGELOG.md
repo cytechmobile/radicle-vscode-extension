@@ -43,15 +43,15 @@
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
-- call Radicle CLI binary directly for rad commands without spawning a shell TODO: improve changelog items, maybe split them under perf, security etc?
-  - increased performance via around 2x faster execution of most rad commands which results in all-around speed-up of the extension including its activation time TODO: measure and say how much
-  - increased robustness by making our exposure to OS/shell-specific edge cases obsolete
-  - improved user experience (UX) by
-    - allowing rad commands to be cancelled mid-run instead of always waiting for them to complete, blocking the main JavaScript thread TODO: maninak verify the last thing is true
-    - enabling streaming of rad command output to the extension's logs in the Output panel TODO: implement
+- **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
+  - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
   - lays much of the grandwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
+
+### 🔥 Performance
+
+- **exec:** invoke Radicle CLI binary directly for rad commands to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
 
 ### 🛡️ Security Fixes
 

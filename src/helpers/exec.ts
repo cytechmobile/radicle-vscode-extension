@@ -132,7 +132,6 @@ export function exec(
   }
 }
 
-// TODO: maninak add option `currentRepo = true` auto-adding arg `['--repo', useEnvStore().currentRepoId]`
 // TODO: maninak support async calling
 // TODO: maninak write JSDoc for func
 export function execRad(
@@ -175,7 +174,6 @@ export function execRad(
 
   try {
     let cwd: string | undefined
-    // TODO: maninak extract to getWorskapaceDir and deduplicate
     if (opts.cwd === '$workspaceDir') {
       const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
       if (!firstWorkspaceDir) {
