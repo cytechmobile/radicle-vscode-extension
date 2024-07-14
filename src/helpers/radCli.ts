@@ -199,7 +199,6 @@ export function editPatch(
     return { outcome: 'failure', errorMsg }
   }
 
-  // TODO: maninak authguard
   const execResult = execRad(
     ['patch', 'edit', patchId, '--repo', rid, '--message', newTitle, '--message', newDescr],
     { shouldLog: true, timeout: timeoutSeconds ? timeoutSeconds * 1000 : undefined },

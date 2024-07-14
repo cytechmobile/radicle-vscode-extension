@@ -119,11 +119,10 @@ export function registerAllFileWatchers() {
       if (resolvedGlob.pattern.match(/rad$/)) {
         const pathToRadBinary = `${resolvedGlob.baseUri.path}${resolvedGlob.pattern}`
 
-        const radCliInstallationCheckIntervalId = setInterval(() => {
+        setTimeout(() => {
           access(pathToRadBinary, constants.R_OK | constants.X_OK, (err) => {
             if (!err) {
               onRadCliInstallationChanged()
-              clearInterval(radCliInstallationCheckIntervalId)
               registerAllFileWatchers()
             }
           })
