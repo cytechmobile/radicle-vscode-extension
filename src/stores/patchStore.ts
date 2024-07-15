@@ -3,6 +3,7 @@ import { computed, effect, ref, unref } from '@vue/reactivity'
 import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
+import { retrieveAllPatches } from '../helpers/retrieveFromCli'
 import { useEnvStore, useGitStore, useWebviewStore } from '.'
 
 setActivePinia(createPinia())
@@ -104,29 +105,17 @@ export const usePatchStore = defineStore('patch', () => {
     }
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
     lastFetchedAllTs.value = nowTs
-    // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
-    const promisedResponses = Promise.all([
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft', perPage: 500 } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'open', perPage: 500 } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, {
-        query: { state: 'archived', perPage: 500 },
-      }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'merged', perPage: 500 } }),
-    ]).finally(() => (inProgressRequest = undefined))
-    inProgressRequest = promisedResponses
+    const promisedPatches = retrieveAllPatches(rid).finally(
+      () => (inProgressRequest = undefined),
+    )
+    inProgressRequest = promisedPatches
 
-    const responses = await promisedResponses
-    const errors = responses.map((response) => response.error).filter(Boolean)
-    if (errors.length) {
-      return false
-    }
+    const retrievedPatches = (await promisedPatches).map((patch) => ({
+      ...patch,
+      ...{ lastFetchedTs: nowTs },
+    }))
 
-    const fetchedPatches = responses
-      .flatMap((response) => response.data)
-      .filter(Boolean)
-      .map((fetchedPatch) => ({ ...fetchedPatch, ...{ lastFetchedTs: nowTs } }))
-
-    patches.value = fetchedPatches
+    patches.value = retrievedPatches
 
     return true
   }

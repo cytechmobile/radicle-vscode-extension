@@ -7,7 +7,7 @@ export function getFirstAndLatestRevisions(patch: Patch): {
   latestRevision: Revision
 } {
   const revisionsSortedOldestFirst = [...patch.revisions].sort(
-    (p1, p2) => p1.timestamp - p2.timestamp,
+    (r1, r2) => r1.timestamp - r2.timestamp,
   )
   const firstRevision = revisionsSortedOldestFirst[0] as Exclude<
     (typeof patch.revisions)[number],

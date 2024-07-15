@@ -1,6 +1,8 @@
 import {
+  type ExecFileOptionsWithStringEncoding,
   type ExecFileSyncOptionsWithStringEncoding,
   type SpawnSyncOptionsWithStringEncoding,
+  execFile,
   execFileSync,
   spawnSync,
 } from 'node:child_process'
@@ -16,7 +18,7 @@ import { getConfig } from './config'
  * EXAMPLE:
  * ```ts
  * exec('echo "hello shell :)"')
- * //> hello shell:)
+ * //> hello shell :)
  * ```
  *
  * @param cmd - The shell command to execute. Can be a static string or a function resolving
@@ -132,7 +134,6 @@ export function exec(
   }
 }
 
-// TODO: maninak support async calling
 // TODO: maninak write JSDoc for func
 export function execRad(
   args: string[] = [],
@@ -236,6 +237,106 @@ export function execRad(
       errorCode: error.code || error.status,
     }
   }
+}
+
+// TODO: maninak write JSDoc for func
+export async function execRadAsync(
+  args: string[] = [],
+  options?: {
+    /**
+     * Specifies whether the output of the shell command should be logged in the Output panel
+     * or not. If set to `false` and a command execution error occurs, then the error will be
+     * logged in the Debug panel regardless (only visible during development).
+     *
+     * @default false
+     */
+    shouldLog?: boolean
+    /**
+     * Specifies the maximum amount of time (in milliseconds) that the shell command is
+     * allowed to run before it is automatically terminated. If the command takes longer than
+     * the specified timeout, it will be forcefully terminated and an error will be thrown.
+     *
+     * Setting it to `0` will disable the timeout.
+     *
+     * @default 30_000
+     */
+    timeout?: number
+    /**
+     * Specifies the current working directory in which the shell command will be executed.
+     * Can be either a string representing a specific directory path or the string
+     * literal `'$workspaceDir'` indicating that the VS Code workspace should be used.
+     *
+     * @default undefined
+     * */
+    cwd?: (string & {}) | '$workspaceDir' // eslint-disable-line @typescript-eslint/ban-types
+    env?: ExecFileOptionsWithStringEncoding['env']
+  },
+): Promise<
+  XOR<{ stdout: string }, { errorCode: string | number; stdout?: string; stderr?: string }>
+> {
+  const opts = options ?? {}
+
+  const truncatedRadCmd = `rad ${args
+    .map((arg) => maybeEscapeArg(truncateKeepWords(arg, 40, ' […]')))
+    .join(' ')}`
+
+  let cwd: string | undefined
+  if (opts.cwd === '$workspaceDir') {
+    const firstWorkspaceDir = getWorkspaceFolderPaths()?.[0] // Hack: always use only 0th folder
+    if (!firstWorkspaceDir) {
+      throw new Error(
+        `Failed resolving path of workspace directory in order to exec "${truncatedRadCmd}" in it`,
+      )
+    }
+    cwd = firstWorkspaceDir
+  } else {
+    cwd = opts.cwd
+  }
+
+  const configPathToNodeHome = getConfig('radicle.advanced.pathToNodeHome')
+  const spawnOpts: ExecFileOptionsWithStringEncoding = {
+    shell: false,
+    cwd,
+    timeout: opts.timeout ?? 30_000,
+    encoding: 'utf-8',
+    env: {
+      ...process.env,
+      ...(configPathToNodeHome ? { RAD_HOME: configPathToNodeHome } : {}),
+      ...opts.env,
+    },
+  }
+
+  return await new Promise((resolve) => {
+    execFile(
+      useEnvStore().resolvedAbsolutePathToRadBinary,
+      args,
+      spawnOpts,
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(truncatedRadCmd, '\n\n', error)
+          if (opts.shouldLog ?? false) {
+            log(
+              stdout.trim() ||
+                error.message.trim() ||
+                stderr.trim() ||
+                `Failed executing command: ${truncatedRadCmd}`,
+              'error',
+              truncatedRadCmd,
+            )
+          }
+          resolve({
+            errorCode: error.code || error.errno || error.message.trim(),
+            stderr: stderr.trim(),
+          })
+        } else {
+          if (opts.shouldLog ?? false) {
+            log(stdout, 'info', truncatedRadCmd)
+          }
+          resolve({ stdout: stdout.trim() })
+        }
+      },
+    )
+  })
 }
 
 function maybeEscapeArg(cliArg: string): string {

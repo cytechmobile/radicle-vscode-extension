@@ -42,13 +42,6 @@ export interface Project {
   visibility?: { type: 'public' } | { type: 'private'; allow?: string[] }
 }
 
-export interface Merge {
-  author: RadicleIdentity
-  revision: string
-  commit: string
-  timestamp: number
-}
-
 export interface Patch {
   id: string
   title: string
@@ -63,6 +56,14 @@ export interface Patch {
   merges: Merge[]
   assignees: string[]
   revisions: ArrayMinLength<Revision, 1>
+  reviews: unknown[]
+}
+
+export interface Merge {
+  author: RadicleIdentity
+  revision: string
+  commit: string
+  timestamp: number
 }
 
 export type PatchStatus = Patch['state']['status']
@@ -153,7 +154,7 @@ export interface CommentInlineWithCode {
   timestamp: number
 }
 
-interface CodeLocation {
+export interface CodeLocation {
   path: string
   commit: string
   lines: {
