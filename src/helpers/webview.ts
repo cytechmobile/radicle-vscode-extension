@@ -1,4 +1,4 @@
-import { Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
+import { Uri, ViewColumn, type Webview, type WebviewPanel, commands, window } from 'vscode'
 import {
   type WebviewId,
   allWebviewIds,
@@ -261,7 +261,7 @@ async function handleMessageFromWebviewPatchDetail(
       copyToClipboardAndNotify(message.payload.textToCopy)
       break
     case 'refreshPatchData':
-      usePatchStore().refetchPatch(message.payload.patchId)
+      commands.executeCommand('radicle.refreshOnePatch', message.payload.patchId)
       break
     case 'checkOutPatchBranch':
       checkOutPatch(message.payload.patch)

@@ -48,6 +48,8 @@
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
+- **patch-list:** show all possible actions for a patch on its context menu (right click)
+- **patch-list:** add new context-menu action "Refresh Patch Data" for a patch item
 
 ### 🔥 Performance
 
@@ -64,6 +66,7 @@
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
 - **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
+- **patch-list:** sort changed file entries placing correctly always to the top those located at the root directory of the repo
 - **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.

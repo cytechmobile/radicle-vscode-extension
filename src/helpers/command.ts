@@ -101,8 +101,11 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.collapsePatches', () => {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
-  registerVsCodeCmd('radicle.refreshPatches', () => {
+  registerVsCodeCmd('radicle.refreshAllPatches', () => {
     usePatchStore().resetAllPatches()
+  })
+  registerVsCodeCmd('radicle.refreshOnePatch', (patchId: Patch['id']) => {
+    usePatchStore().refetchPatch(patchId)
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
   registerVsCodeCmd('radicle.checkoutDefaultBranch', checkOutDefaultBranch)
