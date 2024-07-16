@@ -44,6 +44,9 @@
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
 - **patch-detail:** add a button next to a revision's latest and base commit identifier which copies the full id to clipboard
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+- **commands:** improve the algorithm detecting if patch/default branch check-out failed due to uncommitted changes in the working directory.
+  - additionally, if there was a check-out error and that was the reason, then offer, additionally to the default option of seeing the command's output, the option to switch to the native Source Control View where the user can take inspect further and take follow-up actions
+  - if there was a check-out error due to a different reason, the error notification copy is more generic without suggesting to the user to "commit or stash changes" and without showing the button "Focus Source Control View"
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
   - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
