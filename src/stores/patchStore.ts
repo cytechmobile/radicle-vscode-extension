@@ -98,20 +98,33 @@ export const usePatchStore = defineStore('patch', () => {
       }
     }
 
+    // Backwards compatibility with non-latest httpd versions while users are transitioning.
+    // Should be removed in a couple of months.
+    let queryKey = 'status' as const
+    const httpdApiVersionMajor = (await fetchFromHttpd('/')).data?.apiVersion[0]
+    if (httpdApiVersionMajor && Number.parseInt(httpdApiVersionMajor) < 3) {
+      queryKey = 'state' as 'status'
+    }
+
     const rid = useEnvStore().currentRepoId
     if (!rid) {
       return false
     }
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
     lastFetchedAllTs.value = nowTs
-    // TODO: refactor to make only a single request when https://radicle.zulipchat.com/#narrow/stream/369873-support/topic/fetch.20all.20patches.20in.20one.20req is resolved
     const promisedResponses = Promise.all([
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'draft', perPage: 500 } }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'open', perPage: 500 } }),
       fetchFromHttpd(`/projects/${rid}/patches`, {
-        query: { state: 'archived', perPage: 500 },
+        query: { [queryKey]: 'draft', perPage: 500 },
       }),
-      fetchFromHttpd(`/projects/${rid}/patches`, { query: { state: 'merged', perPage: 500 } }),
+      fetchFromHttpd(`/projects/${rid}/patches`, {
+        query: { [queryKey]: 'open', perPage: 500 },
+      }),
+      fetchFromHttpd(`/projects/${rid}/patches`, {
+        query: { [queryKey]: 'archived', perPage: 500 },
+      }),
+      fetchFromHttpd(`/projects/${rid}/patches`, {
+        query: { [queryKey]: 'merged', perPage: 500 },
+      }),
     ]).finally(() => (inProgressRequest = undefined))
     inProgressRequest = promisedResponses
 
