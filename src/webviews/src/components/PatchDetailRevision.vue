@@ -115,9 +115,37 @@ const selectedRevisionRejectedReviews = computed(() =>
     </Metadatum>
     <Metadatum label="Latest commit">
       <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>
+      <template #aside>
+        <vscode-button
+          appearance="icon"
+          title="Copy Commit Identifier to Clipboard"
+          @click="
+            notifyExtension({
+              command: 'copyToClipboardAndNotify',
+              payload: { textToCopy: selectedRevision.oid },
+            })
+          "
+        >
+          <span class="codicon codicon-copy"></span>
+        </vscode-button>
+      </template>
     </Metadatum>
     <Metadatum label="Based on commit">
       <pre :title="selectedRevision.base">{{ shortenHash(selectedRevision.base) }}</pre>
+      <template #aside>
+        <vscode-button
+          appearance="icon"
+          title="Copy Commit Identifier to Clipboard"
+          @click="
+            notifyExtension({
+              command: 'copyToClipboardAndNotify',
+              payload: { textToCopy: selectedRevision.base },
+            })
+          "
+        >
+          <span class="codicon codicon-copy"></span>
+        </vscode-button>
+      </template>
     </Metadatum>
     <Metadatum v-if="selectedRevision.reactions.length" label="Reactions">
       <Reactions :reactions="selectedRevision.reactions" />
