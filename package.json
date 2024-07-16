@@ -128,7 +128,7 @@
       },
       {
         "command": "radicle.viewPatchDetails",
-        "title": "View Patch Details",
+        "title": "Open Patch Details",
         "shortTitle": "Patch Details",
         "category": "Radicle",
         "icon": "$(preview)",
