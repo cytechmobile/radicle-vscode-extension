@@ -48,6 +48,7 @@
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
+- **patch-list:** show all possible actions for a patch on its context menu (right click)
 
 ### 🔥 Performance
 

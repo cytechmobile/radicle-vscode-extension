@@ -217,18 +217,29 @@
           "group": "inline@1"
         },
         {
+          "command": "radicle.viewPatchDetails",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "contextMenu@1"
+        },
+        {
+          "command": "radicle.copyPatchId",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "contextMenu@2"
+        },
+        {
           "command": "radicle.checkoutPatch",
           "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
           "group": "inline@2"
         },
         {
+          "command": "radicle.checkoutPatch",
+          "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
+          "group": "contextMenu@3"
+        },
+        {
           "command": "radicle.checkoutDefaultBranch",
           "when": "view == patches-view && viewItem =~ /patch:checked-out-true/",
           "group": "inline@2"
-        },
-        {
-          "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem =~ /patch/"
         },
         {
           "command": "radicle.openOriginalVersionOfPatchedFile",
