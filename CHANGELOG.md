@@ -49,6 +49,7 @@
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 - **patch-list:** show all possible actions for a patch on its context menu (right click)
+- **patch-list:** add new context-menu action "Refresh Patch Data" for a patch item
 
 ### 🔥 Performance
 
