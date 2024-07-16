@@ -74,6 +74,7 @@
 - **markdown:** make the language tag on (recognised) code blocks not user-selectable
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
 - **log:** show the actual output of failed rad commands (which explains _why_ it failed...) instead of sometimes showing the CLI's progress-spinnner characters spammed en masse
+- **patch-list:** show all patches again as expected, not only those with status "open". Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) while keeping backwards compatibility for users who haven't yet upgraded to the latest httpd
 
 ### 💅 Refactors
 

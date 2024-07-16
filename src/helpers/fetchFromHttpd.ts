@@ -80,7 +80,7 @@ export async function fetchFromHttpd(
 ): FetchFromHttpdReturn<Patch>
 export async function fetchFromHttpd(
   path: `/projects/rad:${string}/patches`,
-  options?: FetchOptions<'json'> & { query?: { state: PatchStatus }; method?: 'GET' },
+  options?: FetchOptions<'json'> & { query?: { status: PatchStatus | 'all' }; method?: 'GET' },
 ): FetchFromHttpdReturn<Patch[]>
 export async function fetchFromHttpd<RevBase extends string, RevOid extends string>(
   path: `/projects/rad:${string}/diff/${RevBase}/${RevOid}`,
