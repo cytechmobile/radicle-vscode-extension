@@ -186,7 +186,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
           )}${sep}${fileDir}${sep}${filename}`
 
           const node: FilechangeNode = {
-            relativeInRepoUrl: filePath,
+            relativeInRepoUrl: filePath.includes(sep) ? filePath : `${sep}${filePath}`,
             oldVersionUrl,
             newVersionUrl,
             patch,
