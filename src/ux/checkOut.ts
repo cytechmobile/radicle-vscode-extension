@@ -1,4 +1,4 @@
-import { window } from 'vscode'
+import { commands, window } from 'vscode'
 import { useGitStore } from '../stores'
 import { exec, execRad } from '../helpers'
 import type { Patch } from '../types'
@@ -52,16 +52,26 @@ export function checkOutPatch(patch: Pick<Patch, 'id'>): boolean {
 
 function notifyUserGitCheckoutFailed(mainErrorMessage: string) {
   const hasUncommitedChanges =
-    exec('git update-index --refresh && git diff-index --quiet HEAD --', {
+    exec('u="$(git ls-files --others)" && test -z "$u"', {
       cwd: '$workspaceDir',
-    }) === undefined // https://stackoverflow.com/a/3879077/5015955
+    }) === undefined // https://stackoverflow.com/a/2659808/5015955
 
-  const button = 'Show output'
+  const buttonFocusScm = 'Focus Source Control View'
+  const buttonShowOutput = 'Show Output'
   const msg = `${mainErrorMessage}${
     hasUncommitedChanges ? '. Please stash or commit your changes and try again.' : ''
   }`
   log(msg, 'error')
-  window.showErrorMessage(msg, button).then((userSelection) => {
-    userSelection === button && showLog()
-  })
+  window
+    .showErrorMessage(
+      msg,
+      ...[hasUncommitedChanges ? buttonFocusScm : undefined, buttonShowOutput].filter(Boolean),
+    )
+    .then((userSelection) => {
+      if (userSelection === buttonFocusScm) {
+        commands.executeCommand('workbench.view.scm')
+      } else if (userSelection === buttonShowOutput) {
+        showLog()
+      }
+    })
 }
