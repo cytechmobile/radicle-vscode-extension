@@ -40,6 +40,7 @@
       - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is instead shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
       - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
+- **patch-detail:** replace generic file icon in webview panel with one that depicts the patch status
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
 - **patch-detail:** add a button next to a revision's latest and base commit identifier which copies the full id to clipboard
