@@ -241,6 +241,15 @@ export function alignUiWithWebviewPatchDetailState(
   if (!useWebviewStore().isPanelDisposed(panel)) {
     notifyWebview({ command: 'updateState', payload: state }, panel.webview)
     panel.title = getFormatedPanelTitle(state.state.patch.title)
+
+    if (panel.viewType === 'webview-patch-detail') {
+      panel.iconPath = Uri.joinPath(
+        useEnvStore().extCtx.extensionUri,
+        'assets',
+        'patch-status-icons',
+        `patch-${state.state.patch.state.status}.svg`,
+      )
+    }
   }
 }
 
@@ -285,8 +294,8 @@ async function handleMessageFromWebviewPatchDetail(
 }
 
 function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
-  const stylesUri = getUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.css'])
-  const scriptUri = getUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.js'])
+  const stylesUri = getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.css'])
+  const scriptUri = getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.js'])
   const allowedSource = webview.cspSource
   const nonce = getNonce()
 
@@ -323,6 +332,6 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
   return html
 }
 
-function getUri(webview: Webview, pathList: string[]): Uri {
+function getWebviewUri(webview: Webview, pathList: string[]): Uri {
   return webview.asWebviewUri(Uri.joinPath(useEnvStore().extCtx.extensionUri, ...pathList))
 }
