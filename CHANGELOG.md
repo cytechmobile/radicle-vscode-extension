@@ -55,6 +55,7 @@
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 - **patch-list:** show all possible actions for a patch on its context menu (right click)
 - **patch-list:** add new context-menu action "Refresh Patch Data" for a patch item
+- **patch-list:** add new context-menu action "Change Patch Status to Draft[... or Open/Archived]" for a patch item related to a non-merged patch
 
 ### 🔥 Performance
 

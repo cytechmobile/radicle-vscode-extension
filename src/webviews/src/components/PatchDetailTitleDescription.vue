@@ -78,6 +78,7 @@ function submitPatchEditForm() {
       patchId: patch.value.id,
       newTitle: patchEditForm.value.title.trim(),
       newDescr: patchEditForm.value.descr.trim(),
+      oldTitle: patch.value.title,
     },
   })
 }

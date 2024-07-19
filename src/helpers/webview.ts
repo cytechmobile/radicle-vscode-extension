@@ -14,9 +14,9 @@ import {
   checkOutDefaultBranch,
   checkOutPatch,
   copyToClipboardAndNotify,
-  updatePatchTitleAndDescription,
+  mutatePatch,
 } from '../ux'
-import { getRadicleIdentity, revealPatch } from '.'
+import { execPatchMutation, getRadicleIdentity, revealPatch } from '.'
 
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
@@ -282,10 +282,18 @@ async function handleMessageFromWebviewPatchDetail(
       revealPatch(message.payload.patch, { expand: true, focus: true })
       break
     case 'updatePatchTitleAndDescription':
-      updatePatchTitleAndDescription(
-        message.payload.patchId,
-        message.payload.newTitle,
-        message.payload.newDescr,
+      mutatePatch(message.payload.patchId, message.payload.oldTitle, (timeout?: number) =>
+        execPatchMutation(
+          [
+            'edit',
+            message.payload.patchId,
+            '--message',
+            message.payload.newTitle,
+            '--message',
+            message.payload.newDescr,
+          ],
+          timeout,
+        ),
       )
       break
     default:

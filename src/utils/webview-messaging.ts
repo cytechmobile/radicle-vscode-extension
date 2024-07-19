@@ -20,7 +20,7 @@ type MessageToExtension =
   | Message<'checkOutDefaultBranch'>
   | Message<
       'updatePatchTitleAndDescription',
-      { patchId: Patch['id']; newTitle: string; newDescr: string }
+      { patchId: Patch['id']; newTitle: string; newDescr: string; oldTitle: string }
     >
 
 /**

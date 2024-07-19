@@ -82,7 +82,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
 
       const treeItem: TreeItem = {
         id: patch.id,
-        contextValue: `patch:checked-out-${isCheckedOut}`,
+        contextValue: `patch:status-${patch.state.status}:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(patch),
         label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${patch.title}`,
         description: getPatchTreeItemDescription(patch, edgeRevisions),
