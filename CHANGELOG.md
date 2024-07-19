@@ -40,6 +40,14 @@
       - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is instead shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
       - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
+- **patch-list:** support changing a patch's status via new context-menu (right-click) actions "Change Patch Status to Draft[or Open/Archived]" on non-merged patch items
+  - only shown if the user is authorized to perform the actions
+  - only show those actions applicable given the patch's status
+- **patch-detail:** support changing a patch's status via button "Edit"
+  - shown on hover or on keyboard-focus of the patch status badge. The button replaces the badge in-place, with visual cues assisting the transition.
+  - only shown if the user is authorized to perform the actions
+  - clicking it toggles visibility of available alternative statuses the patch can have
+  - only those actions applicable given the patch's status are shown
 - **patch-detail:** replace generic file icon in webview panel with one that depicts the patch status
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
@@ -55,7 +63,6 @@
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 - **patch-list:** show all possible actions for a patch on its context menu (right click)
 - **patch-list:** add new context-menu action "Refresh Patch Data" for a patch item
-- **patch-list:** add new context-menu action "Change Patch Status to Draft[... or Open/Archived]" for a patch item related to a non-merged patch
 
 ### 🔥 Performance
 
@@ -67,13 +74,13 @@
 
 ### 🩹 Fixes
 
-- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch Detail view and the Patches view that each would occur only following very specific reproduction steps.
+- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch-Detail view and the Patches view that each would occur only following very specific reproduction steps
 - **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, _signigicantly_ more robust and much less likely to result in an blank panel
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
-- **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
+- **patch-detail:** the buttons on Patch-Detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
 - **patch-list:** sort changed file entries placing correctly always to the top those located at the root directory of the repo
-- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
+- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch-Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
