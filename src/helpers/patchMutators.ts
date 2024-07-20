@@ -6,29 +6,6 @@ export type PatchMutatorResult =
   | { outcome: 'success'; didAnnounce: boolean }
   | { outcome: 'failure'; errorMsg: string }
 
-/**
- * Performs mutation of the patch's title and description on Radicle. Effectively
- * it's editing the first patch revision.
- *
- * @returns An object with the outcome of the editing operation plus additional details
- * when available
- */
-// export function mutatePatchTitleAndDescr(
-//   patchId: Patch['id'],
-//   newTitle: string,
-//   newDescr: string,
-//   timeoutSeconds?: number,
-// ): PatchMutatorResult {
-//   return execPatchMutation(
-//     ['edit', patchId, '--message', newTitle, '--message', newDescr],
-//     timeoutSeconds,
-//   )
-// }
-
-// export function mutatePatchStatusToArchived(patch: Patch, timeoutSeconds?: number) {
-//   return execPatchMutation(['archive', patch.id], timeoutSeconds)
-// }
-
 export function execPatchMutation(
   execRadArgs: NonNullable<Parameters<typeof execRad>['0']>,
   timeoutSeconds?: number,
