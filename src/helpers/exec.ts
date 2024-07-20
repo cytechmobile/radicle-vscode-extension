@@ -10,13 +10,12 @@ import { getWorkspaceFolderPaths, log, truncateKeepWords } from '../utils'
 import { getConfig } from './config'
 
 /**
- * Executes a shell command and returns a promise that resolves with the stdout of the
- * command.
+ * Executes a shell command and returns the stdout of the command, if it was successful.
  *
- * EXAMPLE:
+ * @example
  * ```ts
  * exec('echo "hello shell :)"')
- * //> hello shell:)
+ * //> hello shell :)
  * ```
  *
  * @param cmd - The shell command to execute. Can be a static string or a function resolving
@@ -132,8 +131,23 @@ export function exec(
   }
 }
 
-// TODO: maninak support async calling
-// TODO: maninak write JSDoc for func
+/**
+ * Executes commands using the `rad` CLI binary directly, without spawning a shell.
+ *
+ * @example
+ * ```ts
+ * const { stdout: alias } = execRad(['self', '--alias'])
+ * // Equivalent to running `rad self --alias` in the shell, but without using a shell
+ * ```
+ *
+ * @param {string[]} [args=[]] The arguments with which we want to call the rad binary.
+ * Special string characters don't need to be escaped as one would do with a
+ * shell command and there should be no exposure to shell injection attacks.
+ *
+ * @returns An object with either the stdout of the command, if executed successfully, or
+ * the errorCode that node.js or the rad binary returned, along with any stderr and stdout
+ * outputs.
+ */
 export function execRad(
   args: string[] = [],
   options?: {
@@ -212,7 +226,7 @@ export function execRad(
   } catch (err) {
     const error = err as Error & {
       status: number // should be non-zero as per the process-return-value convention
-      code?: string // set if spawning child process failed: 'ENOENT', 'ETIMEDOUT'
+      code?: string // set if spawning child process failed: e.g. 'ENOENT', 'ETIMEDOUT'
       stdout?: string
       stderr?: string
     }
