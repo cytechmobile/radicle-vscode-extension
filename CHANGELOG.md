@@ -73,7 +73,7 @@
 
 ### 🛡️ Security Fixes
 
-- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, massively enhancing protection against shell injection attacks
+- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, greatly decreasing the extension's exposure to potential shell injection attacks
 
 ### 🩹 Fixes
 
