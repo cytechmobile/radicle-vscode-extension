@@ -296,6 +296,30 @@ async function handleMessageFromWebviewPatchDetail(
         ),
       )
       break
+    case 'updatePatchStatus':
+      {
+        const patch = message.payload.patch
+        const newStatus = message.payload.newStatus
+
+        if (newStatus === patch.state.status) {
+          break
+        }
+
+        switch (newStatus) {
+          case 'draft':
+            commands.executeCommand('radicle.draftizePatch', patch)
+            break
+          case 'open':
+            commands.executeCommand('radicle.openPatch', patch)
+            break
+          case 'archived':
+            commands.executeCommand('radicle.archivePatch', patch)
+            break
+          default:
+            assertUnreachable(newStatus)
+        }
+      }
+      break
     default:
       assertUnreachable(message)
   }

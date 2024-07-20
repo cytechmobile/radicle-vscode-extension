@@ -1,45 +1,159 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { computed, nextTick, ref, toRaw, watchEffect } from 'vue'
+import {
+  provideVSCodeDesignSystem,
+  vsCodeButton,
+  vsCodeRadioGroup,
+  vsCodeRadio,
+} from '@vscode/webview-ui-toolkit'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusIcon from './PatchStatusIcon.vue'
-import { computed } from 'vue'
+import { assertUnreachable } from 'extensionUtils/assertions'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
+
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeRadioGroup(), vsCodeRadio())
 
 const { patch, delegates, firstRevision, localIdentity } = storeToRefs(usePatchDetailStore())
 const status = computed(() => patch.value.state.status)
 
 const isAuthedToEditStatus = computed(() => {
+  if (status.value === 'merged') {
+    return false
+  }
+
   return [
     ...delegates.value.map((delegate) => delegate.id),
     firstRevision.value.author.id,
   ].includes(localIdentity.value?.id)
 })
+
+const btnStartEditingEl = ref<HTMLElement>()
+const btnStopEditingEl = ref<HTMLElement>()
+const isEditingStatus = ref(false)
+function toggleStatusEditing(ev: PointerEvent) {
+  isEditingStatus.value = !isEditingStatus.value
+
+  const isKeyboardClick = ev.detail === 0 && !ev.pointerType
+  if (isKeyboardClick) {
+    nextTick(() => {
+      isEditingStatus.value
+        ? btnStopEditingEl.value?.focus()
+        : btnStartEditingEl.value?.focus()
+    })
+  }
+}
+
+const radioGroupEl = ref<HTMLElement>()
+const radioDraftEl = ref<HTMLInputElement>()
+const radioOpenEl = ref<HTMLInputElement>()
+const radioArchivedEl = ref<HTMLInputElement>()
+
+// <vscode-radio checked> is bugged from the HTML side, so we have to do it manually with JS
+watchEffect(() => {
+  if (
+    radioGroupEl.value &&
+    !radioDraftEl.value?.checked &&
+    !radioOpenEl.value?.checked &&
+    !radioArchivedEl.value?.checked
+  ) {
+    nextTick(() => {
+      switch (status.value) {
+        case 'draft':
+          radioDraftEl.value!.checked = true
+          break
+        case 'open':
+          radioOpenEl.value!.checked = true
+          break
+        case 'archived':
+          radioArchivedEl.value!.checked = true
+          break
+        case 'merged':
+          break
+        default:
+          assertUnreachable(status.value)
+      }
+    })
+  }
+})
+
+function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
+  if (!ev.srcElement.checked) {
+    return
+  }
+
+  notifyExtension({
+    command: 'updatePatchStatus',
+    payload: {
+      patch: toRaw(patch.value),
+      newStatus: ev.srcElement.value as 'draft' | 'open' | 'archived',
+    },
+  })
+}
 </script>
 
 <template>
-  <span
-    class="relative rounded-full px-[0.75em] py-[0.25em] inline-flex items-center text-vscode-editor-background gap-[0.5em] group"
-    :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
-  >
-    <span class="-mb-[0.125em] group-hover:invisible group-focus-within:invisible"
-      ><PatchStatusIcon :status="status"
-    /></span>
+  <div class="flex flex-col sm:contents">
     <span
-      class="-mb-[0.125em] capitalize font-mono group-hover:invisible group-focus-within:invisible"
-      >{{ status }}</span
+      class="relative rounded-full px-[0.75em] py-[0.25em] inline-flex items-center w-fit text-vscode-editor-background gap-[0.5em] group"
+      :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
     >
+      <span
+        class="-mb-[0.125em] group-hover:invisible group-focus-within:invisible"
+        :class="{ invisible: isEditingStatus }"
+      >
+        <PatchStatusIcon :status="status" />
+      </span>
+      <span
+        class="-mb-[0.125em] capitalize font-mono group-hover:invisible group-focus-within:invisible"
+        :class="{ invisible: isEditingStatus }"
+      >
+        {{ status }}
+      </span>
 
-    <vscode-button
-      v-if="isAuthedToEditStatus"
-      appearance="icon"
-      title="Change Patch Status"
-      class="absolute left-0 w-full h-full opacity-0 focus:opacity-100 text-vscode-editor-background group-hover:opacity-100"
-      @click="toggleStatusEditing"
+      <vscode-button
+        v-if="isAuthedToEditStatus && !isEditingStatus"
+        ref="btnStartEditingEl"
+        @click="toggleStatusEditing"
+        appearance="icon"
+        title="Change Patch Status"
+        class="absolute left-0 w-full h-full opacity-0 focus:opacity-100 text-vscode-editor-background group-hover:opacity-100"
+      >
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <span class="codicon codicon-edit" slot="start"></span>
+        Edit
+      </vscode-button>
+      <vscode-button
+        v-if="isEditingStatus"
+        ref="btnStopEditingEl"
+        @click="toggleStatusEditing"
+        appearance="icon"
+        title="Stop Editing Patch Status"
+        class="absolute left-0 w-full h-full text-vscode-editor-background"
+      >
+        <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+        <span class="codicon codicon-close" slot="start"></span>
+        Close
+      </vscode-button>
+    </span>
+    <vscode-radio-group
+      v-if="isEditingStatus"
+      ref="radioGroupEl"
+      name="Select status"
+      orientation="vertical"
+      class="pl-2 sm:pl-0"
     >
       <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-      <span class="codicon codicon-edit" slot="start"></span>
-      Edit
-    </vscode-button>
-  </span>
+      <label slot="label">Status:</label>
+      <vscode-radio ref="radioDraftEl" @change="onRadioChanged" value="draft">
+        Draft
+      </vscode-radio>
+      <vscode-radio ref="radioOpenEl" @change="onRadioChanged" value="open">Open</vscode-radio>
+      <vscode-radio ref="radioArchivedEl" @change="onRadioChanged" value="archived">
+        Archived
+      </vscode-radio>
+    </vscode-radio-group>
+  </div>
 </template>
 
 <style scoped>

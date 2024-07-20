@@ -151,7 +151,7 @@
       },
       {
         "command": "radicle.checkoutDefaultBranch",
-        "title": "Check Out Current Repository's Default Git Branch",
+        "title": "Check Out Default Git Branch",
         "shortTitle": "Check Out Default",
         "category": "Radicle",
         "icon": "$(home)"

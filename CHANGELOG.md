@@ -42,12 +42,15 @@
 - **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
 - **patch-list:** support changing a patch's status via new context-menu (right-click) actions "Change Patch Status to Draft[or Open/Archived]" on non-merged patch items
   - only shown if the user is authorized to perform the actions
-  - only show those actions applicable given the patch's status
-- **patch-detail:** support changing a patch's status via button "Edit"
+  - only those actions applicable given the patch's status are shown
+- **patch-detail:** support changing a patch's status via a new button "Edit"
   - shown on hover or on keyboard-focus of the patch status badge. The button replaces the badge in-place, with visual cues assisting the transition.
   - only shown if the user is authorized to perform the actions
-  - clicking it toggles visibility of available alternative statuses the patch can have
-  - only those actions applicable given the patch's status are shown
+  - clicking the Edit button toggles visibility of status selection radio buttons and becomes "Close" while they are visible
+  - the placement of the status selection form is responsive, adapting to the viewport's width
+  - selecting a status from the available radios will immediatly trigger a patch status change. The handling of this command supports the rich UX also described above for the title and description change.
+  - keyboard focus is preserved on the button after pressing "clicking" it with the keyboard, despite the fact that there are four different elements conditionally layered on top of each other, including two separate buttons
+  - this bespoke Edit toggle button(s) still behaves like the standard one e.g. showing a focus ring but only when focused with the keyboard remaining accessible *and* visually lean
 - **patch-detail:** replace generic file icon in webview panel with one that depicts the patch status
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
