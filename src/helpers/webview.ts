@@ -3,7 +3,6 @@ import {
   type WebviewId,
   allWebviewIds,
   useEnvStore,
-  useGitStore,
   usePatchStore,
   useWebviewStore,
 } from '../stores'
@@ -14,9 +13,9 @@ import {
   checkOutDefaultBranch,
   checkOutPatch,
   copyToClipboardAndNotify,
-  updatePatchTitleAndDescription,
+  mutatePatch,
 } from '../ux'
-import { getRadicleIdentity, revealPatch } from '.'
+import { execPatchMutation, revealPatch } from '.'
 
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
@@ -121,14 +120,8 @@ export async function getStateForWebview(
 
       const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
 
-      const delegates = (await useGitStore().getRepoInfo())?.delegates
-      const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
-      assert(delegates)
-      assert(defaultBranch)
-
-      const identity = getRadicleIdentity('DID')
-      assert(identity)
-      const localIdentity = { id: identity.DID, alias: identity.alias }
+      const { currentRepoInfo, localIdentity: localId } = useEnvStore()
+      assert(currentRepoInfo)
 
       const state: PatchDetailWebviewInjectedState = {
         kind: webviewId,
@@ -143,9 +136,9 @@ export async function getStateForWebview(
           // issue is resolved? :thinking:
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
-          delegates,
-          defaultBranch,
-          localIdentity,
+          delegates: currentRepoInfo.delegates,
+          defaultBranch: currentRepoInfo.defaultBranch,
+          localIdentity: localId ? { id: localId.DID, alias: localId.alias } : undefined,
         },
       }
 
@@ -216,10 +209,10 @@ function initializePanel(
   let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
   switch (webviewId) {
     case 'webview-patch-detail':
-      handleMessageFromWebview = async (
+      handleMessageFromWebview = (
         message: Parameters<typeof handleMessageFromWebviewPatchDetail>[0],
       ) => {
-        await handleMessageFromWebviewPatchDetail(message, panel.webview)
+        handleMessageFromWebviewPatchDetail(message, panel.webview)
       }
       break
     default:
@@ -253,7 +246,7 @@ export function alignUiWithWebviewPatchDetailState(
   }
 }
 
-async function handleMessageFromWebviewPatchDetail(
+function handleMessageFromWebviewPatchDetail(
   message: Parameters<typeof notifyExtension>['0'],
   webview: Webview,
 ) {
@@ -276,17 +269,49 @@ async function handleMessageFromWebviewPatchDetail(
       checkOutPatch(message.payload.patch)
       break
     case 'checkOutDefaultBranch':
-      await checkOutDefaultBranch()
+      checkOutDefaultBranch()
       break
     case 'revealInPatchesView':
       revealPatch(message.payload.patch, { expand: true, focus: true })
       break
     case 'updatePatchTitleAndDescription':
-      updatePatchTitleAndDescription(
-        message.payload.patchId,
-        message.payload.newTitle,
-        message.payload.newDescr,
+      mutatePatch(message.payload.patchId, message.payload.oldTitle, (timeout?: number) =>
+        execPatchMutation(
+          [
+            'edit',
+            message.payload.patchId,
+            '--message',
+            message.payload.newTitle,
+            '--message',
+            message.payload.newDescr,
+          ],
+          timeout,
+        ),
       )
+      break
+    case 'updatePatchStatus':
+      {
+        const patch = message.payload.patch
+        const newStatus = message.payload.newStatus
+
+        if (newStatus === patch.state.status) {
+          break
+        }
+
+        switch (newStatus) {
+          case 'draft':
+            commands.executeCommand('radicle.draftizePatch', patch)
+            break
+          case 'open':
+            commands.executeCommand('radicle.openPatch', patch)
+            break
+          case 'archived':
+            commands.executeCommand('radicle.archivePatch', patch)
+            break
+          default:
+            assertUnreachable(newStatus)
+        }
+      }
       break
     default:
       assertUnreachable(message)

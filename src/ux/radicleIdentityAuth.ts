@@ -6,7 +6,6 @@ import {
   exec,
   execRad,
   getNodeSshKey,
-  getRadicleIdentity,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
   isRadInitialized,
@@ -43,11 +42,11 @@ function composeRadAuthSuccessMsg(
       msgPrefix = 'Succesfully authenticated'
   }
 
-  const radicleId = getRadicleIdentity('DID')
-  if (!radicleId) {
+  const localIdentityDid = useEnvStore().localIdentity?.DID
+  if (!localIdentityDid) {
     throw new Error('Failed resolving radicleId')
   }
-  const msg = `${msgPrefix} Radicle identity ${radicleId}${composeNodeHomePathMsg()}`
+  const msg = `${msgPrefix} Radicle identity ${localIdentityDid}${composeNodeHomePathMsg()}`
 
   return msg
 }
@@ -61,8 +60,8 @@ function authenticate({ alias, passphrase }: { passphrase: string; alias?: strin
     return false
   }
 
-  const radicleId = getRadicleIdentity('DID')
-  radicleId && useEnvStore().extCtx.secrets.store(radicleId.DID, passphrase)
+  const localIdentityDid = useEnvStore().localIdentity?.DID
+  localIdentityDid && useEnvStore().extCtx.secrets.store(localIdentityDid, passphrase)
 
   const authSuccessMsg = composeRadAuthSuccessMsg(alias ? 'didCreatedId' : 'didUnlockId')
   log(authSuccessMsg, 'info')
@@ -85,14 +84,14 @@ export async function launchAuthenticationFlow(
     return true
   }
 
-  const radicleId = getRadicleIdentity('DID')
+  const localIdentityDid = useEnvStore().localIdentity?.DID
   const secrets = useEnvStore().extCtx.secrets
 
   /* Attempt automatic authentication */
 
-  // a.k.a. if radicleId already exists
-  if (radicleId) {
-    const storedPass = await secrets.get(radicleId.DID)
+  // a.k.a. if localIdentityDid already exists
+  if (localIdentityDid) {
+    const storedPass = await secrets.get(localIdentityDid)
 
     if (storedPass) {
       const { errorCode } = execRad(['auth'], { env: { RAD_PASSPHRASE: storedPass } })
@@ -102,9 +101,9 @@ export async function launchAuthenticationFlow(
         return true
       }
 
-      await secrets.delete(radicleId.DID)
+      await secrets.delete(localIdentityDid)
       log(
-        `Deleted the stored, stale passphrase previously associated with identity ${radicleId}`,
+        `Deleted the stored, stale passphrase previously associated with identity ${localIdentityDid}`,
         'warn',
       )
     }
@@ -127,12 +126,12 @@ export async function launchAuthenticationFlow(
 
   /* Collect credentials and attempt authentication */
 
-  if (radicleId) {
+  if (localIdentityDid) {
     const answers = await askUser([
       {
         key: 'passphrase',
 
-        title: `Unlocking Radicle identity ${radicleId}`,
+        title: `Unlocking Radicle identity ${localIdentityDid}`,
         prompt: `Please enter the passphrase used to unlock your Radicle identity.`,
         placeHolder: '************',
         validateInput: (input) => {
@@ -248,10 +247,10 @@ export async function validateRadicleIdentityAuthentication(
     return true
   }
 
-  const radicleId = getRadicleIdentity('DID')
+  const localIdentityDid = useEnvStore().localIdentity?.DID
   const pathToNodeHome = getResolvedPathToNodeHome()
-  const msg = radicleId
-    ? `Found non-authenticated identity ${radicleId} stored in "${pathToNodeHome}"`
+  const msg = localIdentityDid
+    ? `Found non-authenticated identity ${localIdentityDid} stored in "${pathToNodeHome}"`
     : `No Radicle identity is currently stored in "${pathToNodeHome}"`
   log(msg, 'warn')
 
@@ -282,11 +281,11 @@ export function deAuthCurrentRadicleIdentity(): boolean {
   }
 
   const didDeAuth = exec(`ssh-add -D ${sshKey}`, { shouldLog: true }) !== undefined
-  const radicleId = getRadicleIdentity('DID')
+  const localIdentityDid = useEnvStore().localIdentity?.DID
   if (!didDeAuth) {
     const button = 'Show output'
 
-    const msg = `Failed de-authenticating Radicle identity ${radicleId}${composeNodeHomePathMsg()}.`
+    const msg = `Failed de-authenticating Radicle identity ${localIdentityDid}${composeNodeHomePathMsg()}.`
     log(msg, 'error')
     window.showErrorMessage(msg, button).then((userSelection) => {
       userSelection === button && showLog()
@@ -295,9 +294,9 @@ export function deAuthCurrentRadicleIdentity(): boolean {
     return false
   }
 
-  radicleId && useEnvStore().extCtx.secrets.delete(radicleId.DID)
+  localIdentityDid && useEnvStore().extCtx.secrets.delete(localIdentityDid)
 
-  const msg = `De-authenticated Radicle identity ${radicleId}${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
+  const msg = `De-authenticated Radicle identity ${localIdentityDid}${composeNodeHomePathMsg()} and removed the associated passphrase from Secret Storage successfully`
   window.showInformationMessage(msg)
   log(msg, 'info')
 

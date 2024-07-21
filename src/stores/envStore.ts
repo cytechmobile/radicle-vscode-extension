@@ -1,11 +1,14 @@
 import vscode, { type ExtensionContext } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ShallowRef, computed, ref, shallowRef } from '@vue/reactivity'
-import { convertLocaleFromLibcToBcp47 } from '../utils'
+import type { DId } from '../types'
+import { convertLocaleFromLibcToBcp47, log } from '../utils'
 import {
+  execRad,
   getAbsolutePathToDefaultRadBinaryLocation,
   getConfig,
   getCurrentRepoId,
+  getLocalRadicleIdentity,
   getValidatedPathToRadBinaryWhenAliased,
 } from '../helpers'
 
@@ -38,17 +41,6 @@ export const useEnvStore = defineStore('envStore', () => {
     )
   })
 
-  const currentRepoIdRecomputeSignal = ref(0)
-  const currentRepoId = computed(() => {
-    void currentRepoIdRecomputeSignal.value
-
-    return getCurrentRepoId()
-  })
-
-  function refreshCurrentRepoId() {
-    currentRepoIdRecomputeSignal.value++
-  }
-
   const radPathRecomputeSignal = ref(0)
   /**
    * The most preferable absolute path to the Radicle CLI binary resolved among user configured
@@ -68,12 +60,75 @@ export const useEnvStore = defineStore('envStore', () => {
     radPathRecomputeSignal.value++
   }
 
+  const localIdentityRecomputeSignal = ref(0)
+  const localIdentity = computed(() => {
+    void localIdentityRecomputeSignal.value
+
+    return getLocalRadicleIdentity('DID')
+  })
+
+  function refreshLocalIdentity() {
+    localIdentityRecomputeSignal.value++
+  }
+
+  const currentRepoIdRecomputeSignal = ref(0)
+  const currentRepoId = computed(() => {
+    void currentRepoIdRecomputeSignal.value
+
+    return getCurrentRepoId()
+  })
+
+  function refreshCurrentRepoId() {
+    currentRepoIdRecomputeSignal.value++
+  }
+
+  const currentRepoInfo = computed(() => {
+    void currentRepoId.value
+    void localIdentity.value // `rad inspect --identity` currently fails if no local node id
+
+    const { stdout: repoIdStringified } = execRad(['inspect', '--identity'], {
+      cwd: '$workspaceDir',
+    })
+    if (!repoIdStringified) {
+      return undefined
+    }
+
+    try {
+      const repoIdentity = JSON.parse(repoIdStringified) as {
+        payload: {
+          'xyz.radicle.project': {
+            defaultBranch: string
+            description: string
+            name: string
+          }
+        }
+        delegates: DId[]
+        threshold: number
+      }
+
+      const repoIdNormalized = {
+        ...repoIdentity.payload['xyz.radicle.project'],
+        delegates: repoIdentity.delegates,
+        threshold: repoIdentity.threshold,
+      }
+
+      return repoIdNormalized
+    } catch {
+      log("Failed sourcing current Radicle repository's information", 'error')
+
+      return undefined
+    }
+  })
+
   return {
     extCtx,
     setExtensionContext,
     timeLocaleBcp47,
+    localIdentity,
+    refreshLocalIdentity,
     currentRepoId,
     refreshCurrentRepoId,
+    currentRepoInfo,
     resolvedAbsolutePathToRadBinary,
     refreshResolvedAbsolutePathToRadBinary,
   }

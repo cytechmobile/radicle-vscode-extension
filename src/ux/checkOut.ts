@@ -1,5 +1,5 @@
 import { commands, window } from 'vscode'
-import { useGitStore } from '../stores'
+import { useEnvStore } from '../stores'
 import { exec, execRad } from '../helpers'
 import type { Patch } from '../types'
 import { log, shortenHash, showLog } from '../utils'
@@ -9,8 +9,8 @@ import { log, shortenHash, showLog } from '../utils'
  *
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
-export async function checkOutDefaultBranch(): Promise<boolean> {
-  const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
+export function checkOutDefaultBranch(): boolean {
+  const defaultBranch = useEnvStore().currentRepoInfo?.defaultBranch
   if (!defaultBranch) {
     return false
   }

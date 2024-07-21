@@ -99,7 +99,8 @@ export function validateRadCliInstallation(
   const radVersion = getRadCliVersion()
   const isRadInstalled = Boolean(radVersion)
   setWhenClauseContext('radicle.isRadCliInstalled', isRadInstalled)
-  isRadInstalled && useEnvStore().refreshCurrentRepoId() // TODO: maninak remove this when isRadInstalled is in a store and make currentRepoId depend on it
+  // TODO: maninak remove these when isRadInstalled is in a store and make them depend on isRadInstalled
+  isRadInstalled && useEnvStore().refreshCurrentRepoId()
 
   const radPath = useEnvStore().resolvedAbsolutePathToRadBinary
 

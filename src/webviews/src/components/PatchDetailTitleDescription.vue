@@ -57,10 +57,9 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
 }
 
 const isAuthedToEditTitleAndDescr = computed(() => {
-  return [
-    ...delegates.value.map((delegate) => delegate.id),
-    firstRevision.value.author.id,
-  ].includes(localIdentity.value?.id)
+  return [...delegates.value, firstRevision.value.author.id].includes(
+    localIdentity.value?.id ?? '',
+  )
 })
 
 function beginPatchEditing() {
@@ -78,6 +77,7 @@ function submitPatchEditForm() {
       patchId: patch.value.id,
       newTitle: patchEditForm.value.title.trim(),
       newDescr: patchEditForm.value.descr.trim(),
+      oldTitle: patch.value.title,
     },
   })
 }

@@ -16,7 +16,13 @@ export const usePatchStore = defineStore('patch', () => {
   })
   effect(
     () => {
-      useEnvStore().currentRepoId && resetAllPatches()
+      // Patches view items should be recalculated when any of those change
+      // so we import them, even if unused, to bind them as dependencies to `effect`.
+      const { currentRepoId, currentRepoInfo, localIdentity } = useEnvStore()
+      void currentRepoInfo?.delegates
+      void localIdentity?.DID
+
+      currentRepoId && resetAllPatches()
     },
     { lazy: true },
   )
