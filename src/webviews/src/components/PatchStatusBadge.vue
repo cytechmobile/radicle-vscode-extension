@@ -103,14 +103,20 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
       :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
     >
       <span
-        class="-mb-[0.125em] group-hover:invisible group-focus-within:invisible"
-        :class="{ invisible: isEditingStatus }"
+        class="-mb-[0.125em]"
+        :class="{
+          'group-hover:invisible group-focus-within:invisible': isAuthedToEditStatus,
+          invisible: isEditingStatus,
+        }"
       >
         <PatchStatusIcon :status="status" />
       </span>
       <span
-        class="-mb-[0.125em] capitalize font-mono group-hover:invisible group-focus-within:invisible"
-        :class="{ invisible: isEditingStatus }"
+        class="-mb-[0.125em] capitalize font-mono"
+        :class="{
+          'group-hover:invisible group-focus-within:invisible': isAuthedToEditStatus,
+          invisible: isEditingStatus,
+        }"
       >
         {{ status }}
       </span>
