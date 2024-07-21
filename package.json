@@ -119,16 +119,24 @@
         "enablement": "radicle.isRadInitialized"
       },
       {
-        "command": "radicle.refreshPatches",
-        "title": "Refresh Patches View",
+        "command": "radicle.refreshAllPatches",
+        "title": "Refresh All Patch Data",
         "shortTitle": "Refresh Patches",
         "category": "Radicle",
         "icon": "$(refresh)",
         "enablement": "radicle.isRadInitialized"
       },
       {
+        "command": "radicle.refreshOnePatch",
+        "title": "Refresh Patch Data",
+        "shortTitle": "Refresh Patch",
+        "category": "Radicle",
+        "icon": "$(refresh)",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
         "command": "radicle.viewPatchDetails",
-        "title": "View Patch Details",
+        "title": "Open Patch Details",
         "shortTitle": "Patch Details",
         "category": "Radicle",
         "icon": "$(preview)",
@@ -143,7 +151,7 @@
       },
       {
         "command": "radicle.checkoutDefaultBranch",
-        "title": "Check Out Current Repository's Default Git Branch",
+        "title": "Check Out Default Git Branch",
         "shortTitle": "Check Out Default",
         "category": "Radicle",
         "icon": "$(home)"
@@ -168,30 +176,43 @@
         "shortTitle": "Open Changed",
         "category": "Radicle",
         "icon": "$(go-to-file)"
+      },
+      {
+        "command": "radicle.draftizePatch",
+        "title": "Change Patch Status to Draft",
+        "shortTitle": "Draft",
+        "category": "Radicle",
+        "icon": "git-pull-request-draft",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.openPatch",
+        "title": "Change Patch Status to Open",
+        "shortTitle": "Open",
+        "category": "Radicle",
+        "icon": "git-pull-request",
+        "enablement": "radicle.isRadInitialized"
+      },
+      {
+        "command": "radicle.archivePatch",
+        "title": "Change Patch Status to Archived",
+        "shortTitle": "Archive",
+        "category": "Radicle",
+        "icon": "git-pull-request-closed",
+        "enablement": "radicle.isRadInitialized"
       }
     ],
     "menus": {
       "commandPalette": [
-        {
-          "command": "radicle.viewPatchDetails",
-          "when": "false"
-        },
-        {
-          "command": "radicle.checkoutPatch",
-          "when": "false"
-        },
-        {
-          "command": "radicle.copyPatchId",
-          "when": "false"
-        },
-        {
-          "command": "radicle.openOriginalVersionOfPatchedFile",
-          "when": "false"
-        },
-        {
-          "command": "radicle.openChangedVersionOfPatchedFile",
-          "when": "false"
-        }
+        { "command": "radicle.viewPatchDetails", "when": "false" },
+        { "command": "radicle.refreshOnePatch", "when": "false" },
+        { "command": "radicle.checkoutPatch", "when": "false" },
+        { "command": "radicle.copyPatchId", "when": "false" },
+        { "command": "radicle.openOriginalVersionOfPatchedFile", "when": "false" },
+        { "command": "radicle.openChangedVersionOfPatchedFile", "when": "false" },
+        { "command": "radicle.draftizePatch", "when": "false" },
+        { "command": "radicle.openPatch", "when": "false" },
+        { "command": "radicle.archivePatch", "when": "false" }
       ],
       "scm/title": [
         {
@@ -205,7 +226,7 @@
       ],
       "view/title": [
         {
-          "command": "radicle.refreshPatches",
+          "command": "radicle.refreshAllPatches",
           "when": "view == patches-view",
           "group": "navigation@1"
         }
@@ -217,27 +238,63 @@
           "group": "inline@1"
         },
         {
+          "command": "radicle.viewPatchDetails",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "contextMenu.A@1"
+        },
+        {
+          "command": "radicle.refreshOnePatch",
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "contextMenu.A@2"
+        },
+        {
           "command": "radicle.checkoutPatch",
-          "when": "view == patches-view && viewItem =~ /patch:checked-out-false/",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:checked-out-false/",
           "group": "inline@2"
+        },
+        {
+          "command": "radicle.checkoutPatch",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:checked-out-false/",
+          "group": "contextMenu.B@1"
         },
         {
           "command": "radicle.checkoutDefaultBranch",
-          "when": "view == patches-view && viewItem =~ /patch:checked-out-true/",
-          "group": "inline@2"
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:checked-out-true/",
+          "group": "contextMenu.B@1"
+        },
+        {
+          "command": "radicle.draftizePatch",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/  && (viewItem =~ /:status-open/ || viewItem =~ /:status-archived/)",
+          "group": "contextMenu.C@1"
+        },
+        {
+          "command": "radicle.openPatch",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-archived/)",
+          "group": "contextMenu.C@2"
+        },
+        {
+          "command": "radicle.archivePatch",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-open/)",
+          "group": "contextMenu.C@3"
         },
         {
           "command": "radicle.copyPatchId",
-          "when": "view == patches-view && viewItem =~ /patch/"
+          "when": "view == patches-view && viewItem =~ /patch/",
+          "group": "contextMenu.D@1"
+        },
+        {
+          "command": "radicle.checkoutDefaultBranch",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:checked-out-true/",
+          "group": "inline@2"
         },
         {
           "command": "radicle.openOriginalVersionOfPatchedFile",
-          "when": "view == patches-view && viewItem =~ /filechange:(deleted|modified|copied|moved)/",
+          "when": "view == patches-view && viewItem =~ /filechange/ && viewItem =~ /:(deleted|modified|copied|moved)/",
           "group": "contextMenu.diff@1"
         },
         {
           "command": "radicle.openChangedVersionOfPatchedFile",
-          "when": "view == patches-view && viewItem =~ /filechange:(added|modified|copied|moved)/",
+          "when": "view == patches-view && viewItem =~ /filechange/ && viewItem =~ /:(added|modified|copied|moved)/",
           "group": "contextMenu.diff@2"
         }
       ],

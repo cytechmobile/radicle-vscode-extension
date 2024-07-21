@@ -27,7 +27,7 @@ function revealPatch() {
   <vscode-button
     class="self-center"
     appearance="secondary"
-    title="Refresh All Data on This Page"
+    title="Refresh Patch Data"
     @click="refetchPatchData"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->

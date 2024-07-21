@@ -39,10 +39,25 @@
       - if "Retry With Longer Timeout" is clicked, the patch edit command will be retried with a two minute timeout
       - each time a rad operation is launched with a timeout longer than 30s then its busy indicator is instead shown in the [Status Bar](https://code.visualstudio.com/docs/getstarted/userinterface), not the Patches view
       - each time the retried command with longer time-out also times out, then the user is again presented the "Retry With Longer Timeout" which will quadruple the previous timeout (e.g. 2, 8, 24 minutes etc)
+- **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
+- **patch-list:** support changing a patch's status via new context-menu (right-click) actions "Change Patch Status to Draft[or Open/Archived]" on non-merged patch items
+  - only shown if the user is authorized to perform the actions
+  - only those actions applicable given the patch's status are shown
+- **patch-detail:** support changing a patch's status via a new button "Edit"
+  - shown on hover or on keyboard-focus of the patch status badge. The button replaces the badge in place, with visual cues assisting the transition.
+  - only shown if the user is authorized to perform the actions
+  - clicking the Edit button toggles the visibility of status-selection radio buttons and becomes "Close" while they are visible
+  - selecting a status from the available radios will immediately trigger a patch status change. The handling of this command supports the rich UX also described above for the title and description change.
+  - keyboard focus is preserved on the button after pressing "clicking" it with the keyboard, even though there are four different elements conditionally layered on top of each other, including two separate buttons
+  - this bespoke Edit toggle button(s) still behaves like the standard one e.g. showing a focus ring but only when focused with the keyboard remaining accessible *and* visually lean
+- **patch-detail:** replace generic file icon in webview panel with one that depicts the patch status
 - **patch-detail:** replace former "Reveal" button with a new "Browse Diff" one that still reveals the patch among others in the list but additionally expands it to show the changed files and moves the keyboard focus over to that item
 - **patch-detail:** the former "Check Out Default" button now has a dynamic copy "Check Out $nameOfdefaultBranch"
-- **webview:** make webviews like the one for patch details reactively adapt their UI state when any extension state they depend on is updated
+- **patch-detail:** add a button next to a revision's latest and base commit identifier which copies the full id to clipboard
 - **commands:** use the name of the tracked upstream branch of the currently checked out branch, instead of just the latter, when trying to detect if a radicle patch is currently checked out
+- **commands:** improve the algorithm detecting if patch/default branch check-out failed due to uncommitted changes in the working directory.
+  - additionally, if there was a check-out error and that was the reason, then offer, additionally to the default option of seeing the command's output, the option to switch to the native Source Control View where the user can take inspect further and take follow-up actions
+  - if there was a check-out error due to a different reason, the error notification copy is more generic without suggesting to the user to "commit or stash changes" and without showing the button "Focus Source Control View"
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
   - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
@@ -58,23 +73,28 @@
   - general copy improvements across all branches of the flow
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
+- **patch-list:** show all possible actions for a patch on its context menu (right click)
+- **patch-list:** add new context-menu action "Refresh Patch Data" for a patch item
 
 ### 🔥 Performance
 
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
+- **patch-list:** speed up (re-)loading of Patches view by caching env state previously resolved anew for each patch item in the list
+  - measured as ~25% faster for a real-world Project with >350 patches
 
 ### 🛡️ Security Fixes
 
-- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, massively enhancing protection against shell injection attacks
+- **exec:** sanitize untrusted paths and other values before interpolating them into shell commands or forgo spawning a shell altogether, greatly decreasing the extension's exposure to potential shell injection attacks
 
 ### 🩹 Fixes
 
-- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch Detail view and the Patches view that each would occur only following very specific reproduction steps.
+- **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch-Detail view and the Patches view that each would occur only following very specific reproduction steps
 - **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, _signigicantly_ more robust and much less likely to result in an blank panel
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
-- **patch-detail:** the buttons on patch detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
+- **patch-detail:** the buttons on Patch-Detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
-- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch Detail view
+- **patch-list:** sort changed file entries placing correctly always to the top those located at the root directory of the repo
+- **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch-Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** don't show simulataneously cli-troubleshooting and getting-started Welcome Views when the rad CLI isn't installed
@@ -85,6 +105,7 @@
 - **markdown:** make the language tag on (recognised) code blocks not user-selectable
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
 - **log:** show the actual output of failed rad commands (which explains _why_ it failed...) instead of sometimes showing the CLI's progress-spinnner characters spammed en masse
+- **patch-list:** show all patches again as expected, not only those with status "open". Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) while keeping backwards compatibility for users who haven't yet upgraded to the latest httpd
 
 ### 💅 Refactors
 

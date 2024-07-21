@@ -1,5 +1,10 @@
 import type { Webview } from 'vscode'
-import type { AugmentedPatch, Patch, PatchDetailWebviewInjectedState } from '../types'
+import type {
+  AugmentedPatch,
+  Patch,
+  PatchDetailWebviewInjectedState,
+  PatchStatus,
+} from '../types'
 import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
 
 interface Message<Command extends string, Payload extends object | undefined = undefined> {
@@ -20,8 +25,9 @@ type MessageToExtension =
   | Message<'checkOutDefaultBranch'>
   | Message<
       'updatePatchTitleAndDescription',
-      { patchId: Patch['id']; newTitle: string; newDescr: string }
+      { patchId: Patch['id']; newTitle: string; newDescr: string; oldTitle: string }
     >
+  | Message<'updatePatchStatus', { patch: Patch; newStatus: Exclude<PatchStatus, 'merged'> }>
 
 /**
  * Sends a message, usually from the host window, to the provided webview.

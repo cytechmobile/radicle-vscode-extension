@@ -20,7 +20,8 @@ export interface HttpdRoot {
   message: string
   service: string
   version: string
-  node: { id: string } // TODO: maninak handle breaking change https://radicle.zulipchat.com/#narrow/stream/369278-web/topic/breaking.20changes.20in.20HTTPD/near/409172640
+  apiVersion: string
+  nid: string
   path: string
   links: {
     href: string

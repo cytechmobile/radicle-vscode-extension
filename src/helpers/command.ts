@@ -1,6 +1,6 @@
 import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
 import { useEnvStore, usePatchStore } from '../stores'
-import { log, showLog } from '../utils'
+import { assert, assertUnreachable, log, showLog } from '../utils'
 import {
   type FilechangeNode,
   checkOutDefaultBranch,
@@ -8,11 +8,12 @@ import {
   copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
   launchAuthenticationFlow,
+  mutatePatch,
   selectAndCloneRadicleRepo,
   troubleshootRadCliInstallation,
 } from '../ux'
-import type { AugmentedPatch, Patch } from '../types'
-import { createOrReuseWebviewPanel, execRad } from '.'
+import type { AugmentedPatch, Patch, PatchStatus } from '../types'
+import { createOrReuseWebviewPanel, execPatchMutation, execRad } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -101,13 +102,18 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.collapsePatches', () => {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })
-  registerVsCodeCmd('radicle.refreshPatches', () => {
+  registerVsCodeCmd('radicle.refreshAllPatches', () => {
     usePatchStore().resetAllPatches()
+  })
+  registerVsCodeCmd('radicle.refreshOnePatch', (patch: Patch | undefined) => {
+    assert(patch)
+    usePatchStore().refetchPatch(patch?.id)
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
   registerVsCodeCmd('radicle.checkoutDefaultBranch', checkOutDefaultBranch)
-  registerVsCodeCmd('radicle.copyPatchId', async (patch: Partial<Patch> | undefined) => {
-    typeof patch?.id === 'string' && (await copyToClipboardAndNotify(patch.id))
+  registerVsCodeCmd('radicle.copyPatchId', async (patch: Patch | undefined) => {
+    assert(patch)
+    await copyToClipboardAndNotify(patch.id)
   })
   registerVsCodeCmd(
     'radicle.openDiff',
@@ -152,10 +158,57 @@ export function registerAllCommands(): void {
     },
   )
   registerVsCodeCmd('radicle.viewPatchDetails', (patch: AugmentedPatch) => {
+    assert(patch)
     createOrReuseWebviewPanel({
       webviewId: 'webview-patch-detail',
       data: patch.id,
       proposedPanelTitle: patch.title,
+    })
+  })
+  registerVsCodeCmd('radicle.draftizePatch', (patch: Patch | undefined) => {
+    assert(patch)
+    const patchStatus = patch.state.status as Exclude<PatchStatus, 'draft' | 'merged'>
+
+    switch (patchStatus) {
+      case 'open':
+        mutatePatch(patch.id, patch.title, (timeout?: number) => {
+          return execPatchMutation(['ready', patch.id, '--undo'], timeout)
+        })
+        break
+      case 'archived':
+        commands.executeCommand('radicle.openPatch', patch)
+        commands.executeCommand('radicle.draftizePatch', {
+          ...patch,
+          state: { status: 'open' },
+        })
+        break
+      default:
+        assertUnreachable(patchStatus)
+    }
+  })
+  registerVsCodeCmd('radicle.openPatch', (patch: Patch | undefined) => {
+    assert(patch)
+    const patchStatus = patch.state.status as Exclude<PatchStatus, 'open' | 'merged'>
+
+    switch (patchStatus) {
+      case 'draft':
+        mutatePatch(patch.id, patch.title, (timeout?: number) => {
+          return execPatchMutation(['ready', patch.id], timeout)
+        })
+        break
+      case 'archived':
+        mutatePatch(patch.id, patch.title, (timeout?: number) => {
+          return execPatchMutation(['archive', patch.id, '--undo'], timeout)
+        })
+        break
+      default:
+        assertUnreachable(patchStatus)
+    }
+  })
+  registerVsCodeCmd('radicle.archivePatch', (patch: Patch | undefined) => {
+    assert(patch)
+    mutatePatch(patch.id, patch.title, (timeout?: number) => {
+      return execPatchMutation(['archive', patch.id], timeout)
     })
   })
 }

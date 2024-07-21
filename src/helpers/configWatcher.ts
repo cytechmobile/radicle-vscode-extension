@@ -40,6 +40,7 @@ const configWatchers = [
   {
     configKey: 'radicle.advanced.pathToNodeHome',
     onConfigChange: () => {
+      useEnvStore().refreshLocalIdentity()
       // no need to notify since we check AND notify on rad command execution
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
       usePatchStore().resetAllPatches()

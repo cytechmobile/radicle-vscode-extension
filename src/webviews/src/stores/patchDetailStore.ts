@@ -47,6 +47,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   )
 
   const localIdentity = computed(() => state.state.localIdentity)
+  // TODO: delete delete `identities` from `patchDetailStore` or move it into patchStore across all patches if not too slow. Will be useful for a "Contributors" view.
   const identities = computed(() => {
     const mergers = patch.value.merges.map((merge) => merge.author)
     const commenters = patch.value.revisions.flatMap((revision) =>
@@ -58,9 +59,9 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
     const uniqueIds = [
       ...new Map(
-        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers].map(
-          (identity) => [identity.id, identity],
-        ),
+        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers]
+          .filter(Boolean)
+          .map((identity) => [identity.id, identity]),
       ).values(),
     ]
 

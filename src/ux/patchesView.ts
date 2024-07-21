@@ -13,7 +13,11 @@ import {
 } from 'vscode'
 import { extTempDir } from '../constants'
 import { useEnvStore, usePatchStore } from '../stores'
-import { fetchFromHttpd, getFirstAndLatestRevisions } from '../helpers'
+import {
+  fetchFromHttpd,
+  getFirstAndLatestRevisions,
+  isLocalIdAuthedToEditPatchStatus,
+} from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -77,12 +81,25 @@ export const patchesTreeDataProvider: TreeDataProvider<
       return { description: elem }
     } else if (isPatch(elem)) {
       const patch = elem
-      const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
       const edgeRevisions = getFirstAndLatestRevisions(patch)
+      const localIdentityDid = useEnvStore().localIdentity?.DID
+      const delegates = useEnvStore().currentRepoInfo?.delegates
+      const traitStatusEditable =
+        localIdentityDid &&
+        delegates &&
+        isLocalIdAuthedToEditPatchStatus(
+          patch.state.status,
+          delegates,
+          edgeRevisions.firstRevision,
+          localIdentityDid,
+        )
+          ? ':status-editable'
+          : ''
+      const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
 
       const treeItem: TreeItem = {
         id: patch.id,
-        contextValue: `patch:checked-out-${isCheckedOut}`,
+        contextValue: `patch:status-${patch.state.status}${traitStatusEditable}:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(patch),
         label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${patch.title}`,
         description: getPatchTreeItemDescription(patch, edgeRevisions),
@@ -186,7 +203,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
           )}${sep}${fileDir}${sep}${filename}`
 
           const node: FilechangeNode = {
-            relativeInRepoUrl: filePath,
+            relativeInRepoUrl: filePath.includes(sep) ? filePath : `${sep}${filePath}`,
             oldVersionUrl,
             newVersionUrl,
             patch,
