@@ -97,7 +97,7 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
 </script>
 
 <template>
-  <div class="flex flex-col sm:contents">
+  <div class="contents">
     <span
       class="relative rounded-full px-[0.75em] py-[0.25em] inline-flex items-center w-fit text-vscode-editor-background gap-[0.5em] group"
       :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
@@ -151,7 +151,6 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
       ref="radioGroupEl"
       name="Select status"
       orientation="vertical"
-      class="pl-2 sm:pl-0"
     >
       <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
       <label slot="label">Status:</label>

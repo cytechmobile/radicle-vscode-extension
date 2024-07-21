@@ -47,7 +47,6 @@
   - shown on hover or on keyboard-focus of the patch status badge. The button replaces the badge in-place, with visual cues assisting the transition.
   - only shown if the user is authorized to perform the actions
   - clicking the Edit button toggles visibility of status selection radio buttons and becomes "Close" while they are visible
-  - the placement of the status selection form is responsive, adapting to the viewport's width
   - selecting a status from the available radios will immediatly trigger a patch status change. The handling of this command supports the rich UX also described above for the title and description change.
   - keyboard focus is preserved on the button after pressing "clicking" it with the keyboard, despite the fact that there are four different elements conditionally layered on top of each other, including two separate buttons
   - this bespoke Edit toggle button(s) still behaves like the standard one e.g. showing a focus ring but only when focused with the keyboard remaining accessible *and* visually lean
