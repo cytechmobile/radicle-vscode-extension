@@ -11,22 +11,21 @@ import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchStatusIcon from './PatchStatusIcon.vue'
 import { assertUnreachable } from 'extensionUtils/assertions'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
+import { isLocalIdAuthedToEditPatchStatus } from 'extensionHelpers/patch'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeRadioGroup(), vsCodeRadio())
 
 const { patch, delegates, firstRevision, localIdentity } = storeToRefs(usePatchDetailStore())
 const status = computed(() => patch.value.state.status)
 
-const isAuthedToEditStatus = computed(() => {
-  if (status.value === 'merged') {
-    return false
-  }
-
-  return [
-    ...delegates.value.map((delegate) => delegate.id),
-    firstRevision.value.author.id,
-  ].includes(localIdentity.value?.id)
-})
+const isAuthedToEditStatus = computed(() =>
+  isLocalIdAuthedToEditPatchStatus(
+    patch.value.state.status,
+    delegates.value,
+    firstRevision.value,
+    localIdentity.value.id,
+  ),
+)
 
 const btnStartEditingEl = ref<HTMLElement>()
 const btnStopEditingEl = ref<HTMLElement>()

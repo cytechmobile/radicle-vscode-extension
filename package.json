@@ -264,17 +264,17 @@
         },
         {
           "command": "radicle.draftizePatch",
-          "when": "view == patches-view && viewItem =~ /patch/ && (viewItem =~ /:status-open/ || viewItem =~ /:status-archived/)",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/  && (viewItem =~ /:status-open/ || viewItem =~ /:status-archived/)",
           "group": "contextMenu.C@1"
         },
         {
           "command": "radicle.openPatch",
-          "when": "view == patches-view && viewItem =~ /patch/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-archived/)",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-archived/)",
           "group": "contextMenu.C@2"
         },
         {
           "command": "radicle.archivePatch",
-          "when": "view == patches-view && viewItem =~ /patch/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-open/)",
+          "when": "view == patches-view && viewItem =~ /patch/ && viewItem =~ /:status-editable/ && (viewItem =~ /:status-draft/ || viewItem =~ /:status-open/)",
           "group": "contextMenu.C@3"
         },
         {

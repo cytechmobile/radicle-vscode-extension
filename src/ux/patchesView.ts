@@ -12,8 +12,8 @@ import {
   Uri,
 } from 'vscode'
 import { extTempDir } from '../constants'
-import { useEnvStore, usePatchStore } from '../stores'
-import { fetchFromHttpd, getFirstAndLatestRevisions } from '../helpers'
+import { useEnvStore, useGitStore, usePatchStore } from '../stores'
+import { fetchFromHttpd, getFirstAndLatestRevisions, getRadicleIdentity, isLocalIdAuthedToEditPatchStatus } from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -72,17 +72,29 @@ export function rerenderAllItemsInPatchesView() {
 export const patchesTreeDataProvider: TreeDataProvider<
   string | AugmentedPatch | FilechangeNode
 > = {
-  getTreeItem: (elem) => {
+  getTreeItem: async (elem) => {
     if (typeof elem === 'string') {
       return { description: elem }
     } else if (isPatch(elem)) {
       const patch = elem
-      const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
       const edgeRevisions = getFirstAndLatestRevisions(patch)
+      // TODO: maninak use memoized+debounced getRadicleIdentity. Maybe also wherever getRepoInfo is?
+      const localIdentityDid = getRadicleIdentity('DID')?.DID
+      const traitStatusEditable =
+        localIdentityDid &&
+        isLocalIdAuthedToEditPatchStatus(
+          patch.state.status,
+          (await useGitStore().getRepoInfo())?.delegates ?? [],
+          edgeRevisions.firstRevision,
+          localIdentityDid,
+        )
+          ? ':status-editable'
+          : ''
+      const isCheckedOut = patch.id === usePatchStore().checkedOutPatch?.id
 
       const treeItem: TreeItem = {
         id: patch.id,
-        contextValue: `patch:status-${patch.state.status}:checked-out-${isCheckedOut}`,
+        contextValue: `patch:status-${patch.state.status}${traitStatusEditable}:checked-out-${isCheckedOut}`,
         iconPath: getThemeIconForPatch(patch),
         label: `${isCheckedOut ? `❬${checkmark}❭ ` : ''}${patch.title}`,
         description: getPatchTreeItemDescription(patch, edgeRevisions),
