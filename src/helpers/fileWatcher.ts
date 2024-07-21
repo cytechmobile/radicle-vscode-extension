@@ -6,6 +6,7 @@ import { useEnvStore, useGitStore } from '../stores'
 import {
   getAbsolutePathToDefaultRadBinaryDirectory,
   getConfig,
+  getResolvedPathToNodeHome,
   isRadCliInstalled,
   isRadInitialized,
 } from '.'
@@ -32,7 +33,7 @@ const notInWorkspaceFileWatchers = [
         'config',
       ),
     handler: () => {
-      useEnvStore().refreshCurrentRepo() // doesn't _need_ to be immediate but ok for now
+      useEnvStore().refreshCurrentRepoId() // doesn't _need_ to be immediate but ok for now
       setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
     },
     immediate: true,
@@ -50,6 +51,13 @@ const notInWorkspaceFileWatchers = [
     handler: () => {
       useGitStore().refreshCurentBranch()
     },
+  },
+  {
+    glob: new RelativePattern(Uri.file(`${getResolvedPathToNodeHome()}/keys/`), 'radicle.pub'),
+    handler: () => {
+      useEnvStore().refreshLocalIdentity()
+    },
+    immediate: true,
   },
   // installation with script from https://radicle.xyz/install
   {

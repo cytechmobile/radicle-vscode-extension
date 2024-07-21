@@ -2,12 +2,13 @@ import vscode, { type ExtensionContext } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ShallowRef, computed, ref, shallowRef } from '@vue/reactivity'
 import type { DId } from '../types'
-import { assert, convertLocaleFromLibcToBcp47, log } from '../utils'
+import { convertLocaleFromLibcToBcp47, log } from '../utils'
 import {
   execRad,
   getAbsolutePathToDefaultRadBinaryLocation,
   getConfig,
   getCurrentRepoId,
+  getLocalRadicleIdentity,
   getValidatedPathToRadBinaryWhenAliased,
 } from '../helpers'
 
@@ -59,9 +60,31 @@ export const useEnvStore = defineStore('envStore', () => {
     radPathRecomputeSignal.value++
   }
 
-  const currentRepoRecomputeSignal = ref(0)
-  const currentRepo = computed(() => {
-    void currentRepoRecomputeSignal.value
+  const localIdentityRecomputeSignal = ref(0)
+  const localIdentity = computed(() => {
+    void localIdentityRecomputeSignal.value
+
+    return getLocalRadicleIdentity('DID')
+  })
+
+  function refreshLocalIdentity() {
+    localIdentityRecomputeSignal.value++
+  }
+
+  const currentRepoIdRecomputeSignal = ref(0)
+  const currentRepoId = computed(() => {
+    void currentRepoIdRecomputeSignal.value
+
+    return getCurrentRepoId()
+  })
+
+  function refreshCurrentRepoId() {
+    currentRepoIdRecomputeSignal.value++
+  }
+
+  const currentRepoInfo = computed(() => {
+    void currentRepoId.value
+    void localIdentity.value // `rad inspect --identity` currently fails if no local node id
 
     const { stdout: repoIdStringified } = execRad(['inspect', '--identity'], {
       cwd: '$workspaceDir',
@@ -83,11 +106,7 @@ export const useEnvStore = defineStore('envStore', () => {
         threshold: number
       }
 
-      const id = getCurrentRepoId()
-      assert(id)
-
       const repoIdNormalized = {
-        id,
         ...repoIdentity.payload['xyz.radicle.project'],
         delegates: repoIdentity.delegates,
         threshold: repoIdentity.threshold,
@@ -101,16 +120,15 @@ export const useEnvStore = defineStore('envStore', () => {
     }
   })
 
-  function refreshCurrentRepo() {
-    currentRepoRecomputeSignal.value++
-  }
-
   return {
     extCtx,
     setExtensionContext,
     timeLocaleBcp47,
-    currentRepo,
-    refreshCurrentRepo,
+    localIdentity,
+    refreshLocalIdentity,
+    currentRepoId,
+    refreshCurrentRepoId,
+    currentRepoInfo,
     resolvedAbsolutePathToRadBinary,
     refreshResolvedAbsolutePathToRadBinary,
   }

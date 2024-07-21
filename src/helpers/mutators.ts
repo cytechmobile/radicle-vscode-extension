@@ -10,7 +10,7 @@ export function execPatchMutation(
   execRadArgs: NonNullable<Parameters<typeof execRad>['0']>,
   timeoutSeconds?: number,
 ): PatchMutatorResult {
-  const rid = useEnvStore().currentRepo?.id
+  const rid = useEnvStore().currentRepoId
   if (!rid) {
     const errorMsg = 'Unable to resolve current repo id in `updatePatchTitleAndDescription()`'
     log(errorMsg, 'error')

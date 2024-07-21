@@ -18,14 +18,19 @@ provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeRadioGroup(), vsCodeR
 const { patch, delegates, firstRevision, localIdentity } = storeToRefs(usePatchDetailStore())
 const status = computed(() => patch.value.state.status)
 
-const isAuthedToEditStatus = computed(() =>
-  isLocalIdAuthedToEditPatchStatus(
+const isAuthedToEditStatus = computed(() => {
+  const localId = localIdentity.value?.id
+  if (!localId) {
+    return false
+  }
+
+  return isLocalIdAuthedToEditPatchStatus(
     patch.value.state.status,
     delegates.value,
     firstRevision.value,
-    localIdentity.value.id,
-  ),
-)
+    localId,
+  )
+})
 
 const btnStartEditingEl = ref<HTMLElement>()
 const btnStopEditingEl = ref<HTMLElement>()

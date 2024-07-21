@@ -57,7 +57,9 @@ function resetTextAreaHeight(el: HTMLTextAreaElement) {
 }
 
 const isAuthedToEditTitleAndDescr = computed(() => {
-  return [...delegates.value, firstRevision.value.author.id].includes(localIdentity.value?.id)
+  return [...delegates.value, firstRevision.value.author.id].includes(
+    localIdentity.value?.id ?? '',
+  )
 })
 
 function beginPatchEditing() {

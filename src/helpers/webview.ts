@@ -15,7 +15,7 @@ import {
   copyToClipboardAndNotify,
   mutatePatch,
 } from '../ux'
-import { execPatchMutation, getRadicleIdentity, revealPatch } from '.'
+import { execPatchMutation, revealPatch } from '.'
 
 // TODO: move this file (and other found in helpers) to "/services" or "/providers"
 
@@ -120,12 +120,8 @@ export async function getStateForWebview(
 
       const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
 
-      const currentRepo = useEnvStore().currentRepo
-      assert(currentRepo)
-
-      const identity = getRadicleIdentity('DID')
-      assert(identity)
-      const localIdentity = { id: identity.DID, alias: identity.alias }
+      const { currentRepoInfo, localIdentity: localId } = useEnvStore()
+      assert(currentRepoInfo)
 
       const state: PatchDetailWebviewInjectedState = {
         kind: webviewId,
@@ -140,9 +136,9 @@ export async function getStateForWebview(
           // issue is resolved? :thinking:
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
-          delegates: currentRepo.delegates,
-          defaultBranch: currentRepo.defaultBranch,
-          localIdentity,
+          delegates: currentRepoInfo.delegates,
+          defaultBranch: currentRepoInfo.defaultBranch,
+          localIdentity: localId ? { id: localId.DID, alias: localId.alias } : undefined,
         },
       }
 

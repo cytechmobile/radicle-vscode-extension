@@ -16,7 +16,6 @@ import { useEnvStore, usePatchStore } from '../stores'
 import {
   fetchFromHttpd,
   getFirstAndLatestRevisions,
-  getRadicleIdentity,
   isLocalIdAuthedToEditPatchStatus,
 } from '../helpers'
 import {
@@ -83,9 +82,8 @@ export const patchesTreeDataProvider: TreeDataProvider<
     } else if (isPatch(elem)) {
       const patch = elem
       const edgeRevisions = getFirstAndLatestRevisions(patch)
-      // TODO: maninak use memoized+debounced getRadicleIdentity. Maybe also wherever getRepoInfo is?
-      const localIdentityDid = getRadicleIdentity('DID')?.DID
-      const delegates = useEnvStore().currentRepo?.delegates
+      const localIdentityDid = useEnvStore().localIdentity?.DID
+      const delegates = useEnvStore().currentRepoInfo?.delegates
       const traitStatusEditable =
         localIdentityDid &&
         delegates &&
@@ -121,7 +119,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
-    const rid = useEnvStore().currentRepo?.id
+    const rid = useEnvStore().currentRepoId
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.

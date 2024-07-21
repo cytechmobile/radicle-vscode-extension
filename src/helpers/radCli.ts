@@ -86,7 +86,8 @@ export function isRadicleIdentityAuthed(): boolean {
 }
 
 /**
- * Resolves the Radicle identity and associated alias found in the home directory of a node.
+ * Resolves the Radicle id and associated alias found in the home
+ * directory of the local node.
  *
  * POST-CONDITIONS:
  * - the returned identity will be keyed with the value of `format` param
@@ -103,13 +104,13 @@ export function isRadicleIdentityAuthed(): boolean {
  * `"${alias}" "${id}"`
  * ```
  */
-export function getRadicleIdentity(
+export function getLocalRadicleIdentity(
   format: 'DID',
 ): { DID: `did:key:${string}`; alias: string; toString: () => string } | undefined
-export function getRadicleIdentity(
+export function getLocalRadicleIdentity(
   format: 'NID',
 ): { NID: string; alias: string; toString: () => string } | undefined // eslint-disable-next-line padding-line-between-statements
-export function getRadicleIdentity(format: 'DID' | 'NID') {
+export function getLocalRadicleIdentity(format: 'DID' | 'NID') {
   let flag: string
   switch (format) {
     case 'DID':

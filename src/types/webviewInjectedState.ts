@@ -8,6 +8,6 @@ export interface PatchDetailWebviewInjectedState {
     timeLocale: Parameters<Date['toLocaleDateString']>['0']
     delegates: DId[]
     defaultBranch: string
-    localIdentity: { id: `did:key:${string}`; alias?: string }
+    localIdentity?: { id: `did:key:${string}`; alias: string }
   }
 }

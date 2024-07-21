@@ -10,7 +10,7 @@ import { log, shortenHash, showLog } from '../utils'
  * @returns A promise that resolves to `true` if successful, otherwise `false`
  */
 export function checkOutDefaultBranch(): boolean {
-  const defaultBranch = useEnvStore().currentRepo?.defaultBranch
+  const defaultBranch = useEnvStore().currentRepoInfo?.defaultBranch
   if (!defaultBranch) {
     return false
   }

@@ -70,6 +70,8 @@
 ### 🔥 Performance
 
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell to remove a 20-40ms overhead on rad commands which results in all-around speed-up of the extension including its activation time
+- **patch-list:** speed up (re-)loading of Patches view by caching env state previously resolved anew for each patch item in the list
+  - measured as ~25% faster for a real-world Project with >350 patches
 
 ### 🛡️ Security Fixes
 
