@@ -1,8 +1,10 @@
 import vscode, { type ExtensionContext } from 'vscode'
 import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { type ShallowRef, computed, ref, shallowRef } from '@vue/reactivity'
-import { convertLocaleFromLibcToBcp47 } from '../utils'
+import type { DId } from '../types'
+import { assert, convertLocaleFromLibcToBcp47, log } from '../utils'
 import {
+  execRad,
   getAbsolutePathToDefaultRadBinaryLocation,
   getConfig,
   getCurrentRepoId,
@@ -38,17 +40,6 @@ export const useEnvStore = defineStore('envStore', () => {
     )
   })
 
-  const currentRepoIdRecomputeSignal = ref(0)
-  const currentRepoId = computed(() => {
-    void currentRepoIdRecomputeSignal.value
-
-    return getCurrentRepoId()
-  })
-
-  function refreshCurrentRepoId() {
-    currentRepoIdRecomputeSignal.value++
-  }
-
   const radPathRecomputeSignal = ref(0)
   /**
    * The most preferable absolute path to the Radicle CLI binary resolved among user configured
@@ -68,12 +59,58 @@ export const useEnvStore = defineStore('envStore', () => {
     radPathRecomputeSignal.value++
   }
 
+  const currentRepoRecomputeSignal = ref(0)
+  const currentRepo = computed(() => {
+    void currentRepoRecomputeSignal.value
+
+    const { stdout: repoIdStringified } = execRad(['inspect', '--identity'], {
+      cwd: '$workspaceDir',
+    })
+    if (!repoIdStringified) {
+      return undefined
+    }
+
+    try {
+      const repoIdentity = JSON.parse(repoIdStringified) as {
+        payload: {
+          'xyz.radicle.project': {
+            defaultBranch: string
+            description: string
+            name: string
+          }
+        }
+        delegates: DId[]
+        threshold: number
+      }
+
+      const id = getCurrentRepoId()
+      assert(id)
+
+      const repoIdNormalized = {
+        id,
+        ...repoIdentity.payload['xyz.radicle.project'],
+        delegates: repoIdentity.delegates,
+        threshold: repoIdentity.threshold,
+      }
+
+      return repoIdNormalized
+    } catch {
+      log("Failed sourcing current Radicle repository's information", 'error')
+
+      return undefined
+    }
+  })
+
+  function refreshCurrentRepo() {
+    currentRepoRecomputeSignal.value++
+  }
+
   return {
     extCtx,
     setExtensionContext,
     timeLocaleBcp47,
-    currentRepoId,
-    refreshCurrentRepoId,
+    currentRepo,
+    refreshCurrentRepo,
     resolvedAbsolutePathToRadBinary,
     refreshResolvedAbsolutePathToRadBinary,
   }

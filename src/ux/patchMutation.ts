@@ -1,5 +1,5 @@
 import { ProgressLocation, commands, window } from 'vscode'
-import type { Patch } from 'src/types'
+import type { Patch } from '../types'
 import type { PatchMutatorResult } from '../helpers'
 import { usePatchStore } from '../stores'
 import { log, showLog, truncateKeepWords } from '../utils'

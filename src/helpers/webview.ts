@@ -3,7 +3,6 @@ import {
   type WebviewId,
   allWebviewIds,
   useEnvStore,
-  useGitStore,
   usePatchStore,
   useWebviewStore,
 } from '../stores'
@@ -121,10 +120,8 @@ export async function getStateForWebview(
 
       const isCheckedOut = patch.id === patchStore.checkedOutPatch?.id
 
-      const delegates = (await useGitStore().getRepoInfo())?.delegates
-      const defaultBranch = (await useGitStore().getRepoInfo())?.defaultBranch
-      assert(delegates)
-      assert(defaultBranch)
+      const currentRepo = useEnvStore().currentRepo
+      assert(currentRepo)
 
       const identity = getRadicleIdentity('DID')
       assert(identity)
@@ -143,8 +140,8 @@ export async function getStateForWebview(
           // issue is resolved? :thinking:
           patch: { ...patch, isCheckedOut },
           timeLocale: useEnvStore().timeLocaleBcp47,
-          delegates,
-          defaultBranch,
+          delegates: currentRepo.delegates,
+          defaultBranch: currentRepo.defaultBranch,
           localIdentity,
         },
       }
@@ -216,10 +213,10 @@ function initializePanel(
   let handleMessageFromWebview: Parameters<Webview['onDidReceiveMessage']>['0']
   switch (webviewId) {
     case 'webview-patch-detail':
-      handleMessageFromWebview = async (
+      handleMessageFromWebview = (
         message: Parameters<typeof handleMessageFromWebviewPatchDetail>[0],
       ) => {
-        await handleMessageFromWebviewPatchDetail(message, panel.webview)
+        handleMessageFromWebviewPatchDetail(message, panel.webview)
       }
       break
     default:
@@ -253,7 +250,7 @@ export function alignUiWithWebviewPatchDetailState(
   }
 }
 
-async function handleMessageFromWebviewPatchDetail(
+function handleMessageFromWebviewPatchDetail(
   message: Parameters<typeof notifyExtension>['0'],
   webview: Webview,
 ) {
@@ -276,7 +273,7 @@ async function handleMessageFromWebviewPatchDetail(
       checkOutPatch(message.payload.patch)
       break
     case 'checkOutDefaultBranch':
-      await checkOutDefaultBranch()
+      checkOutDefaultBranch()
       break
     case 'revealInPatchesView':
       revealPatch(message.payload.patch, { expand: true, focus: true })

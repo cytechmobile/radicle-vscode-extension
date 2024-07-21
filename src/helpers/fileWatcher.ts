@@ -32,7 +32,7 @@ const notInWorkspaceFileWatchers = [
         'config',
       ),
     handler: () => {
-      useEnvStore().refreshCurrentRepoId() // doesn't _need_ to be immediate but ok for now
+      useEnvStore().refreshCurrentRepo() // doesn't _need_ to be immediate but ok for now
       setWhenClauseContext('radicle.isRadInitialized', isRadInitialized())
     },
     immediate: true,

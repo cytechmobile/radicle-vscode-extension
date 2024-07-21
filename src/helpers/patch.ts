@@ -1,4 +1,4 @@
-import type { DId, Patch, PatchStatus, Project, Revision } from '../types'
+import type { DId, Patch, PatchStatus, Revision } from '../types'
 
 // TODO: change logic (and rename here and everywhere) to not get the latest revision but the most important one which is `patch.status === merged ? mergedRevision(s) ? latestRevision`
 
@@ -23,7 +23,7 @@ export function getFirstAndLatestRevisions(patch: Patch): {
 
 export function isLocalIdAuthedToEditPatchStatus(
   status: PatchStatus,
-  delegates: Project['delegates'],
+  delegates: DId[],
   firstRevision: Revision,
   localIdentityId: DId,
 ): boolean {
@@ -31,10 +31,7 @@ export function isLocalIdAuthedToEditPatchStatus(
     return false
   }
 
-  const isLocalIdAuthed = [
-    ...delegates.map((delegate) => delegate.id),
-    firstRevision.author.id,
-  ].includes(localIdentityId)
+  const isLocalIdAuthed = [...delegates, firstRevision.author.id].includes(localIdentityId)
 
   return isLocalIdAuthed
 }

@@ -12,8 +12,13 @@ import {
   Uri,
 } from 'vscode'
 import { extTempDir } from '../constants'
-import { useEnvStore, useGitStore, usePatchStore } from '../stores'
-import { fetchFromHttpd, getFirstAndLatestRevisions, getRadicleIdentity, isLocalIdAuthedToEditPatchStatus } from '../helpers'
+import { useEnvStore, usePatchStore } from '../stores'
+import {
+  fetchFromHttpd,
+  getFirstAndLatestRevisions,
+  getRadicleIdentity,
+  isLocalIdAuthedToEditPatchStatus,
+} from '../helpers'
 import {
   type AugmentedPatch,
   type Patch,
@@ -72,7 +77,7 @@ export function rerenderAllItemsInPatchesView() {
 export const patchesTreeDataProvider: TreeDataProvider<
   string | AugmentedPatch | FilechangeNode
 > = {
-  getTreeItem: async (elem) => {
+  getTreeItem: (elem) => {
     if (typeof elem === 'string') {
       return { description: elem }
     } else if (isPatch(elem)) {
@@ -80,11 +85,13 @@ export const patchesTreeDataProvider: TreeDataProvider<
       const edgeRevisions = getFirstAndLatestRevisions(patch)
       // TODO: maninak use memoized+debounced getRadicleIdentity. Maybe also wherever getRepoInfo is?
       const localIdentityDid = getRadicleIdentity('DID')?.DID
+      const delegates = useEnvStore().currentRepo?.delegates
       const traitStatusEditable =
         localIdentityDid &&
+        delegates &&
         isLocalIdAuthedToEditPatchStatus(
           patch.state.status,
-          (await useGitStore().getRepoInfo())?.delegates ?? [],
+          delegates,
           edgeRevisions.firstRevision,
           localIdentityDid,
         )
@@ -114,7 +121,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
     }
   },
   getChildren: async (elem) => {
-    const rid = useEnvStore().currentRepoId
+    const rid = useEnvStore().currentRepo?.id
     if (!rid) {
       // This trap should theoretically never be reached,
       // because `patches.view` has `"when": "radicle.isRadInitialized"`.
