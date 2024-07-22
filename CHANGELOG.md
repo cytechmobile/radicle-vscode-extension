@@ -1,6 +1,14 @@
 # Radicle VS Code Extension Change Log
 
-## _(WIP, yet unreleased version)_
+## **v0.5.0** (July 22nd, 2024)
+
+### ✨ Highlights
+
+- first mutations are here! (patch title, description and status)
+- reactive state shared between extension and webviews
+- significant hardening and polishing of existing features and their UX
+- security and performance improvements
+- research and groundwork for future operation without requiring Radicle HTTP API Daemon a.k.a. `httpd`
 
 ### 🚀 Enhancements
 
@@ -62,7 +70,7 @@
   - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
 - **onboarding:** multiple improvements on the getting-started flow:
-  - better clarify _required_ next steps on each Welcome Views
+  - better clarify *required* next steps on each Welcome View
   - better clarify that the existing init button will perform `git init` (not `rad init`)
   - better inform and reassure the user about `rad init` when offering it to them
   - offer a link to the Radicle User Guide for further info
@@ -89,14 +97,14 @@
 ### 🩹 Fixes
 
 - **store:** fix a couple dozens interconnected (:sigh:) state syncronization bugs between the Patch-Detail view and the Patches view that each would occur only following very specific reproduction steps
-- **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, _signigicantly_ more robust and much less likely to result in an blank panel
+- **webview:** make webview restoration, for example switching back to the panel hosting it after switching away from it in a way that would put it to the background, *signigicantly* more robust and much less likely to result in an blank panel
 - **webview:** keep panel's title in sync with the title of the patch shown within it as it gets updated either from the extension user or from network users
 - **patch-detail:** the buttons on Patch-Detail webviews left open from a previous VS Code session that got restored will now work, same as those of just opened webviews
 - **patch-list:** more accurately reflect git check-out state per patch in the list. Previously a checked out patch would not have the associated checkmark denoting its state shown in the patch list unless a check out AND a list refresh was done. Some edge cases may remain unpatched still.
 - **patch-list:** sort changed file entries placing correctly always to the top those located at the root directory of the repo
 - **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch-Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
-- **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
+- **settings:** watch *user-defined* path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
 - **onboarding:** don't show simultaneously cli-troubleshooting and getting-started Welcome Views when the rad CLI isn't installed
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
