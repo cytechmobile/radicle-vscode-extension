@@ -105,7 +105,7 @@
       },
       {
         "command": "radicle.deAuthCurrentIdentity",
-        "title": "De-authenticate / Re-lock the Currently Used Radicle Identity",
+        "title": "De-authenticate / Re-seal the Currently Used Radicle Identity",
         "shortTitle": "De-auth",
         "category": "Radicle",
         "icon": "$(sign-out)"

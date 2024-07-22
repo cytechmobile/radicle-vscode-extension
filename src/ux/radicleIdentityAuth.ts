@@ -16,7 +16,7 @@ import {
 function composeRadAuthSuccessMsg(
   didAction:
     | 'foundUnprotectedId'
-    | 'foundUnlockedId'
+    | 'foundUnsealedId'
     | 'didAutoUnlockId'
     | 'didUnlockId'
     | 'didCreatedId',
@@ -26,14 +26,14 @@ function composeRadAuthSuccessMsg(
     case 'foundUnprotectedId':
       msgPrefix = 'Using non-password-protected'
       break
-    case 'foundUnlockedId':
-      msgPrefix = 'Using already unlocked'
+    case 'foundUnsealedId':
+      msgPrefix = 'Using already unsealed'
       break
     case 'didAutoUnlockId':
-      msgPrefix = 'Auto-unlocked (using associated passphrase already in Secret Storage) the'
+      msgPrefix = 'Auto-unsealed (using associated passphrase already in Secret Storage) the'
       break
     case 'didUnlockId':
-      msgPrefix = 'Succesfully unlocked'
+      msgPrefix = 'Succesfully unsealed'
       break
     case 'didCreatedId':
       msgPrefix = 'Succesfully created new'
@@ -240,7 +240,7 @@ export async function validateRadicleIdentityAuthentication(
   const isIdAuthed = isRadicleIdentityAuthed()
   const isIdentityUnprotected = isRadicleIdentityKeyEncrypted() === false
   if (isIdAuthed || isIdentityUnprotected) {
-    const msg = composeRadAuthSuccessMsg(isIdAuthed ? 'foundUnlockedId' : 'foundUnprotectedId')
+    const msg = composeRadAuthSuccessMsg(isIdAuthed ? 'foundUnsealedId' : 'foundUnprotectedId')
     log(msg, 'info')
     !options.minimizeUserNotifications && window.showInformationMessage(msg)
 
@@ -264,7 +264,7 @@ export async function validateRadicleIdentityAuthentication(
 }
 
 /**
- * De-authenticates any currently authed Radicle identity by removing the unlocked key from
+ * De-authenticates any currently authed Radicle identity by removing the unsealed key from
  * the ssh-agent and the associated stored passphrase (if any) from the extension's
  * Secret Storage.
  *

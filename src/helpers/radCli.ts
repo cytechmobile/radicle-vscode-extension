@@ -75,12 +75,12 @@ export function isRadicleIdentityKeyEncrypted(): boolean | undefined {
  */
 export function isRadicleIdentityAuthed(): boolean {
   const sshKey = getNodeSshKey('fingerprint')
-  const unlockedIds = exec('ssh-add -l')
-  if (!sshKey || !unlockedIds) {
+  const unsealedIds = exec('ssh-add -l')
+  if (!sshKey || !unsealedIds) {
     return false
   }
 
-  const isAuthed = Boolean(unlockedIds.includes(sshKey))
+  const isAuthed = Boolean(unsealedIds.includes(sshKey))
 
   return isAuthed
 }
