@@ -61,6 +61,16 @@
 - **exec:** invoke Radicle CLI binary directly for rad commands without spawning a shell
   - increased robustness by negating the extension's exposure to OS/shell-specific edge cases
   - lays much of the groundwork for the upcoming independence of the extension from the Radicle HTTP daemon for local operations
+- **onboarding:** multiple improvements on the getting-started flow:
+  - better clarify _required_ next steps on each Welcome Views
+  - better clarify that the existing init button will perform `git init` (not `rad init`)
+  - better inform and reassure the user about `rad init` when offering it to them
+  - offer a link to the Radicle User Guide for further info
+  - misc copy alignments between Welcome Views
+- **onboarding:** multiple improvements on the cli-troubleshooting flow:
+  - for the option with external link to install Radicle, it will now take the user directly to the "get-started" section of the Radicle website
+  - suggest the modern `~/.radicle/bin/rad` vs the legacy ~~/usr/bin/rad~~ as a path to the CLI binary in the placeholder of the input for a custom path to CLI
+  - general copy improvements across all branches of the flow
 - **settings:** disallow usage of now unsupported relative paths for config `radicle.advanced.pathToRadBinary`
 - **settings:** support trailing slashes for config `radicle.advanced.pathToNodeHome`
 - **patch-list:** show all possible actions for a patch on its context menu (right click)
@@ -87,6 +97,7 @@
 - **patch-list:** let the "Updated X time ago" text in the title bar of the Patches view be updated when there's only one patch in the currently open repo and the user refetched its data exclusively, e.g. using the "Refresh" button in the Patch-Detail view
 - **commands:** don't fail checking out patch branch if the branch already existed but was referring to a different revision than the one we're attempting to check out
 - **settings:** watch _user-defined_ path to Radicle CLI binary for changes too. Previously only the default paths per OS were being watched.
+- **onboarding:** don't show simultaneously cli-troubleshooting and getting-started Welcome Views when the rad CLI isn't installed
 - **onboarding:** detect Radicle CLI binary installation change even if file or parent directory tree is missing on extension's initialization
 - **markdown:** polish (un-)ordered/task lists. Align identation, fix unordered list to start with bullet and generally and define styles for nested lists, including mixed ol and ul.
 - **markdown:** align horizontal rule with text column instead of it being always in the middle
@@ -95,6 +106,7 @@
 - **patch-detail:** homogenize all tooltips and controls to have their copy in Title Case
 - **log:** show the actual output of failed rad commands (which explains _why_ it failed...) instead of sometimes showing the CLI's progress-spinnner characters spammed en masse
 - **patch-list:** show all patches again as expected, not only those with status "open". Addresses regression caused due to a breaking change in Radicle HTTP API (httpd) while keeping backwards compatibility for users who haven't yet upgraded to the latest httpd
+- **auth:** use the term "seal" instead of "lock" in commands and logs, e.g. "unsealed identity" instead of "unlocked identity", which better aligns with the CLI terminology and communicates facts slightly more accurately
 
 ### 💅 Refactors
 
