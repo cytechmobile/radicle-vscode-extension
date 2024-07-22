@@ -384,7 +384,7 @@
       },
       {
         "view": "getting-started",
-        "contents": "The Git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle with it, please run `rad init` in your terminal.\nOnce rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.\nRad-initializing your Git repo is a reversible process during which you'll also get to choose whether your repo will be private or public.\nTo learn more [read the Radicle User Guide](https://docs.radicle.xyz/guides/user#git-going-with-repositories).",
+        "contents": "The Git repository currently opened in your workspace is not yet initialized with Radicle.\nTo use Radicle with it, please run `rad init` in your terminal.\nOnce rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.\nDuring this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.\nTo learn more [read the Radicle User Guide](https://docs.radicle.xyz/guides/user#git-going-with-repositories).",
         "when": "radicle.isExtensionActivated && radicle.isRadCliInstalled && workspaceFolderCount > 0 && gitOpenRepositoryCount > 0 && !radicle.isRadInitialized"
       },
       {
