@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.5.0",
   "name": "radicle",
   "displayName": "Radicle",
   "description": "Bring support for the Radicle network to your VS code.",
@@ -204,15 +204,42 @@
     ],
     "menus": {
       "commandPalette": [
-        { "command": "radicle.viewPatchDetails", "when": "false" },
-        { "command": "radicle.refreshOnePatch", "when": "false" },
-        { "command": "radicle.checkoutPatch", "when": "false" },
-        { "command": "radicle.copyPatchId", "when": "false" },
-        { "command": "radicle.openOriginalVersionOfPatchedFile", "when": "false" },
-        { "command": "radicle.openChangedVersionOfPatchedFile", "when": "false" },
-        { "command": "radicle.draftizePatch", "when": "false" },
-        { "command": "radicle.openPatch", "when": "false" },
-        { "command": "radicle.archivePatch", "when": "false" }
+        {
+          "command": "radicle.viewPatchDetails",
+          "when": "false"
+        },
+        {
+          "command": "radicle.refreshOnePatch",
+          "when": "false"
+        },
+        {
+          "command": "radicle.checkoutPatch",
+          "when": "false"
+        },
+        {
+          "command": "radicle.copyPatchId",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openOriginalVersionOfPatchedFile",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openChangedVersionOfPatchedFile",
+          "when": "false"
+        },
+        {
+          "command": "radicle.draftizePatch",
+          "when": "false"
+        },
+        {
+          "command": "radicle.openPatch",
+          "when": "false"
+        },
+        {
+          "command": "radicle.archivePatch",
+          "when": "false"
+        }
       ],
       "scm/title": [
         {
