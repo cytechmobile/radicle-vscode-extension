@@ -1,5 +1,14 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 📖 Documentation
+
+- **readme:** add badge advertising that we're co-publishing in Open VSX and the count of downloads in that registry
+- **readme:** use cached queries to shields.io to reduce the chance of of hitting the API query limits
+
+-----
+
 ## **v0.5.0** (July 22nd, 2024)
 
 ### ✨ Highlights
