@@ -30,8 +30,8 @@ export interface HttpdRoot {
   }[]
 }
 
-export interface Project {
-  id: string
+export interface Repo {
+  rid: string
   name: string
   description: string
   defaultBranch: string
@@ -40,7 +40,7 @@ export interface Project {
   patches: { [K in PatchStatus]: number }
   issues: { open: number; closed: number }
   seeding: number
-  visibility?: { type: 'public' } | { type: 'private'; allow?: string[] }
+  visibility: { type: 'public' | 'private' }
 }
 
 export interface Merge {
@@ -178,14 +178,14 @@ export interface DiffResponse {
 
 export interface Changeset {
   files: (
-    | { state: 'added'; diff: Diff; path: string; new: FileRef }
-    | { state: 'deleted'; diff: Diff; path: string; old: FileRef }
-    | { state: 'modified'; diff: Diff; path: string; old: FileRef; new: FileRef }
-    | ({ state: 'copied' } & (
+    | { status: 'added'; diff: Diff; path: string; new: FileRef }
+    | { status: 'deleted'; diff: Diff; path: string; old: FileRef }
+    | { status: 'modified'; diff: Diff; path: string; old: FileRef; new: FileRef }
+    | ({ status: 'copied' } & (
         | CopiedOrMovedFilechangeWithDiff
         | CopiedOrMovedFilechangeWithoutDiff
       ))
-    | ({ state: 'moved' } & (CopiedOrMovedFilechangeWithDiff | MovedFilechangeWithoutDiff))
+    | ({ status: 'moved' } & (CopiedOrMovedFilechangeWithDiff | MovedFilechangeWithoutDiff))
   )[]
   stats: {
     filesChanged: number

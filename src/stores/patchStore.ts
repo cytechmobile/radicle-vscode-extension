@@ -67,7 +67,7 @@ export const usePatchStore = defineStore('patch', () => {
 
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
     const { data: fetchedPatch, error } = await fetchFromHttpd(
-      `/projects/${rid}/patches/${patchId}`,
+      `/repos/${rid}/patches/${patchId}`,
     )
     if (error) {
       return { error }
@@ -104,12 +104,15 @@ export const usePatchStore = defineStore('patch', () => {
       }
     }
 
+    // TODO: maninak remove code for backwards compatibility
     // Backwards compatibility with non-latest httpd versions while users are transitioning.
     // Should be removed in a couple of months.
     let queryKey = 'status' as const
+    let path = 'repos' as const
     const httpdApiVersionMajor = (await fetchFromHttpd('/')).data?.apiVersion[0]
     if (httpdApiVersionMajor && Number.parseInt(httpdApiVersionMajor) < 3) {
       queryKey = 'state' as 'status'
+      path = 'projects' as 'repos'
     }
 
     const rid = useEnvStore().currentRepoId
@@ -119,16 +122,16 @@ export const usePatchStore = defineStore('patch', () => {
     const nowTs = Date.now() / 1000 // we devide to align with the httpd's timestamp format
     lastFetchedAllTs.value = nowTs
     const promisedResponses = Promise.all([
-      fetchFromHttpd(`/projects/${rid}/patches`, {
+      fetchFromHttpd(`/${path}/${rid}/patches`, {
         query: { [queryKey]: 'draft', perPage: 500 },
       }),
-      fetchFromHttpd(`/projects/${rid}/patches`, {
+      fetchFromHttpd(`/${path}/${rid}/patches`, {
         query: { [queryKey]: 'open', perPage: 500 },
       }),
-      fetchFromHttpd(`/projects/${rid}/patches`, {
+      fetchFromHttpd(`/${path}/${rid}/patches`, {
         query: { [queryKey]: 'archived', perPage: 500 },
       }),
-      fetchFromHttpd(`/projects/${rid}/patches`, {
+      fetchFromHttpd(`/${path}/${rid}/patches`, {
         query: { [queryKey]: 'merged', perPage: 500 },
       }),
     ]).finally(() => (inProgressRequest = undefined))

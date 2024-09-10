@@ -2,6 +2,10 @@
 
 ## _(WIP, yet unreleased version)_
 
+### 🩹 Fixes
+
+- **httpd:** Addresses regression caused due to a breaking changes in Radicle HTTP API daemon (`radicle-httpd`) `v0.16.0` and `v0.17.0`
+
 ### 📖 Documentation
 
 - **readme:** add badge advertising that we're co-publishing in Open VSX and the count of downloads in that registry
