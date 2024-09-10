@@ -1,6 +1,6 @@
 import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import type { XOR } from 'ts-xor'
-import type { DiffResponse, HttpdRoot, Patch, PatchStatus, Project } from '../types'
+import type { DiffResponse, HttpdRoot, Patch, PatchStatus, Repo } from '../types'
 import { log, removeTrailingSlashes } from '../utils'
 import { getConfig } from './config'
 
@@ -33,18 +33,18 @@ type FetchFromHttpdReturn<Data extends object> = Promise<
  *
  * @example GET request with error handling
  * ```ts
- * const { data: projects, error } = await fetchFromHttpd('/projects')
+ * const { data: repos, error } = await fetchFromHttpd('/repos')
  * if (error) {
  *   notifyUserAboutFetchError(error) // optionally
  *   return
  * }
- * // use `projects` ...
+ * // use `repos` ...
  * ```
  *
  * @example PATCH request with error handling
  * ```ts
  * const { error } = await fetchFromHttpd(
- *   `/projects/${projectId}/patches/${patchId}`, {
+ *   `/repos/${repoId}/patches/${patchId}`, {
  *     method: 'PATCH',
  *     body: { state: 'merged' },
  *   },
@@ -71,29 +71,29 @@ type FetchFromHttpdReturn<Data extends object> = Promise<
  * Signatures with non-`GET` `method`, should always have that field required.
  */
 export async function fetchFromHttpd(
-  path: `/projects/rad:${string}/patches/${string}`,
+  path: `/repos/rad:${string}/patches/${string}`,
   options: FetchOptions<'json'> & { method: 'PATCH'; body: { state: PatchStatus } },
 ): FetchFromHttpdReturn<Patch>
 export async function fetchFromHttpd(
-  path: `/projects/rad:${string}/patches/${string}`,
+  path: `/repos/rad:${string}/patches/${string}`,
   options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<Patch>
 export async function fetchFromHttpd(
-  path: `/projects/rad:${string}/patches`,
+  path: `/repos/rad:${string}/patches`,
   options?: FetchOptions<'json'> & { query?: { status: PatchStatus | 'all' }; method?: 'GET' },
 ): FetchFromHttpdReturn<Patch[]>
 export async function fetchFromHttpd<RevBase extends string, RevOid extends string>(
-  path: `/projects/rad:${string}/diff/${RevBase}/${RevOid}`,
+  path: `/repos/rad:${string}/diff/${RevBase}/${RevOid}`,
   options?: FetchOptions<'json'> & { method?: 'GET' },
 ): FetchFromHttpdReturn<DiffResponse>
 export async function fetchFromHttpd(
-  path: `/projects/rad:${string}`,
+  path: `/repos/rad:${string}`,
   options?: FetchOptions<'json'> & { method?: 'GET' },
-): FetchFromHttpdReturn<Project>
+): FetchFromHttpdReturn<Repo>
 export async function fetchFromHttpd(
-  path: '/projects',
+  path: '/repos',
   options: FetchOptions<'json'> & { query: { show: 'pinned' | 'all' }; method?: 'GET' },
-): FetchFromHttpdReturn<Project[]>
+): FetchFromHttpdReturn<Repo[]>
 export async function fetchFromHttpd(
   path: '/',
   options?: FetchOptions<'json'> & { method?: 'GET' },

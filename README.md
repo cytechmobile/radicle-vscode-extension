@@ -18,10 +18,10 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](./CHANGELOG.md)._
 
 - 🖲️ [Radicle Commands](#integrated-radicle-commands) everywhere you need them
-- 📋 [Patches View](#patches-view) offers a glance at the status of code changes in your project
+- 📋 [Patches View](#patches-view) offers a glance at the status of code changes in your repository
 - 📑 [Patch Detail View](#patch-detail-view) offers in-depth information for a specific patch
 - 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
-- 📥 [Cloning](#cloning) of seeded Radicle projects
+- 📥 [Cloning](#cloning) of seeded Radicle repos
 - 🗺️ [Onboarding Flow](#onboarding-flow) with tips tuned to whichever state your Workspace is in when starting out
 - 🕵️‍♂️ [Troubleshooting Flow](#troubleshooting-flow) helping you point the extension to a Radicle CLI binary (if it didn't already auto-resolve)
 - 🎛️ [Configurable](#configurable) via VS Code's native Settings
@@ -77,9 +77,9 @@ Inspect all details you'd want to know about a patch including discussions, deta
 
     ![rad clone listed in command palette](assets/for-md/rad-clone-palette.png)
 
-- Select from a filterable list of projects that your Radicle node is seeding
+- Select from a filterable list of repos that your Radicle node is seeding
 
-    ![rad clone listed projects](assets/for-md/rad-clone-choose.png)
+    ![rad clone listed repos](assets/for-md/rad-clone-choose.png)
 
 - Open the newly cloned repo in another VS Code window with a single click
 

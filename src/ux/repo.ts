@@ -19,11 +19,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
       location: ProgressLocation.Window,
       title: `‎$(radicle-logo) Fetching list of repos available for cloning…`,
     },
-    async () => {
-      return await fetchFromHttpd('/projects', {
-        query: { show: 'all' },
-      })
-    },
+    async () => await fetchFromHttpd('/repos', { query: { show: 'all' } }),
   )
   if (!repos) {
     notifyUserAboutFetchError(error)
@@ -35,7 +31,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
     .sort((p1, p2) => p2.seeding - p1.seeding)
     .map((proj) => ({
       label: proj.name,
-      description: `$(radio-tower) ${proj.seeding} | ${proj.id}`,
+      description: `$(radio-tower) ${proj.seeding} | ${proj.rid}`,
       detail: proj.description,
       icon: 'repo',
     }))
@@ -50,7 +46,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
     return
   }
 
-  const selectedRid = repos.find((proj) => proj.name === projSelection.label)?.id
+  const selectedRid = repos.find((proj) => proj.name === projSelection.label)?.rid
   if (!selectedRid) {
     return
   }

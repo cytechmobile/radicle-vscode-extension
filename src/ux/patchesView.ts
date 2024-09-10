@@ -165,7 +165,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
       const newVersionCommitSha = latestRevision.oid
 
       const { data: diffResponse, error } = await fetchFromHttpd(
-        `/projects/${rid}/diff/${oldVersionCommitSha}/${newVersionCommitSha}`,
+        `/repos/${rid}/diff/${oldVersionCommitSha}/${newVersionCommitSha}`,
       )
       if (error) {
         return ['Patch details could not be resolved due to an error!']
@@ -188,7 +188,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
       const filechangeNodes: FilechangeNode[] = diffResponse.diff.files
         .map((filechange) => {
           const filePath =
-            filechange.state === 'copied' || filechange.state === 'moved'
+            filechange.status === 'copied' || filechange.status === 'moved'
               ? filechange.newPath
               : filechange.path
           const fileDir = Path.dirname(filePath)
@@ -224,7 +224,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
               type FileContent = (typeof diffResponse)['files'][string]['content']
 
               try {
-                switch (filechange.state) {
+                switch (filechange.status) {
                   case 'added':
                     await fs.mkdir(Path.dirname(newVersionUrl), { recursive: true })
                     await fs.writeFile(
@@ -248,7 +248,7 @@ export const patchesTreeDataProvider: TreeDataProvider<
                     ])
 
                     if (
-                      filechange.state === 'modified' ||
+                      filechange.status === 'modified' ||
                       isCopiedOrMovedFilechangeWithDiff(filechange)
                     ) {
                       await Promise.all([
@@ -290,17 +290,17 @@ export const patchesTreeDataProvider: TreeDataProvider<
                 contextValue:
                   (filechange as FilechangeWithDiff).diff ??
                   (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
-                    ? `filechange:${filechange.state}`
+                    ? `filechange:${filechange.status}`
                     : undefined,
                 label: filename,
                 description: fileDir === '.' ? undefined : fileDir,
                 tooltip: `${
-                  filechange.state === 'copied' || filechange.state === 'moved'
-                    ? `${filechange.oldPath} ${filechange.state === 'copied' ? '↦' : '➟'} ${
+                  filechange.status === 'copied' || filechange.status === 'moved'
+                    ? `${filechange.oldPath} ${filechange.status === 'copied' ? '↦' : '➟'} ${
                         filechange.newPath
                       }`
                     : filechange.path
-                } ${dot} ${capitalizeFirstLetter(filechange.state)}`,
+                } ${dot} ${capitalizeFirstLetter(filechange.status)}`,
                 resourceUri: Uri.file(filePath),
                 command:
                   (filechange as FilechangeWithDiff).diff ??
@@ -327,7 +327,7 @@ before-the-Patch version and its latest version committed in the Radicle Patch`,
                           ),
                           `${filename} (${shortenHash(oldVersionCommitSha)} ⟷ ${shortenHash(
                             newVersionCommitSha,
-                          )}) ${capitalizeFirstLetter(filechange.state)}`,
+                          )}) ${capitalizeFirstLetter(filechange.status)}`,
                           { preview: true } satisfies TextDocumentShowOptions,
                         ],
                       }
