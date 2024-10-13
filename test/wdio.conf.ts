@@ -1,5 +1,7 @@
 import path from 'node:path'
 
+const isCI = process.env['CI'] === 'true'
+
 export const config: WebdriverIO.Config = {
   //
   // ====================
@@ -7,7 +9,7 @@ export const config: WebdriverIO.Config = {
   // ====================
   // WebdriverIO supports running e2e tests as well as unit and component tests.
   runner: 'local',
-  tsConfigPath: '../tsconfig.json',
+  tsConfigPath: './tsconfig.json',
 
   //
   // ==================
@@ -58,7 +60,7 @@ export const config: WebdriverIO.Config = {
       'wdio:vscodeOptions': {
         // points to directory where extension package.json is located
         extensionPath: path.join(__dirname, '..'),
-        workspacePath: path.join(__dirname, 'fixtures/workspaces/a_blog'),
+        workspacePath: path.join(__dirname, isCI ? 'fixtures/workspaces/a_blog' : '../../radicle-repos/radicle-planning-boards'),
         // optional VS Code settings
         userSettings: {
           'editor.fontSize': 14,
@@ -83,7 +85,7 @@ export const config: WebdriverIO.Config = {
   // Define all options that are relevant for the WebdriverIO instance here
   //
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'info',
+  logLevel: isCI ? 'warn' : 'info',
   //
   // Set specific log levels per logger
   // loggers:

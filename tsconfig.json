@@ -17,12 +17,7 @@
     "incremental": true,
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
     "types": [
-      "node",
-      "webdriverio/async",
-      "@wdio/mocha-framework",
-      "expect-webdriverio",
-      "wdio-vscode-service",
-      "@wdio/types"
+      "node"
     ],
   },
   "exclude": [
