@@ -7,7 +7,7 @@ export const config: WebdriverIO.Config = {
   // ====================
   // WebdriverIO supports running e2e tests as well as unit and component tests.
   runner: 'local',
-  tsConfigPath: './tsconfig.json',
+  tsConfigPath: '../tsconfig.json',
 
   //
   // ==================
@@ -24,7 +24,7 @@ export const config: WebdriverIO.Config = {
   // The path of the spec files will be resolved relative from the directory of
   // of the config file unless it's absolute.
   //
-  specs: ['./test/specs/**/*.ts'],
+  specs: ['./specs/**/*.ts'],
   // Patterns to exclude.
   exclude: [
     // 'path/to/excluded/files'
@@ -57,8 +57,8 @@ export const config: WebdriverIO.Config = {
       'browserVersion': 'stable', // also possible: "insiders" or a specific version e.g. "1.80.0"
       'wdio:vscodeOptions': {
         // points to directory where extension package.json is located
-        extensionPath: __dirname,
-        workspacePath: path.join(__dirname, '../radicle-repos/radicle-planning-boards'),
+        extensionPath: path.join(__dirname, '..'),
+        workspacePath: path.join(__dirname, 'fixtures/workspaces/a_blog'),
         // optional VS Code settings
         userSettings: {
           'editor.fontSize': 14,
@@ -71,6 +71,7 @@ export const config: WebdriverIO.Config = {
           'disable-workspace-trust': true,
         },
       },
+      // Driver introduced in v9 has a bug that prevents tests from running
       'wdio:enforceWebDriverClassic': true,
     },
   ],

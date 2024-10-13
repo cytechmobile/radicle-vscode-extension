@@ -51,7 +51,7 @@
     "test:typings:webviews": "cd ./src/webviews && npm run type-check",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
     "test:e2e": "node ./dist/test/runTest.js",
-    "wdio": "wdio run ./wdio.conf.ts"
+    "wdio": "wdio run ./test/wdio.conf.ts"
   },
   "main": "./dist/extension.js",
   "activationEvents": [
