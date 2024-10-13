@@ -16,6 +16,19 @@
     "skipLibCheck": true,
     "incremental": true,
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
+    "types": [
+      "node",
+      "webdriverio/async",
+      "@wdio/mocha-framework",
+      "expect-webdriverio",
+      "wdio-vscode-service",
+      "@wdio/types"
+    ],
   },
-  "exclude": ["node_modules", "dist", ".vscode-test", "src/webviews"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vscode-test",
+    "src/webviews"
+  ],
 }
