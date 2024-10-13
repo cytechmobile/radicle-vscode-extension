@@ -7,6 +7,7 @@ on:
 #    branches: [ main ]
   push:
   pull_request:
+  pull_request_target:
 
 jobs:
   e2e-test:
@@ -95,9 +96,9 @@ jobs:
     - name: Install Dependencies
       working-directory: ${{ github.workspace }}/radicle-vscode-extension
       run: npx npm-run-all -l verify-deps:*
-    - name: Compile
-      working-directory: ${{ github.workspace }}/radicle-vscode-extension
-      run: pnpm run pretest
+    # - name: Compile
+    #   working-directory: ${{ github.workspace }}/radicle-vscode-extension
+    #   run: pnpm run pretest
     - name: Test E2E (Linux)
       working-directory: ${{ github.workspace }}/radicle-vscode-extension
       if: runner.os == 'Linux'
@@ -105,7 +106,7 @@ jobs:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
       run: |
         echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        xvfb-run -a pnpm run test:e2e
+        xvfb-run -a pnpm wdio
     - name: Test E2E (non-Linux)
       working-directory: ${{ github.workspace }}/radicle-vscode-extension
       if: runner.os != 'Linux'
@@ -113,4 +114,4 @@ jobs:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
       run: |
         echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        pnpm run test:e2e
+        pnpm wdio
