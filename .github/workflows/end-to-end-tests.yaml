@@ -6,8 +6,7 @@ on:
 #  pull_request:
 #    branches: [ main ]
   push:
-  pull_request:
-  pull_request_target:
+  # pull_request:
 
 jobs:
   e2e-test:
@@ -15,9 +14,13 @@ jobs:
       matrix:
 # TODO: when PR is ready to merge, we should adapt these depending on when we actually want this workflow to run
 #        os: [macos-latest, ubuntu-latest, windows-latest]
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Install Radicle
       env:
         RAD_HOME: ${{ github.workspace }}/.radicle
@@ -47,11 +50,16 @@ jobs:
         echo "${RAD_HOME}/bin" >> $GITHUB_PATH
         echo "RAD_HOME=${{ github.workspace }}/.radicle" >> $GITHUB_ENV
         echo "RAD_PASSPHRASE=''" >> $GITHUB_ENV
-        
 
     - name: Create New Radicle Identity
       run: |
         rad auth --alias test_user
+
+    - name: Configure Radicle for Testing
+      run: |
+        # Source: https://app.radicle.xyz/nodes/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5/tree/HACKING.md
+        jq '.node.network = "test" | .preferredSeeds = [] | .node.connect = [] | .node.peers.type = "static"' ${RAD_HOME}/config.json > ${RAD_HOME}/config.json.tmp
+        mv ${RAD_HOME}/config.json.tmp ${RAD_HOME}/config.json
 
     - name: Start Radicle Node and http API
       run: |
@@ -65,8 +73,8 @@ jobs:
     - name: Create a new Radicle Repository
       id: radicle-init
       run: |
-        mkdir ${{ github.workspace }}/a_blog
-        cd ${{ github.workspace }}/a_blog
+        mkdir ./test/fixtures/workspaces/a_blog
+        cd  ./test/fixtures/workspaces/a_blog
         git config --global init.defaultBranch main
         git init .
         git config --local user.email "test@radicle.xyz"
@@ -78,29 +86,22 @@ jobs:
         pwd
         cd ..
         chmod -R 777 a_blog
-        echo "RADICLE_REPO=${{ github.workspace }}/a_blog" >> $GITHUB_ENV
+        echo "RADICLE_REPO=${{ github.workspace }}/test/fixtures/workspaces/a_blog" >> $GITHUB_ENV
 
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        path: ${{ github.workspace }}/radicle-vscode-extension
     - uses: pnpm/action-setup@v3
       with:
         version: 8
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
-        cache-dependency-path: ${{ github.workspace }}/radicle-vscode-extension/pnpm-lock.yaml
+        cache-dependency-path: ./pnpm-lock.yaml
         node-version: 20.x
         cache: 'pnpm'
     - name: Install Dependencies
-      working-directory: ${{ github.workspace }}/radicle-vscode-extension
       run: npx npm-run-all -l verify-deps:*
-    # - name: Compile
-    #   working-directory: ${{ github.workspace }}/radicle-vscode-extension
-    #   run: pnpm run pretest
+    - name: Build
+      run: pnpm run build
     - name: Test E2E (Linux)
-      working-directory: ${{ github.workspace }}/radicle-vscode-extension
       if: runner.os == 'Linux'
       env:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
@@ -108,7 +109,6 @@ jobs:
         echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
         xvfb-run -a pnpm wdio
     - name: Test E2E (non-Linux)
-      working-directory: ${{ github.workspace }}/radicle-vscode-extension
       if: runner.os != 'Linux'
       env:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
