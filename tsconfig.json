@@ -16,6 +16,14 @@
     "skipLibCheck": true,
     "incremental": true,
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
+    "types": [
+      "node"
+    ],
   },
-  "exclude": ["node_modules", "dist", ".vscode-test", "src/webviews"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vscode-test",
+    "src/webviews"
+  ],
 }
