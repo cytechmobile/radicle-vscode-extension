@@ -14,7 +14,7 @@ jobs:
       matrix:
 # TODO: when PR is ready to merge, we should adapt these depending on when we actually want this workflow to run
 #        os: [macos-latest, ubuntu-latest, windows-latest]
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
 

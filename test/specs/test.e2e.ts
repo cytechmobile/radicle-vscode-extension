@@ -2,8 +2,21 @@ import { $, browser, expect } from '@wdio/globals'
 import type { TreeItem, ViewContent, ViewSection, Workbench } from 'wdio-vscode-service'
 
 async function openRadicleViewControl(workbench: Workbench) {
-  const radicleViewControl = await workbench.getActivityBar().getViewControl('Radicle')
+  const activityBar = workbench.getActivityBar()
+  await activityBar.wait();
+  // await browser.pause(1000)
+  if (!activityBar) {
+    console.error('Activity bar not found')
+  }
+
+
+  const radicleViewControl = await activityBar.getViewControl('Radicle')
   await radicleViewControl?.wait()
+  // await browser.pause(1000)
+  if (!radicleViewControl) {
+    console.error('Radicle view control not found')
+  }
+
   await radicleViewControl?.openView()
 }
 
@@ -53,7 +66,7 @@ describe('VS Code Extension Testing', () => {
     expect((welcomeText ?? []).some((text) => text.includes('rad init'))).toBe(true)
   })
 
-  describe.only('sections', () => {
+  describe('sections', () => {
     let sidebarView: ViewContent
     let cliCommandsSection: ViewSection
     let patchesSection: ViewSection
@@ -61,6 +74,7 @@ describe('VS Code Extension Testing', () => {
     before(async () => {
       await openRadicleViewControl(workbench)
       sidebarView = workbench.getSideBar().getContent()
+      await sidebarView.wait()
       cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
       patchesSection = await sidebarView.getSection('PATCHES')
       await cliCommandsSection.collapse()
@@ -76,7 +90,7 @@ describe('VS Code Extension Testing', () => {
         await cliCommandsSection.collapse()
       })
 
-      it('should show the correct text and buttons on the CLI Commands section', async () => {
+      it.only('should show the correct text and buttons on the CLI Commands section', async () => {
         await cliCommandsSection.expand()
 
         const welcomeContent = await cliCommandsSection?.findWelcomeContent()
@@ -108,7 +122,7 @@ describe('VS Code Extension Testing', () => {
       })
 
 
-      it.only('should list the repo\'s patches', async () => {
+      it('should list the repo\'s patches', async () => {
         // TODO: zac - Create repo with patches, update expectedLabels with those patches
         const expectedPatches = [
           '❬✓❭ feat(config): implement runtime configuration via json file',
