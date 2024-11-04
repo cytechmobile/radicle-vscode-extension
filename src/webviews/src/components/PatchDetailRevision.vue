@@ -5,7 +5,7 @@ import {
   vsCodeDropdown,
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
-import { computed } from 'vue'
+import { computed, defineEmits } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 import { getDateInIsoWithZeroedTimezone, getFormattedDate } from 'extensionUtils/time'
@@ -25,7 +25,10 @@ const props = defineProps<{
   revisionOptionsMap: Map<string, Revision>
 }>()
 
-defineEmits<{ didSelectOption: [option: string] }>()
+defineEmits<{
+  didSelectOption: [option: string]
+  showCreateCommentForm: []
+}>()
 
 const { firstRevision, timeLocale } = storeToRefs(usePatchDetailStore())
 
@@ -44,19 +47,29 @@ const selectedRevisionRejectedReviews = computed(() =>
 <template>
   <section>
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-3">Revision</h2>
-    <vscode-dropdown
-      @change="(ev: CustomEvent) => $emit('didSelectOption', ev.detail._value)"
-      :value="selectedRevisionOption"
-      title="Select a Patch Revision to See More Info About It"
-      class="max-w-full mb-3 font-mono rounded-none"
-    >
-      <vscode-option
-        v-for="revisionOption in revisionOptionsMap.keys()"
-        :key="revisionOption"
-        class="font-mono"
-        >{{ revisionOption }}</vscode-option
+    <div class="mb-3 flex flex-wrap gap-2">
+      <vscode-dropdown
+        @change="(ev: CustomEvent) => $emit('didSelectOption', ev.detail._value)"
+        :value="selectedRevisionOption"
+        title="Select a Patch Revision to See More Info About It"
+        class="max-w-full font-mono rounded-none"
       >
-    </vscode-dropdown>
+        <vscode-option
+          v-for="revisionOption in revisionOptionsMap.keys()"
+          :key="revisionOption"
+          class="font-mono"
+          >{{ revisionOption }}</vscode-option
+        >
+      </vscode-dropdown>
+      <div class="flex gap-x-1">
+        <vscode-button
+          appearance="secondary"
+          title="Begin Authoring a Comment on the Selected Revision"
+          @click="$emit('showCreateCommentForm')"
+          >Comment</vscode-button
+        >
+      </div>
+    </div>
     <Metadatum label="Id">
       <pre :title="selectedRevision.id">{{ shortenHash(selectedRevision.id) }}</pre>
       <template #aside>

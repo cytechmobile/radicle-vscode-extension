@@ -4,6 +4,7 @@ import type {
   Patch,
   PatchDetailWebviewInjectedState,
   PatchStatus,
+  Revision,
 } from '../types'
 import { getVscodeRef } from '../webviews/src/utils/getVscodeRef'
 
@@ -28,6 +29,10 @@ type MessageToExtension =
       { patchId: Patch['id']; newTitle: string; newDescr: string; oldTitle: string }
     >
   | Message<'updatePatchStatus', { patch: Patch; newStatus: Exclude<PatchStatus, 'merged'> }>
+  | Message<
+      'createPatchComment',
+      { patch: Patch; revisionId: Revision['id']; comment: string }
+    >
 
 /**
  * Sends a message, usually from the host window, to the provided webview.

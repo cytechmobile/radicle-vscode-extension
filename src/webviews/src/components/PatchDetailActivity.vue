@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import {
+  provideVSCodeDesignSystem,
+  vsCodeButton,
+  vsCodeTextArea,
+} from '@vscode/webview-ui-toolkit'
+import { ref, computed, toRaw, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useEventListener } from '@vueuse/core'
 import {
   getIdentityAliasOrId,
   shortenHash,
@@ -14,12 +20,15 @@ import Markdown from '@/components/Markdown.vue'
 import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
 import Reactions from '@/components/Reactions.vue'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
+
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
 defineProps<{ showHeading: boolean }>()
 
 const emit = defineEmits<{ showRevision: [revision: Revision] }>()
 
-const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
+const { patch, firstRevision, patchCommentForm } = storeToRefs(usePatchDetailStore())
 
 function getRevisionHoverTitle(text: string) {
   return `Click to See Revision Details\n⸻\nRevision Description:\n"${text}"`
@@ -63,6 +72,66 @@ const patchEvents = computed(() =>
     .flat()
     .sort((ev1, ev2) => ev2.ts - ev1.ts),
 )
+
+// TODO: maninak extract to usePatchCommentForm? composable
+
+interface VscodeTextAreaEvent {
+  target: { _value: string }
+}
+const formEl = ref<HTMLElement>()
+const commentTextAreaEl = ref<HTMLElement>()
+
+watchEffect(() => {
+  const commentEl = commentTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  const els = [commentEl].filter(Boolean)
+
+  els.forEach((el) => {
+    useEventListener(
+      el,
+      'keydown',
+      (ev) => {
+        if (ev.key === 'Escape') {
+          patchCommentForm.value.isEditing = false
+        }
+        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+          submitPatchCommentForm()
+        }
+      },
+      { passive: true },
+    )
+    useEventListener(el, 'focus', alignViewportWithForm, { passive: true })
+    useEventListener(el, 'input', alignViewportWithForm, { passive: true })
+  })
+})
+
+function alignViewportWithForm() {
+  formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
+}
+
+watchEffect(() => {
+  if (patchCommentForm.value.isEditing) {
+    setTimeout(() => {
+      commentTextAreaEl.value?.focus()
+    }, 0) // Vue.nextTick isn't cutting it
+  }
+})
+
+function submitPatchCommentForm() {
+  patchCommentForm.value.isEditing = false
+  notifyExtension({
+    command: 'createPatchComment',
+    payload: {
+      patch: toRaw(patch.value),
+      revisionId: patch.value.id, // TODO: maninak use the selectedRevision from global store (migrated there from PatchDetail.vue)
+      comment: patchCommentForm.value.comment.trim(),
+    },
+  })
+}
+
+function discardPatchCommentForm() {
+  patchCommentForm.value.isEditing = false
+  patchCommentForm.value.comment = ''
+}
 </script>
 
 <template>
@@ -70,6 +139,42 @@ const patchEvents = computed(() =>
     <!-- TODO: add button to expand/collapse all -->
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-4">Activity</h2>
     <EventList>
+      <EventItem v-if="patchCommentForm.isEditing" :when="NaN" codicon="codicon-comment">
+        <form
+          @submit.prevent
+          ref="formEl"
+          name="Edit patch title and description"
+          class="pb-2 flex flex-col gap-y-3"
+        >
+          <vscode-text-area
+            ref="commentTextAreaEl"
+            :value="patchCommentForm.comment"
+            @input="(ev: VscodeTextAreaEvent) => (patchCommentForm.comment = ev.target._value)"
+            placeholder="Share your kind thoughts…"
+            name="patch comment"
+            resize="vertical"
+            maxlength="50000"
+          >
+            New Patch Comment:
+          </vscode-text-area>
+          <div class="w-full flex flex-row-reverse justify-start gap-x-2">
+            <vscode-button
+              appearance="primary"
+              title="Save New Comment to Radicle"
+              @click="submitPatchCommentForm"
+            >
+              Comment
+            </vscode-button>
+            <vscode-button
+              appearance="secondary"
+              title="Stop Editing and Discard Current Changes"
+              @click="discardPatchCommentForm"
+            >
+              Discard
+            </vscode-button>
+          </div>
+        </form>
+      </EventItem>
       <!-- TODO: list committer's email as tooltip -->
       <!--<div class="grid grid-cols-subgrid gap-x-3 items-center">
         <span
@@ -232,6 +337,22 @@ const patchEvents = computed(() =>
 </template>
 
 <style scoped>
+form {
+  @apply w-fit font-mono text-sm leading-[unset];
+  min-width: min(100%, 68ch); /* results to allowing 65 chars before resizing to be wider */
+}
+
+vscode-text-area::part(control) {
+  @apply font-mono text-sm;
+  field-sizing: content;
+  max-height: min(80ch, 65vh);
+  word-break: break-word;
+}
+
+vscode-text-area::part(label) {
+  margin-bottom: 0.5em;
+}
+
 :deep(.pulse-outline) {
   @keyframes outline-pulse {
     from {

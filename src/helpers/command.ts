@@ -105,9 +105,9 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.refreshAllPatches', () => {
     usePatchStore().resetAllPatches()
   })
-  registerVsCodeCmd('radicle.refreshOnePatch', (patch: Patch | undefined) => {
-    assert(patch)
-    usePatchStore().refetchPatch(patch?.id)
+  registerVsCodeCmd('radicle.refreshOnePatch', (patchId: Patch['id'] | undefined) => {
+    assert(patchId)
+    usePatchStore().refetchPatch(patchId)
   })
   registerVsCodeCmd('radicle.checkoutPatch', checkOutPatch)
   registerVsCodeCmd('radicle.checkoutDefaultBranch', checkOutDefaultBranch)

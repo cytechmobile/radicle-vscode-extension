@@ -11,7 +11,9 @@ type SavedPanelState = Omit<PatchDetailWebviewInjectedState, 'id'> & typeof init
 const vscode = getVscodeRef<SavedPanelState>()
 const initialExtraState = {
   injectedStateIds: [] as number[],
+  // TODO: maninak remove `isEditing` and infer it from other properties, e.g. if there's title or descr then the user is editing...
   patchEditForm: { title: '', descr: '', isEditing: false },
+  patchCommentForm: { comment: '', isEditing: false }, // TODO: maninak index comment using revision so that comments of multiple revisions can be cached
 }
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
@@ -73,6 +75,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
   const defaultBranch = computed(() => state.state.defaultBranch)
 
   const patchEditForm = computed(() => state.patchEditForm)
+  const patchCommentForm = computed(() => state.patchCommentForm)
 
   watchEffect(() => {
     // TODO: save and restore scroll position?
@@ -103,6 +106,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     delegates,
     defaultBranch,
     patchEditForm,
+    patchCommentForm,
   }
 })
 

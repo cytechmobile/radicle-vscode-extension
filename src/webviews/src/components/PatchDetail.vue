@@ -27,8 +27,10 @@ import PatchDetailRevision from '@/components/PatchDetailRevision.vue'
 
 provideVSCodeDesignSystem().register(vsCodePanels(), vsCodePanelTab(), vsCodePanelView())
 
-const { patch, authors, firstRevision, latestRevision } = storeToRefs(usePatchDetailStore())
+const { patch, authors, firstRevision, latestRevision, patchCommentForm } =
+  storeToRefs(usePatchDetailStore())
 
+const activityTabRef = ref<HTMLElement>()
 const revisionTabRef = ref<HTMLElement>()
 const revisionSectionRef = ref<HTMLElement>()
 
@@ -60,6 +62,12 @@ function selectAndScrollToRevision(revision: Revision) {
   selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
   isWindowNarrowerThanSm.value && revisionTabRef.value?.click()
   scrollToTemplateRef(revisionSectionRef.value)
+}
+
+function showCreateCommentForm() {
+  // patchCommentForm.value.comment ||= ''  // TODO: maninak delete
+  patchCommentForm.value.isEditing = true
+  isWindowNarrowerThanSm.value && activityTabRef.value?.click()
 }
 
 function assembleRevisionOptionLabel(revision: Revision): string {
@@ -109,6 +117,7 @@ function assembleRevisionOptionLabel(revision: Revision): string {
         aria-label="Detailed patch information"
       >
         <vscode-panel-tab
+          ref="activityTabRef"
           title="Click to See All Events That Took Place During the Lifetime of the Patch"
           class="text-lg"
         >
@@ -131,6 +140,7 @@ function assembleRevisionOptionLabel(revision: Revision): string {
           <PatchDetailRevision
             ref="revisionSectionRef"
             @did-select-option="(newOption) => (selectedRevisionOption = newOption)"
+            @show-create-comment-form="showCreateCommentForm"
             :show-heading="false"
             :selected-revision="selectedRevision"
             :selected-revision-option="selectedRevisionOption"
@@ -150,6 +160,7 @@ function assembleRevisionOptionLabel(revision: Revision): string {
         v-if="!isWindowNarrowerThanSm"
         ref="revisionSectionRef"
         @did-select-option="(newOption) => (selectedRevisionOption = newOption)"
+        @show-create-comment-form="showCreateCommentForm"
         show-heading
         :selected-revision="selectedRevision"
         :selected-revision-option="selectedRevisionOption"

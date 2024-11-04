@@ -4,7 +4,7 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { ref, watchEffect, nextTick, computed } from 'vue'
+import { ref, watchEffect, computed } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
@@ -17,6 +17,8 @@ provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 const { patch, firstRevision, patchEditForm, delegates, localIdentity } =
   storeToRefs(usePatchDetailStore())
 
+// TODO: maninak extract to usePatchDetailForm? composable
+
 interface VscodeTextAreaEvent {
   target: { _value: string }
 }
@@ -24,8 +26,6 @@ const formEl = ref<HTMLElement>()
 const titleTextAreaEl = ref<HTMLElement>()
 const descrTextAreaEl = ref<HTMLElement>()
 
-// TODO: maninak add button to toggle between markdown preview and editing
-// TODO: maninak add ctrl/cmd + (B | I | E | K) listeners to toggle bold | italics | backtick-quote | link
 watchEffect(() => {
   const titleEl = titleTextAreaEl.value?.shadowRoot?.querySelector('textarea')
   const descrEl = descrTextAreaEl.value?.shadowRoot?.querySelector('textarea')
@@ -45,14 +45,12 @@ watchEffect(() => {
       },
       { passive: true },
     )
-    useEventListener(el, 'focus', () => resetTextAreaHeight(el), { passive: true })
-    useEventListener(el, 'input', () => resetTextAreaHeight(el), { passive: true })
+    useEventListener(el, 'focus', alignViewportWithForm, { passive: true })
+    useEventListener(el, 'input', alignViewportWithForm, { passive: true })
   })
 })
 
-function resetTextAreaHeight(el: HTMLTextAreaElement) {
-  el.style.height = ''
-  el.style.height = `${el.scrollHeight + 3}px` // additional offset needed to avoid scrollbar
+function alignViewportWithForm() {
   formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
 }
 
@@ -66,7 +64,10 @@ function beginPatchEditing() {
   patchEditForm.value.title ||= patch.value.title
   patchEditForm.value.descr ||= firstRevision.value.description
   patchEditForm.value.isEditing = true
-  nextTick(() => titleTextAreaEl.value?.focus())
+  setTimeout(() => {
+    titleTextAreaEl.value?.focus()
+    alignViewportWithForm()
+  }, 0) // Vue.nextTick isn't cutting it
 }
 
 function submitPatchEditForm() {
@@ -113,62 +114,65 @@ function discardPatchEditForm() {
       @submit.prevent
       ref="formEl"
       name="Edit patch title and description"
-      class="pb-2 w-fit flex flex-col gap-y-3"
+      class="pb-2 flex flex-col gap-y-3"
     >
       <vscode-text-area
         ref="titleTextAreaEl"
         :value="patchEditForm.title"
         @input="(ev: VscodeTextAreaEvent) => (patchEditForm.title = ev.target._value)"
+        placeholder="What does this patch do, in a nutshell?"
         name="patch title"
-        rows="1"
-        cols="100"
         resize="vertical"
         maxlength="400"
+        >Patch Title:</vscode-text-area
       >
-        Patch Title:
-      </vscode-text-area>
       <vscode-text-area
         ref="descrTextAreaEl"
         :value="patchEditForm.descr"
         @input="(ev: VscodeTextAreaEvent) => (patchEditForm.descr = ev.target._value)"
+        placeholder="Describe the patch in more detail…"
         name="patch description"
-        rows="6"
-        cols="100"
         resize="vertical"
         maxlength="500000"
+        >Patch Description:</vscode-text-area
       >
-        Patch Description:
-      </vscode-text-area>
       <div class="w-full flex flex-row-reverse justify-start gap-x-2">
         <vscode-button
           appearance="primary"
           title="Save Changes to Radicle"
           @click="submitPatchEditForm"
+          >Update</vscode-button
         >
-          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-          <span slot="start" class="codicon codicon-save"></span>
-          Save
-        </vscode-button>
         <vscode-button
           appearance="secondary"
           title="Stop Editing and Discard Current Changes"
           @click="discardPatchEditForm"
+          >Discard</vscode-button
         >
-          <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-          <span slot="start" class="codicon codicon-discard"></span>
-          Discard
-        </vscode-button>
       </div>
     </form>
   </section>
 </template>
 
 <style scoped>
+form {
+  @apply w-fit font-mono text-sm leading-[unset];
+  min-width: min(100%, 68ch); /* results to allowing 65 chars before resizing to be wider */
+}
+
 vscode-text-area::part(control) {
-  min-height: 5ch;
-  max-height: min(80ch, 65vh);
-  field-sizing: content;
   @apply font-mono text-sm;
+  field-sizing: content;
+  max-height: min(80ch, 65vh);
+  word-break: break-word;
+}
+
+vscode-text-area[name*='title']::part(control) {
+  max-height: 12ch; /* results to 4 lines of text */
+}
+
+vscode-text-area[name*='descr']::part(control) {
+  min-height: 12ch; /* results to 4 lines of text */
 }
 
 vscode-text-area::part(label) {

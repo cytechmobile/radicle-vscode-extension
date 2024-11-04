@@ -1,5 +1,31 @@
 # Radicle VS Code Extension Change Log
 
+## _(WIP, yet unreleased version)_
+
+### 🚀 Enhancements
+
+- **patch-detail:** add a new "Comment" button next to the revision selector
+  - clicking the button shows a new create-new-comment form in the top of the Activity section
+    - if in single-column mode due to narrow viewport the active tab will automatically switch to the Activity section
+    - form state is preserved as described in [v0.5.0#enhancements](#v050-july-22nd-2024)
+  - clicking the form's "Comment" button or the keyboard combo Ctrl/Cmd+Enter will submit the form
+  - submitting the form attempts to create a new comment on radicle, informing the user of the action's result (created and announced / created only locally / failed) and offering follow-up actions as needed
+  - upon the comment's successful creation, it is shown directly in place of the create-new-comment form as a new event at the top of the Activity section with the time-ago indicator showing "now"
+- **patch-detail:** in the edit-title-&-description form's
+  - show placeholder text when either text-field is empty
+  - polish text-field sizing dynamics:
+    - use 1 line of text as starting height when empty for the patch title field and 4 lines for the description
+    - respectively limit the max vertical lines for the former and the latter
+    - fields offer 65 characters of horizontal space (when there's enough viewport width, whatever fits otherwise), which also happens to be the Markdown renderer's wrapping limit (with exceptions). This can double as a subtle hint that we may be typing too much. Longer lines of text will widen the fields to fit the content as long as there's enough viewport space, at which point they'll wrap into a new line, line-breaking at at appropriate point.
+    - while both fields remain manually user-resizeable (pursposefully only across height) by mouse-dragging the bottom-right handle of each field _and_ dynamically resizeable as content grows (with contextual restrictions) and shrinks, if the user indeed defines a preferred height using the former method, then it will be respected by the latter
+    - the aforementioned coupled with the pre-existing feature of optimally auto-aligning the form as it resizes should seamlessly provide a smooth authoring experience
+  - change button label "Save" to "Update"
+  - remove button icons
+
+### 🩹 Fixes
+
+- **patch-detail:** make "Refresh" button work again, fetching latest patch data
+
 ## **v0.5.1** (September 10th, 2024)
 
 ### 🩹 Fixes
@@ -45,7 +71,7 @@
     - responds to viewport size changes applying sizing limits on top of the aforementioned content-relative resizing
     - is set with (generous) max char count limits to limit abuse
     - pressing the Enter key enters a new line but pressing Ctrl/Cmd+Enter behaves as if the "Save" button was clicked
-  - the value of each text-area is auto-saved in memory as a draft while typing, as well as the "is editing" status of the form, and those will be attempted to be restored:
+  - the value of each text-area is preserved as an in-extension draft while typing, as well as the "is editing" status of the form, and those will be attempted to be restored:
     - if the editor panel is hidden (another panel is selected placing it in the background) and then re-viewed (same session)
     - if VS Code is terminated or crashes (across sessions)
     - if the form submission fails

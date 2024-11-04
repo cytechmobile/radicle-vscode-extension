@@ -313,6 +313,14 @@ function handleMessageFromWebviewPatchDetail(
         }
       }
       break
+    case 'createPatchComment':
+      mutatePatch(message.payload.patch.id, message.payload.patch.title, (timeout?: number) =>
+        execPatchMutation(
+          ['comment', message.payload.revisionId, '--message', message.payload.comment],
+          timeout,
+        ),
+      )
+      break
     default:
       assertUnreachable(message)
   }
