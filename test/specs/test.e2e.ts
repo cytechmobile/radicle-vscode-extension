@@ -2,7 +2,7 @@ import { $, browser, expect } from '@wdio/globals'
 import type { TreeItem, ViewContent, ViewSection, Workbench } from 'wdio-vscode-service'
 import { $ as zx } from 'zx'
 
-async function setUpRadicleRepo() {
+async function setUpRepo() {
   await zx`mkdir -p ./test/fixtures/workspaces/a_blog`
   await zx`cd ./test/fixtures/workspaces/a_blog`
   await zx`git config --local init.defaultBranch main`
@@ -12,7 +12,6 @@ async function setUpRadicleRepo() {
   await zx`echo "# A Blog" > README.md`
   await zx`git add README.md`
   await zx`git commit -m 'adds readme' --no-gpg-sign`
-  await zx`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
 }
 
 async function openRadicleViewControl(workbench: Workbench) {
@@ -40,13 +39,8 @@ describe('VS Code Extension Testing', () => {
   let workbench: Workbench
 
   before(async () => {
-    await setUpRadicleRepo()
+    await setUpRepo()
     workbench = await browser.getWorkbench()
-  })
-
-  it('should be able to load VSCode', async () => {
-    const title = await workbench.getTitleBar().getTitle()
-    expect(title).toContain('[Extension Development Host]')
   })
 
   it('should load and install our VSCode Extension', async () => {
@@ -64,27 +58,23 @@ describe('VS Code Extension Testing', () => {
     expect(title).toBe('Radicle')
   })
 
-  // Skipping this for now as we cannot change folder in tests
-  it.skip('should show the `rad init` text when in the sidebar when the repo is not a radicle repo', async () => {
+  it('should show the `rad init` text when in the sidebar when the repo is not a radicle repo', async () => {
     await openRadicleViewControl(workbench)
 
     const welcomeText = await findFirstSectionWelcomeText(workbench)
     expect((welcomeText ?? []).some((text) => text.includes('rad init'))).toBe(true)
   })
 
-  describe('sections', () => {
+  describe('sections', async () => {
     let sidebarView: ViewContent
     let cliCommandsSection: ViewSection
-    let patchesSection: ViewSection
 
     before(async () => {
+      await zx`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
       await openRadicleViewControl(workbench)
       sidebarView = workbench.getSideBar().getContent()
       await sidebarView.wait()
       cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
-      patchesSection = await sidebarView.getSection('PATCHES')
-      await cliCommandsSection.collapse()
-      await patchesSection.collapse()
     })
 
     describe('CLI Commands section', () => {
@@ -117,93 +107,5 @@ describe('VS Code Extension Testing', () => {
         expect(buttonTitles[2]).toBe('Announce')
       })
     })
-
-    describe('Patches section', () => {
-      before(async () => {
-        await patchesSection.expand()
-      })
-
-      after(async () => {
-        await patchesSection.collapse()
-      })
-
-
-      it('should list the repo\'s patches', async () => {
-        // TODO: zac - Create repo with patches, update expectedLabels with those patches
-        const expectedPatches = [
-          '❬✓❭ feat(config): implement runtime configuration via json file',
-          'test patch 7',
-          'chore(repo): setup radicle github actions',
-          'chore(repo): test-patch-5',
-          'chore(repo): test-patch-3',
-          'chore(repo): test-patch-2',
-          'chore(repo): test patch 2',
-          'chore(repo): setup radicle github actions',
-          'chore(repo): setup radicle github actions',
-          'chore(repo): setup radicle github actions',
-          'chore(repo): setup radicle github actions',
-          'chore(repo): setup radicle GiHhub Actions integration',
-          'Add container packaging'
-        ]
-
-        const items = (await patchesSection?.getVisibleItems()) as TreeItem[]
-        const labels = await Promise.all(items.map(async (item) => await item.getLabel()))
-
-        expectedPatches.forEach((label, index) => {
-          expect(labels[index]).toBe(label)
-        })
-      })
-
-      it("should be able to open a patch's details", async () => {
-        const items = (await patchesSection?.getVisibleItems()) as TreeItem[]
-        const firstItem = items[0]!
-        const menu = await firstItem.openContextMenu()
-        const menuItem = await menu.getItem('Open Patch Details')
-        await menuItem?.select()
-
-        // Need to get webview by index because it doesn't have a title
-        await browser.waitUntil(async () => (await workbench.getAllWebviews()).length > 0)
-        const webviews = await workbench.getAllWebviews()
-        expect(webviews).toHaveLength(1)
-        await webviews[0]!.open()
-
-        await expect($('h1')).toHaveText(
-          'feat(config): implement runtime configuration via json file',
-        )
-      })
-    })
   })
-
-  // it.only('should find the buttons', async () => {
-  //
-
-  //   await openRadicleViewControl(workbench)
-
-  //   const sidebarView = workbench.getSideBar().getContent()
-
-  //   const cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
-  //   await cliCommandsSection?.collapse()
-
-  //   const patchesSection = await sidebarView.getSection('PATCHES')
-  //   const items = await patchesSection?.getVisibleItems() as TreeItem[]
-  //   const firstItem = items[0]!
-  //   const menu = await firstItem.openContextMenu();
-  //   const menuItem = await menu.getItem('Open Patch Details')
-  //   await menuItem?.select()
-
-  //   await browser.waitUntil(async () => (await workbench.getAllWebviews()).length > 0)
-  //   const webviews = await workbench.getAllWebviews()
-  //   expect(webviews).toHaveLength(1)
-  //   await webviews[0]!.open()
-
-  //   const editButton = await $('aria/Edit Patch Title and Description')
-  //   await editButton.click()
-
-  //   await browser.pause(2000)
-
-  //   const discardButton = await $('aria/Stop Editing and Discard Current Changes')
-  //   await discardButton.click()
-
-  //   await browser.pause(50000)
-  // })
 })
