@@ -1,22 +1,28 @@
-import { $, browser, expect } from '@wdio/globals'
-import type { TreeItem, ViewContent, ViewSection, Workbench } from 'wdio-vscode-service'
-import { $ as zx } from 'zx'
+import path from 'node:path'
+import { browser, expect } from '@wdio/globals'
+import { e2eTestDirPath } from 'test/constants/config'
+import type { ViewContent, ViewSection, Workbench } from 'wdio-vscode-service'
+import { $, cd } from 'zx'
 
-async function setUpRepo() {
-  await zx`mkdir -p ./test/fixtures/workspaces/a_blog`
-  await zx`cd ./test/fixtures/workspaces/a_blog`
-  await zx`git config --local init.defaultBranch main`
-  await zx`git init .`
-  await zx`git config --local user.email "test@radicle.xyz"`
-  await zx`git config --local user.name "Radicle Test"`
-  await zx`echo "# A Blog" > README.md`
-  await zx`git add README.md`
-  await zx`git commit -m 'adds readme' --no-gpg-sign`
+type VsCodeType = typeof import('vscode')
+
+async function setUpGitRepo() {
+  const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/a_blog')
+
+  await $`mkdir -p ${repoDirPath}`
+  cd(repoDirPath)
+  await $`git config --global init.defaultBranch main`
+  await $`git init .`
+  await $`git config --global user.email "test@radicle.xyz"`
+  await $`git config --global user.name "Radicle Test"`
+  await $`echo "# A Blog" > README.md`
+  await $`git add README.md`
+  await $`git commit -m 'adds readme' --no-gpg-sign`
 }
 
 async function openRadicleViewControl(workbench: Workbench) {
   const activityBar = workbench.getActivityBar()
-  await activityBar.wait();
+  await activityBar.wait()
 
   const radicleViewControl = await activityBar.getViewControl('Radicle')
   await radicleViewControl?.wait()
@@ -39,16 +45,17 @@ describe('VS Code Extension Testing', () => {
   let workbench: Workbench
 
   before(async () => {
-    await setUpRepo()
+    await setUpGitRepo()
     workbench = await browser.getWorkbench()
   })
 
   it('should load and install our VSCode Extension', async () => {
-    const extensions = await browser.executeWorkbench((vscodeApi) => vscodeApi.extensions.all)
+    const extensions = await browser.executeWorkbench(
+      (vscode: VsCodeType) => vscode.extensions.all,
+    )
+
     expect(
-      extensions.some(
-        (extension: { id: string }) => extension.id === 'radicle-ide-plugins-team.radicle',
-      ),
+      extensions.some((extension) => extension.id === 'radicle-ide-plugins-team.radicle'),
     ).toBe(true)
   })
 
@@ -58,23 +65,27 @@ describe('VS Code Extension Testing', () => {
     expect(title).toBe('Radicle')
   })
 
-  it('should show the `rad init` text when in the sidebar when the repo is not a radicle repo', async () => {
+  it('should show the `rad init` text when the repo is not a radicle repo', async () => {
     await openRadicleViewControl(workbench)
 
     const welcomeText = await findFirstSectionWelcomeText(workbench)
     expect((welcomeText ?? []).some((text) => text.includes('rad init'))).toBe(true)
   })
 
-  describe('sections', async () => {
+  describe('sections', () => {
     let sidebarView: ViewContent
     let cliCommandsSection: ViewSection
+    let patchesSection: ViewSection
 
     before(async () => {
-      await zx`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
+      await $`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
       await openRadicleViewControl(workbench)
       sidebarView = workbench.getSideBar().getContent()
       await sidebarView.wait()
       cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
+      patchesSection = await sidebarView.getSection('PATCHES')
+      await cliCommandsSection.collapse()
+      await patchesSection.collapse()
     })
 
     describe('CLI Commands section', () => {
@@ -92,8 +103,9 @@ describe('VS Code Extension Testing', () => {
         const welcomeContent = await cliCommandsSection?.findWelcomeContent()
         const welcomeText = (await welcomeContent?.getTextSections()) ?? []
         const buttons = (await welcomeContent?.getButtons()) ?? []
-
-        const buttonTitles = await Promise.all(buttons.map(async (button) => button.getTitle()))
+        const buttonTitles = await Promise.all(
+          buttons.map(async (button) => await button.getTitle()),
+        )
 
         expect(
           welcomeText.some((text) =>

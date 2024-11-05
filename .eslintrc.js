@@ -20,7 +20,7 @@ module.exports = {
   ignorePatterns: [
     'static',
     'src/webviews',
-    'test',
+    'src/test',
 
     // overrides to antfu's config follow
     '!.*rc.*',
@@ -392,6 +392,18 @@ module.exports = {
         'no-only-tests/no-only-tests': 'warn',
         'jasmine/new-line-before-expect': 'warn',
         'jasmine/new-line-between-declarations': 'warn',
+      },
+    },
+    {
+      /*
+       * Rules specifically for end-to-end test files
+       * ======================================================================================
+       */
+      files: ['test/specs/*.e2e.ts', 'test/specs/*.e2e.js'],
+      rules: {
+        // prevent errors on expect assertions (e.g. `expect(...).toBe(...)`)
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
       },
     },
     {

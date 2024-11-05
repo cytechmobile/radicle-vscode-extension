@@ -40,7 +40,7 @@ importers:
         specifier: ^4.17.6
         version: 4.17.6
       '@types/mocha':
-        specifier: ^10.0.1
+        specifier: ^10.0.7
         version: 10.0.7
       '@types/node':
         specifier: ^20.11.21
@@ -93,6 +93,9 @@ importers:
       eslint-plugin-vue-scoped-css:
         specifier: ^2.7.2
         version: 2.7.2(eslint@8.57.0)(vue-eslint-parser@9.4.2(eslint@8.57.0))
+      expect-webdriverio:
+        specifier: ^5.0.3
+        version: 5.0.3(@wdio/globals@9.1.2(@wdio/logger@9.1.0))(@wdio/logger@9.1.0)(webdriverio@9.1.2)
       glob:
         specifier: ^7.1.4
         version: 7.2.3
