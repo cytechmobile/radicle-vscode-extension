@@ -60,7 +60,7 @@ export const config: WebdriverIO.Config = {
       'wdio:vscodeOptions': {
         // points to directory where extension package.json is located
         extensionPath: path.join(__dirname, '..'),
-        workspacePath: path.join(__dirname, isCI ? 'fixtures/workspaces/a_blog' : '../../radicle-repos/radicle-planning-boards'),
+        workspacePath: path.join(__dirname, 'fixtures/workspaces/a_blog'),
         // optional VS Code settings
         userSettings: {
           'editor.fontSize': 14,

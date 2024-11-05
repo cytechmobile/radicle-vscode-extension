@@ -1,9 +1,27 @@
 import { $, browser, expect } from '@wdio/globals'
 import type { TreeItem, ViewContent, ViewSection, Workbench } from 'wdio-vscode-service'
+import { $ as zx } from 'zx'
+
+async function setUpRadicleRepo() {
+  await zx`mkdir -p ./test/fixtures/workspaces/a_blog`
+  await zx`cd ./test/fixtures/workspaces/a_blog`
+  await zx`git config --local init.defaultBranch main`
+  await zx`git init .`
+  await zx`git config --local user.email "test@radicle.xyz"`
+  await zx`git config --local user.name "Radicle Test"`
+  await zx`echo "# A Blog" > README.md`
+  await zx`git add README.md`
+  await zx`git commit -m 'adds readme' --no-gpg-sign`
+  await zx`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
+}
 
 async function openRadicleViewControl(workbench: Workbench) {
-  const radicleViewControl = await workbench.getActivityBar().getViewControl('Radicle')
+  const activityBar = workbench.getActivityBar()
+  await activityBar.wait();
+
+  const radicleViewControl = await activityBar.getViewControl('Radicle')
   await radicleViewControl?.wait()
+
   await radicleViewControl?.openView()
 }
 
@@ -22,6 +40,7 @@ describe('VS Code Extension Testing', () => {
   let workbench: Workbench
 
   before(async () => {
+    await setUpRadicleRepo()
     workbench = await browser.getWorkbench()
   })
 
@@ -53,7 +72,7 @@ describe('VS Code Extension Testing', () => {
     expect((welcomeText ?? []).some((text) => text.includes('rad init'))).toBe(true)
   })
 
-  describe.only('sections', () => {
+  describe('sections', () => {
     let sidebarView: ViewContent
     let cliCommandsSection: ViewSection
     let patchesSection: ViewSection
@@ -61,6 +80,7 @@ describe('VS Code Extension Testing', () => {
     before(async () => {
       await openRadicleViewControl(workbench)
       sidebarView = workbench.getSideBar().getContent()
+      await sidebarView.wait()
       cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
       patchesSection = await sidebarView.getSection('PATCHES')
       await cliCommandsSection.collapse()
@@ -108,7 +128,7 @@ describe('VS Code Extension Testing', () => {
       })
 
 
-      it.only('should list the repo\'s patches', async () => {
+      it('should list the repo\'s patches', async () => {
         // TODO: zac - Create repo with patches, update expectedLabels with those patches
         const expectedPatches = [
           '❬✓❭ feat(config): implement runtime configuration via json file',
