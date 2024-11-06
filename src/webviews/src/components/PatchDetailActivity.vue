@@ -246,7 +246,6 @@ function discardPatchCommentForm() {
           <template v-if="event.review.summary">
             <details v-if="event.review.summary && event.review.comment">
               <summary
-                style="color: var(--vscode-foreground)"
                 title="Click to Expand/Collapse"
                 class="mt-1 max-w-prose break-words text-sm font-mono"
                 >{{ event.review.summary }}</summary
@@ -293,12 +292,8 @@ function discardPatchCommentForm() {
               >another</span
             ></span
           >
-          <details
-            v-if="event.discussion.body.length > maxCharsForUntruncatedMdText"
-            class="[&_summary]:open:opacity-50"
-          >
+          <details v-if="event.discussion.body.length > maxCharsForUntruncatedMdText">
             <summary
-              style="color: var(--vscode-foreground)"
               title="Click to Expand/Collapse"
               class="mt-1 max-w-prose text-sm font-mono"
               >{{ truncateMarkdown(event.discussion.body) }}</summary

@@ -166,9 +166,7 @@ const selectedRevisionRejectedReviews = computed(() =>
     <!-- TODO: show names of all unique committers -->
     <div v-if="selectedRevision.description" class="mt-4">
       <details v-if="shouldHideRevisionDescription">
-        <summary style="color: var(--vscode-foreground)" title="Click to Expand/Collapse"
-          >Description</summary
-        >
+        <summary title="Click to Expand/Collapse">Description</summary>
         <Markdown :source="selectedRevision.description" class="mt-[0.25em] text-sm" />
       </details>
       <Markdown v-else :source="selectedRevision.description" class="text-sm" />

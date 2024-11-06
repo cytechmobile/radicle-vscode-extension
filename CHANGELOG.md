@@ -21,6 +21,7 @@
     - the aforementioned coupled with the pre-existing feature of optimally auto-aligning the form as it resizes should seamlessly provide a smooth authoring experience
   - change button label "Save" to "Update"
   - remove button icons
+  - **patch-detail:** add themed styling to `<summary>` elements when tabbed into
 
 ### 🩹 Fixes
 
