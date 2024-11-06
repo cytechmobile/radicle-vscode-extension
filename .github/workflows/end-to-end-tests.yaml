@@ -107,11 +107,11 @@ jobs:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
       run: |
         echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        xvfb-run -a pnpm wdio
+        xvfb-run -a pnpm test:e2e
     - name: Test E2E (non-Linux)
       if: runner.os != 'Linux'
       env:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
       run: |
         echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        pnpm wdio
+        pnpm test:e2e

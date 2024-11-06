@@ -34,7 +34,8 @@
     "cli",
     "webview",
     "markdown",
-    "exec"
+    "exec",
+    "e2e"
   ],
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.lineBreak": "\\n",

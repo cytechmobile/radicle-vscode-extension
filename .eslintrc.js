@@ -20,7 +20,6 @@ module.exports = {
   ignorePatterns: [
     'static',
     'src/webviews',
-    'src/test',
 
     // overrides to antfu's config follow
     '!.*rc.*',
