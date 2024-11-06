@@ -105,7 +105,7 @@ watchEffect(() => {
 })
 
 function alignViewportWithForm() {
-  formEl.value?.scrollIntoView({ block: 'end', behavior: 'instant' })
+  formEl.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
 }
 
 watchEffect(() => {

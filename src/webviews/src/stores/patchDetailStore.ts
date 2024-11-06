@@ -12,8 +12,13 @@ const vscode = getVscodeRef<SavedPanelState>()
 const initialExtraState = {
   injectedStateIds: [] as number[],
   // TODO: maninak remove `isEditing` and infer it from other properties, e.g. if there's title or descr then the user is editing...
-  patchEditForm: { title: '', descr: '', isEditing: false },
+  patchEditForm: {
+    title: '',
+    descr: '',
+    status: 'off' as 'off' | 'editing' | 'previewing',
+  },
   patchCommentForm: { comment: '', isEditing: false }, // TODO: maninak index comment using revision so that comments of multiple revisions can be cached
+  // patchCommentForm: new Map<Revision['id'], {comment: string, isEditing: boolean}>(),
 }
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {

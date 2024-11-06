@@ -5,27 +5,36 @@
 ### 🚀 Enhancements
 
 - **patch-detail:** add a new "Comment" button next to the revision selector
-  - clicking the button shows a new create-new-comment form in the top of the Activity section
+  - clicking the button shows a new create-comment form in the top of the Activity section
     - if in single-column mode due to narrow viewport the active tab will automatically switch to the Activity section
     - form state is preserved as described in [v0.5.0#enhancements](#v050-july-22nd-2024)
-  - clicking the form's "Comment" button or the keyboard combo Ctrl/Cmd+Enter will submit the form
+  - clicking the form's "Comment" button or the keyboard shortcut `Ctrl/Cmd + Enter` will submit the form
   - submitting the form attempts to create a new comment on radicle, informing the user of the action's result (created and announced / created only locally / failed) and offering follow-up actions as needed
-  - upon the comment's successful creation, it is shown directly in place of the create-new-comment form as a new event at the top of the Activity section with the time-ago indicator showing "now"
-- **patch-detail:** in the edit-title-&-description form's
+  - upon the comment's successful creation, it is shown directly in place of the create-comment form as a new event at the top of the Activity section with the time-ago indicator showing "now"
+- **patch-detail:** in the edit-title-&-description form
   - show placeholder text when either text-field is empty
+  - change button label "Save" to "Update"
+- **patch-detail:** in both create-comment and edit-title-&-description forms
+  - add a new button with a coffee icon between "Update"/"Comment" and "Discard"
+    - clicking it will pause editing, preserving the current changes for later (a.k.a. aforementioned form state preservation)
+    - also triggerable with keyboard shortcut `Escape`
+    - also acts as a safe "spacer" between the two aforementioned buttons protecting against misclicks that would otherwise come with a big penalty
+  - add a new button to toggle a markdown preview of the current changes before submitting
+    - also triggerable with keyboard shortcut `Alt + P`
   - polish text-field sizing dynamics:
-    - use 1 line of text as starting height when empty for the patch title field and 4 lines for the description
+    - use 1 line of text as starting height when empty for the patch title field and 4 lines for the patch description
     - respectively limit the max vertical lines for the former and the latter
     - fields offer 65 characters of horizontal space (when there's enough viewport width, whatever fits otherwise), which also happens to be the Markdown renderer's wrapping limit (with exceptions). This can double as a subtle hint that we may be typing too much. Longer lines of text will widen the fields to fit the content as long as there's enough viewport space, at which point they'll wrap into a new line, line-breaking at at appropriate point.
-    - while both fields remain manually user-resizeable (pursposefully only across height) by mouse-dragging the bottom-right handle of each field _and_ dynamically resizeable as content grows (with contextual restrictions) and shrinks, if the user indeed defines a preferred height using the former method, then it will be respected by the latter
+    - previously typing or focusing any of the form's fields would always scroll the viewport to align the form at its bottom. Now this happens only if the form doesn't already fit on the viewport, leaving the scroll position wherever it was already set by the user and resulting in a less constricting experience
+    - although fields remain manually user-resizeable (pursposefully only across height) by mouse-dragging the bottom-right handle of each field _and_ dynamically resizeable as content grows (with contextual restrictions) and shrinks, if the user indeed defines a preferred height using the former method, then it will be respected by the latter
     - the aforementioned coupled with the pre-existing feature of optimally auto-aligning the form as it resizes should seamlessly provide a smooth authoring experience
-  - change button label "Save" to "Update"
-  - remove button icons
+  - adjust the hover text of all form buttons to advertise their respective keyboard shortcut (if any)
   - **patch-detail:** add themed styling to `<summary>` elements when tabbed into
 
 ### 🩹 Fixes
 
 - **patch-detail:** make "Refresh" button work again, fetching latest patch data
+- **patch-detail:** don't show extra gap between patch title and next section if description is empty
 
 ## **v0.5.1** (September 10th, 2024)
 
