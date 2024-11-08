@@ -59,7 +59,7 @@ export const config: WebdriverIO.Config = {
       'wdio:vscodeOptions': {
         // points to directory where extension package.json is located
         extensionPath: path.join(e2eTestDirPath, '..'),
-        workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/a_blog'),
+        workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/basic'),
         // optional VS Code settings
         userSettings: {
           'editor.fontSize': 14,

@@ -83,7 +83,7 @@ describe('onboarding flow', () => {
 })
 
 async function setUpGitRepo() {
-  const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/a_blog')
+  const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
 
   await $`mkdir -p ${repoDirPath}`
   cd(repoDirPath)
@@ -91,7 +91,7 @@ async function setUpGitRepo() {
   await $`git init .`
   await $`git config --global user.email "test@radicle.xyz"`
   await $`git config --global user.name "Radicle Test"`
-  await $`echo "# A Blog" > README.md`
+  await $`echo "# Basic Repo" > README.md`
   await $`git add README.md`
   await $`git commit -m 'adds readme' --no-gpg-sign`
 }
