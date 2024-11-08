@@ -4,7 +4,7 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { ref, computed, toRaw, watchEffect } from 'vue'
+import { ref, computed, toRaw, watchEffect, useTemplateRef } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useEventListener } from '@vueuse/core'
 import {
@@ -24,9 +24,11 @@ import { notifyExtension } from 'extensionUtils/webview-messaging'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
-defineProps<{ showHeading: boolean }>()
-
-const emit = defineEmits<{ showRevision: [revision: Revision] }>()
+defineEmits<{ showRevision: [revision: Revision] }>()
+const { selectedRevision } = defineProps<{
+  showHeading: boolean
+  selectedRevision: Revision
+}>()
 
 const { patch, firstRevision, patchCommentForm } = storeToRefs(usePatchDetailStore())
 
@@ -40,7 +42,9 @@ function scrollToComment(commentId: Comment['id']) {
     (commentEl) => commentEl.$attrs.id === commentId,
   )
 
-  scrollToTemplateRef(foundCommentRef, { classToAdd: 'pulse-outline', removeAfterMs: 1500 })
+  scrollToTemplateRef(foundCommentRef, {
+    addClass: { class: 'pulse-outline', removeAfterMs: 1500 },
+  })
 }
 
 const patchEvents = computed(() =>
@@ -75,14 +79,11 @@ const patchEvents = computed(() =>
 
 // TODO: maninak extract to usePatchCommentForm? composable
 
-interface VscodeTextAreaEvent {
-  target: { _value: string }
-}
-const formEl = ref<HTMLElement>()
-const commentTextAreaEl = ref<HTMLElement>()
+const formRef = useTemplateRef<HTMLElement>('formRef')
+const commentTextAreaRef = useTemplateRef<HTMLElement>('commentTextAreaRef')
 
 watchEffect(() => {
-  const commentEl = commentTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  const commentEl = commentTextAreaRef.value?.shadowRoot?.querySelector('textarea')
   const els = [commentEl].filter(Boolean)
 
   els.forEach((el) => {
@@ -91,7 +92,10 @@ watchEffect(() => {
       'keydown',
       (ev) => {
         if (ev.key === 'Escape') {
-          patchCommentForm.value.isEditing = false
+          patchCommentForm.value[selectedRevision.id] = {
+            comment: patchCommentForm.value[selectedRevision.id]?.comment || '',
+            status: 'off',
+          }
         }
         if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
           submitPatchCommentForm()
@@ -105,33 +109,45 @@ watchEffect(() => {
 })
 
 function alignViewportWithForm() {
-  formEl.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+  formRef.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
 }
 
 watchEffect(() => {
-  if (patchCommentForm.value.isEditing) {
-    setTimeout(() => {
-      commentTextAreaEl.value?.focus()
-    }, 0) // Vue.nextTick isn't cutting it
+  if (patchCommentForm.value[selectedRevision.id]?.status === 'editing') {
+    setTimeout(() => commentTextAreaRef.value?.focus(), 0) // Vue.nextTick isn't cutting it
   }
 })
 
+// TODO: maninak whenever a new revision is selected mark the forms of all other revs as `'off'` (use watcher to do it?) (do it in revision Cmp instead) (maybe move all this selectedRevision state to )
+
+interface VscodeTextAreaEvent {
+  target: { _value: string }
+}
+function updatePatchCommentFormComment(ev: VscodeTextAreaEvent) {
+  patchCommentForm.value[selectedRevision.id] = {
+    comment: ev.target._value,
+    status: 'editing',
+  }
+}
+
 function submitPatchCommentForm() {
-  patchCommentForm.value.isEditing = false
   notifyExtension({
     command: 'createPatchComment',
     payload: {
       patch: toRaw(patch.value),
-      revisionId: patch.value.id, // TODO: maninak use the selectedRevision from global store (migrated there from PatchDetail.vue)
-      comment: patchCommentForm.value.comment.trim(),
+      revisionId: selectedRevision.id,
+      comment: patchCommentForm.value[selectedRevision.id]?.comment?.trim() || '',
     },
   })
+
+  discardPatchCommentForm() // Would be better to discard form IFF submition suceeded, but current webview-extension comm channel doesn't support notification replies
 }
 
 function discardPatchCommentForm() {
-  patchCommentForm.value.isEditing = false
-  patchCommentForm.value.comment = ''
+  delete patchCommentForm.value[selectedRevision.id]
 }
+
+// TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
 <template>
@@ -139,17 +155,21 @@ function discardPatchCommentForm() {
     <!-- TODO: add button to expand/collapse all -->
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-4">Activity</h2>
     <EventList>
-      <EventItem v-if="patchCommentForm.isEditing" :when="NaN" codicon="codicon-comment">
+      <EventItem
+        v-if="patchCommentForm[selectedRevision.id]?.status === 'editing'"
+        :when="NaN"
+        codicon="codicon-comment"
+      >
         <form
           @submit.prevent
-          ref="formEl"
+          ref="formRef"
           name="Edit patch title and description"
           class="pb-2 flex flex-col gap-y-3"
         >
           <vscode-text-area
-            ref="commentTextAreaEl"
-            :value="patchCommentForm.comment"
-            @input="(ev: VscodeTextAreaEvent) => (patchCommentForm.comment = ev.target._value)"
+            ref="commentTextAreaRef"
+            :value="patchCommentForm[selectedRevision.id]?.comment"
+            @input="updatePatchCommentFormComment"
             placeholder="Share your kind thoughts…"
             name="patch comment"
             resize="vertical"
@@ -204,7 +224,7 @@ function discardPatchCommentForm() {
         >
           {{ event.revision.id === firstRevision.id ? 'Patch and revision' : 'Revision' }}
           <span
-            @click="emit('showRevision', event.revision)"
+            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
             >{{ shortenHash(event.revision.id) }}</span
@@ -232,7 +252,7 @@ function discardPatchCommentForm() {
           <template v-else>with <span class="font-mono">no verdict</span> for</template>
           revision
           <span
-            @click="emit('showRevision', event.revision)"
+            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
             >{{ shortenHash(event.revision.id) }}</span
@@ -274,7 +294,7 @@ function discardPatchCommentForm() {
           >
           posted on revision
           <span
-            @click="emit('showRevision', event.revision)"
+            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
             >{{ shortenHash(event.revision.id) }}</span
@@ -319,7 +339,7 @@ function discardPatchCommentForm() {
           using revision
           <span
             v-if="event.revision"
-            @click="emit('showRevision', event.revision)"
+            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
             >{{ shortenHash(event.revision.id) }}</span

@@ -5,43 +5,87 @@ import {
   vsCodeDropdown,
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
-import { computed, defineEmits } from 'vue'
+import { computed, defineEmits, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
-import { getDateInIsoWithZeroedTimezone, getFormattedDate } from 'extensionUtils/time'
+import {
+  getDateInIsoWithZeroedTimezone,
+  getFormattedDate,
+  getTimeAgo,
+} from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
-import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import Markdown from '@/components/Markdown.vue'
 import Metadatum from '@/components/Metadatum.vue'
 import Reactions from './Reactions.vue'
+import type { Revision } from '../../../types'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 
-const props = defineProps<{
-  showHeading: boolean
-  selectedRevisionOption: string
-  selectedRevision: Revision
-  revisionOptionsMap: Map<string, Revision>
-}>()
+defineEmits<{ showCreateCommentForm: [targetRevision: Revision] }>()
+defineProps<{ showHeading: boolean }>()
 
-defineEmits<{
-  didSelectOption: [option: string]
-  showCreateCommentForm: []
-}>()
+const { patch, authors, firstRevision, latestRevision, mergedRevision, timeLocale } =
+  storeToRefs(usePatchDetailStore())
 
-const { firstRevision, timeLocale } = storeToRefs(usePatchDetailStore())
+const revisionOptionsMap = computed(
+  () =>
+    new Map(
+      [...patch.value.revisions]
+        .reverse()
+        .map((revision) => [assembleRevisionOptionLabel(revision), revision]),
+    ),
+)
+const selectedRevisionOption = ref(
+  assembleRevisionOptionLabel(mergedRevision.value ?? latestRevision.value),
+)
+const selectedRevision = computed(() => {
+  const selRev = revisionOptionsMap.value.get(selectedRevisionOption.value)
+  if (selRev) {
+    return selRev
+  }
+
+  // Options got updated and our selected option doesn't match any more. Reset.
+  const fallbackSelRev = mergedRevision.value ?? latestRevision.value
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  selectedRevisionOption.value = assembleRevisionOptionLabel(fallbackSelRev)
+
+  return fallbackSelRev
+})
+function selectRevision(revision: Revision) {
+  selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
+}
+function assembleRevisionOptionLabel(revision: Revision): string {
+  const id = shortenHash(revision.id)
+  const timeAgo = getTimeAgo(revision.timestamp, 'mini')
+  const state = [
+    patch.value.merges.map((merge) => merge.revision).includes(revision.id) &&
+      `merged${patch.value.merges.length >= 2 ? `/${patch.value.merges.length}` : ''}`, // TODO: maninak should be `merges-count/required-delegate-count` instead
+    revision.reviews.find((review) => review.verdict === 'accept') && 'accepted',
+    revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
+    patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
+    patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest',
+    patch.value.revisions.length == 1 && 'sole',
+  ].filter(Boolean)
+  const parsedState = state.length ? ` [${state.join(', ')}]` : ''
+  const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''
+  const label = `${id}${parsedState} ${timeAgo}${author}`
+
+  return label
+}
 
 const shouldHideRevisionDescription = computed(
   () =>
-    props.selectedRevision.description && props.selectedRevision.id === firstRevision.value.id,
+    selectedRevision.value.description && selectedRevision.value.id === firstRevision.value.id,
 )
 const selectedRevisionAcceptedReviews = computed(() =>
-  props.selectedRevision.reviews.filter((review) => review.verdict === 'accept'),
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'accept'),
 )
 const selectedRevisionRejectedReviews = computed(() =>
-  props.selectedRevision.reviews.filter((review) => review.verdict === 'reject'),
+  selectedRevision.value.reviews.filter((review) => review.verdict === 'reject'),
 )
+
+defineExpose({ selectedRevision, selectRevision })
 </script>
 
 <template>
@@ -49,7 +93,7 @@ const selectedRevisionRejectedReviews = computed(() =>
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-3">Revision</h2>
     <div class="mb-3 flex flex-wrap gap-2">
       <vscode-dropdown
-        @change="(ev: CustomEvent) => $emit('didSelectOption', ev.detail._value)"
+        @change="(ev: CustomEvent) => (selectedRevisionOption = ev.detail._value)"
         :value="selectedRevisionOption"
         title="Select a Patch Revision to See More Info About It"
         class="max-w-full font-mono rounded-none"
@@ -65,7 +109,7 @@ const selectedRevisionRejectedReviews = computed(() =>
         <vscode-button
           appearance="secondary"
           title="Begin Authoring a Comment on the Selected Revision"
-          @click="$emit('showCreateCommentForm')"
+          @click="$emit('showCreateCommentForm', selectedRevision)"
           >Comment</vscode-button
         >
       </div>
@@ -163,7 +207,7 @@ const selectedRevisionRejectedReviews = computed(() =>
     <Metadatum v-if="selectedRevision.reactions.length" label="Reactions">
       <Reactions :reactions="selectedRevision.reactions" />
     </Metadatum>
-    <!-- TODO: show names of all unique committers -->
+    <!-- TODO: show names of all unique committers and their email on hover -->
     <div v-if="selectedRevision.description" class="mt-4">
       <details v-if="shouldHideRevisionDescription">
         <summary title="Click to Expand/Collapse">Description</summary>

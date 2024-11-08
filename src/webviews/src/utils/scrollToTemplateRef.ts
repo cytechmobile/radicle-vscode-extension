@@ -2,8 +2,11 @@ import type { ComponentPublicInstance, MaybeRef } from 'vue'
 import { unrefElement } from '@vueuse/core'
 
 export function scrollToTemplateRef(
-  templateRef?: MaybeRef<ComponentPublicInstance> | MaybeRef<HTMLElement | SVGElement>,
-  options?: { classToAdd: string; removeAfterMs: number },
+  templateRef?: MaybeRef<ComponentPublicInstance> | MaybeRef<HTMLElement | SVGElement> | null,
+  options?: {
+    addClass?: { class: string; removeAfterMs: number }
+    scrollIntoViewOptions?: Parameters<HTMLElement['scrollIntoView']>[0]
+  },
 ) {
   const el = unrefElement(templateRef)
   if (!el) {
@@ -11,11 +14,14 @@ export function scrollToTemplateRef(
     return
   }
 
-  el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  el.scrollIntoView(options?.scrollIntoViewOptions ?? { block: 'center', behavior: 'smooth' })
 
-  if (options?.classToAdd) {
-    el.classList.add(options.classToAdd)
-    options?.removeAfterMs !== undefined &&
-      setTimeout(() => el.classList.remove(options.classToAdd), options.removeAfterMs)
+  if (options?.addClass?.class) {
+    el.classList.add(options.addClass.class)
+    options.addClass.removeAfterMs !== undefined &&
+      setTimeout(
+        () => el.classList.remove(options.addClass?.class || ''),
+        options.addClass.removeAfterMs,
+      )
   }
 }

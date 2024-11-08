@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, nextTick, ref, toRaw, watchEffect } from 'vue'
+import { computed, nextTick, ref, toRaw, useTemplateRef, watchEffect } from 'vue'
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
@@ -32,8 +32,8 @@ const isAuthedToEditStatus = computed(() => {
   )
 })
 
-const btnStartEditingEl = ref<HTMLElement>()
-const btnStopEditingEl = ref<HTMLElement>()
+const btnStartEditingRef = useTemplateRef<HTMLElement>('btnStartEditingRef')
+const btnStopEditingRef = useTemplateRef<HTMLElement>('btnStopEditingRef')
 const isEditingStatus = ref(false)
 function toggleStatusEditing(ev: PointerEvent) {
   isEditingStatus.value = !isEditingStatus.value
@@ -42,35 +42,35 @@ function toggleStatusEditing(ev: PointerEvent) {
   if (isKeyboardClick) {
     nextTick(() => {
       isEditingStatus.value
-        ? btnStopEditingEl.value?.focus()
-        : btnStartEditingEl.value?.focus()
+        ? btnStopEditingRef.value?.focus()
+        : btnStartEditingRef.value?.focus()
     })
   }
 }
 
-const radioGroupEl = ref<HTMLElement>()
-const radioDraftEl = ref<HTMLInputElement>()
-const radioOpenEl = ref<HTMLInputElement>()
-const radioArchivedEl = ref<HTMLInputElement>()
+const radioGroupRef = useTemplateRef('radioGroupRef')
+const radioDraftRef = useTemplateRef<HTMLElement & { checked: boolean }>('radioDraftRef')
+const radioOpenRef = useTemplateRef<HTMLElement & { checked: boolean }>('radioOpenRef')
+const radioArchivedRef = useTemplateRef<HTMLElement & { checked: boolean }>('radioArchivedRef')
 
 // <vscode-radio checked> is bugged from the HTML side, so we have to do it manually with JS
 watchEffect(() => {
   if (
-    radioGroupEl.value &&
-    !radioDraftEl.value?.checked &&
-    !radioOpenEl.value?.checked &&
-    !radioArchivedEl.value?.checked
+    radioGroupRef.value &&
+    !radioDraftRef.value?.checked &&
+    !radioOpenRef.value?.checked &&
+    !radioArchivedRef.value?.checked
   ) {
     nextTick(() => {
       switch (status.value) {
         case 'draft':
-          radioDraftEl.value!.checked = true
+          radioDraftRef.value!.checked = true
           break
         case 'open':
-          radioOpenEl.value!.checked = true
+          radioOpenRef.value!.checked = true
           break
         case 'archived':
-          radioArchivedEl.value!.checked = true
+          radioArchivedRef.value!.checked = true
           break
         case 'merged':
           break
@@ -123,7 +123,7 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
 
       <vscode-button
         v-if="isAuthedToEditStatus && !isEditingStatus"
-        ref="btnStartEditingEl"
+        ref="btnStartEditingRef"
         @click="toggleStatusEditing"
         appearance="icon"
         title="Change Patch Status"
@@ -135,7 +135,7 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
       </vscode-button>
       <vscode-button
         v-if="isEditingStatus"
-        ref="btnStopEditingEl"
+        ref="btnStopEditingRef"
         @click="toggleStatusEditing"
         appearance="icon"
         title="Stop Editing Patch Status"
@@ -148,17 +148,19 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
     </span>
     <vscode-radio-group
       v-if="isEditingStatus"
-      ref="radioGroupEl"
+      ref="radioGroupRef"
       name="Select status"
       orientation="vertical"
     >
       <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
       <label slot="label">Status:</label>
-      <vscode-radio ref="radioDraftEl" @change="onRadioChanged" value="draft">
+      <vscode-radio ref="radioDraftRef" @change="onRadioChanged" value="draft">
         Draft
       </vscode-radio>
-      <vscode-radio ref="radioOpenEl" @change="onRadioChanged" value="open">Open</vscode-radio>
-      <vscode-radio ref="radioArchivedEl" @change="onRadioChanged" value="archived">
+      <vscode-radio ref="radioOpenRef" @change="onRadioChanged" value="open"
+        >Open</vscode-radio
+      >
+      <vscode-radio ref="radioArchivedRef" @change="onRadioChanged" value="archived">
         Archived
       </vscode-radio>
     </vscode-radio-group>

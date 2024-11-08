@@ -11,7 +11,7 @@ const { localIdentity } = storeToRefs(usePatchDetailStore())
 
 function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[] {
   const normalizedAuthors = reaction.authors.map((author) =>
-    localIdentity.value?.id === author.id ? 'you' : author.alias ?? truncateDid(author.id),
+    localIdentity.value?.id === author.id ? 'you' : (author.alias ?? truncateDid(author.id)),
   )
 
   return normalizedAuthors

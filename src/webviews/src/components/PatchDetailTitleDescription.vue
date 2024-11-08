@@ -4,7 +4,7 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { ref, watchEffect, computed } from 'vue'
+import { watchEffect, computed, useTemplateRef } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
@@ -22,15 +22,15 @@ const { patch, firstRevision, patchEditForm, delegates, localIdentity } =
 interface VscodeTextAreaEvent {
   target: { _value: string }
 }
-const formEl = ref<HTMLElement>()
-const titleTextAreaEl = ref<HTMLElement>()
-const descrTextAreaEl = ref<HTMLElement>()
+const formRef = useTemplateRef<HTMLElement>('formRef')
+const titleTextAreaRef = useTemplateRef<HTMLElement>('titleTextAreaRef')
+const descrTextAreaRef = useTemplateRef<HTMLElement>('descrTextAreaRef')
 
 // Those `watchEffect()`s should run once each time the respective elements get created
 watchEffect(() => {
-  formEl.value &&
+  formRef.value &&
     useEventListener(
-      formEl.value,
+      formRef.value,
       'keydown',
       (ev) => {
         if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
@@ -46,12 +46,12 @@ watchEffect(() => {
 })
 watchEffect(() => {
   setTimeout(() => {
-    titleTextAreaEl.value?.focus()
+    titleTextAreaRef.value?.focus()
     alignViewportWithForm()
   }, 0) // Vue.nextTick isn't cutting it
 
-  const titleEl = titleTextAreaEl.value?.shadowRoot?.querySelector('textarea')
-  const descrEl = descrTextAreaEl.value?.shadowRoot?.querySelector('textarea')
+  const titleEl = titleTextAreaRef.value?.shadowRoot?.querySelector('textarea')
+  const descrEl = descrTextAreaRef.value?.shadowRoot?.querySelector('textarea')
   const els = [titleEl, descrEl].filter(Boolean)
 
   els.forEach((el) => {
@@ -61,7 +61,7 @@ watchEffect(() => {
 })
 
 function alignViewportWithForm() {
-  formEl.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+  formRef.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
 }
 
 function beginPatchEditing() {
@@ -97,17 +97,17 @@ function togglePreviewMarkdown() {
   if (patchEditForm.value.status === 'editing') {
     patchEditForm.value.status = 'previewing'
 
-    if (formEl.value) {
-      formEl.value.tabIndex = 0 // allows <form>, otherwise  non-tabbable, to be `focus()`ed
-      formEl.value.focus() // make form keyboard shortcuts still work after toggling MD preview
-      formEl.value.tabIndex = -1 // clean-up
+    if (formRef.value) {
+      formRef.value.tabIndex = 0 // allows <form>, otherwise  non-tabbable, to be `focus()`ed
+      formRef.value.focus() // make form keyboard shortcuts still work after toggling MD preview
+      formRef.value.tabIndex = -1 // clean-up
     }
   } else if (patchEditForm.value.status === 'previewing') {
     patchEditForm.value.status = 'editing'
 
     const elemToFocusBackTo = patchEditForm.value.descr
-      ? descrTextAreaEl.value
-      : titleTextAreaEl.value
+      ? descrTextAreaRef.value
+      : titleTextAreaRef.value
     setTimeout(() => elemToFocusBackTo?.focus(), 0)
   }
 }
@@ -146,7 +146,7 @@ const isAuthedToEditTitleAndDescr = computed(() => {
       <form
         v-if="patchEditForm.status === 'editing' || patchEditForm.status === 'previewing'"
         @submit.prevent
-        ref="formEl"
+        ref="formRef"
         name="Edit patch title and description"
         class="pb-2 flex flex-col gap-y-3 outline-none"
       >
@@ -163,7 +163,7 @@ const isAuthedToEditTitleAndDescr = computed(() => {
 
         <vscode-text-area
           v-show="patchEditForm.status === 'editing'"
-          ref="titleTextAreaEl"
+          ref="titleTextAreaRef"
           :value="patchEditForm.title"
           @input="(ev: VscodeTextAreaEvent) => (patchEditForm.title = ev.target._value)"
           placeholder="What does this patch do, in a nutshell?"
@@ -174,7 +174,7 @@ const isAuthedToEditTitleAndDescr = computed(() => {
         >
         <vscode-text-area
           v-show="patchEditForm.status === 'editing'"
-          ref="descrTextAreaEl"
+          ref="descrTextAreaRef"
           :value="patchEditForm.descr"
           @input="(ev: VscodeTextAreaEvent) => (patchEditForm.descr = ev.target._value)"
           placeholder="Describe the patch in more detail…"

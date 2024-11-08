@@ -5,7 +5,7 @@ import {
   vsCodePanelTab,
   vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
-import { ref, computed } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import {
   breakpointsTailwind,
   useBreakpoints,
@@ -13,8 +13,6 @@ import {
   useThrottleFn,
 } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
-import { getTimeAgo } from 'extensionUtils/time'
 import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
@@ -27,12 +25,13 @@ import PatchDetailRevision from '@/components/PatchDetailRevision.vue'
 
 provideVSCodeDesignSystem().register(vsCodePanels(), vsCodePanelTab(), vsCodePanelView())
 
-const { patch, authors, firstRevision, latestRevision, patchCommentForm } =
-  storeToRefs(usePatchDetailStore())
+const { patchCommentForm } = storeToRefs(usePatchDetailStore())
 
-const activityTabRef = ref<HTMLElement>()
-const revisionTabRef = ref<HTMLElement>()
-const revisionSectionRef = ref<HTMLElement>()
+const activityTabRef = useTemplateRef<HTMLElement>('activityTabRef')
+const revisionTabRef = useTemplateRef<HTMLElement>('revisionTabRef')
+const patchDetailRevisionRef = useTemplateRef<InstanceType<typeof PatchDetailRevision>>(
+  'patchDetailRevisionRef',
+)
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isWindowNarrowerThanSm = ref<boolean>()
@@ -41,55 +40,19 @@ const recalcIsWindowNarrowerThanSm = () =>
 recalcIsWindowNarrowerThanSm()
 useEventListener('resize', useThrottleFn(recalcIsWindowNarrowerThanSm, 50))
 
-const revisionOptionsMap = computed(
-  () =>
-    new Map(
-      [...patch.value.revisions]
-        .reverse()
-        .map((revision) => [assembleRevisionOptionLabel(revision), revision]),
-    ),
-)
-// TODO: if patch is merged pre-select revision that got merged
-const selectedRevisionOption = ref(assembleRevisionOptionLabel(latestRevision.value))
-const selectedRevision = computed(
-  () =>
-    revisionOptionsMap.value.get(selectedRevisionOption.value) as NonNullable<
-      ReturnType<(typeof revisionOptionsMap)['value']['get']>
-    >,
-)
-
-function selectAndScrollToRevision(revision: Revision) {
-  selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
-  isWindowNarrowerThanSm.value && revisionTabRef.value?.click()
-  scrollToTemplateRef(revisionSectionRef.value)
+function showRevision(revision: Revision) {
+  patchDetailRevisionRef.value?.selectRevision(revision)
+  revisionTabRef.value?.click()
+  scrollToTemplateRef(patchDetailRevisionRef.value as HTMLElement | null)
 }
 
-function showCreateCommentForm() {
-  // patchCommentForm.value.comment ||= ''  // TODO: maninak delete
-  patchCommentForm.value.isEditing = true
-  isWindowNarrowerThanSm.value && activityTabRef.value?.click()
+function showCreateCommentForm(targetRevision: Revision) {
+  patchCommentForm.value[targetRevision.id] = {
+    comment: patchCommentForm.value[targetRevision.id]?.comment || '',
+    status: 'editing',
+  }
+  activityTabRef.value?.click()
 }
-
-function assembleRevisionOptionLabel(revision: Revision): string {
-  const id = shortenHash(revision.id)
-  const timeAgo = getTimeAgo(revision.timestamp, 'mini')
-  const state = [
-    patch.value.merges.map((merge) => merge.revision).includes(revision.id) &&
-      `merged${patch.value.merges.length >= 2 ? `/${patch.value.merges.length}` : ''}`,
-    revision.reviews.find((review) => review.verdict === 'accept') && 'accepted',
-    revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
-    patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
-    patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest',
-    patch.value.revisions.length == 1 && 'sole',
-  ].filter(Boolean)
-  const parsedState = state.length ? ` [${state.join(', ')}]` : ''
-  const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''
-  const label = `${id}${parsedState} ${timeAgo}${author}`
-
-  return label
-}
-
-// TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
 <template>
@@ -132,39 +95,33 @@ function assembleRevisionOptionLabel(revision: Revision): string {
         </vscode-panel-tab>
         <vscode-panel-view class="pt-5 px-0 pb-0">
           <PatchDetailActivity
-            @show-revision="selectAndScrollToRevision"
+            v-if="patchDetailRevisionRef?.selectedRevision"
             :show-heading="false"
+            :selected-revision="patchDetailRevisionRef?.selectedRevision"
           />
         </vscode-panel-view>
         <vscode-panel-view class="pt-5 px-0 pb-0">
           <PatchDetailRevision
-            ref="revisionSectionRef"
-            @did-select-option="(newOption) => (selectedRevisionOption = newOption)"
+            ref="patchDetailRevisionRef"
             @show-create-comment-form="showCreateCommentForm"
             :show-heading="false"
-            :selected-revision="selectedRevision"
-            :selected-revision-option="selectedRevisionOption"
-            :revision-options-map="revisionOptionsMap"
             class="h-fit"
           />
         </vscode-panel-view>
       </vscode-panels>
 
       <PatchDetailActivity
-        v-if="!isWindowNarrowerThanSm"
-        @show-revision="selectAndScrollToRevision"
+        v-if="!isWindowNarrowerThanSm && patchDetailRevisionRef?.selectedRevision"
+        @show-revision="showRevision"
         show-heading
+        :selected-revision="patchDetailRevisionRef?.selectedRevision"
         style="grid-area: section-primary"
       />
       <PatchDetailRevision
         v-if="!isWindowNarrowerThanSm"
-        ref="revisionSectionRef"
-        @did-select-option="(newOption) => (selectedRevisionOption = newOption)"
+        ref="patchDetailRevisionRef"
         @show-create-comment-form="showCreateCommentForm"
         show-heading
-        :selected-revision="selectedRevision"
-        :selected-revision-option="selectedRevisionOption"
-        :revision-options-map="revisionOptionsMap"
         class="hidden sm:block h-fit"
         style="grid-area: section-secondary"
       />

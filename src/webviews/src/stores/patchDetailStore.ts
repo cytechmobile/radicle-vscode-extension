@@ -3,22 +3,17 @@ import { defineStore } from 'pinia'
 import { computed, reactive, watchEffect } from 'vue'
 import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionHelpers/patch'
-import type { Patch, PatchDetailWebviewInjectedState } from '../../../types'
+import type { Patch, PatchDetailWebviewInjectedState, Revision } from '../../../types'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
 type SavedPanelState = Omit<PatchDetailWebviewInjectedState, 'id'> & typeof initialExtraState
+type FormStatus = 'off' | 'editing' | 'previewing'
 
 const vscode = getVscodeRef<SavedPanelState>()
 const initialExtraState = {
   injectedStateIds: [] as number[],
-  // TODO: maninak remove `isEditing` and infer it from other properties, e.g. if there's title or descr then the user is editing...
-  patchEditForm: {
-    title: '',
-    descr: '',
-    status: 'off' as 'off' | 'editing' | 'previewing',
-  },
-  patchCommentForm: { comment: '', isEditing: false }, // TODO: maninak index comment using revision so that comments of multiple revisions can be cached
-  // patchCommentForm: new Map<Revision['id'], {comment: string, isEditing: boolean}>(),
+  patchEditForm: { title: '', descr: '', status: 'off' as FormStatus },
+  patchCommentForm: {} as Record<Revision['id'], { comment: string; status: FormStatus }>,
 }
 
 export const usePatchDetailStore = defineStore('patch-detail', () => {
@@ -37,10 +32,6 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
   const patch = computed(() => state.state.patch)
 
-  const firstAndLatestRevisions = computed(() => getFirstAndLatestRevisions(patch.value))
-  const firstRevision = computed(() => firstAndLatestRevisions.value.firstRevision)
-  const latestRevision = computed(() => firstAndLatestRevisions.value.latestRevision)
-
   const authors = computed(() =>
     patch.value.revisions
       .map((rev) => rev.author)
@@ -53,8 +44,14 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
       ),
   )
 
-  const localIdentity = computed(() => state.state.localIdentity)
-  // TODO: delete delete `identities` from `patchDetailStore` or move it into patchStore across all patches if not too slow. Will be useful for a "Contributors" view.
+  const firstAndLatestRevisions = computed(() => getFirstAndLatestRevisions(patch.value))
+  const firstRevision = computed(() => firstAndLatestRevisions.value.firstRevision)
+  const latestRevision = computed(() => firstAndLatestRevisions.value.latestRevision)
+  const mergedRevision = computed(() =>
+    patch.value.revisions.find((revision) => revision.id === patch.value.merges[0]?.revision),
+  )
+
+  // TODO: delete `identities` from `patchDetailStore` or move it into patchStore across all patches if not too slow. Will be useful for a "Contributors" view.
   const identities = computed(() => {
     const mergers = patch.value.merges.map((merge) => merge.author)
     const commenters = patch.value.revisions.flatMap((revision) =>
@@ -66,7 +63,7 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
     const uniqueIds = [
       ...new Map(
-        [localIdentity.value, ...authors.value, ...mergers, ...commenters, ...reviewers]
+        [state.state.localIdentity, ...authors.value, ...mergers, ...commenters, ...reviewers]
           .filter(Boolean)
           .map((identity) => [identity.id, identity]),
       ).values(),
@@ -74,13 +71,6 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
     return uniqueIds
   })
-
-  const timeLocale = computed(() => state.state.timeLocale)
-  const delegates = computed(() => state.state.delegates)
-  const defaultBranch = computed(() => state.state.defaultBranch)
-
-  const patchEditForm = computed(() => state.patchEditForm)
-  const patchCommentForm = computed(() => state.patchCommentForm)
 
   watchEffect(() => {
     // TODO: save and restore scroll position?
@@ -102,16 +92,17 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
 
   return {
     patch,
+    authors,
     firstRevision,
     latestRevision,
-    authors,
-    localIdentity,
+    mergedRevision,
     identities,
-    timeLocale,
-    delegates,
-    defaultBranch,
-    patchEditForm,
-    patchCommentForm,
+    localIdentity: computed(() => state.state.localIdentity),
+    timeLocale: computed(() => state.state.timeLocale),
+    delegates: computed(() => state.state.delegates),
+    defaultBranch: computed(() => state.state.defaultBranch),
+    patchEditForm: computed(() => state.patchEditForm),
+    patchCommentForm: computed(() => state.patchCommentForm),
   }
 })
 
