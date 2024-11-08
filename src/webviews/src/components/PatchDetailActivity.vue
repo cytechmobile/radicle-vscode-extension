@@ -4,7 +4,7 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { ref, computed, toRaw, watchEffect, useTemplateRef } from 'vue'
+import { computed, toRaw, watchEffect, useTemplateRef } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useEventListener } from '@vueuse/core'
 import {
@@ -36,14 +36,14 @@ function getRevisionHoverTitle(text: string) {
   return `Click to See Revision Details\n⸻\nRevision Description:\n"${text}"`
 }
 
-const commentRefs = ref<InstanceType<typeof EventItem>[]>()
+const commentRefs = useTemplateRef<InstanceType<typeof EventItem>[]>('commentRefs')
 function scrollToComment(commentId: Comment['id']) {
   const foundCommentRef = commentRefs.value?.find(
     (commentEl) => commentEl.$attrs.id === commentId,
   )
 
   scrollToTemplateRef(foundCommentRef, {
-    addClass: { class: 'pulse-outline', removeAfterMs: 1500 },
+    addClass: { class: 'pulse-outline', removeAfterMs: 2000 },
   })
 }
 
@@ -118,8 +118,6 @@ watchEffect(() => {
   }
 })
 
-// TODO: maninak whenever a new revision is selected mark the forms of all other revs as `'off'` (use watcher to do it?) (do it in revision Cmp instead) (maybe move all this selectedRevision state to )
-
 interface VscodeTextAreaEvent {
   target: { _value: string }
 }
@@ -131,6 +129,8 @@ function updatePatchCommentFormComment(ev: VscodeTextAreaEvent) {
 }
 
 function submitPatchCommentForm() {
+  const commentIdsBefore = commentRefs.value?.map((commentRef) => commentRef.$attrs.id)
+
   notifyExtension({
     command: 'createPatchComment',
     payload: {
@@ -140,7 +140,16 @@ function submitPatchCommentForm() {
     },
   })
 
-  discardPatchCommentForm() // Would be better to discard form IFF submition suceeded, but current webview-extension comm channel doesn't support notification replies
+  // HACK: would be better to discard form IFF submition suceeded, but current webview-extension comm channel doesn't support notification replies
+  discardPatchCommentForm()
+  // HACK: we just wait :waves-hand: 3s for comment to be created, because currently we don't have a way to get notified when our previous `'createPatchComment'` notification to the extension succeeded
+  setTimeout(() => {
+    const createdCommentRef = commentRefs.value?.filter(
+      (comment) => !commentIdsBefore?.includes(comment.$attrs.id),
+    )[0]
+    createdCommentRef?.$el.classList.add('pulse-outline')
+    setTimeout(() => createdCommentRef?.$el.classList.remove('pulse-outline'), 2000)
+  }, 2500)
 }
 
 function discardPatchCommentForm() {
@@ -368,6 +377,7 @@ vscode-text-area::part(label) {
   margin-bottom: 0.5em;
 }
 
+.pulse-outline,
 :deep(.pulse-outline) {
   @keyframes outline-pulse {
     from {
@@ -387,7 +397,23 @@ vscode-text-area::part(label) {
     }
   }
 
+  @keyframes outline-pulse-static {
+    from {
+      @apply outline-vscode-editor-foreground;
+    }
+    to {
+      @apply outline-vscode-editor-foreground;
+    }
+  }
+
   @apply outline outline-offset-[0.25em];
-  animation: outline-pulse 1000ms ease-in-out forwards;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: outline-pulse 1000ms ease-in-out forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: outline-pulse-static 1000ms ease-in-out forwards;
+  }
 }
 </style>

@@ -9,8 +9,9 @@
     - if in single-column mode due to narrow viewport the active tab will automatically switch to the Activity section
     - form state is preserved (as described in [v0.5.0#enhancements](#v050-july-22nd-2024)) individually for each revision
   - clicking the form's "Comment" button or the keyboard shortcut `Ctrl/Cmd + Enter` will submit the form
-  - submitting the form attempts to create a new comment on radicle under the selected revision, informing the user of the action's result (created and announced / created only locally / failed) and offering follow-up actions as needed
-  - upon the comment's successful creation, it is shown directly in place of the patch-comment form as a new event at the top of the Activity section with the time-ago indicator showing "now"
+    - attempts to create a new comment on radicle under the selected revision
+    - informs the user of the action's result (created and announced / created only locally / failed) and offers follow-up actions as needed
+    - upon the comment's successful creation, it is shown directly in place of the patch-comment form as a new event at the top of the Activity section with the time-ago indicator showing "now" and a short "pulse-outline" animation around it
 - **patch-detail:** in the patch-edit form
   - show placeholder text when either text-field is empty
   - change button label "Save" to "Update"
