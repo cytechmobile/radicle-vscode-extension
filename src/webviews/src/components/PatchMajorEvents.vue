@@ -40,10 +40,7 @@ setInterval(() => {
       <pre :title="latestMerge.author.id">{{ getIdentityAliasOrId(latestMerge.author) }}</pre>
       using revision
       <pre :title="latestMerge.revision">{{ shortenHash(latestMerge.revision) }}</pre>
-      <span v-if="!shouldShowRevisionEvent"
-        >at commit
-        <pre :title="latestMerge.commit">{{ shortenHash(latestMerge.commit) }}</pre></span
-      >&ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
+      &ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
         mergedTimeAgo
       }}</pre>
     </div>
@@ -53,8 +50,7 @@ setInterval(() => {
         getIdentityAliasOrId(latestRevision.author)
       }}</pre>
       with revision
-      <pre :title="latestRevision.id">{{ shortenHash(latestRevision.id) }}</pre> at commit
-      <pre :title="latestRevision.oid">{{ shortenHash(latestRevision.oid) }}</pre
+      <pre :title="latestRevision.id">{{ shortenHash(latestRevision.id) }}</pre
       >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp, timeLocale)">{{
         updatedTimeAgo
       }}</pre>
