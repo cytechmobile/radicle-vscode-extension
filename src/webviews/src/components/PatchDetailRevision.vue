@@ -14,11 +14,11 @@ import {
   getTimeAgo,
 } from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
+import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import Markdown from '@/components/Markdown.vue'
 import Metadatum from '@/components/Metadatum.vue'
 import Reactions from './Reactions.vue'
-import type { Revision } from '../../../types'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 

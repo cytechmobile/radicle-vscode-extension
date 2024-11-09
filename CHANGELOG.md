@@ -35,7 +35,8 @@
   - the aforementioned coupled with the pre-existing feature of optimally auto-aligning the form as it resizes should seamlessly provide a smooth authoring experience
   - adjust the hover text of all form buttons to advertise their respective keyboard shortcut (if any)
   - **patch-detail:** preselect the merged revision, if any, in the revision selector instead of always the latest
-  - **patch-detail:** don't mention the related commit in the patch major events section (~~"Last updated by W with revision X at commit Y Z time ago"~~). This information is still available in the Revision section.
+  - **patch-detail:** align the UX for every revision identifier shown in the patch-major-events section (top of the view) with the behaviour of those in the Activity section, i.e. showing the revision description on hover, and when clicked scrolling to the Revision section wherin more info about it is shown
+  - **patch-detail:** don't mention the related commit in the patch-major-events section (~~"Last updated by W with revision X at commit Y Z time ago"~~). This information is still available in the Revision section.
   - **patch-detail:** keep the labels of the main buttons (top-right of the view) as a single line of text, even if the viewport is narrow enough to compress them
   - **patch-detail:** add themed styling to `<summary>` elements when tabbed into
 

@@ -7,10 +7,10 @@ import {
 import { watchEffect, computed, useTemplateRef } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import PatchMetadata from '@/components/PatchMetadata.vue'
 import Markdown from '@/components/Markdown.vue'
-import { notifyExtension } from 'extensionUtils/webview-messaging'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 

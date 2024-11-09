@@ -13,6 +13,7 @@ import {
   truncateMarkdown,
   maxCharsForUntruncatedMdText,
 } from 'extensionUtils/string'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 import type { Comment, Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
@@ -20,7 +21,7 @@ import Markdown from '@/components/Markdown.vue'
 import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
 import Reactions from '@/components/Reactions.vue'
-import { notifyExtension } from 'extensionUtils/webview-messaging'
+import { getRevisionHoverTitle } from '@/helpers/patchDetail'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
@@ -31,10 +32,6 @@ const { selectedRevision } = defineProps<{
 }>()
 
 const { patch, firstRevision, patchCommentForm } = storeToRefs(usePatchDetailStore())
-
-function getRevisionHoverTitle(text: string) {
-  return `Click to See Revision Details\n⸻\nRevision Description:\n"${text}"`
-}
 
 const commentRefs = useTemplateRef<InstanceType<typeof EventItem>[]>('commentRefs')
 function scrollToComment(commentId: Comment['id']) {

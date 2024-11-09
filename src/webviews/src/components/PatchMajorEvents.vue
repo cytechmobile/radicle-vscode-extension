@@ -2,9 +2,13 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { computedWithControl } from '@vueuse/core'
+import type { Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { getTimeAgo, getFormattedDate } from 'extensionUtils/time'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
+import { getRevisionHoverTitle } from '@/helpers/patchDetail'
+
+defineEmits<{ showRevision: [revision: Revision] }>()
 
 const { patch, firstRevision, latestRevision, timeLocale } = storeToRefs(usePatchDetailStore())
 
@@ -12,6 +16,9 @@ const { patch, firstRevision, latestRevision, timeLocale } = storeToRefs(usePatc
 
 const latestMerge = computed(() =>
   [...patch.value.merges].sort((m1, m2) => m1.timestamp - m2.timestamp).at(-1),
+)
+const latestMergeRevision = patch.value.revisions.find(
+  (revision) => revision.id === latestMerge.value?.revision,
 )
 const shouldShowRevisionEvent = computed(() => patch.value.revisions.length >= 2)
 
@@ -36,10 +43,18 @@ setInterval(() => {
   <div class="flex flex-col gap-[0.5em]">
     <div v-if="latestMerge" class="leading-tight">
       Merged by
-      <!--  TODO: maninak include all revisions and mergers? -->
       <pre :title="latestMerge.author.id">{{ getIdentityAliasOrId(latestMerge.author) }}</pre>
       using revision
-      <pre :title="latestMerge.revision">{{ shortenHash(latestMerge.revision) }}</pre>
+      <pre
+        @click="latestMergeRevision && $emit('showRevision', latestMergeRevision)"
+        :title="
+          latestMergeRevision
+            ? getRevisionHoverTitle(latestMergeRevision?.description)
+            : latestMerge.revision
+        "
+        class="hover:cursor-pointer"
+        >{{ shortenHash(latestMerge.revision) }}</pre
+      >
       &ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
         mergedTimeAgo
       }}</pre>
@@ -50,7 +65,11 @@ setInterval(() => {
         getIdentityAliasOrId(latestRevision.author)
       }}</pre>
       with revision
-      <pre :title="latestRevision.id">{{ shortenHash(latestRevision.id) }}</pre
+      <pre
+        @click="$emit('showRevision', latestRevision)"
+        :title="getRevisionHoverTitle(latestRevision.description)"
+        class="hover:cursor-pointer"
+        >{{ shortenHash(latestRevision.id) }}</pre
       >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp, timeLocale)">{{
         updatedTimeAgo
       }}</pre>

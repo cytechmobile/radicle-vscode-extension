@@ -62,7 +62,7 @@ function showCreateCommentForm(targetRevision: Revision) {
     <header class="flex gap-4 justify-between" style="grid-area: header">
       <div class="flex flex-wrap gap-4 items-center">
         <PatchStatusBadge class="text-sm" />
-        <PatchMajorEvents />
+        <PatchMajorEvents @show-revision="showRevision" />
       </div>
       <aside class="flex flex-col gap-2 shrink-0 *:w-full">
         <PatchDetailButtons />
