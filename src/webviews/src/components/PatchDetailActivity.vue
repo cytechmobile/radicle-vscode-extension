@@ -186,6 +186,10 @@ function discardPatchCommentForm() {
           >
             New Patch Comment:
           </vscode-text-area>
+          <div class="reset-font opacity-[0.65]"
+            >Target Revision: <pre class="ml-1">{{ shortenHash(selectedRevision.id) }}</pre>
+          </div>
+
           <div class="w-full flex flex-row-reverse justify-start gap-x-2">
             <vscode-button
               appearance="primary"
@@ -366,6 +370,12 @@ form {
   min-width: min(100%, 68ch); /* results to allowing 65 chars before resizing to be wider */
 }
 
+.reset-font {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+vscode-text-field::part(control),
 vscode-text-area::part(control) {
   @apply font-mono text-sm;
   field-sizing: content;
@@ -373,6 +383,7 @@ vscode-text-area::part(control) {
   word-break: break-word;
 }
 
+vscode-text-field::part(label),
 vscode-text-area::part(label) {
   margin-bottom: 0.5em;
 }
