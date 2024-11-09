@@ -260,13 +260,16 @@ function discardPatchCommentForm() {
             {{ `${event.review.verdict}ing` }}
           </span>
           <template v-else>with <span class="font-mono">no verdict</span> for</template>
-          revision
-          <span
-            @click="$emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
+          <template v-if="patch.revisions.length > 1">
+            revision
+            <span
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+          </template>
+          <template v-else> patch</template>
           posted
           <span v-if="event.review.inline?.length">with code-inlined comments</span>
           by
@@ -302,13 +305,16 @@ function discardPatchCommentForm() {
           <span v-if="!event.discussion.resolved"
             >(<span class="font-mono">unresolved</span>)</span
           >
-          posted on revision
-          <span
-            @click="$emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
+          posted
+          <template v-if="patch.revisions.length > 1">
+            on revision
+            <span
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+          </template>
           by
           <span :title="event.discussion.author.id" class="font-mono">{{
             getIdentityAliasOrId(event.discussion.author)
@@ -346,15 +352,17 @@ function discardPatchCommentForm() {
           <span :title="event.merge.author.id" class="font-mono">{{
             getIdentityAliasOrId(event.merge.author)
           }}</span>
-          using revision
-          <span
-            v-if="event.revision"
-            @click="$emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
-          <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
+          <template v-if="patch.revisions.length > 1">
+            using revision
+            <span
+              v-if="event.revision"
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+            <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
+          </template>
         </EventItem>
       </template>
     </EventList>
