@@ -13,13 +13,15 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 > **NOTE:** The extension currently offers partial support for the latest version of the Radicle CLI (codename "Heartwood"). Support for Radicle Patches is [under active development](https://github.com/cytechmobile/radicle-vscode-extension/milestone/6) and further features like Issues are next on the pipeline.
 
+> **NOTE:** Requires [Radicle HTTP Daemon](https://radicle.xyz/download) 0.17.0
+
 ## Features
 
 > _See the latest, as well as upcoming, updates in the [🗒️ Change Log](./CHANGELOG.md)._
 
 - 🖲️ [Radicle Commands](#integrated-radicle-commands) everywhere you need them
 - 📋 [Patches View](#patches-view) offers a glance at the status of code changes in your repository
-- 📑 [Patch Detail View](#patch-detail-view) offers in-depth information for a specific patch
+- 📑 [Patch Detail View](#patch-detail-view) gives you in-depth information and interactivity for a specific patch
 - 🔐 [Integrated Authentication](#integrated-authentication) eases your Radicle Identity management
 - 📥 [Cloning](#cloning) of seeded Radicle repos
 - 🗺️ [Onboarding Flow](#onboarding-flow) with tips tuned to whichever state your Workspace is in when starting out
