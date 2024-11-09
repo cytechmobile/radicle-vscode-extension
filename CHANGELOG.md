@@ -35,6 +35,7 @@
   - the aforementioned coupled with the pre-existing feature of optimally auto-aligning the form as it resizes should seamlessly provide a smooth authoring experience
   - adjust the hover text of all form buttons to advertise their respective keyboard shortcut (if any)
   - **patch-detail:** preselect the merged revision, if any, in the revision selector instead of always the latest
+  - **patch-detail:** keep the labels of the main buttons (top-right of the view) as a single line of text, even if the viewport is narrow enough to compress them
   - **patch-detail:** add themed styling to `<summary>` elements when tabbed into
 
 ### 🩹 Fixes

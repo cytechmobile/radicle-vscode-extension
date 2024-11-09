@@ -64,7 +64,7 @@ function showCreateCommentForm(targetRevision: Revision) {
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents />
       </div>
-      <aside class="flex flex-col gap-2 *:w-full">
+      <aside class="flex flex-col gap-2 shrink-0 *:w-full">
         <PatchDetailButtons />
       </aside>
     </header>
