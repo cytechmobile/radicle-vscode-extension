@@ -23,6 +23,16 @@ body {
 :where(details) {
   & summary {
     @apply w-fit cursor-pointer select-none;
+
+    &:focus-visible {
+      border-radius: 1px;
+      outline: 1px solid var(--vscode-focusBorder);
+      outline-offset: 1px;
+    }
+  }
+
+  &[open] summary {
+    color: color-mix(in srgb-linear, var(--vscode-editor-background), var(--vscode-editor-foreground) 20%);
   }
 }
 

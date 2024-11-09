@@ -14,9 +14,13 @@ const { timeLocale } = storeToRefs(usePatchDetailStore())
 
 <template>
   <li class="grid grid-cols-subgrid col-span-3">
-    <pre :title="getFormattedDate(when, timeLocale)" class="justify-self-end">{{
-      getTimeAgo(when, 'mini')
-    }}</pre>
+    <pre
+      v-if="!Number.isNaN(when)"
+      :title="getFormattedDate(when, timeLocale)"
+      class="justify-self-end"
+      >{{ getTimeAgo(when, 'mini') }}</pre
+    >
+    <span v-else class="no-underline codicon codicon-blank"></span>
     <span :class="['no-underline codicon', codicon]"></span>
     <div><slot></slot></div>
   </li>

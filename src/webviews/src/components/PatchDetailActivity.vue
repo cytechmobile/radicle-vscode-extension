@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import {
+  provideVSCodeDesignSystem,
+  vsCodeButton,
+  vsCodeTextArea,
+} from '@vscode/webview-ui-toolkit'
+import { computed, toRaw, watchEffect, useTemplateRef } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useEventListener } from '@vueuse/core'
 import {
   getIdentityAliasOrId,
   shortenHash,
   truncateMarkdown,
   maxCharsForUntruncatedMdText,
 } from 'extensionUtils/string'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 import type { Comment, Revision } from '../../../types'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
@@ -14,24 +21,27 @@ import Markdown from '@/components/Markdown.vue'
 import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
 import Reactions from '@/components/Reactions.vue'
+import { getRevisionHoverTitle } from '@/helpers/patchDetail'
 
-defineProps<{ showHeading: boolean }>()
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
-const emit = defineEmits<{ showRevision: [revision: Revision] }>()
+defineEmits<{ showRevision: [revision: Revision] }>()
+const { selectedRevision } = defineProps<{
+  showHeading: boolean
+  selectedRevision: Revision
+}>()
 
-const { patch, firstRevision } = storeToRefs(usePatchDetailStore())
+const { patch, firstRevision, patchCommentForm } = storeToRefs(usePatchDetailStore())
 
-function getRevisionHoverTitle(text: string) {
-  return `Click to See Revision Details\n⸻\nRevision Description:\n"${text}"`
-}
-
-const commentRefs = ref<InstanceType<typeof EventItem>[]>()
+const commentRefs = useTemplateRef<InstanceType<typeof EventItem>[]>('commentRefs')
 function scrollToComment(commentId: Comment['id']) {
   const foundCommentRef = commentRefs.value?.find(
     (commentEl) => commentEl.$attrs.id === commentId,
   )
 
-  scrollToTemplateRef(foundCommentRef, { classToAdd: 'pulse-outline', removeAfterMs: 1500 })
+  scrollToTemplateRef(foundCommentRef, {
+    addClass: { class: 'pulse-outline', removeAfterMs: 2000 },
+  })
 }
 
 const patchEvents = computed(() =>
@@ -63,6 +73,105 @@ const patchEvents = computed(() =>
     .flat()
     .sort((ev1, ev2) => ev2.ts - ev1.ts),
 )
+
+// TODO: maninak extract to usePatchCommentForm? composable
+
+const formRef = useTemplateRef<HTMLElement>('formRef')
+const commentTextAreaRef = useTemplateRef<HTMLElement>('commentTextAreaRef')
+
+// Those `watchEffect()`s should run once each time the respective elements get created
+watchEffect(() => {
+  formRef.value &&
+    useEventListener(
+      formRef.value,
+      'keydown',
+      (ev) => {
+        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+          submitPatchCommentForm()
+        } else if (ev.key === 'Escape') {
+          pausePatchCommenting()
+        } else if (ev.key === 'p' && ev.altKey) {
+          togglePreviewMarkdown()
+        }
+      },
+      { passive: true },
+    )
+})
+watchEffect(() => {
+  if (patchCommentForm.value[selectedRevision.id]?.status === 'editing') {
+    const el = commentTextAreaRef.value
+    setTimeout(() => el?.focus(), 0) // Vue.nextTick isn't cutting it
+    useEventListener(el, 'focus', alignViewportWithForm, { passive: true })
+    useEventListener(el, 'input', alignViewportWithForm, { passive: true })
+  }
+})
+
+function alignViewportWithForm() {
+  formRef.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+}
+
+interface VscodeTextAreaEvent {
+  target: { _value: string }
+}
+function updatePatchCommentFormComment(ev: VscodeTextAreaEvent) {
+  patchCommentForm.value[selectedRevision.id] = {
+    comment: ev.target._value,
+    status: 'editing',
+  }
+}
+
+function pausePatchCommenting() {
+  patchCommentForm.value[selectedRevision.id] = {
+    comment: patchCommentForm.value[selectedRevision.id]?.comment || '',
+    status: 'off',
+  }
+}
+
+function submitPatchCommentForm() {
+  const commentIdsBefore = commentRefs.value?.map((commentRef) => commentRef.$attrs.id)
+
+  notifyExtension({
+    command: 'createPatchComment',
+    payload: {
+      patch: toRaw(patch.value),
+      revisionId: selectedRevision.id,
+      comment: patchCommentForm.value[selectedRevision.id]?.comment?.trim() || '',
+    },
+  })
+
+  // HACK: would be better to discard form IFF submition suceeded, but current webview-extension comm channel doesn't support notification replies
+  discardPatchCommentForm()
+  // HACK: we just wait :waves-hand: 3s for comment to be created, because currently we don't have a way to get notified when our previous `'createPatchComment'` notification to the extension succeeded
+  setTimeout(() => {
+    const createdCommentRef = commentRefs.value?.filter(
+      (comment) => !commentIdsBefore?.includes(comment.$attrs.id),
+    )[0]
+    createdCommentRef?.$el.classList.add('pulse-outline')
+    setTimeout(() => createdCommentRef?.$el.classList.remove('pulse-outline'), 2000)
+  }, 2500)
+}
+
+function discardPatchCommentForm() {
+  delete patchCommentForm.value[selectedRevision.id]
+}
+
+function togglePreviewMarkdown() {
+  const selectedRevForm = patchCommentForm.value[selectedRevision.id]
+  if (selectedRevForm?.status === 'editing') {
+    selectedRevForm.status = 'previewing'
+
+    if (formRef.value) {
+      formRef.value.tabIndex = 0 // allows <form>, otherwise  non-tabbable, to be `focus()`ed
+      formRef.value.focus() // make form keyboard shortcuts still work after toggling MD preview
+      formRef.value.tabIndex = -1 // clean-up
+    }
+  } else if (selectedRevForm?.status === 'previewing') {
+    selectedRevForm.status = 'editing'
+    setTimeout(() => commentTextAreaRef.value?.focus(), 0)
+  }
+}
+
+// TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
 <template>
@@ -70,6 +179,111 @@ const patchEvents = computed(() =>
     <!-- TODO: add button to expand/collapse all -->
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-4">Activity</h2>
     <EventList>
+      <EventItem
+        v-if="
+          patchCommentForm[selectedRevision.id]?.status === 'editing' ||
+          patchCommentForm[selectedRevision.id]?.status === 'previewing'
+        "
+        :when="NaN"
+        codicon="codicon-comment"
+      >
+        <form
+          @submit.prevent
+          ref="formRef"
+          name="Edit patch title and description"
+          class="font-mono text-sm leading-[unset] pb-2 flex flex-col gap-y-3 outline-none"
+          :class="{ 'w-fit': patchCommentForm[selectedRevision.id]?.status !== 'previewing' }"
+          style="
+            min-width: min(
+              100%,
+              68ch
+            ); /* results in allowing 65 chars before resizing to be wider */
+          "
+        >
+          <vscode-text-area
+            v-if="patchCommentForm[selectedRevision.id]?.status === 'editing'"
+            ref="commentTextAreaRef"
+            :value="patchCommentForm[selectedRevision.id]?.comment"
+            @input="updatePatchCommentFormComment"
+            placeholder="Share your kind thoughts…"
+            name="patch comment"
+            resize="vertical"
+            maxlength="50000"
+          >
+            New Patch Comment:
+          </vscode-text-area>
+
+          <div
+            v-if="patchCommentForm[selectedRevision.id]?.status === 'previewing'"
+            class="p-1 border border-dashed border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))] max-w-fit flex flex-col gap-y-4 group"
+          >
+            <Markdown
+              :source="patchCommentForm[selectedRevision.id]?.comment || ''"
+              class="text-sm"
+            />
+          </div>
+
+          <div class="reset-font opacity-[0.65]"
+            >Target Revision: <pre class="ml-1">{{ shortenHash(selectedRevision.id) }}</pre>
+          </div>
+
+          <div class="w-full flex flex-row-reverse justify-between">
+            <div class="flex flex-row-reverse justify-start gap-x-2">
+              <vscode-button
+                @click="submitPatchCommentForm"
+                appearance="primary"
+                title="Save New Comment to Radicle"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span slot="start" class="codicon codicon-save"></span>
+                Comment
+              </vscode-button>
+              <vscode-button
+                @click="pausePatchCommenting"
+                appearance="secondary"
+                title="Pause Editing, Preserving Current Changes for Later (Escape)"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span class="codicon codicon-coffee"></span>
+              </vscode-button>
+              <vscode-button
+                @click="discardPatchCommentForm"
+                appearance="secondary"
+                title="Stop Editing and Discard Current Changes"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span slot="start" class="codicon codicon-discard"></span>
+                Discard
+              </vscode-button>
+            </div>
+            <div class="flex flex-row-reverse justify-start gap-x-2">
+              <vscode-button
+                @click="togglePreviewMarkdown"
+                :appearance="
+                  patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                    ? 'primary'
+                    : 'secondary'
+                "
+                :title="
+                  patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                    ? 'Stop Previewing as Rendered Markdown and Return to Editing (Alt + P)'
+                    : 'Preview Changes as Rendered Markdown (Alt + P)'
+                "
+                class="self-center"
+              >
+                <span
+                  :class="[
+                    'codicon',
+                    patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                      ? 'codicon-edit'
+                      : 'codicon-markdown',
+                  ]"
+                ></span>
+              </vscode-button>
+            </div>
+          </div>
+        </form>
+      </EventItem>
       <!-- TODO: list committer's email as tooltip -->
       <!--<div class="grid grid-cols-subgrid gap-x-3 items-center">
         <span
@@ -99,7 +313,7 @@ const patchEvents = computed(() =>
         >
           {{ event.revision.id === firstRevision.id ? 'Patch and revision' : 'Revision' }}
           <span
-            @click="emit('showRevision', event.revision)"
+            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
             >{{ shortenHash(event.revision.id) }}</span
@@ -125,13 +339,16 @@ const patchEvents = computed(() =>
             {{ `${event.review.verdict}ing` }}
           </span>
           <template v-else>with <span class="font-mono">no verdict</span> for</template>
-          revision
-          <span
-            @click="emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
+          <template v-if="patch.revisions.length > 1">
+            revision
+            <span
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+          </template>
+          <template v-else> patch</template>
           posted
           <span v-if="event.review.inline?.length">with code-inlined comments</span>
           by
@@ -141,7 +358,6 @@ const patchEvents = computed(() =>
           <template v-if="event.review.summary">
             <details v-if="event.review.summary && event.review.comment">
               <summary
-                style="color: var(--vscode-foreground)"
                 title="Click to Expand/Collapse"
                 class="mt-1 max-w-prose break-words text-sm font-mono"
                 >{{ event.review.summary }}</summary
@@ -168,13 +384,16 @@ const patchEvents = computed(() =>
           <span v-if="!event.discussion.resolved"
             >(<span class="font-mono">unresolved</span>)</span
           >
-          posted on revision
-          <span
-            @click="emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
+          posted
+          <template v-if="patch.revisions.length > 1">
+            on revision
+            <span
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+          </template>
           by
           <span :title="event.discussion.author.id" class="font-mono">{{
             getIdentityAliasOrId(event.discussion.author)
@@ -188,12 +407,8 @@ const patchEvents = computed(() =>
               >another</span
             ></span
           >
-          <details
-            v-if="event.discussion.body.length > maxCharsForUntruncatedMdText"
-            class="[&_summary]:open:opacity-50"
-          >
+          <details v-if="event.discussion.body.length > maxCharsForUntruncatedMdText">
             <summary
-              style="color: var(--vscode-foreground)"
               title="Click to Expand/Collapse"
               class="mt-1 max-w-prose text-sm font-mono"
               >{{ truncateMarkdown(event.discussion.body) }}</summary
@@ -216,15 +431,17 @@ const patchEvents = computed(() =>
           <span :title="event.merge.author.id" class="font-mono">{{
             getIdentityAliasOrId(event.merge.author)
           }}</span>
-          using revision
-          <span
-            v-if="event.revision"
-            @click="emit('showRevision', event.revision)"
-            :title="getRevisionHoverTitle(event.revision.description)"
-            class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
-          >
-          <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
+          <template v-if="patch.revisions.length > 1">
+            using revision
+            <span
+              v-if="event.revision"
+              @click="$emit('showRevision', event.revision)"
+              :title="getRevisionHoverTitle(event.revision.description)"
+              class="font-mono hover:cursor-pointer"
+              >{{ shortenHash(event.revision.id) }}</span
+            >
+            <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
+          </template>
         </EventItem>
       </template>
     </EventList>
@@ -232,6 +449,25 @@ const patchEvents = computed(() =>
 </template>
 
 <style scoped>
+.reset-font {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+vscode-text-field::part(control),
+vscode-text-area::part(control) {
+  @apply font-mono text-sm;
+  field-sizing: content;
+  max-height: min(80ch, 65vh);
+  word-break: break-word;
+}
+
+vscode-text-field::part(label),
+vscode-text-area::part(label) {
+  margin-bottom: 0.5em;
+}
+
+.pulse-outline,
 :deep(.pulse-outline) {
   @keyframes outline-pulse {
     from {
@@ -251,7 +487,23 @@ const patchEvents = computed(() =>
     }
   }
 
+  @keyframes outline-pulse-static {
+    from {
+      @apply outline-vscode-editor-foreground;
+    }
+    to {
+      @apply outline-vscode-editor-foreground;
+    }
+  }
+
   @apply outline outline-offset-[0.25em];
-  animation: outline-pulse 1000ms ease-in-out forwards;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: outline-pulse 1000ms ease-in-out forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: outline-pulse-static 1000ms ease-in-out forwards;
+  }
 }
 </style>
