@@ -26,6 +26,7 @@
     - also acts as a safe "spacer" between the two aforementioned buttons protecting against misclicks that would otherwise come with a big penalty
   - add a new button to toggle a markdown preview of the current changes before submitting
     - also triggerable with keyboard shortcut `Alt + P`
+    - after toggling to markdown preview and back to editing the undo/redo history (Ctrl/Cmd + Z and Ctrl/Cmd + Shift + Z) is still available. Even if the form contains multiple controls (e.g. two text-areas) then the undo/redo history spanning _all of them in the order they were changed_ is still retained
   - polish text-field sizing dynamics:
     - use 1 line of text as starting height when empty for the patch title field and 4 lines for the patch description
     - respectively limit the max vertical lines for the former and the latter

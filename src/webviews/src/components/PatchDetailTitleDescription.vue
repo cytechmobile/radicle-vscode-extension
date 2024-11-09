@@ -158,7 +158,7 @@ const isAuthedToEditTitleAndDescr = computed(() => {
           ]"
         >
           <h1 class="my-0 text-3xl font-mono"><Markdown :source="patchEditForm.title" /></h1>
-          <Markdown v-if="patchEditForm.descr" :source="patchEditForm.descr" class="text-sm" />
+          <Markdown :source="patchEditForm.descr" class="text-sm" />
         </div>
 
         <vscode-text-area

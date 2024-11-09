@@ -79,41 +79,36 @@ const patchEvents = computed(() =>
 const formRef = useTemplateRef<HTMLElement>('formRef')
 const commentTextAreaRef = useTemplateRef<HTMLElement>('commentTextAreaRef')
 
+// Those `watchEffect()`s should run once each time the respective elements get created
 watchEffect(() => {
-  const commentEl = commentTextAreaRef.value?.shadowRoot?.querySelector('textarea')
-  const els = [commentEl].filter(Boolean)
-
-  els.forEach((el) => {
+  formRef.value &&
     useEventListener(
-      el,
+      formRef.value,
       'keydown',
       (ev) => {
-        if (ev.key === 'Escape') {
-          patchCommentForm.value[selectedRevision.id] = {
-            comment: patchCommentForm.value[selectedRevision.id]?.comment || '',
-            status: 'off',
-          }
-        }
         if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
           submitPatchCommentForm()
+        } else if (ev.key === 'Escape') {
+          pausePatchCommenting()
+        } else if (ev.key === 'p' && ev.altKey) {
+          togglePreviewMarkdown()
         }
       },
       { passive: true },
     )
+})
+watchEffect(() => {
+  if (patchCommentForm.value[selectedRevision.id]?.status === 'editing') {
+    const el = commentTextAreaRef.value
+    setTimeout(() => el?.focus(), 0) // Vue.nextTick isn't cutting it
     useEventListener(el, 'focus', alignViewportWithForm, { passive: true })
     useEventListener(el, 'input', alignViewportWithForm, { passive: true })
-  })
+  }
 })
 
 function alignViewportWithForm() {
   formRef.value?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
 }
-
-watchEffect(() => {
-  if (patchCommentForm.value[selectedRevision.id]?.status === 'editing') {
-    setTimeout(() => commentTextAreaRef.value?.focus(), 0) // Vue.nextTick isn't cutting it
-  }
-})
 
 interface VscodeTextAreaEvent {
   target: { _value: string }
@@ -122,6 +117,13 @@ function updatePatchCommentFormComment(ev: VscodeTextAreaEvent) {
   patchCommentForm.value[selectedRevision.id] = {
     comment: ev.target._value,
     status: 'editing',
+  }
+}
+
+function pausePatchCommenting() {
+  patchCommentForm.value[selectedRevision.id] = {
+    comment: patchCommentForm.value[selectedRevision.id]?.comment || '',
+    status: 'off',
   }
 }
 
@@ -153,6 +155,22 @@ function discardPatchCommentForm() {
   delete patchCommentForm.value[selectedRevision.id]
 }
 
+function togglePreviewMarkdown() {
+  const selectedRevForm = patchCommentForm.value[selectedRevision.id]
+  if (selectedRevForm?.status === 'editing') {
+    selectedRevForm.status = 'previewing'
+
+    if (formRef.value) {
+      formRef.value.tabIndex = 0 // allows <form>, otherwise  non-tabbable, to be `focus()`ed
+      formRef.value.focus() // make form keyboard shortcuts still work after toggling MD preview
+      formRef.value.tabIndex = -1 // clean-up
+    }
+  } else if (selectedRevForm?.status === 'previewing') {
+    selectedRevForm.status = 'editing'
+    setTimeout(() => commentTextAreaRef.value?.focus(), 0)
+  }
+}
+
 // TODO: show "edited" indicators + timestamp (on hover) or full-blown list of edits, for each revision, comment, etc anything that has edits
 </script>
 
@@ -162,7 +180,10 @@ function discardPatchCommentForm() {
     <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-4">Activity</h2>
     <EventList>
       <EventItem
-        v-if="patchCommentForm[selectedRevision.id]?.status === 'editing'"
+        v-if="
+          patchCommentForm[selectedRevision.id]?.status === 'editing' ||
+          patchCommentForm[selectedRevision.id]?.status === 'previewing'
+        "
         :when="NaN"
         codicon="codicon-comment"
       >
@@ -170,9 +191,17 @@ function discardPatchCommentForm() {
           @submit.prevent
           ref="formRef"
           name="Edit patch title and description"
-          class="pb-2 flex flex-col gap-y-3"
+          class="font-mono text-sm leading-[unset] pb-2 flex flex-col gap-y-3 outline-none"
+          :class="{ 'w-fit': patchCommentForm[selectedRevision.id]?.status !== 'previewing' }"
+          style="
+            min-width: min(
+              100%,
+              68ch
+            ); /* results in allowing 65 chars before resizing to be wider */
+          "
         >
           <vscode-text-area
+            v-if="patchCommentForm[selectedRevision.id]?.status === 'editing'"
             ref="commentTextAreaRef"
             :value="patchCommentForm[selectedRevision.id]?.comment"
             @input="updatePatchCommentFormComment"
@@ -183,25 +212,75 @@ function discardPatchCommentForm() {
           >
             New Patch Comment:
           </vscode-text-area>
+
+          <div
+            v-if="patchCommentForm[selectedRevision.id]?.status === 'previewing'"
+            class="p-1 border border-dashed border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))] max-w-fit flex flex-col gap-y-4 group"
+          >
+            <Markdown
+              :source="patchCommentForm[selectedRevision.id]?.comment || ''"
+              class="text-sm"
+            />
+          </div>
+
           <div class="reset-font opacity-[0.65]"
             >Target Revision: <pre class="ml-1">{{ shortenHash(selectedRevision.id) }}</pre>
           </div>
 
-          <div class="w-full flex flex-row-reverse justify-start gap-x-2">
-            <vscode-button
-              appearance="primary"
-              title="Save New Comment to Radicle"
-              @click="submitPatchCommentForm"
-            >
-              Comment
-            </vscode-button>
-            <vscode-button
-              appearance="secondary"
-              title="Stop Editing and Discard Current Changes"
-              @click="discardPatchCommentForm"
-            >
-              Discard
-            </vscode-button>
+          <div class="w-full flex flex-row-reverse justify-between">
+            <div class="flex flex-row-reverse justify-start gap-x-2">
+              <vscode-button
+                @click="submitPatchCommentForm"
+                appearance="primary"
+                title="Save New Comment to Radicle"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span slot="start" class="codicon codicon-save"></span>
+                Comment
+              </vscode-button>
+              <vscode-button
+                @click="pausePatchCommenting"
+                appearance="secondary"
+                title="Pause Editing, Preserving Current Changes for Later (Escape)"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span class="codicon codicon-coffee"></span>
+              </vscode-button>
+              <vscode-button
+                @click="discardPatchCommentForm"
+                appearance="secondary"
+                title="Stop Editing and Discard Current Changes"
+              >
+                <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
+                <span slot="start" class="codicon codicon-discard"></span>
+                Discard
+              </vscode-button>
+            </div>
+            <div class="flex flex-row-reverse justify-start gap-x-2">
+              <vscode-button
+                @click="togglePreviewMarkdown"
+                :appearance="
+                  patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                    ? 'primary'
+                    : 'secondary'
+                "
+                :title="
+                  patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                    ? 'Stop Previewing as Rendered Markdown and Return to Editing (Alt + P)'
+                    : 'Preview Changes as Rendered Markdown (Alt + P)'
+                "
+                class="self-center"
+              >
+                <span
+                  :class="[
+                    'codicon',
+                    patchCommentForm[selectedRevision.id]?.status === 'previewing'
+                      ? 'codicon-edit'
+                      : 'codicon-markdown',
+                  ]"
+                ></span>
+              </vscode-button>
+            </div>
           </div>
         </form>
       </EventItem>
@@ -370,11 +449,6 @@ function discardPatchCommentForm() {
 </template>
 
 <style scoped>
-form {
-  @apply w-fit font-mono text-sm leading-[unset];
-  min-width: min(100%, 68ch); /* results to allowing 65 chars before resizing to be wider */
-}
-
 .reset-font {
   font-family: var(--vscode-font-family);
   font-size: var(--vscode-font-size);
