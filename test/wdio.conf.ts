@@ -1,6 +1,12 @@
 import path from 'node:path'
 import { e2eTestDirPath } from './constants/config'
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+const packageJson = require('../package.json')
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
+
 export const config: WebdriverIO.Config = {
   //
   // ====================
@@ -55,15 +61,13 @@ export const config: WebdriverIO.Config = {
   capabilities: [
     {
       'browserName': 'vscode',
-      'browserVersion': 'stable', // also possible: "insiders" or a specific version e.g. "1.80.0"
+      'browserVersion': vscodeVersion, // also possible: "insiders" or a specific version e.g. "1.80.0"
       'wdio:vscodeOptions': {
         // points to directory where extension package.json is located
         extensionPath: path.join(e2eTestDirPath, '..'),
         workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/basic'),
         // optional VS Code settings
         userSettings: {
-          'editor.fontSize': 14,
-          'window.newWindowDimensions': 'default',
           'extensions.autoCheckUpdates': false,
           'extensions.autoUpdate': false,
         },
@@ -124,7 +128,7 @@ export const config: WebdriverIO.Config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: ['vscode'],
+  services: [['vscode', { cachePath: path.join(__dirname, '.cache') }]],
 
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
