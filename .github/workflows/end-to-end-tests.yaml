@@ -1,19 +1,14 @@
 name: CI
 on:
-# TODO: when PR is ready to merge, we should adapt these depending on when we actually want this workflow to run
-#  push:
-#    branches: [ main ]
-#  pull_request:
-#    branches: [ main ]
-  push:
-  # pull_request:
+ push:
+   branches: [ main ]
+ pull_request:
+   branches: [ main ]
 
 jobs:
   e2e-test:
     strategy:
       matrix:
-# TODO: when PR is ready to merge, we should adapt these depending on when we actually want this workflow to run
-#        os: [macos-latest, ubuntu-latest, windows-latest]
         os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -43,7 +38,7 @@ jobs:
           fatal "Your operating system is currently unsupported. Sorry!" ;;
         esac
         echo $TARGET
-        curl -s https://files.radicle.xyz/releases/radicle-httpd/0.11.0/radicle-httpd-0.11.0-$TARGET.tar.xz | tar -xJ --strip-components=2
+        curl -s https://files.radicle.xyz/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
         mv radicle-httpd $RAD_HOME/bin/radicle-httpd
 
         # add to path
@@ -70,24 +65,6 @@ jobs:
         rad node status
         rad self
 
-    # - name: Create a new Radicle Repository
-    #   id: radicle-init
-    #   run: |
-    #     mkdir ./test/fixtures/workspaces/a_blog
-    #     cd  ./test/fixtures/workspaces/a_blog
-    #     git config --global init.defaultBranch main
-    #     git init .
-    #     git config --local user.email "test@radicle.xyz"
-    #     git config --local user.name "Radicle Test"
-    #     echo "# A Blog" > README.md
-    #     git add README.md
-    #     git commit -m 'adds readme'
-    #     rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose
-    #     pwd
-    #     cd ..
-    #     chmod -R 777 a_blog
-    #     echo "RADICLE_REPO=${{ github.workspace }}/test/fixtures/workspaces/a_blog" >> $GITHUB_ENV
-
     - uses: pnpm/action-setup@v3
       with:
         version: 8
@@ -97,21 +74,21 @@ jobs:
         cache-dependency-path: ./pnpm-lock.yaml
         node-version: 20.x
         cache: 'pnpm'
+
     - name: Install Dependencies
       run: npx npm-run-all -l verify-deps:*
+
     - name: Build
       run: pnpm run build
+
     - name: Test E2E (Linux)
       if: runner.os == 'Linux'
       env:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
-      run: |
-        echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        xvfb-run -a pnpm test:e2e
+      run: xvfb-run -a pnpm test:e2e
+
     - name: Test E2E (non-Linux)
       if: runner.os != 'Linux'
       env:
         RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
-      run: |
-        echo "The repo is at: ${{ steps.radicle-init.outputs.radicle-repo }}" 
-        pnpm test:e2e
+      run: pnpm test:e2e
