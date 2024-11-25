@@ -1,4 +1,4 @@
-name: PR linting
+name: CI
 on:
   pull_request:
     types: ['opened', 'edited', 'reopened', 'synchronize']

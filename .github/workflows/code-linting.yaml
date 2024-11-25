@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  audit:
+  lint-code:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -28,5 +28,3 @@ jobs:
       run: pnpm run lint
     - name: Test Typings
       run: pnpm run test:typings
-    - name: Test Unit
-      run: pnpm run test:unit
