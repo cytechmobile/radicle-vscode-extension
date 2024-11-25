@@ -6,7 +6,7 @@ import { $, cd } from 'zx'
 
 type VsCodeType = typeof import('vscode')
 
-describe('onboarding flow', () => {
+describe('Onboarding Flow', () => {
   let workbench: Workbench
 
   before(async () => {
@@ -14,8 +14,8 @@ describe('onboarding flow', () => {
     workbench = await browser.getWorkbench()
   })
 
-  describe('before the repo is initialized as a radicle repo', () => {
-    it('should load and install the extension', async () => {
+  describe('VS Code, *before* the workspace is rad-initialized', () => {
+    it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: VsCodeType) => vscode.extensions.all,
       )
@@ -24,13 +24,13 @@ describe('onboarding flow', () => {
       ).toBe(true)
     })
 
-    it('should show the "Radicle" sidebar tab', async () => {
+    it('shows the Radicle button in the Activity Bar', async () => {
       const radicleViewControl = await workbench.getActivityBar().getViewControl('Radicle')
       const title = await radicleViewControl?.getTitle()
       expect(title).toBe('Radicle')
     })
 
-    it('should show the `rad init` copy', async () => {
+    it('guides the user on how to rad-initialize their git repo', async () => {
       await openRadicleSidebarTab(workbench)
 
       const welcomeText = await findFirstSectionWelcomeText(workbench)
@@ -38,7 +38,7 @@ describe('onboarding flow', () => {
     })
   })
 
-  describe('after the repo has been initialized as a radicle repo', () => {
+  describe('VS Code, *after* the workspace us rad-initialized', () => {
     let cliCommandsSection: ViewSection
 
     before(async () => {
@@ -54,12 +54,12 @@ describe('onboarding flow', () => {
       await patchesSection.collapse()
     })
 
-    it('should not show the `rad init` copy', async () => {
+    it('hides the non rad-initialized guide', async () => {
       const welcomeText = await findFirstSectionWelcomeText(workbench)
       expect(welcomeText.some((text) => text.includes('rad init'))).not.toBe(true)
     })
 
-    it('should show the correct copy and buttons on the CLI Commands section', async () => {
+    it('shows the CLI Commands section', async () => {
       await cliCommandsSection.expand()
       // Fixes flakiness on macOS CI
       await browser.pause(100)
