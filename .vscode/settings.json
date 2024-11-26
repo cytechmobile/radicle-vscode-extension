@@ -8,6 +8,8 @@
     "build",
     "lint",
     "git",
+    "ci",
+    "e2e",
     "env",
     "deps",
     "ts",
@@ -25,7 +27,6 @@
     "publish",
     "marketplace",
     "icons",
-    "ci",
     "auth",
     "ux",
     "httpd",
@@ -34,8 +35,7 @@
     "cli",
     "webview",
     "markdown",
-    "exec",
-    "e2e"
+    "exec"
   ],
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.lineBreak": "\\n",
