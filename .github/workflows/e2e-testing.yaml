@@ -22,9 +22,9 @@ jobs:
       run: |
         echo "Installing radicle-node..."
         curl -sSf https://radicle.xyz/install | sh
-        
+
         echo "Installing radicle-httpd..."
-        
+
         case "$(uname)/$(uname -m)" in
         Darwin/arm64)
           export TARGET="aarch64-apple-darwin" ;;
@@ -65,9 +65,7 @@ jobs:
         rad node status
         rad self
 
-    - uses: pnpm/action-setup@v3
-      with:
-        version: 9
+    - uses: pnpm/action-setup@v4
     - name: Install Node.js
       uses: actions/setup-node@v4.1.0
       with:
