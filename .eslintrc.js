@@ -395,18 +395,6 @@ module.exports = {
     },
     {
       /*
-       * Rules specifically for end-to-end test files
-       * ======================================================================================
-       */
-      files: ['test/specs/*.e2e.ts', 'test/specs/*.e2e.js'],
-      rules: {
-        // prevent errors on expect assertions (e.g. `expect(...).toBe(...)`)
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-        '@typescript-eslint/no-unsafe-call': 'off',
-      },
-    },
-    {
-      /*
        * Rules specifically for common js config files
        * ======================================================================================
        */

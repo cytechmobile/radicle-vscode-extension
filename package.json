@@ -50,7 +50,7 @@
     "test:typings:extension": "tsc --noEmit",
     "test:typings:webviews": "cd ./src/webviews && npm run type-check",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
-    "test:e2e": "wdio run ./test/wdio.conf.ts"
+    "test:e2e": "wdio run ./test/e2e/wdio.conf.ts"
   },
   "main": "./dist/extension.js",
   "activationEvents": [

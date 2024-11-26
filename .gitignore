@@ -17,4 +17,4 @@ debug.log*
 
 # wdio
 .wdio-vscode-service
-test/.cache
+test/e2e/.cache

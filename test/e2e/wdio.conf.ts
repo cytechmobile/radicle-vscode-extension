@@ -2,7 +2,7 @@ import path from 'node:path'
 import { e2eTestDirPath } from './constants/config'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-const packageJson = require('../package.json')
+const packageJson = require('../../package.json')
 
 if (!process.env['CI']) {
   throw new Error('E2E tests should only be run in CI')
@@ -13,7 +13,7 @@ const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  tsConfigPath: './tsconfig.json',
+  tsConfigPath: './tsconfig.wdio.json',
   specs: ['./specs/**/*.ts'],
   maxInstances: 10,
   capabilities: [
@@ -21,7 +21,7 @@ export const config: WebdriverIO.Config = {
       'browserName': 'vscode',
       'browserVersion': vscodeVersion,
       'wdio:vscodeOptions': {
-        extensionPath: path.join(e2eTestDirPath, '..'),
+        extensionPath: path.join(e2eTestDirPath, '../..'),
         workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/basic'),
         userSettings: {
           'extensions.autoCheckUpdates': false,
@@ -39,7 +39,7 @@ export const config: WebdriverIO.Config = {
 
   logLevel: 'warn',
   waitforTimeout: 10000,
-  services: [['vscode', { cachePath: path.join(__dirname, '.cache') }]],
+  services: [['vscode', { cachePath: path.join(e2eTestDirPath, '.cache') }]],
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {

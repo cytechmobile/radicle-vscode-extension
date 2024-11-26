@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
-import { e2eTestDirPath } from 'test/constants/config'
+import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
 import { $, cd } from 'zx'
 
