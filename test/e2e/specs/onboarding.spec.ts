@@ -14,7 +14,7 @@ describe('Onboarding Flow', () => {
     workbench = await browser.getWorkbench()
   })
 
-  describe('VS Code, *before* the workspace is rad-initialized', () => {
+  describe('VS Code, *before* the workspace is rad-initialized,', () => {
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: VsCodeType) => vscode.extensions.all,
@@ -34,11 +34,21 @@ describe('Onboarding Flow', () => {
       await openRadicleViewContainer(workbench)
 
       const welcomeText = await findFirstWelcomeViewText(workbench)
+      expect(welcomeText).toEqual([
+        // eslint-disable-next-line max-len
+        'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
+        'To use Radicle with it, please run `rad init` in your terminal.',
+        // eslint-disable-next-line max-len
+        'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',
+        // eslint-disable-next-line max-len
+        'During this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.',
+        'To learn more read the Radicle User Guide.',
+      ])
       expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
 
-  describe('VS Code, *after* the workspace us rad-initialized', () => {
+  describe('VS Code, *after* the workspace us rad-initialized,', () => {
     let cliCommandsSection: ViewSection
 
     before(async () => {
@@ -109,9 +119,11 @@ async function openRadicleViewContainer(workbench: Workbench) {
 async function findFirstWelcomeViewText(workbench: Workbench) {
   const sidebarView = workbench.getSideBar().getContent()
   await sidebarView.wait()
-  const firstSection = (await sidebarView.getSections())[0]
-  const welcomeContent = await firstSection?.findWelcomeContent()
-  const welcomeText = (await welcomeContent?.getTextSections()) ?? []
+
+  const welcomeText =
+    (await (
+      await (await sidebarView.getSections())[0]?.findWelcomeContent()
+    )?.getTextSections()) ?? []
 
   return welcomeText
 }
