@@ -31,9 +31,9 @@ describe('Onboarding Flow', () => {
     })
 
     it('guides the user on how to rad-initialize their git repo', async () => {
-      await openRadicleSidebarTab(workbench)
+      await openRadicleViewContainer(workbench)
 
-      const welcomeText = await findFirstSectionWelcomeText(workbench)
+      const welcomeText = await findFirstWelcomeViewText(workbench)
       expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
@@ -43,7 +43,7 @@ describe('Onboarding Flow', () => {
 
     before(async () => {
       await $`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
-      await openRadicleSidebarTab(workbench)
+      await openRadicleViewContainer(workbench)
       const sidebarView = workbench.getSideBar().getContent()
       await sidebarView.wait()
 
@@ -55,7 +55,7 @@ describe('Onboarding Flow', () => {
     })
 
     it('hides the non rad-initialized guide', async () => {
-      const welcomeText = await findFirstSectionWelcomeText(workbench)
+      const welcomeText = await findFirstWelcomeViewText(workbench)
       expect(welcomeText.some((text) => text.includes('rad init'))).not.toBe(true)
     })
 
@@ -96,7 +96,7 @@ async function setUpGitRepo() {
   await $`git commit -m 'adds readme' --no-gpg-sign`
 }
 
-async function openRadicleSidebarTab(workbench: Workbench) {
+async function openRadicleViewContainer(workbench: Workbench) {
   const activityBar = workbench.getActivityBar()
   await activityBar.wait()
 
@@ -106,7 +106,7 @@ async function openRadicleSidebarTab(workbench: Workbench) {
   await radicleViewControl?.openView()
 }
 
-async function findFirstSectionWelcomeText(workbench: Workbench) {
+async function findFirstWelcomeViewText(workbench: Workbench) {
   const sidebarView = workbench.getSideBar().getContent()
   await sidebarView.wait()
   const firstSection = (await sidebarView.getSections())[0]
