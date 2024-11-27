@@ -1,5 +1,17 @@
 # Radicle VS Code Extension Change Log
 
+# _(WIP, yet unreleased version)_
+
+### 🤖 CI
+
+- **e2e:** set up new infrastructure and a related CI workflow capable of automated completely end-to-end testing. It uses a real Radicle node, which powers the latest extension build, which is running in an actual VS Code. Tests can assert behavior and state even as deep as extension webviews.
+
+### ☑️ Tests
+
+- **onboarding:** cover various paths of the flow with e2e tests
+
+-----
+
 ## **v0.6.0** (November 9th, 2024)
 
 ### ✨ Highlights

@@ -2,8 +2,8 @@
   "compilerOptions": {
     "noEmit": true,
     "incremental": false,
- },
-  "extends": "./tsconfig.json",
+  },
+  "extends": "./test/e2e/tsconfig.wdio.json",
   "include": [
     "./**.js",
     "./**/*.ts",

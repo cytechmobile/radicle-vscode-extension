@@ -1,0 +1,92 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-e2e:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Radicle
+      env:
+        RAD_HOME: ${{ github.workspace }}/.radicle
+      run: |
+        echo "Installing radicle-node..."
+        curl -sSf https://radicle.xyz/install | sh
+
+        echo "Installing radicle-httpd..."
+
+        case "$(uname)/$(uname -m)" in
+        Darwin/arm64)
+          export TARGET="aarch64-apple-darwin" ;;
+        Darwin/x86_64)
+          export TARGET="x86_64-apple-darwin" ;;
+        Linux/arm64|Linux/aarch64)
+          export TARGET="aarch64-unknown-linux-musl" ;;
+        Linux/x86_64)
+          export TARGET="x86_64-unknown-linux-musl" ;;
+        *)
+          fatal "Your operating system is currently unsupported. Sorry!" ;;
+        esac
+        echo $TARGET
+        curl -s https://files.radicle.xyz/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
+        mv radicle-httpd $RAD_HOME/bin/radicle-httpd
+
+        # add to path
+        echo "${RAD_HOME}/bin" >> $GITHUB_PATH
+        echo "RAD_HOME=${{ github.workspace }}/.radicle" >> $GITHUB_ENV
+        echo "RAD_PASSPHRASE=''" >> $GITHUB_ENV
+
+    - name: Create New Radicle Identity
+      run: |
+        rad auth --alias test_user
+
+    - name: Configure Radicle for Testing
+      run: |
+        # Source: https://app.radicle.xyz/nodes/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5/tree/HACKING.md
+        jq '.node.network = "test" | .preferredSeeds = [] | .node.connect = [] | .node.peers.type = "static"' ${RAD_HOME}/config.json > ${RAD_HOME}/config.json.tmp
+        mv ${RAD_HOME}/config.json.tmp ${RAD_HOME}/config.json
+
+    - name: Start Radicle Node and http API
+      run: |
+        rad node start &
+        echo "allowing node to start up..."
+        sleep 5
+        radicle-httpd --listen 0.0.0.0:8888 &
+        rad node status
+        rad self
+
+    - uses: pnpm/action-setup@v4
+    - name: Install Node.js
+      uses: actions/setup-node@v4.1.0
+      with:
+        cache-dependency-path: ./pnpm-lock.yaml
+        node-version: 20.x
+        cache: 'pnpm'
+
+    - name: Install Dependencies
+      run: npx npm-run-all -l verify-deps:*
+
+    - name: Build
+      run: pnpm run build
+
+    - name: Test E2E (Linux)
+      if: runner.os == 'Linux'
+      env:
+        RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
+      run: xvfb-run -a pnpm test:e2e
+
+    - name: Test E2E (non-Linux)
+      if: runner.os != 'Linux'
+      env:
+        RAD_PATH: ${{ github.workspace }}/.radicle/bin/rad
+      run: pnpm test:e2e
