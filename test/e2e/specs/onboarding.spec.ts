@@ -18,6 +18,7 @@ describe('Onboarding Flow', () => {
       const extensions = await browser.executeWorkbench(
         (vscode: typeof VsCode) => vscode.extensions.all,
       )
+
       expect(
         extensions.some((extension) => extension.id === 'radicle-ide-plugins-team.radicle'),
       ).toBe(true)
@@ -26,6 +27,7 @@ describe('Onboarding Flow', () => {
     it('shows the Radicle button in the Activity Bar', async () => {
       const radicleViewControl = await workbench.getActivityBar().getViewControl('Radicle')
       const title = await radicleViewControl?.getTitle()
+
       expect(title).toBe('Radicle')
     })
 
@@ -33,6 +35,7 @@ describe('Onboarding Flow', () => {
       await openRadicleViewContainer(workbench)
 
       const welcomeText = await getFirstWelcomeViewText(workbench)
+
       expect(welcomeText).toEqual([
         /* eslint-disable max-len */
         'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
@@ -42,6 +45,7 @@ describe('Onboarding Flow', () => {
         'To learn more read the Radicle User Guide.',
         /* eslint-enable max-len */
       ])
+
       expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
@@ -64,6 +68,7 @@ describe('Onboarding Flow', () => {
 
     it('hides the non rad-initialized guide', async () => {
       const welcomeText = await getFirstWelcomeViewText(workbench)
+
       expect(welcomeText.some((text) => text.includes('rad init'))).not.toBe(true)
     })
 
@@ -78,6 +83,7 @@ describe('Onboarding Flow', () => {
       const buttonTitles = await Promise.all(
         buttons.map(async (button) => await button.getTitle()),
       )
+
       expect(
         welcomeText.some((text) =>
           /Use the buttons below to perform common interactions with the Radicle network./i.test(
@@ -85,6 +91,7 @@ describe('Onboarding Flow', () => {
           ),
         ),
       ).toBe(true)
+
       expect(buttonTitles).toEqual(['Sync', 'Fetch', 'Announce'])
     })
   })
