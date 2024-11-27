@@ -3,21 +3,20 @@ import { browser, expect } from '@wdio/globals'
 import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
 import { $, cd } from 'zx'
-
-type VsCodeType = typeof import('vscode')
+import type * as VsCode from 'vscode'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
 
   before(async () => {
-    await setUpGitRepo()
+    await initGitRepo()
     workbench = await browser.getWorkbench()
   })
 
   describe('VS Code, *before* the workspace is rad-initialized,', () => {
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
-        (vscode: VsCodeType) => vscode.extensions.all,
+        (vscode: typeof VsCode) => vscode.extensions.all,
       )
       expect(
         extensions.some((extension) => extension.id === 'radicle-ide-plugins-team.radicle'),
@@ -33,22 +32,21 @@ describe('Onboarding Flow', () => {
     it('guides the user on how to rad-initialize their git repo', async () => {
       await openRadicleViewContainer(workbench)
 
-      const welcomeText = await findFirstWelcomeViewText(workbench)
+      const welcomeText = await getFirstWelcomeViewText(workbench)
       expect(welcomeText).toEqual([
-        // eslint-disable-next-line max-len
+        /* eslint-disable max-len */
         'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
         'To use Radicle with it, please run `rad init` in your terminal.',
-        // eslint-disable-next-line max-len
         'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',
-        // eslint-disable-next-line max-len
         'During this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.',
         'To learn more read the Radicle User Guide.',
+        /* eslint-enable max-len */
       ])
       expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
 
-  describe('VS Code, *after* the workspace us rad-initialized,', () => {
+  describe('VS Code, *after* the workspace is rad-initialized,', () => {
     let cliCommandsSection: ViewSection
 
     before(async () => {
@@ -65,7 +63,7 @@ describe('Onboarding Flow', () => {
     })
 
     it('hides the non rad-initialized guide', async () => {
-      const welcomeText = await findFirstWelcomeViewText(workbench)
+      const welcomeText = await getFirstWelcomeViewText(workbench)
       expect(welcomeText.some((text) => text.includes('rad init'))).not.toBe(true)
     })
 
@@ -92,7 +90,7 @@ describe('Onboarding Flow', () => {
   })
 })
 
-async function setUpGitRepo() {
+async function initGitRepo() {
   const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
 
   await $`mkdir -p ${repoDirPath}`
@@ -116,7 +114,7 @@ async function openRadicleViewContainer(workbench: Workbench) {
   await radicleViewControl?.openView()
 }
 
-async function findFirstWelcomeViewText(workbench: Workbench) {
+async function getFirstWelcomeViewText(workbench: Workbench) {
   const sidebarView = workbench.getSideBar().getContent()
   await sidebarView.wait()
 
