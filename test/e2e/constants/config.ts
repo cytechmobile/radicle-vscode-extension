@@ -5,3 +5,9 @@ import { join } from 'node:path'
  * files for testing.
  */
 export const e2eTestDirPath = join(__dirname, '..')
+
+/**
+ * The path to the root directory of the repository. Used when needing to access
+ * files outside of the e2e test directory.
+ */
+export const rootDirPath = join(__dirname, '../../..')

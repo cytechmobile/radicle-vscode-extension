@@ -1,5 +1,6 @@
 import path from 'node:path'
-import { e2eTestDirPath } from './constants/config'
+import { $ } from 'zx'
+import { e2eTestDirPath, rootDirPath } from './constants/config'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const packageJson = require('../../package.json')
@@ -21,7 +22,7 @@ export const config: WebdriverIO.Config = {
       'browserName': 'vscode',
       'browserVersion': vscodeVersion,
       'wdio:vscodeOptions': {
-        extensionPath: path.join(e2eTestDirPath, '../..'),
+        extensionPath: rootDirPath,
         workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/basic'),
         userSettings: {
           'extensions.autoCheckUpdates': false,
@@ -39,11 +40,14 @@ export const config: WebdriverIO.Config = {
 
   logLevel: 'warn',
   waitforTimeout: 10000,
-  services: [['vscode', { cachePath: path.join(e2eTestDirPath, '.cache') }]],
+  services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
+  },
+  onPrepare: async () => {
+    await $`mkdir -p ${path.join(rootDirPath, 'node_modules/.cache/wdio')}`
   },
 }
