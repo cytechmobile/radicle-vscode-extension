@@ -1,6 +1,12 @@
 # Radicle VS Code Extension Change Log
 
-## _(WIP, yet unreleased version)_
+## **v0.6.0** (November 9th, 2024)
+
+### ✨ Highlights
+
+- create new comments on patches
+- preview your patch edits and draft new comments, before submitting them, with Markdown support
+- polished, comfortable authoring experience
 
 ### 🚀 Enhancements
 

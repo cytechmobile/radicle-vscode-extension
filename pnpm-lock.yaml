@@ -51,6 +51,9 @@ importers:
       eslint-config-prettier:
         specifier: ^8.10.0
         version: 8.10.0(eslint@8.57.0)
+      eslint-plugin-jasmine:
+        specifier: ^4.2.2
+        version: 4.2.2
       eslint-plugin-prettier-vue:
         specifier: ^4.2.0
         version: 4.2.0
@@ -846,6 +849,10 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       eslint: ^7.2.0 || ^8
+
+  eslint-plugin-jasmine@4.2.2:
+    resolution: {integrity: sha512-nALbewRk63uz28UGNhUTJyd6GofXxVNFpWFNAwr9ySc6kpSRIoO4suwZqIYz3cfJmCacilmjp7+1Ocjr7zRagA==}
+    engines: {node: '>=8', npm: '>=6'}
 
   eslint-plugin-jest@27.9.0:
     resolution: {integrity: sha512-QIT7FH7fNmd9n4se7FFKHbsLKGQiw885Ds6Y/sxKgCZ6natwCsXdgPOADnYVxN2QrRweF0FZWbJ6S7Rsn7llug==}
@@ -2927,6 +2934,8 @@ snapshots:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
       - supports-color
+
+  eslint-plugin-jasmine@4.2.2: {}
 
   eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.3.3))(eslint@8.57.0)(typescript@5.3.3))(eslint@8.57.0)(typescript@5.3.3):
     dependencies:

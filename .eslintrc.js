@@ -385,9 +385,12 @@ module.exports = {
        * ======================================================================================
        */
       files: ['*.test.ts', '*.test.js', '*.spec.ts', '*.spec.js'],
+      plugins: ['jasmine'],
       rules: {
         // overrides to antfu's config follow
         'no-only-tests/no-only-tests': 'warn',
+        'jasmine/new-line-before-expect': 'warn',
+        'jasmine/new-line-between-declarations': 'warn',
       },
     },
     {
