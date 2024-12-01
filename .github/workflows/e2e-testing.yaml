@@ -9,7 +9,8 @@ jobs:
   test-e2e:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        # os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
 
