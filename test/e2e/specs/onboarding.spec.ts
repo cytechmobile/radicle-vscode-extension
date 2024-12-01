@@ -1,19 +1,19 @@
 import path from 'node:path'
+import os from 'node:os'
 import { browser, expect } from '@wdio/globals'
 import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
-import { $, cd } from 'zx'
+import { $, cd, echo } from 'zx'
 import type * as VsCode from 'vscode'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
 
   before(async () => {
-    await initGitRepo()
     workbench = await browser.getWorkbench()
   })
 
-  describe('VS Code, *before* the workspace is rad-initialized,', () => {
+  describe('VS Code, *before* Radicle is installed,', () => {
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: typeof VsCode) => vscode.extensions.all,
@@ -31,6 +31,55 @@ describe('Onboarding Flow', () => {
       expect(title).toBe('Radicle')
     })
 
+    it('instructs the user to install radicle', async () => {
+      await openRadicleViewContainer(workbench)
+
+      const welcomeText = await getFirstWelcomeViewText(workbench)
+      const buttonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+
+      expect(welcomeText).toEqual([
+        /* eslint-disable max-len */
+        'Failed resolving the Radicle CLI binary.',
+        "Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.",
+        "Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
+        /* eslint-enable max-len */
+      ])
+
+      expect(buttonTitles).toEqual(['Troubleshoot'])
+    })
+  })
+
+  describe('VS Code, *before* the workspace is git-initialized,', () => {
+    before(async () => {
+      await installRadicle()
+    })
+
+    it('guides the user on how to git-initialize their workspace', async () => {
+      await openRadicleViewContainer(workbench)
+
+      const welcomeText = await getFirstWelcomeViewText(workbench)
+      const welcomeButtonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+
+      expect(welcomeText).toEqual([
+        /* eslint-disable max-len */
+        'The folder currently opened in your workspace is not a Git code repository.',
+        'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
+        'To learn more about how to use Git and source control in VS Code read the docs.',
+        /* eslint-enable max-len */
+      ])
+
+      expect(welcomeButtonTitles).toEqual([
+        'Initialize Repository With Git',
+        'Choose a Different Folder',
+      ])
+    })
+  })
+
+  describe('VS Code, *before* the workspace is rad-initialized,', () => {
+    before(async () => {
+      await initGitRepo()
+    })
+
     it('guides the user on how to rad-initialize their git repo', async () => {
       await openRadicleViewContainer(workbench)
 
@@ -45,8 +94,6 @@ describe('Onboarding Flow', () => {
         'To learn more read the Radicle User Guide.',
         /* eslint-enable max-len */
       ])
-
-      expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
 
@@ -97,6 +144,40 @@ describe('Onboarding Flow', () => {
   })
 })
 
+async function installRadicle() {
+  echo`Installing Radicle...`
+  cd(os.homedir())
+  const radHome = path.join(os.homedir(), '.radicle')
+  const radBin = path.join(radHome, 'bin')
+  // add RAD_HOME as an environment variable
+  await $`export RAD_HOME=${radHome}`
+  await $`curl -sSf https://radicle.xyz/install | sh`
+
+  echo`Installing radicle-httpd...`
+
+  await $`case "$(uname)/$(uname -m)" in
+    Darwin/arm64)
+      export TARGET="aarch64-apple-darwin" ;;
+    Darwin/x86_64)
+      export TARGET="x86_64-apple-darwin" ;;
+    Linux/arm64|Linux/aarch64)
+      export TARGET="aarch64-unknown-linux-musl" ;;
+    Linux/x86_64)
+      export TARGET="x86_64-unknown-linux-musl" ;;
+    *)
+      fatal "Your operating system is currently unsupported. Sorry!" ;;
+    esac
+    echo $TARGET
+    curl -s https://files.radicle.xyz/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
+  `
+  await $`mv radicle-httpd ${radBin}/radicle-httpd`
+
+  echo('Installed')
+  echo`ls .radicle`
+  echo`ls .radicle/bin`
+  echo`Over..`
+}
+
 async function initGitRepo() {
   const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
 
@@ -131,4 +212,18 @@ async function getFirstWelcomeViewText(workbench: Workbench) {
     )?.getTextSections()) ?? []
 
   return welcomeText
+}
+
+async function getFirstWelcomeViewButtonTitles(workbench: Workbench) {
+  const sidebarView = workbench.getSideBar().getContent()
+  await sidebarView.wait()
+
+  const buttons =
+    (await (await (await sidebarView.getSections())[0]?.findWelcomeContent())?.getButtons()) ??
+    []
+  const buttonTitles = await Promise.all(
+    buttons.map(async (button) => await button.getTitle()),
+  )
+
+  return buttonTitles
 }
