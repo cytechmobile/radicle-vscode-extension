@@ -38,7 +38,7 @@ export const config: WebdriverIO.Config = {
     },
   ],
 
-  logLevel: 'warn',
+  logLevel: 'error',
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
   framework: 'mocha',

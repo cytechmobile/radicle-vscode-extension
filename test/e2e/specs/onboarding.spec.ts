@@ -1,4 +1,5 @@
 import path from 'node:path'
+import os from 'node:os'
 import { browser, expect } from '@wdio/globals'
 import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
@@ -49,8 +50,8 @@ describe('Onboarding Flow', () => {
   })
 
   describe('VS Code, *before* the workspace is git-initialized,', () => {
-    before(() => {
-      installRadicle()
+    before(async () => {
+      await installRadicle()
     })
 
     it('guides the user on how to git-initialize their workspace', async () => {
@@ -143,9 +144,38 @@ describe('Onboarding Flow', () => {
   })
 })
 
-function installRadicle() {
-  // TODO: zac implement this
-  echo('To be implemented')
+async function installRadicle() {
+  echo`Installing Radicle...`
+  cd(os.homedir())
+  const radHome = path.join(os.homedir(), '.radicle')
+  const radBin = path.join(radHome, 'bin')
+  // add RAD_HOME as an environment variable
+  await $`export RAD_HOME=${radHome}`
+  await $`curl -sSf https://radicle.xyz/install | sh`
+
+  echo`Installing radicle-httpd...`
+
+  await $`case "$(uname)/$(uname -m)" in
+    Darwin/arm64)
+      export TARGET="aarch64-apple-darwin" ;;
+    Darwin/x86_64)
+      export TARGET="x86_64-apple-darwin" ;;
+    Linux/arm64|Linux/aarch64)
+      export TARGET="aarch64-unknown-linux-musl" ;;
+    Linux/x86_64)
+      export TARGET="x86_64-unknown-linux-musl" ;;
+    *)
+      fatal "Your operating system is currently unsupported. Sorry!" ;;
+    esac
+    echo $TARGET
+    curl -s https://files.radicle.xyz/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
+  `
+  await $`mv radicle-httpd ${radBin}/radicle-httpd`
+
+  echo('Installed')
+  echo`ls .radicle`
+  echo`ls .radicle/bin`
+  echo`Over..`
 }
 
 async function initGitRepo() {
