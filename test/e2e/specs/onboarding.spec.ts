@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
-import { $, cd } from 'zx'
+import { $, cd, echo } from 'zx'
 import type * as VsCode from 'vscode'
 import { e2eTestDirPath } from '../constants/config'
 
@@ -9,11 +9,10 @@ describe('Onboarding Flow', () => {
   let workbench: Workbench
 
   before(async () => {
-    await initGitRepo()
     workbench = await browser.getWorkbench()
   })
 
-  describe('VS Code, *before* the workspace is rad-initialized,', () => {
+  describe('VS Code, *before* Radicle is installed,', () => {
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: typeof VsCode) => vscode.extensions.all,
@@ -31,6 +30,55 @@ describe('Onboarding Flow', () => {
       expect(title).toBe('Radicle')
     })
 
+    it('instructs the user to install radicle', async () => {
+      await openRadicleViewContainer(workbench)
+
+      const welcomeText = await getFirstWelcomeViewText(workbench)
+      const buttonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+
+      expect(welcomeText).toEqual([
+        /* eslint-disable max-len */
+        'Failed resolving the Radicle CLI binary.',
+        "Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.",
+        "Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
+        /* eslint-enable max-len */
+      ])
+
+      expect(buttonTitles).toEqual(['Troubleshoot'])
+    })
+  })
+
+  describe('VS Code, *before* the workspace is git-initialized,', () => {
+    before(() => {
+      installRadicle()
+    })
+
+    it('guides the user on how to git-initialize their workspace', async () => {
+      await openRadicleViewContainer(workbench)
+
+      const welcomeText = await getFirstWelcomeViewText(workbench)
+      const welcomeButtonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+
+      expect(welcomeText).toEqual([
+        /* eslint-disable max-len */
+        'The folder currently opened in your workspace is not a Git code repository.',
+        'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
+        'To learn more about how to use Git and source control in VS Code read the docs.',
+        /* eslint-enable max-len */
+      ])
+
+      expect(welcomeButtonTitles).toEqual([
+        'Initialize Repository With Git',
+        'Choose a Different Folder',
+      ])
+    })
+  })
+
+  describe('VS Code, *before* the workspace is rad-initialized,', () => {
+    before(async () => {
+      await initGitRepo()
+    })
+
     it('guides the user on how to rad-initialize their git repo', async () => {
       await openRadicleViewContainer(workbench)
 
@@ -45,8 +93,6 @@ describe('Onboarding Flow', () => {
         'To learn more read the Radicle User Guide.',
         /* eslint-enable max-len */
       ])
-
-      expect(welcomeText.some((text) => text.includes('rad init'))).toBe(true)
     })
   })
 
@@ -97,6 +143,11 @@ describe('Onboarding Flow', () => {
   })
 })
 
+function installRadicle() {
+  // TODO: zac implement this
+  echo('To be implemented')
+}
+
 async function initGitRepo() {
   const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
 
@@ -131,4 +182,18 @@ async function getFirstWelcomeViewText(workbench: Workbench) {
     )?.getTextSections()) ?? []
 
   return welcomeText
+}
+
+async function getFirstWelcomeViewButtonTitles(workbench: Workbench) {
+  const sidebarView = workbench.getSideBar().getContent()
+  await sidebarView.wait()
+
+  const buttons =
+    (await (await (await sidebarView.getSections())[0]?.findWelcomeContent())?.getButtons()) ??
+    []
+  const buttonTitles = await Promise.all(
+    buttons.map(async (button) => await button.getTitle()),
+  )
+
+  return buttonTitles
 }
