@@ -1,7 +1,9 @@
+import { tmpdir } from 'node:os'
 import { browser } from '@wdio/globals'
-import type { SettingsEditor, Workbench } from 'wdio-vscode-service'
+import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
+import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { openRadicleViewContainer } from '../helpers/actions'
 
@@ -21,31 +23,42 @@ describe('Settings', () => {
     }
   })
 
-  describe('Path to Rad Binary', () => {
-    it('warns the user if the rad binary is not found', async () => {
-      const pathToRadBinary = await settings.findSetting(
+  describe('Path to Rad Binary,', () => {
+    let pathToRadBinarySetting: Setting
+
+    before(async () => {
+      pathToRadBinarySetting = await settings.findSetting(
         'Path To Rad Binary',
         'Radicle',
         'Advanced',
       )
-      await pathToRadBinary.setValue('/tmp')
+    })
+
+    it('warns the user if the rad binary is not found', async () => {
+      await pathToRadBinarySetting.setValue('/tmp')
       await openRadicleViewContainer(workbench)
 
       await expectRadCliBinaryNotFoundToBeVisible(workbench)
 
-      /**
-       * `.setValue('')` updates the value of the input but does not trigger an
-       * update in the extension. Not sure if this is a bug in the extension, vscode, or
-       * webdriverio.
-       *
-       * The following is a workaround that does trigger an update in the extension.
-       */
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      await (await pathToRadBinary.textSetting$).click()
-      await browser.keys([Key.Ctrl, 'a'])
-      await browser.keys(Key.Backspace)
+      await clearSettingInput(pathToRadBinarySetting)
 
       await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
+
+    // TODO: zac improve name
+    // This functionality does not seem to work
+    it('[WIP] updates if the rad binary path is created after the setting is changed', async () => {
+      const tempRadPath = `${tmpdir()}/.radicle`
+      await pathToRadBinarySetting.setValue(`${tempRadPath}/bin/rad`)
+
+      await expectRadCliBinaryNotFoundToBeVisible(workbench)
+
+      await $`cp -r ~/.radicle ${tempRadPath}`
+
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+
+      await clearSettingInput(pathToRadBinarySetting)
+      await $`rm -rf ${tempRadPath}`
     })
   })
 
@@ -81,4 +94,18 @@ async function expectCliCommandsAndPatchesToBeVisible(workbench: Workbench) {
 
     return sectionsFound
   })
+}
+
+async function clearSettingInput(setting: Setting) {
+  /**
+   * `.setValue('')` updates the value of the input but does not trigger an
+   * update in the extension. Not sure if this is a bug in the extension, vscode, or
+   * webdriverio.
+   *
+   * The following is a workaround that does trigger an update in the extension.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  await (await setting.textSetting$).click()
+  await browser.keys([Key.Ctrl, 'a'])
+  await browser.keys(Key.Backspace)
 }
