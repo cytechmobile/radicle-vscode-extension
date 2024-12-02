@@ -15,7 +15,8 @@ const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 export const config: WebdriverIO.Config = {
   runner: 'local',
   tsConfigPath: './tsconfig.wdio.json',
-  specs: ['./specs/**/*.ts'],
+  // Order matters, onboarding.spec.ts should run first as it sets up the workspace
+  specs: ['./specs/onboarding.spec.ts', './specs/**/*.spec.ts'],
   maxInstances: 10,
   capabilities: [
     {

@@ -4,6 +4,8 @@ import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
 import { $, cd } from 'zx'
 import type * as VsCode from 'vscode'
+import { openRadicleViewContainer } from '../helpers/actions'
+import { getFirstWelcomeViewText } from '../helpers/queries'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
@@ -109,26 +111,4 @@ async function initGitRepo() {
   await $`echo "# Basic Repo" > README.md`
   await $`git add README.md`
   await $`git commit -m 'adds readme' --no-gpg-sign`
-}
-
-async function openRadicleViewContainer(workbench: Workbench) {
-  const activityBar = workbench.getActivityBar()
-  await activityBar.wait()
-
-  const radicleViewControl = await activityBar.getViewControl('Radicle')
-  await radicleViewControl?.wait()
-
-  await radicleViewControl?.openView()
-}
-
-async function getFirstWelcomeViewText(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
-  const welcomeText =
-    (await (
-      await (await sidebarView.getSections())[0]?.findWelcomeContent()
-    )?.getTextSections()) ?? []
-
-  return welcomeText
 }
