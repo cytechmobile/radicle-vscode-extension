@@ -1,9 +1,13 @@
 import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
-import type { ViewSection, Workbench } from 'wdio-vscode-service'
-import { $, cd, echo } from 'zx'
+import type { Workbench } from 'wdio-vscode-service'
+import { $, cd } from 'zx'
 import type * as VsCode from 'vscode'
-import { e2eTestDirPath } from '../constants/config'
+import isEqual from 'lodash/isEqual'
+import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
+import { openRadicleViewContainer } from '../helpers/actions'
+import { getFirstWelcomeViewText } from '../helpers/queries'
+import { e2eTestDirPath, nodeHomePath } from '../constants/config'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
@@ -13,6 +17,18 @@ describe('Onboarding Flow', () => {
   })
 
   describe('VS Code, *before* Radicle is installed,', () => {
+    const tempPathToNodeHome = `${nodeHomePath}.temp`
+
+    before(async () => {
+      // Simulate radicle "not being installed" by renaming the node home directory
+      await $`mv ${nodeHomePath} ${tempPathToNodeHome}`
+    })
+
+    after(async () => {
+      await $`mv ${tempPathToNodeHome} ${nodeHomePath}`
+      await workbench.executeCommand('Developer: Reload Window')
+    })
+
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: typeof VsCode) => vscode.extensions.all,
@@ -49,28 +65,27 @@ describe('Onboarding Flow', () => {
   })
 
   describe('VS Code, *before* the workspace is git-initialized,', () => {
-    before(() => {
-      installRadicle()
-    })
-
     it('guides the user on how to git-initialize their workspace', async () => {
       await openRadicleViewContainer(workbench)
 
-      const welcomeText = await getFirstWelcomeViewText(workbench)
-      const welcomeButtonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+      await browser.waitUntil(async () => {
+        const welcomeText = await getFirstWelcomeViewText(workbench)
+        const welcomeButtonTitles = await getFirstWelcomeViewButtonTitles(workbench)
 
-      expect(welcomeText).toEqual([
-        /* eslint-disable max-len */
-        'The folder currently opened in your workspace is not a Git code repository.',
-        'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
-        'To learn more about how to use Git and source control in VS Code read the docs.',
-        /* eslint-enable max-len */
-      ])
-
-      expect(welcomeButtonTitles).toEqual([
-        'Initialize Repository With Git',
-        'Choose a Different Folder',
-      ])
+        return (
+          isEqual(welcomeText, [
+            /* eslint-disable max-len */
+            'The folder currently opened in your workspace is not a Git code repository.',
+            'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
+            'To learn more about how to use Git and source control in VS Code read the docs.',
+            /* eslint-enable max-len */
+          ]) &&
+          isEqual(welcomeButtonTitles, [
+            'Initialize Repository With Git',
+            'Choose a Different Folder',
+          ])
+        )
+      })
     })
   })
 
@@ -82,71 +97,44 @@ describe('Onboarding Flow', () => {
     it('guides the user on how to rad-initialize their git repo', async () => {
       await openRadicleViewContainer(workbench)
 
-      const welcomeText = await getFirstWelcomeViewText(workbench)
+      await browser.waitUntil(async () => {
+        const welcomeText = await getFirstWelcomeViewText(workbench)
 
-      expect(welcomeText).toEqual([
-        /* eslint-disable max-len */
-        'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
-        'To use Radicle with it, please run `rad init` in your terminal.',
-        'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',
-        'During this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.',
-        'To learn more read the Radicle User Guide.',
-        /* eslint-enable max-len */
-      ])
+        return isEqual(welcomeText, [
+          /* eslint-disable max-len */
+          'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
+          'To use Radicle with it, please run `rad init` in your terminal.',
+          'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',
+          'During this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.',
+          'To learn more read the Radicle User Guide.',
+          /* eslint-enable max-len */
+        ])
+      })
     })
   })
 
   describe('VS Code, *after* the workspace is rad-initialized,', () => {
-    let cliCommandsSection: ViewSection
-
     before(async () => {
       await $`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
-      await openRadicleViewContainer(workbench)
-      const sidebarView = workbench.getSideBar().getContent()
-      await sidebarView.wait()
-
-      cliCommandsSection = await sidebarView.getSection('CLI COMMANDS')
-      await cliCommandsSection.collapse()
-
-      const patchesSection = await sidebarView.getSection('PATCHES')
-      await patchesSection.collapse()
+      await workbench.executeCommand('Developer: Reload Window')
     })
 
     it('hides the non rad-initialized guide', async () => {
-      const welcomeText = await getFirstWelcomeViewText(workbench)
+      await browser.waitUntil(async () => {
+        const welcomeText = await getFirstWelcomeViewText(workbench)
 
-      expect(welcomeText.some((text) => text.includes('rad init'))).not.toBe(true)
+        return welcomeText.some((text) => text.includes('rad init')) === false
+      })
     })
 
-    it('shows the CLI Commands section', async () => {
-      await cliCommandsSection.expand()
-      // Fixes flakiness on macOS CI
-      await browser.pause(100)
+    it('shows the CLI Commands and Patches sections', async () => {
+      const sidebarView = workbench.getSideBar().getContent()
+      await sidebarView.wait()
 
-      const welcomeContent = await cliCommandsSection?.findWelcomeContent()
-      const welcomeText = (await welcomeContent?.getTextSections()) ?? []
-      const buttons = (await welcomeContent?.getButtons()) ?? []
-      const buttonTitles = await Promise.all(
-        buttons.map(async (button) => await button.getTitle()),
-      )
-
-      expect(
-        welcomeText.some((text) =>
-          /Use the buttons below to perform common interactions with the Radicle network./i.test(
-            text,
-          ),
-        ),
-      ).toBe(true)
-
-      expect(buttonTitles).toEqual(['Sync', 'Fetch', 'Announce'])
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
     })
   })
 })
-
-function installRadicle() {
-  // TODO: zac implement this
-  echo('To be implemented')
-}
 
 async function initGitRepo() {
   const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
@@ -160,28 +148,6 @@ async function initGitRepo() {
   await $`echo "# Basic Repo" > README.md`
   await $`git add README.md`
   await $`git commit -m 'adds readme' --no-gpg-sign`
-}
-
-async function openRadicleViewContainer(workbench: Workbench) {
-  const activityBar = workbench.getActivityBar()
-  await activityBar.wait()
-
-  const radicleViewControl = await activityBar.getViewControl('Radicle')
-  await radicleViewControl?.wait()
-
-  await radicleViewControl?.openView()
-}
-
-async function getFirstWelcomeViewText(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
-  const welcomeText =
-    (await (
-      await (await sidebarView.getSections())[0]?.findWelcomeContent()
-    )?.getTextSections()) ?? []
-
-  return welcomeText
 }
 
 async function getFirstWelcomeViewButtonTitles(workbench: Workbench) {
