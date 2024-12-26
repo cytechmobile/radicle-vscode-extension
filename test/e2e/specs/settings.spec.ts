@@ -1,9 +1,13 @@
 import { browser } from '@wdio/globals'
-import type { SettingsEditor, Workbench } from 'wdio-vscode-service'
+import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
+import { $ } from 'zx'
+import { extTempDir } from 'src/constants'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { openRadicleViewContainer } from '../helpers/actions'
+import { pathToNodeHome } from '../constants/config'
+import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
 
 describe('Settings', () => {
   let workbench: Workbench
@@ -21,38 +25,51 @@ describe('Settings', () => {
     }
   })
 
-  describe('Path to Rad Binary', () => {
-    it('warns the user if the rad binary is not found', async () => {
-      const pathToRadBinary = await settings.findSetting(
+  describe('VS Code, when updating the "Path to Rad Binary" setting,', () => {
+    let pathToRadBinarySetting: Setting
+
+    before(async () => {
+      pathToRadBinarySetting = await settings.findSetting(
         'Path To Rad Binary',
         'Radicle',
         'Advanced',
       )
-      await pathToRadBinary.setValue('/tmp')
-      await openRadicleViewContainer(workbench)
+    })
 
-      await expectRadCliBinaryNotFoundToBeVisible(workbench)
-
-      /**
-       * `.setValue('')` updates the value of the input but does not trigger an
-       * update in the extension. Not sure if this is a bug in the extension, vscode, or
-       * webdriverio.
-       *
-       * The following is a workaround that does trigger an update in the extension.
-       */
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      await (await pathToRadBinary.textSetting$).click()
-      await browser.keys([Key.Ctrl, 'a'])
-      await browser.keys(Key.Backspace)
+    afterEach(async () => {
+      await clearSettingInput(pathToRadBinarySetting)
 
       await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
+
+    it('warns the user if the rad binary is not found', async () => {
+      await pathToRadBinarySetting.setValue('/tmp')
+      await openRadicleViewContainer(workbench)
+
+      await expectRadBinaryNotFoundToBeVisible(workbench)
+    })
+
+    // This functionality does not seem to work
+    // eslint-disable-next-line max-len
+    it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
+      const tempNodeHomePath = `${extTempDir}/.radicle/installation-backup`
+      await pathToRadBinarySetting.setValue(`${tempNodeHomePath}/bin/rad`)
+
+      await expectRadBinaryNotFoundToBeVisible(workbench)
+
+      await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+
+      await clearSettingInput(pathToRadBinarySetting)
+      await $`rm -rf ${tempNodeHomePath}`
     })
   })
 
   // describe('Setting: Path To Node Home', () => { })
 })
 
-async function expectRadCliBinaryNotFoundToBeVisible(workbench: Workbench) {
+async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
   return await browser.waitUntil(async () => {
     const welcomeText = await getFirstWelcomeViewText(workbench)
 
@@ -66,19 +83,16 @@ async function expectRadCliBinaryNotFoundToBeVisible(workbench: Workbench) {
   })
 }
 
-async function expectCliCommandsAndPatchesToBeVisible(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
-  return await browser.waitUntil(async () => {
-    let sectionsFound = false
-    try {
-      await sidebarView.getSection('CLI COMMANDS')
-      await sidebarView.getSection('PATCHES')
-      sectionsFound = true
-      // eslint-disable-next-line prettier-vue/prettier
-    } catch { }
-
-    return sectionsFound
-  })
+async function clearSettingInput(setting: Setting) {
+  /**
+   * `.setValue('')` updates the value of the input but does not trigger an
+   * update in the extension. Not sure if this is a bug in the extension, vscode, or
+   * webdriverio.
+   *
+   * The following is a workaround that does trigger an update in the extension.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  await (await setting.textSetting$).click()
+  await browser.keys([Key.Ctrl, 'a'])
+  await browser.keys(Key.Backspace)
 }
