@@ -1,5 +1,5 @@
 import { browser } from '@wdio/globals'
-import type { Setting, Workbench } from 'wdio-vscode-service'
+import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { getFirstWelcomeViewText } from '../helpers/queries'
@@ -7,10 +7,14 @@ import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
 import { openRadicleViewContainer } from '../helpers/actions'
 
 describe('Settings', () => {
+  let workbench: Workbench
+  let settings: SettingsEditor
+  let pathToRadBinarySetting: Setting
+
   it('warns the user if the rad binary is not found', async () => {
-    const workbench = await browser.getWorkbench()
-    const settings = await workbench.openSettings()
-    const pathToRadBinarySetting = await settings.findSetting(
+    workbench = await browser.getWorkbench()
+    settings = await workbench.openSettings()
+    pathToRadBinarySetting = await settings.findSetting(
       'Path To Rad Binary',
       'Radicle',
       'Advanced',
