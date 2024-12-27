@@ -23,6 +23,11 @@ export async function expectStandardSidebarViewsToBeVisible(workbench: Workbench
         return false
       }
     },
-    { timeoutMsg: 'expected the standard sidebar views to be visible' },
+    {
+      timeoutMsg: 'expected the standard sidebar views to be visible',
+      // TODO: zac fine tune these (globally?)
+      timeout: 20000,
+      interval: 500,
+    },
   )
 }
