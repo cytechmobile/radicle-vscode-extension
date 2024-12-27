@@ -4,6 +4,7 @@ import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
+import { openRadicleViewContainer } from '../helpers/actions'
 
 describe('Settings', () => {
   it('warns the user if the rad binary is not found', async () => {
@@ -15,7 +16,7 @@ describe('Settings', () => {
       'Advanced',
     )
 
-    // await openRadicleViewContainer(workbench)
+    await openRadicleViewContainer(workbench)
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
     await browser.pause(1000)
