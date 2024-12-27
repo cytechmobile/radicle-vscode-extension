@@ -18,7 +18,7 @@ describe('Settings', () => {
     // await openRadicleViewContainer(workbench)
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
-    await browser.pause(1000)
+    await browser.pause(5000)
     await pathToRadBinarySetting.setValue('/tmp')
 
     await expectRadBinaryNotFoundToBeVisible(workbench)
