@@ -8,9 +8,10 @@ on:
 jobs:
   test-e2e:
     strategy:
+      fail-fast: false
       matrix:
-        # os: [macos-latest, ubuntu-latest]
-        os: [ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
+        # os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
 

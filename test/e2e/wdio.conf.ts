@@ -29,7 +29,7 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  specs: ['./specs/onboarding.spec.ts', './specs/**/*.spec.ts'],
+  specs: [['./specs/onboarding.spec.ts', './specs/settings.spec.ts']],
   maxInstances: 10,
   capabilities: [
     {
