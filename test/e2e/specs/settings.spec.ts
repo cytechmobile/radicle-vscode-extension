@@ -46,7 +46,7 @@ describe('Settings', () => {
     await expectRadBinaryNotFoundToBeVisible(workbench)
 
     await browser.pause(1000)
-    await pathToRadBinarySetting.setValue(`${tempNodeHomePath}/bin/rad`)
+    await setSettingInputValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
@@ -94,4 +94,9 @@ async function clearSettingInput(setting: Setting) {
   await (await setting.textSetting$).click()
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
+}
+
+async function setSettingInputValue(setting: Setting, value: string) {
+  await clearSettingInput(setting)
+  await setting.setValue(value)
 }
