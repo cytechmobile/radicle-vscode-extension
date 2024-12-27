@@ -2,9 +2,11 @@ import { browser } from '@wdio/globals'
 import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
+import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
 import { openRadicleViewContainer } from '../helpers/actions'
+import { pathToNodeHome } from '../constants/config'
 
 describe('Settings', () => {
   let workbench: Workbench
@@ -27,6 +29,28 @@ describe('Settings', () => {
 
     await openRadicleViewContainer(workbench)
     await expectRadBinaryNotFoundToBeVisible(workbench)
+
+    await clearSettingInput(pathToRadBinarySetting)
+
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
+  })
+
+  it('recognizes the rad binary when a valid path is specified', async () => {
+    const tempNodeHomePath = `${pathToNodeHome}.temp`
+    await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+
+    await browser.pause(1000)
+    await pathToRadBinarySetting.setValue(`/tmp`)
+
+    await openRadicleViewContainer(workbench)
+    await expectRadBinaryNotFoundToBeVisible(workbench)
+
+    await browser.pause(1000)
+    await pathToRadBinarySetting.setValue(`${tempNodeHomePath}/bin/rad`)
+
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
+
+    await $`rm -rf ${tempNodeHomePath}`
 
     await clearSettingInput(pathToRadBinarySetting)
 
