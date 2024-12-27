@@ -47,6 +47,8 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
     },
     {
       timeoutMsg: 'expected the rad binary not found message to be visible',
+      timeout: 20000,
+      interval: 500,
     },
   )
 }
