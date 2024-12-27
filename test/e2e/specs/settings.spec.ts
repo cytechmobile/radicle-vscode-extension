@@ -16,12 +16,12 @@ describe('Settings', () => {
       'Advanced',
     )
 
-    await openRadicleViewContainer(workbench)
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
     await browser.pause(1000)
     await pathToRadBinarySetting.setValue('/tmp')
 
+    await openRadicleViewContainer(workbench)
     await expectRadBinaryNotFoundToBeVisible(workbench)
 
     await clearSettingInput(pathToRadBinarySetting)
