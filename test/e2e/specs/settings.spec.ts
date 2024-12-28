@@ -1,7 +1,7 @@
 import { browser } from '@wdio/globals'
 import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
-import { Key } from 'webdriverio'
+import { type ChainablePromiseElement, Key } from 'webdriverio'
 import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
@@ -106,8 +106,8 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
   )
 }
 
-async function getTextSettingInput(setting: Setting) {
-  return (await setting.textSetting$) as WebdriverIO.Element
+function getTextSettingInput(setting: Setting) {
+  return setting.textSetting$ as ChainablePromiseElement
 }
 
 /**
@@ -115,7 +115,7 @@ async function getTextSettingInput(setting: Setting) {
  * The `getValue` method of a `TextSetting` seems to be wrongly implemented and returns null.
  */
 async function getTextSettingValue(setting: Setting) {
-  return await (await getTextSettingInput(setting)).getValue()
+  return await getTextSettingInput(setting).getValue()
 }
 
 async function setTextSettingValue(setting: Setting, value: string) {
@@ -135,8 +135,7 @@ async function clearTextSetting(setting: Setting) {
     return
   }
 
-  const input = await getTextSettingInput(setting)
-  await input.click()
+  await getTextSettingInput(setting).click()
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
 }
