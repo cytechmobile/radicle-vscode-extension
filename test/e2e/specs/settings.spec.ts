@@ -5,13 +5,17 @@ import { Key } from 'webdriverio'
 import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
-import { openRadicleViewContainer } from '../helpers/actions'
+import { closeRadicleViewContainer, openRadicleViewContainer } from '../helpers/actions'
 import { pathToNodeHome } from '../constants/config'
 
 describe('Settings', () => {
   let workbench: Workbench
   let settings: SettingsEditor
   let pathToRadBinarySetting: Setting
+
+  after(async () => {
+    await closeRadicleViewContainer(workbench)
+  })
 
   it('warns the user if the rad binary is not found', async () => {
     workbench = await browser.getWorkbench()
