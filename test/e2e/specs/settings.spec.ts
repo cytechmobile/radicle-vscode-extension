@@ -33,6 +33,12 @@ describe('Settings', () => {
       )
     })
 
+    afterEach(async () => {
+      await clearTextSetting(pathToRadBinarySetting)
+
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
+
     it('warns the user if the rad binary is not found', async () => {
       await expectCliCommandsAndPatchesToBeVisible(workbench)
 
@@ -41,10 +47,6 @@ describe('Settings', () => {
 
       await openRadicleViewContainer(workbench)
       await expectRadBinaryNotFoundToBeVisible(workbench)
-
-      await clearTextSetting(pathToRadBinarySetting)
-
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
     })
 
     it('recognizes the rad binary when a valid path is specified', async () => {
@@ -61,10 +63,6 @@ describe('Settings', () => {
       await expectCliCommandsAndPatchesToBeVisible(workbench)
 
       await $`rm -rf ${tempNodeHomePath}`
-
-      await clearTextSetting(pathToRadBinarySetting)
-
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
     })
 
     // This functionality does not seem to work
@@ -84,10 +82,6 @@ describe('Settings', () => {
       await clearTextSetting(pathToRadBinarySetting)
 
       await $`rm -rf ${tempNodeHomePath}`
-
-      await clearTextSetting(pathToRadBinarySetting)
-
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
     })
   })
 })
