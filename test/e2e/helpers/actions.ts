@@ -13,3 +13,13 @@ export async function openRadicleViewContainer(workbench: Workbench) {
 
   await radicleViewControl?.openView()
 }
+
+export async function closeRadicleViewContainer(workbench: Workbench) {
+  const activityBar = workbench.getActivityBar()
+  await activityBar.wait()
+
+  const radicleViewControl = await activityBar.getViewControl('Radicle')
+  await radicleViewControl?.wait()
+
+  await radicleViewControl?.closeView()
+}
