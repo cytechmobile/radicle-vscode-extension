@@ -44,7 +44,6 @@ describe('Settings', () => {
       await browser.pause(1000)
       await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
-      await openRadicleViewContainer(workbench)
       await expectRadBinaryNotFoundToBeVisible(workbench)
     })
 
