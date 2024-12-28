@@ -16,6 +16,7 @@ describe('Settings', () => {
   before(async () => {
     workbench = await browser.getWorkbench()
     settings = await workbench.openSettings()
+    await openRadicleViewContainer(workbench)
   })
 
   after(async () => {
