@@ -1,5 +1,6 @@
 import { browser } from '@wdio/globals'
-import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
+import { TextSetting } from 'wdio-vscode-service'
+import type { SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { $ } from 'zx'
@@ -11,26 +12,22 @@ import { pathToNodeHome } from '../constants/config'
 describe('Settings', () => {
   let workbench: Workbench
   let settings: SettingsEditor
-  let pathToRadBinarySetting: Setting
+  let pathToRadBinarySetting: TextSetting
 
   it('warns the user if the rad binary is not found', async () => {
     workbench = await browser.getWorkbench()
     settings = await workbench.openSettings()
-    pathToRadBinarySetting = await settings.findSetting(
-      'Path To Rad Binary',
-      'Radicle',
-      'Advanced',
-    )
+    pathToRadBinarySetting = await findPathToRadBinarySetting(settings)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
     await browser.pause(1000)
-    await pathToRadBinarySetting.setValue('/tmp')
+    await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
     await openRadicleViewContainer(workbench)
     await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await clearSettingInput(pathToRadBinarySetting)
+    await clearTextSetting(pathToRadBinarySetting)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
   })
@@ -39,18 +36,18 @@ describe('Settings', () => {
     const tempNodeHomePath = `${pathToNodeHome}.temp`
     await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
 
-    await pathToRadBinarySetting.setValue(`/tmp`)
+    await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
 
     await openRadicleViewContainer(workbench)
     await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await setSettingInputValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
+    await setTextSettingValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
     await $`rm -rf ${tempNodeHomePath}`
 
-    await clearSettingInput(pathToRadBinarySetting)
+    await clearTextSetting(pathToRadBinarySetting)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
   })
@@ -80,10 +77,38 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
   )
 }
 
-async function clearSettingInput(setting: Setting) {
-  const inputValue = await setting.getValue()
-  console.log({ inputValue })
+async function findPathToRadBinarySetting(settings: SettingsEditor) {
+  const pathToRadBinarySetting = await settings.findSetting(
+    'Path To Rad Binary',
+    'Radicle',
+    'Advanced',
+  )
 
+  if (!(pathToRadBinarySetting instanceof TextSetting)) {
+    throw new TypeError('expected pathToRadBinarySetting to be a TextSetting')
+  }
+
+  return pathToRadBinarySetting
+}
+
+async function getTextSettingInput(setting: TextSetting) {
+  return (await setting.textSetting$) as WebdriverIO.Element
+}
+
+/**
+ * Workaround to get the value of a `TextSetting`.
+ * The `getValue` method of a `TextSetting` seems to be wrongly implemented and returns null.
+ */
+async function getTextSettingValue(setting: TextSetting) {
+  return await (await getTextSettingInput(setting)).getValue()
+}
+
+async function setTextSettingValue(setting: TextSetting, value: string) {
+  await clearTextSetting(setting)
+  await setting.setValue(value)
+}
+
+async function clearTextSetting(setting: TextSetting) {
   /**
    * `.setValue('')` updates the value of the input but does not trigger an
    * update in the extension. Not sure if this is a bug in the extension, vscode, or
@@ -91,13 +116,12 @@ async function clearSettingInput(setting: Setting) {
    *
    * The following is a workaround that does trigger an update in the extension.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  await (await setting.textSetting$).click()
+  if ((await getTextSettingValue(setting)) === '') {
+    return
+  }
+
+  const input = await getTextSettingInput(setting)
+  await input.click()
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
-}
-
-async function setSettingInputValue(setting: Setting, value: string) {
-  await clearSettingInput(setting)
-  await setting.setValue(value)
 }
