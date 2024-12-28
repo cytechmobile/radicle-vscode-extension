@@ -54,6 +54,28 @@ describe('Settings', () => {
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
   })
+
+  // This functionality does not seem to work
+  it('recognizes if the directory is created *after* the setting is updated', async () => {
+    const tempNodeHomePath = `${pathToNodeHome}.temp`
+
+    await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
+
+    await openRadicleViewContainer(workbench)
+    await expectRadBinaryNotFoundToBeVisible(workbench)
+
+    await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
+
+    await clearTextSetting(pathToRadBinarySetting)
+
+    await $`rm -rf ${tempNodeHomePath}`
+
+    await clearTextSetting(pathToRadBinarySetting)
+
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
+  })
 })
 
 async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
