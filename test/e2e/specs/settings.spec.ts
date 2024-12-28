@@ -53,7 +53,6 @@ describe('Settings', () => {
 
       await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
 
-      await openRadicleViewContainer(workbench)
       await expectRadBinaryNotFoundToBeVisible(workbench)
 
       await setTextSettingValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
@@ -70,7 +69,6 @@ describe('Settings', () => {
 
       await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
-      await openRadicleViewContainer(workbench)
       await expectRadBinaryNotFoundToBeVisible(workbench)
 
       await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
