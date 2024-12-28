@@ -81,6 +81,9 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
 }
 
 async function clearSettingInput(setting: Setting) {
+  const inputValue = await setting.getValue()
+  console.log({ inputValue })
+
   /**
    * `.setValue('')` updates the value of the input but does not trigger an
    * update in the extension. Not sure if this is a bug in the extension, vscode, or
