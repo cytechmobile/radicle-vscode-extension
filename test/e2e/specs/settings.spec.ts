@@ -1,6 +1,5 @@
 import { browser } from '@wdio/globals'
-import { TextSetting } from 'wdio-vscode-service'
-import type { SettingsEditor, Workbench } from 'wdio-vscode-service'
+import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { $ } from 'zx'
@@ -12,12 +11,16 @@ import { pathToNodeHome } from '../constants/config'
 describe('Settings', () => {
   let workbench: Workbench
   let settings: SettingsEditor
-  let pathToRadBinarySetting: TextSetting
+  let pathToRadBinarySetting: Setting
 
   it('warns the user if the rad binary is not found', async () => {
     workbench = await browser.getWorkbench()
     settings = await workbench.openSettings()
-    pathToRadBinarySetting = await findPathToRadBinarySetting(settings)
+    pathToRadBinarySetting = await settings.findSetting(
+      'Path To Rad Binary',
+      'Radicle',
+      'Advanced',
+    )
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
 
@@ -77,21 +80,7 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
   )
 }
 
-async function findPathToRadBinarySetting(settings: SettingsEditor) {
-  const pathToRadBinarySetting = await settings.findSetting(
-    'Path To Rad Binary',
-    'Radicle',
-    'Advanced',
-  )
-
-  if (!(pathToRadBinarySetting instanceof TextSetting)) {
-    throw new TypeError('expected pathToRadBinarySetting to be a TextSetting')
-  }
-
-  return pathToRadBinarySetting
-}
-
-async function getTextSettingInput(setting: TextSetting) {
+async function getTextSettingInput(setting: Setting) {
   return (await setting.textSetting$) as WebdriverIO.Element
 }
 
@@ -99,16 +88,16 @@ async function getTextSettingInput(setting: TextSetting) {
  * Workaround to get the value of a `TextSetting`.
  * The `getValue` method of a `TextSetting` seems to be wrongly implemented and returns null.
  */
-async function getTextSettingValue(setting: TextSetting) {
+async function getTextSettingValue(setting: Setting) {
   return await (await getTextSettingInput(setting)).getValue()
 }
 
-async function setTextSettingValue(setting: TextSetting, value: string) {
+async function setTextSettingValue(setting: Setting, value: string) {
   await clearTextSetting(setting)
   await setting.setValue(value)
 }
 
-async function clearTextSetting(setting: TextSetting) {
+async function clearTextSetting(setting: Setting) {
   /**
    * `.setValue('')` updates the value of the input but does not trigger an
    * update in the extension. Not sure if this is a bug in the extension, vscode, or
