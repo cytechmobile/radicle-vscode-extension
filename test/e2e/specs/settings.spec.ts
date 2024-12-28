@@ -14,8 +14,11 @@ describe('Settings', () => {
 
   before(async () => {
     workbench = await browser.getWorkbench()
-    settings = await workbench.openSettings()
     await openRadicleViewContainer(workbench)
+
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
+
+    settings = await workbench.openSettings()
   })
 
   after(async () => {
@@ -40,8 +43,6 @@ describe('Settings', () => {
     })
 
     it('warns the user if the rad binary is not found', async () => {
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
-
       await browser.pause(1000)
       await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
