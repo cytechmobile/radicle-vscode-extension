@@ -11,7 +11,6 @@ import { pathToNodeHome } from '../constants/config'
 describe('Settings', () => {
   let workbench: Workbench
   let settings: SettingsEditor
-  let pathToRadBinarySetting: Setting
 
   before(async () => {
     workbench = await browser.getWorkbench()
@@ -23,67 +22,73 @@ describe('Settings', () => {
     await closeRadicleViewContainer(workbench)
   })
 
-  it('warns the user if the rad binary is not found', async () => {
-    pathToRadBinarySetting = await settings.findSetting(
-      'Path To Rad Binary',
-      'Radicle',
-      'Advanced',
-    )
+  describe('VS Code, when updating the "Path to Rad Binary" setting,', () => {
+    let pathToRadBinarySetting: Setting
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
+    before(async () => {
+      pathToRadBinarySetting = await settings.findSetting(
+        'Path To Rad Binary',
+        'Radicle',
+        'Advanced',
+      )
+    })
 
-    await browser.pause(1000)
-    await setTextSettingValue(pathToRadBinarySetting, '/tmp')
+    it('warns the user if the rad binary is not found', async () => {
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
 
-    await openRadicleViewContainer(workbench)
-    await expectRadBinaryNotFoundToBeVisible(workbench)
+      await browser.pause(1000)
+      await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
-    await clearTextSetting(pathToRadBinarySetting)
+      await openRadicleViewContainer(workbench)
+      await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
-  })
+      await clearTextSetting(pathToRadBinarySetting)
 
-  it('recognizes the rad binary when a valid path is specified', async () => {
-    const tempNodeHomePath = `${pathToNodeHome}.temp`
-    await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
 
-    await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
+    it('recognizes the rad binary when a valid path is specified', async () => {
+      const tempNodeHomePath = `${pathToNodeHome}.temp`
+      await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
 
-    await openRadicleViewContainer(workbench)
-    await expectRadBinaryNotFoundToBeVisible(workbench)
+      await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
 
-    await setTextSettingValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
+      await openRadicleViewContainer(workbench)
+      await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await setTextSettingValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
 
-    await $`rm -rf ${tempNodeHomePath}`
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
 
-    await clearTextSetting(pathToRadBinarySetting)
+      await $`rm -rf ${tempNodeHomePath}`
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
-  })
+      await clearTextSetting(pathToRadBinarySetting)
 
-  // This functionality does not seem to work
-  // eslint-disable-next-line max-len
-  it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
-    const tempNodeHomePath = `${pathToNodeHome}.temp`
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
 
-    await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
+    // This functionality does not seem to work
+    // eslint-disable-next-line max-len
+    it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
+      const tempNodeHomePath = `${pathToNodeHome}.temp`
 
-    await openRadicleViewContainer(workbench)
-    await expectRadBinaryNotFoundToBeVisible(workbench)
+      await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
-    await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+      await openRadicleViewContainer(workbench)
+      await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
 
-    await clearTextSetting(pathToRadBinarySetting)
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
 
-    await $`rm -rf ${tempNodeHomePath}`
+      await clearTextSetting(pathToRadBinarySetting)
 
-    await clearTextSetting(pathToRadBinarySetting)
+      await $`rm -rf ${tempNodeHomePath}`
 
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await clearTextSetting(pathToRadBinarySetting)
+
+      await expectCliCommandsAndPatchesToBeVisible(workbench)
+    })
   })
 })
 
