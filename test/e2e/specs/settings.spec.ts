@@ -13,13 +13,16 @@ describe('Settings', () => {
   let settings: SettingsEditor
   let pathToRadBinarySetting: Setting
 
+  before(async () => {
+    workbench = await browser.getWorkbench()
+    settings = await workbench.openSettings()
+  })
+
   after(async () => {
     await closeRadicleViewContainer(workbench)
   })
 
   it('warns the user if the rad binary is not found', async () => {
-    workbench = await browser.getWorkbench()
-    settings = await workbench.openSettings()
     pathToRadBinarySetting = await settings.findSetting(
       'Path To Rad Binary',
       'Radicle',
