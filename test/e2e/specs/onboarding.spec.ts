@@ -1,9 +1,9 @@
 import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
-import { e2eTestDirPath } from 'test/e2e/constants/config'
 import type { ViewSection, Workbench } from 'wdio-vscode-service'
 import { $, cd } from 'zx'
 import type * as VsCode from 'vscode'
+import { e2eTestDirPath } from '../constants/config'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
