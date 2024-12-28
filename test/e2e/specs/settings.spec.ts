@@ -14,11 +14,9 @@ describe('Settings', () => {
 
   before(async () => {
     workbench = await browser.getWorkbench()
-    await openRadicleViewContainer(workbench)
-
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
-
     settings = await workbench.openSettings()
+    await openRadicleViewContainer(workbench)
+    await expectCliCommandsAndPatchesToBeVisible(workbench)
   })
 
   after(async () => {
