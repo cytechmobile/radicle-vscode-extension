@@ -39,13 +39,11 @@ describe('Settings', () => {
     const tempNodeHomePath = `${pathToNodeHome}.temp`
     await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
 
-    await browser.pause(1000)
     await pathToRadBinarySetting.setValue(`/tmp`)
 
     await openRadicleViewContainer(workbench)
     await expectRadBinaryNotFoundToBeVisible(workbench)
 
-    await browser.pause(1000)
     await setSettingInputValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
 
     await expectCliCommandsAndPatchesToBeVisible(workbench)
