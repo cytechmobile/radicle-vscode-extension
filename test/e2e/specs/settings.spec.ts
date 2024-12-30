@@ -41,7 +41,6 @@ describe('Settings', () => {
     })
 
     it('warns the user if the rad binary is not found', async () => {
-      await browser.pause(1000)
       await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
       await expectRadBinaryNotFoundToBeVisible(workbench)
