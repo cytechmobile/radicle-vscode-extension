@@ -1,12 +1,12 @@
 import { browser } from '@wdio/globals'
 import type { Setting, SettingsEditor, Workbench } from 'wdio-vscode-service'
 import isEqual from 'lodash/isEqual'
-import { type ChainablePromiseElement, Key } from 'webdriverio'
+import { Key } from 'webdriverio'
 import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
 import { closeRadicleViewContainer, openRadicleViewContainer } from '../helpers/actions'
-import { pathToNodeHome } from '../constants/config'
+import { nodeHomePath } from '../constants/config'
 
 describe('Settings', () => {
   let workbench: Workbench
@@ -48,8 +48,8 @@ describe('Settings', () => {
     })
 
     it('recognizes the rad binary when a valid path is specified', async () => {
-      const tempNodeHomePath = `${pathToNodeHome}.temp`
-      await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+      const tempNodeHomePath = `${nodeHomePath}.temp`
+      await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
 
       await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
 
@@ -65,13 +65,13 @@ describe('Settings', () => {
     // This functionality does not seem to work
     // eslint-disable-next-line max-len
     it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
-      const tempNodeHomePath = `${pathToNodeHome}.temp`
+      const tempNodeHomePath = `${nodeHomePath}.temp`
 
       await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
       await expectRadBinaryNotFoundToBeVisible(workbench)
 
-      await $`cp -r ${pathToNodeHome} ${tempNodeHomePath}`
+      await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
 
       await expectCliCommandsAndPatchesToBeVisible(workbench)
 
@@ -106,16 +106,12 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
   )
 }
 
-function getTextSettingInput(setting: Setting) {
-  return setting.textSetting$ as ChainablePromiseElement
-}
-
 /**
  * Workaround to get the value of a `TextSetting`.
  * The `getValue` method of a `TextSetting` seems to be wrongly implemented and returns null.
  */
 async function getTextSettingValue(setting: Setting) {
-  return await getTextSettingInput(setting).getValue()
+  return await setting.textSetting$.getValue()
 }
 
 async function setTextSettingValue(setting: Setting, value: string) {
@@ -135,7 +131,7 @@ async function clearTextSetting(setting: Setting) {
     return
   }
 
-  await getTextSettingInput(setting).click()
+  await setting.textSetting$.click()
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
 }
