@@ -193,6 +193,7 @@ async function expectOutputToContain(outputView: OutputView, expected: string) {
        * of the window. To avoid this, we join the text into a single string.
        */
       const joinedText = (await outputView.getText()).join('')
+      console.log({ joinedText })
 
       return joinedText.includes(expected)
     },
