@@ -108,7 +108,6 @@ describe('Settings', () => {
       await outputView.clearText()
 
       // Set the path to a non-existent directory
-      await browser.pause(1000) // TODO: zac check if this is necessary
       await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
 
       // Assert that the error message is displayed in the output console
