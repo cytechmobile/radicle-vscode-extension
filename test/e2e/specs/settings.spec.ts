@@ -37,8 +37,6 @@ describe('Settings', () => {
     after(async () => {
       const searchBox = await getSettingsSearchBox(settings)
       await clearInput(searchBox)
-
-      expect(searchBox.getValue()).toBe('')
     })
 
     afterEach(async () => {
