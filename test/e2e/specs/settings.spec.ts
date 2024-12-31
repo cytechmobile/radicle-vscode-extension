@@ -87,6 +87,11 @@ describe('Settings', () => {
   })
 
   describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
+    after(async () => {
+      const searchBox = await getSettingsSearchBox(settings)
+      await clearInput(searchBox)
+    })
+
     it('displays error in output console', async () => {
       await workbench.executeCommand('Show Everything Logged in the Output Panel')
       const outputView = await workbench.getBottomBar().openOutputView()
