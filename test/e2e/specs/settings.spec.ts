@@ -88,6 +88,11 @@ describe('Settings', () => {
       await browser.pause(1000) // TODO: zac check if this is necessary
       settings = await workbench.openSettings()
 
+      await workbench.executeCommand('Show Everything Logged in the Output Panel')
+      let outputView = await workbench.getBottomBar().openOutputView()
+      await outputView.selectChannel('Radicle')
+      await outputView.clearText()
+
       // Set the path to a non-existent directory
       const pathToNodeHomeSetting = await settings.findSetting(
         'Path To Node Home',
@@ -98,19 +103,18 @@ describe('Settings', () => {
       await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
 
       // Assert that the error message is displayed in the output console
-      await workbench.executeCommand('Show Everything Logged in the Output Panel')
-      const outputView = await workbench.getBottomBar().openOutputView()
+      outputView = await workbench.getBottomBar().openOutputView()
       await outputView.selectChannel('Radicle')
 
       await browser.waitUntil(
         async () => {
           const text = await outputView.getText()
-          console.log({ text })
+          const joinedText = text.join('')
 
-          return text.some((line) =>
-            line.includes(
-              'Found non-authenticated identity ✗ Error: Radicle profile not found in',
-            ),
+          console.log({ text, joinedText })
+
+          return joinedText.includes(
+            'Found non-authenticated identity ✗ Error: Radicle profile not found in',
           )
         },
         { timeoutMsg: 'expected the error message to be displayed in the output console' },
