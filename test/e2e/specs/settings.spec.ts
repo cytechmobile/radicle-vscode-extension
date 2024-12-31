@@ -80,6 +80,43 @@ describe('Settings', () => {
       await $`rm -rf ${tempNodeHomePath}`
     })
   })
+
+  describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
+    it('displays error in output console', async () => {
+      // Close and re-open the settings editor (to clear the input)
+      await browser.keys([Key.Ctrl, 'w'])
+      await browser.pause(1000) // TODO: zac check if this is necessary
+      settings = await workbench.openSettings()
+
+      // Set the path to a non-existent directory
+      const pathToNodeHomeSetting = await settings.findSetting(
+        'Path To Node Home',
+        'Radicle',
+        'Advanced',
+      )
+      await browser.pause(1000) // TODO: zac check if this is necessary
+      await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
+
+      // Assert that the error message is displayed in the output console
+      await workbench.executeCommand('Show Everything Logged in the Output Panel')
+      const outputView = await workbench.getBottomBar().openOutputView()
+      await outputView.selectChannel('Radicle')
+
+      await browser.waitUntil(
+        async () => {
+          const text = await outputView.getText()
+          console.log({ text })
+
+          return text.some((line) =>
+            line.includes(
+              'Found non-authenticated identity ✗ Error: Radicle profile not found in',
+            ),
+          )
+        },
+        { timeoutMsg: 'expected the error message to be displayed in the output console' },
+      )
+    })
+  })
 })
 
 async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
