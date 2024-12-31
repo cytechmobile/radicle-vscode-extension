@@ -89,7 +89,7 @@ describe('Settings', () => {
       settings = await workbench.openSettings()
 
       await workbench.executeCommand('Show Everything Logged in the Output Panel')
-      let outputView = await workbench.getBottomBar().openOutputView()
+      const outputView = await workbench.getBottomBar().openOutputView()
       await outputView.selectChannel('Radicle')
       await outputView.clearText()
 
@@ -103,9 +103,6 @@ describe('Settings', () => {
       await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
 
       // Assert that the error message is displayed in the output console
-      outputView = await workbench.getBottomBar().openOutputView()
-      await outputView.selectChannel('Radicle')
-
       await browser.waitUntil(
         async () => {
           const text = await outputView.getText()
