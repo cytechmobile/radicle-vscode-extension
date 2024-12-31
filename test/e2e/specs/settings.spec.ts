@@ -87,6 +87,16 @@ describe('Settings', () => {
   })
 
   describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
+    let pathToNodeHomeSetting: Setting
+
+    before(async () => {
+      pathToNodeHomeSetting = await settings.findSetting(
+        'Path To Node Home',
+        'Radicle',
+        'Advanced',
+      )
+    })
+
     after(async () => {
       const searchBox = await getSettingsSearchBox(settings)
       await clearInput(searchBox)
@@ -98,11 +108,6 @@ describe('Settings', () => {
       await outputView.clearText()
 
       // Set the path to a non-existent directory
-      const pathToNodeHomeSetting = await settings.findSetting(
-        'Path To Node Home',
-        'Radicle',
-        'Advanced',
-      )
       await browser.pause(1000) // TODO: zac check if this is necessary
       await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
 
