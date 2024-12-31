@@ -113,14 +113,9 @@ describe('Settings', () => {
       // Assert that the error message is displayed in the output console
       await browser.waitUntil(
         async () => {
-          const text = await outputView.getText()
-          const joinedText = text.join('')
+          const joinedText = (await outputView.getText()).join('')
 
-          console.log({ text, joinedText })
-
-          return joinedText.includes(
-            'Found non-authenticated identity ✗ Error: Radicle profile not found in',
-          )
+          return joinedText.includes('✗ Error: Radicle profile not found in')
         },
         { timeoutMsg: 'expected the error message to be displayed in the output console' },
       )
