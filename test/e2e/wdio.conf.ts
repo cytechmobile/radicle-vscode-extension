@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { $ } from 'zx'
+import type { Options } from '@wdio/types'
 import { e2eTestDirPath, rootDirPath } from './constants/config'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
@@ -12,9 +13,17 @@ if (!process.env['CI']) {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 
-export const config: WebdriverIO.Config = {
+// TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
+// Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/130
+// Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
+export const config: Options.Testrunner = {
   runner: 'local',
-  tsConfigPath: './tsconfig.wdio.json',
+  autoCompileOpts: {
+    autoCompile: true,
+    tsNodeOpts: {
+      transpileOnly: true,
+    },
+  },
   specs: ['./specs/**/*.ts'],
   maxInstances: 10,
   capabilities: [
@@ -33,11 +42,8 @@ export const config: WebdriverIO.Config = {
           'disable-workspace-trust': true,
         },
       },
-      // Driver introduced in v9 has a bug that prevents tests from running
-      'wdio:enforceWebDriverClassic': true,
     },
   ],
-
   logLevel: 'warn',
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
