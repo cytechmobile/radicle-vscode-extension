@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
-import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
+import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
 import { closeRadicleViewContainer, openRadicleViewContainer } from '../helpers/actions'
 import { nodeHomePath } from '../constants/config'
 
@@ -16,7 +16,7 @@ describe('Settings', () => {
     workbench = await browser.getWorkbench()
     settings = await workbench.openSettings()
     await openRadicleViewContainer(workbench)
-    await expectCliCommandsAndPatchesToBeVisible(workbench)
+    await expectStandardSidebarViewsToBeVisible(workbench)
   })
 
   after(async () => {
@@ -37,7 +37,7 @@ describe('Settings', () => {
     afterEach(async () => {
       await clearTextSetting(pathToRadBinarySetting)
 
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await expectStandardSidebarViewsToBeVisible(workbench)
     })
 
     it('warns the user if the rad binary is not found', async () => {
@@ -57,7 +57,7 @@ describe('Settings', () => {
 
       await setTextSettingValue(pathToRadBinarySetting, `${tempNodeHomePath}/bin/rad`)
 
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await expectStandardSidebarViewsToBeVisible(workbench)
 
       await $`rm -rf ${tempNodeHomePath}`
     })
@@ -73,7 +73,7 @@ describe('Settings', () => {
 
       await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
 
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await expectStandardSidebarViewsToBeVisible(workbench)
 
       await clearTextSetting(pathToRadBinarySetting)
 
