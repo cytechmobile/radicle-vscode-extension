@@ -34,6 +34,13 @@ describe('Settings', () => {
       )
     })
 
+    after(async () => {
+      const searchBox = await getSettingsSearchBox(settings)
+      await clearInput(searchBox)
+
+      expect(searchBox.getValue()).toBe('')
+    })
+
     afterEach(async () => {
       await clearTextSetting(pathToRadBinarySetting)
 
@@ -83,11 +90,6 @@ describe('Settings', () => {
 
   describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
     it('displays error in output console', async () => {
-      // Close and re-open the settings editor (to clear the input)
-      await browser.keys([Key.Ctrl, 'w'])
-      await browser.pause(1000) // TODO: zac check if this is necessary
-      settings = await workbench.openSettings()
-
       await workbench.executeCommand('Show Everything Logged in the Output Panel')
       const outputView = await workbench.getBottomBar().openOutputView()
       await outputView.clearText()
@@ -169,6 +171,16 @@ async function clearTextSetting(setting: Setting) {
   }
 
   await setting.textSetting$.click()
+  await browser.keys([Key.Ctrl, 'a'])
+  await browser.keys(Key.Backspace)
+}
+
+async function getSettingsSearchBox(settings: SettingsEditor) {
+  return await settings.elem.$(settings.locatorMap.Editor['inputArea'] as string)
+}
+
+async function clearInput(input: WebdriverIO.Element) {
+  await input.setValue('')
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
 }
