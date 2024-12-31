@@ -11,3 +11,9 @@ export const e2eTestDirPath = join(__dirname, '..')
  * files outside of the e2e test directory.
  */
 export const rootDirPath = join(__dirname, '../../..')
+
+/**
+ * The path to the node home directory. This is where the Radicle node stores its
+ * configuration and data.
+ */
+export const nodeHomePath = process.env['RAD_HOME']
