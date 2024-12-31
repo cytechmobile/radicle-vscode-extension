@@ -90,7 +90,6 @@ describe('Settings', () => {
 
       await workbench.executeCommand('Show Everything Logged in the Output Panel')
       const outputView = await workbench.getBottomBar().openOutputView()
-      await outputView.selectChannel('Radicle')
       await outputView.clearText()
 
       // Set the path to a non-existent directory
