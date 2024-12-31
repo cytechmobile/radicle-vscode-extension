@@ -4,7 +4,7 @@ import type { Workbench } from 'wdio-vscode-service'
 import { $, cd } from 'zx'
 import type * as VsCode from 'vscode'
 import isEqual from 'lodash/isEqual'
-import { expectCliCommandsAndPatchesToBeVisible } from '../helpers/assertions'
+import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
 import { openRadicleViewContainer } from '../helpers/actions'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { e2eTestDirPath, nodeHomePath } from '../constants/config'
@@ -127,11 +127,11 @@ describe('Onboarding Flow', () => {
       })
     })
 
-    it('shows the CLI Commands and Patches sections', async () => {
+    it('shows the standard sidebar views', async () => {
       const sidebarView = workbench.getSideBar().getContent()
       await sidebarView.wait()
 
-      await expectCliCommandsAndPatchesToBeVisible(workbench)
+      await expectStandardSidebarViewsToBeVisible(workbench)
     })
   })
 })

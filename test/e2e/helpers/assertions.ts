@@ -6,19 +6,23 @@ import type { Workbench } from 'wdio-vscode-service'
  * considered the default state when the workspace is open with a git and rad initialized
  * repository.
  */
-export async function expectCliCommandsAndPatchesToBeVisible(workbench: Workbench) {
+export async function expectStandardSidebarViewsToBeVisible(workbench: Workbench) {
   const sidebarView = workbench.getSideBar().getContent()
   await sidebarView.wait()
 
-  await browser.waitUntil(async () => {
-    let sectionsFound = false
-    try {
-      await sidebarView.getSection('CLI COMMANDS')
-      await sidebarView.getSection('PATCHES')
-      sectionsFound = true
-      // eslint-disable-next-line prettier-vue/prettier
-    } catch { }
+  await browser.waitUntil(
+    async () => {
+      try {
+        await Promise.all([
+          sidebarView.getSection('CLI COMMANDS'),
+          sidebarView.getSection('PATCHES'),
+        ])
 
-    return sectionsFound
-  })
+        return true
+      } catch {
+        return false
+      }
+    },
+    { timeoutMsg: 'expected the standard sidebar views to be visible' },
+  )
 }
