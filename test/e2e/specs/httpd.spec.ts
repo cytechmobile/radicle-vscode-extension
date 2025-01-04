@@ -1,6 +1,7 @@
 import { browser } from '@wdio/globals'
 import type { OutputView, Setting, SettingsEditor } from 'wdio-vscode-service'
 import { Key } from 'webdriverio'
+import { $ } from 'zx'
 import { nodeHomePath } from '../constants/config'
 
 describe('Httpd', () => {
@@ -21,6 +22,9 @@ describe('Httpd', () => {
 
       return (await getTextSettingValue(pathToNodeHomeSetting)) === nodeHomePath
     })
+
+    const radSelf = await $`rad self`
+    console.log({ radSelf })
 
     await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
   })
