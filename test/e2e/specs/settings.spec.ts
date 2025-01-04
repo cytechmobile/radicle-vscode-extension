@@ -119,6 +119,14 @@ describe('Settings', () => {
       await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
     })
   })
+
+  it('receives success responses from httpd', async () => {
+    await workbench.executeCommand('Show Everything Logged in the Output Panel')
+    const outputView = await workbench.getBottomBar().openOutputView()
+    await outputView.clearText()
+
+    await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
+  })
 })
 
 async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
