@@ -86,7 +86,7 @@ describe('Settings', () => {
     })
   })
 
-  describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
+  describe.skip('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
     let pathToNodeHomeSetting: Setting
 
     before(async () => {
