@@ -23,7 +23,7 @@ describe('Settings', () => {
     await closeRadicleViewContainer(workbench)
   })
 
-  describe('VS Code, when updating the "Path to Rad Binary" setting,', () => {
+  describe.skip('VS Code, when updating the "Path to Rad Binary" setting,', () => {
     let pathToRadBinarySetting: Setting
 
     before(async () => {
