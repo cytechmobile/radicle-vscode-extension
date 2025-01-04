@@ -64,7 +64,7 @@ export const config: Options.Testrunner = {
     },
   ],
   logLevel: 'warn',
-  waitforTimeout: 10000,
+  waitforTimeout: 20000,
   services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
   framework: 'mocha',
   reporters: ['spec'],

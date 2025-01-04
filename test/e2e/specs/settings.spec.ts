@@ -4,9 +4,18 @@ import isEqual from 'lodash/isEqual'
 import { Key } from 'webdriverio'
 import { $ } from 'zx'
 import { getFirstWelcomeViewText } from '../helpers/queries'
-import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
-import { closeRadicleViewContainer, openRadicleViewContainer } from '../helpers/actions'
+import {
+  expectOutputToContain,
+  expectStandardSidebarViewsToBeVisible,
+} from '../helpers/assertions'
+import {
+  clearInput,
+  closeRadicleViewContainer,
+  openRadicleViewContainer,
+} from '../helpers/actions'
 import { nodeHomePath } from '../constants/config'
+
+const tempNodeHomePath = `${nodeHomePath}.temp`
 
 describe('Settings', () => {
   let workbench: Workbench
@@ -35,8 +44,7 @@ describe('Settings', () => {
     })
 
     after(async () => {
-      const searchBox = await getSettingsSearchBox(settings)
-      await clearInput(searchBox)
+      await clearInput(await getSettingsSearchBox(settings))
     })
 
     afterEach(async () => {
@@ -46,14 +54,12 @@ describe('Settings', () => {
     })
 
     it('warns the user if the rad binary is not found', async () => {
-      await browser.pause(1000)
       await setTextSettingValue(pathToRadBinarySetting, '/tmp')
 
       await expectRadBinaryNotFoundToBeVisible(workbench)
     })
 
     it('recognizes the rad binary when a valid path is specified', async () => {
-      const tempNodeHomePath = `${nodeHomePath}.temp`
       await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
 
       await setTextSettingValue(pathToRadBinarySetting, `/tmp`)
@@ -70,8 +76,6 @@ describe('Settings', () => {
     // This functionality does not seem to work
     // eslint-disable-next-line max-len
     it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
-      const tempNodeHomePath = `${nodeHomePath}.temp`
-
       await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
       await expectRadBinaryNotFoundToBeVisible(workbench)
@@ -80,13 +84,18 @@ describe('Settings', () => {
 
       await expectStandardSidebarViewsToBeVisible(workbench)
 
-      await clearTextSetting(pathToRadBinarySetting)
-
       await $`rm -rf ${tempNodeHomePath}`
     })
   })
 
-  describe('VS Code, when updating the "Path to Radicle to Node Home" setting,', () => {
+  /**
+   * In Linux CI:
+   * - The extension is having issues resolving the correct node home directory (RAD_HOME).
+   * - Even when node home is set explicitly in the settings, the extension incorrectly reports it
+   *   as non-authenticated.
+   */
+  // eslint-disable-next-line max-len
+  describe('VS Code, when updating the "Path to Radicle to Node Home" setting, @skipLinuxCI', () => {
     let pathToNodeHomeSetting: Setting
     let outputView: OutputView
 
@@ -101,56 +110,47 @@ describe('Settings', () => {
     })
 
     after(async () => {
-      const searchBox = await getSettingsSearchBox(settings)
-      await clearInput(searchBox)
+      await clearInput(await getSettingsSearchBox(settings))
     })
 
     afterEach(async () => {
       await outputView.clearText()
       await clearTextSetting(pathToNodeHomeSetting)
 
-      await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
+      await expectRadicleIdentityToBeFound(outputView)
     })
 
-    /**
-     * In Linux CI:
-     * - The extension is having issues resolving the correct node home directory (RAD_HOME).
-     * - Even when set explicitly in the settings, the extension incorrectly reports it as
-     *   non-authenticated.
-     */
-    it('logs an error in the output console if the path is invalid @skipLinuxCI', async () => {
+    it('logs an error in the output console if the path is invalid', async () => {
       await outputView.clearText()
 
       await setTextSettingValue(pathToNodeHomeSetting, '/tmp')
 
-      await expectOutputToContain(outputView, '✗ Error: Radicle profile not found in')
+      await expectRadicleProfileNotToBeFound(outputView)
     })
 
-    it('recognizes when a valid path is specified @skipLinuxCI', async () => {
-      const tempNodeHomePath = `${nodeHomePath}.temp`
+    it('recognizes when a valid path is specified', async () => {
       await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
       await outputView.clearText()
 
       await setTextSettingValue(pathToNodeHomeSetting, tempNodeHomePath)
 
-      await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
+      await expectRadicleIdentityToBeFound(outputView)
 
       await $`rm -rf ${tempNodeHomePath}`
     })
 
     // This functionality does not seem to work
     // eslint-disable-next-line max-len
-    it.skip('recognizes if the directory is created *after* the setting is updated @skipLinuxCI', async () => {
-      const tempNodeHomePath = `${nodeHomePath}.temp`
+    it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
       await outputView.clearText()
 
       await setTextSettingValue(pathToNodeHomeSetting, tempNodeHomePath)
 
-      await expectOutputToContain(outputView, '✗ Error: Radicle profile not found in')
+      await expectRadicleProfileNotToBeFound(outputView)
 
       await $`cp -r ${nodeHomePath} ${tempNodeHomePath}`
 
-      await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
+      await expectRadicleIdentityToBeFound(outputView)
 
       await $`rm -rf ${tempNodeHomePath}`
     })
@@ -162,8 +162,6 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
     async () => {
       const welcomeText = await getFirstWelcomeViewText(workbench)
 
-      console.log({ welcomeText })
-
       return isEqual(welcomeText, [
         /* eslint-disable max-len */
         'Failed resolving the Radicle CLI binary.',
@@ -172,13 +170,16 @@ async function expectRadBinaryNotFoundToBeVisible(workbench: Workbench) {
         /* eslint-enable max-len */
       ])
     },
-    {
-      timeoutMsg: 'expected the rad binary not found message to be visible',
-      // TODO: zac fine tune these (globally?)
-      timeout: 20000,
-      interval: 500,
-    },
+    { timeoutMsg: 'expected the rad binary not found message to be visible' },
   )
+}
+
+async function expectRadicleIdentityToBeFound(outputView: OutputView) {
+  await expectOutputToContain(outputView, 'Using already unsealed Radicle identity')
+}
+
+async function expectRadicleProfileNotToBeFound(outputView: OutputView) {
+  await expectOutputToContain(outputView, '✗ Error: Radicle profile not found in')
 }
 
 /**
@@ -213,27 +214,4 @@ async function clearTextSetting(setting: Setting) {
 
 async function getSettingsSearchBox(settings: SettingsEditor) {
   return await settings.elem.$(settings.locatorMap.Editor['inputArea'] as string)
-}
-
-async function clearInput(input: WebdriverIO.Element) {
-  await input.setValue('')
-  await browser.keys([Key.Ctrl, 'a'])
-  await browser.keys(Key.Backspace)
-}
-
-async function expectOutputToContain(outputView: OutputView, expected: string) {
-  await browser.waitUntil(
-    async () => {
-      /**
-       * The text in the output console is split by newlines, which can be affected by the size
-       * of the window. To avoid this, we join the text into a single string.
-       */
-      const joinedText = (await outputView.getText()).join('')
-
-      return joinedText.includes(expected)
-    },
-    {
-      timeoutMsg: `expected the output text to contain "${expected}"`,
-    },
-  )
 }
