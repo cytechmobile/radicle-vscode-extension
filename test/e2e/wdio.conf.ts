@@ -18,6 +18,17 @@ if (!process.env['CI']) {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 
+const skipTestsGrep = []
+
+switch (process.platform) {
+  case 'darwin':
+    skipTestsGrep.push('@skipMacOSCI')
+    break
+  case 'linux':
+    skipTestsGrep.push('@skipLinuxCI')
+    break
+}
+
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
 // Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/130
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
@@ -60,6 +71,8 @@ export const config: Options.Testrunner = {
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
+    grep: skipTestsGrep.length > 0 ? skipTestsGrep.join('|') : undefined,
+    invert: true,
   },
   onPrepare: async () => {
     await $`mkdir -p ${path.join(rootDirPath, 'node_modules/.cache/wdio')}`
