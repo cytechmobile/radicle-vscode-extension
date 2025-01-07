@@ -17,3 +17,10 @@ export const rootDirPath = join(__dirname, '../../..')
  * configuration and data.
  */
 export const nodeHomePath = process.env['RAD_HOME']
+
+/**
+ * The path to a backup node home directory. This is used to store the original
+ * node home directory for tests that require the original path to be moved or
+ * modified.
+ */
+export const backupNodeHomePath = `${nodeHomePath}.backup`

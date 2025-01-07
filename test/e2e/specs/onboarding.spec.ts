@@ -7,7 +7,7 @@ import isEqual from 'lodash/isEqual'
 import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
 import { openRadicleViewContainer } from '../helpers/actions'
 import { getFirstWelcomeViewText } from '../helpers/queries'
-import { e2eTestDirPath, nodeHomePath } from '../constants/config'
+import { backupNodeHomePath, e2eTestDirPath, nodeHomePath } from '../constants/config'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
@@ -17,15 +17,8 @@ describe('Onboarding Flow', () => {
   })
 
   describe('VS Code, *before* Radicle is installed,', () => {
-    const tempPathToNodeHome = `${nodeHomePath}.temp`
-
-    before(async () => {
-      // Simulate radicle "not being installed" by renaming the node home directory
-      await $`mv ${nodeHomePath} ${tempPathToNodeHome}`
-    })
-
     after(async () => {
-      await $`mv ${tempPathToNodeHome} ${nodeHomePath}`
+      await $`mv ${backupNodeHomePath} ${nodeHomePath}`
       await workbench.executeCommand('Developer: Reload Window')
     })
 

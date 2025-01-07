@@ -1,7 +1,12 @@
 import path from 'node:path'
 import { $ } from 'zx'
 import type { Options } from '@wdio/types'
-import { e2eTestDirPath, rootDirPath } from './constants/config'
+import {
+  backupNodeHomePath,
+  e2eTestDirPath,
+  nodeHomePath,
+  rootDirPath,
+} from './constants/config'
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const packageJson = require('../../package.json')
@@ -55,5 +60,10 @@ export const config: Options.Testrunner = {
   },
   onPrepare: async () => {
     await $`mkdir -p ${path.join(rootDirPath, 'node_modules/.cache/wdio')}`
+  },
+  onWorkerStart: async (_cid, _caps, specs) => {
+    if (specs.some((spec) => spec.includes('onboarding.spec.ts'))) {
+      await $`mv ${nodeHomePath} ${backupNodeHomePath}`
+    }
   },
 }
