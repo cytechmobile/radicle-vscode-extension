@@ -74,8 +74,7 @@ describe('Settings', () => {
     })
 
     // This functionality does not seem to work
-    // eslint-disable-next-line max-len
-    it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
+    it.skip('recognizes if the directory is created *after* the setting is set', async () => {
       await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
       await expectRadBinaryNotFoundToBeVisible(workbench)
@@ -140,8 +139,7 @@ describe('Settings', () => {
     })
 
     // This functionality does not seem to work
-    // eslint-disable-next-line max-len
-    it.skip('recognizes if the directory is created *after* the setting is updated', async () => {
+    it.skip('recognizes if the directory is created *after* the setting is set', async () => {
       await outputView.clearText()
 
       await setTextSettingValue(pathToNodeHomeSetting, tempNodeHomePath)
