@@ -2,13 +2,13 @@ import { browser } from '@wdio/globals'
 import type { OutputView, Workbench } from 'wdio-vscode-service'
 
 /**
- * Asserts the output view contains the expected text.
+ * Asserts the Output Panel contains the expected text.
  */
 export async function expectOutputToContain(outputView: OutputView, expected: string) {
   await browser.waitUntil(
     async () => {
       /**
-       * The text in the output console is split by newlines, which can be affected by the size
+       * The text in the Output Panel is split by newlines, which can be affected by the size
        * of the window. To avoid this, we join the text into a single string.
        */
       const joinedText = (await outputView.getText()).join('')
