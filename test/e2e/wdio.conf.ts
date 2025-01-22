@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path, { sep } from 'node:path'
 import { $ } from 'zx'
 import type { Options } from '@wdio/types'
 import {
@@ -29,6 +29,13 @@ switch (process.platform) {
     break
 }
 
+const orderedSpecPaths = ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'].map(
+  (specPath) => specPath.replace('/', sep),
+)
+const specsToExcludeFromGlob = orderedSpecPaths.map((specPath) =>
+  specPath.split(sep).at(-1)?.replace('.spec.ts', ''),
+)
+
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
 // Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/130
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
@@ -40,10 +47,7 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  specs: [
-    ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'],
-    './specs/**/!(onboarding|settings).spec.ts',
-  ],
+  specs: [orderedSpecPaths, `./specs/**/!(${specsToExcludeFromGlob.join('|')}).spec.ts`],
   maxInstances: 10,
   capabilities: [
     {
