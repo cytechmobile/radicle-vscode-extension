@@ -73,7 +73,7 @@ describe('Settings', () => {
       await $`rm -rf ${tempNodeHomePath}`
     })
 
-    // This functionality does not seem to work
+    // TODO: Unskip when #172 covered by this case is fixed
     it.skip('recognizes if the directory is created *after* the setting is set', async () => {
       await setTextSettingValue(pathToRadBinarySetting, tempNodeHomePath)
 
@@ -88,10 +88,11 @@ describe('Settings', () => {
   })
 
   /**
-   * In Linux CI:
-   * - The extension is having issues resolving the correct node home directory (RAD_HOME).
-   * - Even when node home is set explicitly in the settings, the extension incorrectly reports it
-   *   as non-authenticated.
+   * These tests is skipped on Linux CI because the extension is having issues resolving the correct
+   * node home directory.
+   *
+   * TODO: Figure out why the extension is having issues resolving the correct node home directory
+   * on Linux CI.
    */
   // eslint-disable-next-line max-len
   describe('VS Code, when updating the "Path to Radicle to Node Home" setting, @skipLinuxCI', () => {
@@ -138,7 +139,7 @@ describe('Settings', () => {
       await $`rm -rf ${tempNodeHomePath}`
     })
 
-    // This functionality does not seem to work
+    // TODO: Unskip when #172 covered by this case is fixed
     it.skip('recognizes if the directory is created *after* the setting is set', async () => {
       await outputView.clearText()
 
