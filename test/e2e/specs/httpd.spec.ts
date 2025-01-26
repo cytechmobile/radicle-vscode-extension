@@ -1,11 +1,11 @@
 import { browser } from '@wdio/globals'
-import type { OutputView, Setting, SettingsEditor } from 'wdio-vscode-service'
+import type { OutputView, Setting } from 'wdio-vscode-service'
 import { Key } from 'webdriverio'
 import { $ } from 'zx'
 import { nodeHomePath } from '../constants/config'
 
 describe('Httpd', () => {
-  it('receives success responses from httpd', async () => {
+  it('finds and uses radicle identity', async () => {
     const workbench = await browser.getWorkbench()
     await workbench.executeCommand('Show Everything Logged in the Output Panel')
     const outputView = await workbench.getBottomBar().openOutputView()
@@ -74,16 +74,6 @@ async function clearTextSetting(setting: Setting) {
   }
 
   await setting.textSetting$.click()
-  await browser.keys([Key.Ctrl, 'a'])
-  await browser.keys(Key.Backspace)
-}
-
-async function getSettingsSearchBox(settings: SettingsEditor) {
-  return await settings.elem.$(settings.locatorMap.Editor['inputArea'] as string)
-}
-
-async function clearInput(input: WebdriverIO.Element) {
-  await input.setValue('')
   await browser.keys([Key.Ctrl, 'a'])
   await browser.keys(Key.Backspace)
 }
