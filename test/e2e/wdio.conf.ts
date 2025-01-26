@@ -29,9 +29,11 @@ switch (process.platform) {
     break
 }
 
-const orderedSpecPaths = ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'].map(
-  (specPath) => specPath.replace('/', sep),
-)
+const orderedSpecPaths = [
+  './specs/onboarding.spec.ts',
+  './specs/settings.spec.ts',
+  './specs/patch-details.spec.ts',
+].map((specPath) => specPath.replace('/', sep))
 const specsToExcludeFromGlob = orderedSpecPaths.map((specPath) =>
   specPath.split(sep).at(-1)?.replace('.spec.ts', ''),
 )
