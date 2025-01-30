@@ -53,7 +53,10 @@ export const config: Options.Testrunner = {
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
   framework: 'mocha',
-  reporters: ['spec'],
+  reporters: [
+    'spec',
+    ['video', { outputDir: path.join(e2eTestDirPath, '_results_', 'videos') }],
+  ],
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
