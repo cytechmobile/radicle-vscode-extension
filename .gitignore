@@ -15,5 +15,6 @@ debug.log*
 # git / radicle
 .gitsigners
 
-# wdio
+# e2e tests
 .wdio-vscode-service
+test/e2e/_results_
