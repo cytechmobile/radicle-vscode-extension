@@ -5,7 +5,7 @@ import { $, cd } from 'zx'
 import type * as VsCode from 'vscode'
 import isEqual from 'lodash/isEqual'
 import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
-import { openRadicleViewContainer } from '../helpers/actions'
+import { closeRadicleViewContainer, openRadicleViewContainer } from '../helpers/actions'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 import { backupNodeHomePath, e2eTestDirPath, nodeHomePath } from '../constants/config'
 
@@ -14,6 +14,10 @@ describe('Onboarding Flow', () => {
 
   before(async () => {
     workbench = await browser.getWorkbench()
+  })
+
+  after(async () => {
+    await closeRadicleViewContainer(workbench)
   })
 
   describe('VS Code, *before* Radicle is installed,', () => {

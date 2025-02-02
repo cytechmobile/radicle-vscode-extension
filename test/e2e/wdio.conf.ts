@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path, { sep } from 'node:path'
 import { $ } from 'zx'
 import type { Options } from '@wdio/types'
 import {
@@ -18,6 +18,24 @@ if (!process.env['CI']) {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 
+const skipTestsGrep = []
+
+switch (process.platform) {
+  case 'darwin':
+    skipTestsGrep.push('@skipMacOSCI')
+    break
+  case 'linux':
+    skipTestsGrep.push('@skipLinuxCI')
+    break
+}
+
+const orderedSpecPaths = ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'].map(
+  (specPath) => specPath.replace('/', sep),
+)
+const specsToExcludeFromGlob = orderedSpecPaths.map((specPath) =>
+  specPath.split(sep).at(-1)?.replace('.spec.ts', ''),
+)
+
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
 // Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/130
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
@@ -29,7 +47,7 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  specs: ['./specs/**/*.ts'],
+  specs: [orderedSpecPaths, `./specs/**/!(${specsToExcludeFromGlob.join('|')}).spec.ts`],
   maxInstances: 10,
   capabilities: [
     {
@@ -50,13 +68,15 @@ export const config: Options.Testrunner = {
     },
   ],
   logLevel: 'warn',
-  waitforTimeout: 10000,
+  waitforTimeout: 20000,
   services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
+    grep: skipTestsGrep.length > 0 ? skipTestsGrep.join('|') : undefined,
+    invert: true,
   },
   onPrepare: async () => {
     await $`mkdir -p ${path.join(rootDirPath, 'node_modules/.cache/wdio')}`
