@@ -544,7 +544,7 @@
           "radicle.advanced.pathToRadBinary": {
             "scope": "machine-overridable",
             "type": "string",
-            "pattern": "^$|^(/[^/ ]*)+/?$",
+            "pattern": "^$|^(/[^/ ]*)+/?$|^[a-zA-Z]:([\\\\/][^<>:\"/\\\\|?*]+)+$",
             "patternErrorMessage": "Current input doesn't match any supported path patterns.",
             "default": "",
             "markdownDescription": "Specifies the _absolute_ path to the Radicle CLI binary stored on your machine. \n\nLeave empty to use the default path for your OS or if command `rad` is already globally available in your shell."
