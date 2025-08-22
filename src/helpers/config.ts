@@ -129,7 +129,7 @@ export function getResolvedPathToRadBinary(): string {
  * @returns The path if successfully resolved, otherwise `undefined`
  */
 export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
-  const aliasedPath = exec('which rad')
+  const aliasedPath = process.platform === 'win32' ? exec('where rad') : exec('which rad')
   if (!aliasedPath) {
     return undefined
   }
