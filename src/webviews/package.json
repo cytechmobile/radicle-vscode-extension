@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "npx -y only-allow pnpm",
+    "preinstall": "node ../../scripts/ensure-pnpm.ts",
     "verify-deps": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
     "dev": "npm run build-only --watch",
     "build": "run-p type-check \"build-only {@}\" --",

@@ -18,10 +18,8 @@
   "bugs": "https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues",
   "pricing": "Free",
   "engines": {
-    "vscode": "^1.91.0",
-    "npm": "^7"
+    "vscode": "^1.112.0"
   },
-  "packageManager": "pnpm@9.0.0",
   "keywords": [
     "radicle",
     "git"
@@ -30,12 +28,12 @@
     "SCM Providers"
   ],
   "scripts": {
-    "preinstall": "npx -y only-allow pnpm",
+    "preinstall": "node scripts/ensure-pnpm.ts",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
     "verify-deps": "npx npm-run-all -pl verify-deps:*",
     "verify-deps:extension": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
     "verify-deps:webviews": "cd ./src/webviews && npm run verify-deps",
-    "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
+    "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=./dist/extension.js --external:vscode --format=cjs --platform=node --target=es2022",
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
@@ -583,7 +581,7 @@
     "@types/lodash": "^4.17.6",
     "@types/mocha": "^10.0.9",
     "@types/node": "^20.11.21",
-    "@types/vscode": "^1.91.0",
+    "@types/vscode": "^1.112.0",
     "@wdio/cli": "^8.41.0",
     "@wdio/globals": "^8.41.0",
     "@wdio/local-runner": "^8.41.0",

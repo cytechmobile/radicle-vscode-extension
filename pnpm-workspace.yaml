@@ -1,0 +1,6 @@
+allowBuilds:
+  edgedriver: true
+  esbuild: true
+  geckodriver: true
+  simple-git-hooks: true
+  vue-demi: true

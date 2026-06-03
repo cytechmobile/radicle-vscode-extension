@@ -2,6 +2,13 @@
 
 # _(WIP, yet unreleased version)_
 
+### 🏡 Chores
+
+- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
+- **build:** upgrade transpilation target to es2022
+- **dev, ci:** upgrade to Node.js 24, pnpm 11
+- **deps:** upgrade minimum VS Code version requirement to 1.112.0
+
 ### 🤖 CI
 
 - **e2e:** set up new infrastructure and a related CI workflow capable of automated completely end-to-end testing. It uses a real Radicle node, which powers the latest extension build, which is running in an actual VS Code. Tests can assert behavior and state even as deep as extension webviews.

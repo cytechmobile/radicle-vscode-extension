@@ -494,5 +494,5 @@ function getHtmlIconForPatch<P extends Patch>(patch: P): string {
 
 function getCssColor(themeColor: ThemeColor | undefined): string {
   // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
-  return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
+  return `var(--vscode-${themeColor.id.replace('.', '-')})`
 }
