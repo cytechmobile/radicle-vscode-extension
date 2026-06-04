@@ -4,3 +4,13 @@ allowBuilds:
   geckodriver: true
   simple-git-hooks: true
   vue-demi: true
+
+overrides:
+  "@typescript-eslint/parser": "^8.0.0"
+  "@typescript-eslint/eslint-plugin": "^8.0.0"
+  "@typescript-eslint/typescript-estree": "^8.0.0"
+  "@typescript-eslint/utils": "^8.0.0"
+  "@typescript-eslint/type-utils": "^8.0.0"
+  "@typescript-eslint/scope-manager": "^8.0.0"
+  "@typescript-eslint/visitor-keys": "^8.0.0"
+  "@typescript-eslint/types": "^8.0.0"

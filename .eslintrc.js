@@ -11,7 +11,7 @@ module.exports = {
     'prettier',
     ...(eslintTsconfig
       ? [
-          'plugin:@typescript-eslint/recommended-requiring-type-checking',
+          'plugin:@typescript-eslint/recommended-type-checked',
           'plugin:@typescript-eslint/strict',
         ]
       : []),
@@ -420,6 +420,6 @@ module.exports = {
     sourceType: 'module',
     ecmaVersion: 2024,
     ecmaFeatures: { jsx: true },
-    ...(eslintTsconfig ? { project: [eslintTsconfig] } : {}), // TODO: fix this to work when eslintTsconfig is undefined
+    ...(eslintTsconfig ? { project: [eslintTsconfig, './test/e2e/tsconfig.wdio.json'] } : {}),
   },
 }

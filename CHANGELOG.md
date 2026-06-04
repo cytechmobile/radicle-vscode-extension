@@ -5,8 +5,9 @@
 ### 🏡 Chores
 
 - **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
-- **build:** upgrade transpilation target to es2022
-- **dev, ci:** upgrade to Node.js 24, pnpm 11
+- **build:** upgrade transpilation target to es2022 (latest supported by VS Code)
+- **dev, ci:** migrate to Node.js 24, pnpm 11
+- **ts:** migrate to v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
 - **deps:** upgrade minimum VS Code version requirement to 1.112.0
 
 ### 🤖 CI

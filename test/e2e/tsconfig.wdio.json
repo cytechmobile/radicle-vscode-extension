@@ -9,5 +9,7 @@
       "expect-webdriverio",
       "wdio-vscode-service"
     ]
-  }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"],
+  "exclude": ["node_modules"],
 }

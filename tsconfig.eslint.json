@@ -1,14 +1,16 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
     "incremental": false,
+    "allowJs": true,
   },
-  "extends": "./test/e2e/tsconfig.wdio.json",
   "include": [
-    "./**.js",
     "./**/*.ts",
     "./**/*.tsx",
     "./**/*.mts",
-    "./**/*.cts"
-  ]
+    "./**/*.cts",
+    ".eslintrc.js",
+  ],
+  "exclude": ["node_modules", "dist", "src/webviews", "test"],
 }
