@@ -1,8 +1,8 @@
 import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { ref, computed, watchEffect } from 'vue'
-import { getVscodeRef } from '@/utils/getVscodeRef'
+import { computed, ref, watchEffect } from 'vue'
 import type { notifyWebview } from 'extensionUtils/webview-messaging'
+import { getVscodeRef } from '@/utils/getVscodeRef'
 
 const initialState = { count: 0 }
 const vscode = getVscodeRef<typeof initialState>()

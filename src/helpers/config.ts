@@ -1,7 +1,7 @@
 import { homedir } from 'node:os'
 import { ConfigurationTarget, workspace } from 'vscode'
-import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
 import { exec } from '.'
+import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
 
 /**
  * Lists they keys of configuration options available to the user along with
@@ -34,9 +34,11 @@ export function getConfig<K extends keyof ExtensionConfig>(
     case 'radicle.advanced.pathToNodeHome':
     case 'radicle.advanced.httpApiEndpoint':
       // if the config has the value of the empty string (default) then return `undefined`
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-      return config.get<ExtensionConfig[K]>(configKey)?.trim() || undefined
+      // @ts-expect-error -- config.get() returns `any` for generic config key types
+      // eslint-disable-next-line ts/no-unsafe-call
+      return (config.get<ExtensionConfig[K]>(configKey)?.trim() || undefined) as
+        | ExtensionConfig[K]
+        | undefined
     case 'radicle.hideTempFiles':
       return config.get<ExtensionConfig[K]>(configKey)
     default:

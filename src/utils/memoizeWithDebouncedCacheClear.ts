@@ -1,5 +1,5 @@
-import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
+import memoize from 'lodash/memoize'
 
 // TODO: maninak fix importing issue "Cannot read properties of undefined (reading 'default')"
 // No matter how I import lodash it seems to be undefined?!
@@ -26,12 +26,12 @@ import debounce from 'lodash/debounce'
  * ```
  *
  * @param func The function to memoize
- * @param {number} [cacheTtlMs=0] The minimum amount of time to wait in milliseconds
+ * @param {number} [cacheTtlMs] The minimum amount of time to wait in milliseconds
  * after the last time a cache clear was requested, before it actually happens
  * @returns The original function now memoized
  */
-// eslint-disable-next-line space-before-function-paren, @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
-export function memoizeWithDebouncedCacheClear<T extends (...args: any) => unknown>(
+// eslint-disable-next-line space-before-function-paren, ts/explicit-function-return-type
+export function memoizeWithDebouncedCacheClear<T extends (...args: unknown[]) => unknown>(
   func: T,
   cacheTtlMs = 0,
 ) {

@@ -1,10 +1,10 @@
-import {
-  type ExecFileSyncOptionsWithStringEncoding,
-  type SpawnSyncOptionsWithStringEncoding,
-  execFileSync,
-  spawnSync,
-} from 'node:child_process'
 import type { XOR } from 'ts-xor'
+import {
+  execFileSync,
+  type ExecFileSyncOptionsWithStringEncoding,
+  spawnSync,
+  type SpawnSyncOptionsWithStringEncoding,
+} from 'node:child_process'
 import { useEnvStore } from '../stores'
 import { getWorkspaceFolderPaths, log, truncateKeepWords } from '../utils'
 import { getConfig } from './config'
@@ -21,49 +21,27 @@ import { getConfig } from './config'
  * @param cmd - The shell command to execute. Can be a static string or a function resolving
  * the command dynamically.
  * @param options - Optional configuration.
+ * @param options.args - List of string arguments for the given command.
+ * @param options.shouldLog - Whether to log the command output to the Output panel. If `false`
+ * and an error occurs, the error is still logged to the Debug console (only visible during
+ * development). Defaults to `false`.
+ * @param options.timeout - Maximum time in ms before the command is forcefully terminated.
+ * Set to `0` to disable. Defaults to `30_000`.
+ * @param options.outputTrimming - If `true`, leading and trailing whitespace is stripped from
+ * stdout before it is returned. Defaults to `true`.
+ * @param options.cwd - Working directory for the command. Pass `'$workspaceDir'` to use the
+ * VS Code workspace folder. Defaults to `undefined`.
+ * @param options.env - Additional environment variables to merge into the child process env.
  * @returns The output of the shell command if successful, otherwise `undefined`.
  */
 export function exec(
   cmd: string | (() => string),
   options?: {
-    /**
-     * List of string arguments for the given command.
-     */
     args?: string[]
-    /**
-     * Specifies whether the output of the shell command should be logged in the Output panel
-     * or not. If set to `false` and a command execution error occurs, then the error will be
-     * logged in the Debug panel regardless (only visible during development).
-     *
-     * @default false
-     */
     shouldLog?: boolean
-    /**
-     * Specifies the maximum amount of time (in milliseconds) that the shell command is
-     * allowed to run before it is automatically terminated. If the command takes longer than
-     * the specified timeout, it will be forcefully terminated and an error will be thrown.
-     *
-     * Setting it to `0` will disable the timeout.
-     *
-     * @default 5000
-     */
     timeout?: number
-    /**
-     * If set to `true`, the stdout will be trimmed of any leading or trailing
-     * whitespace before being returned. Otherwise the output will be returned as-is.
-     * Especially useful for removing the common trailing new-line.
-     *
-     * @default true
-     */
     outputTrimming?: boolean
-    /**
-     * Specifies the current working directory in which the shell command will be executed.
-     * Can be either a string representing a specific directory path or the string
-     * literal `'$workspaceDir'` indicating that the VS Code workspace should be used.
-     *
-     * @default undefined
-     * */
-    cwd?: (string & {}) | '$workspaceDir' // eslint-disable-line @typescript-eslint/ban-types
+    cwd?: (string & {}) | '$workspaceDir'
     env?: SpawnSyncOptionsWithStringEncoding['env']
   },
 ): string | undefined {
@@ -94,12 +72,11 @@ export function exec(
 
     const execResult = spawnSync(resolvedCmd, (opts.args ?? []).map(maybeEscapeArg), spawnOpts)
     if (execResult.error || execResult.status) {
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw execResult.error ?? (execResult.stderr || execResult.stdout)
     }
 
     const parsedResult =
-      opts.outputTrimming ?? true ? execResult.stdout.trim() : execResult.stdout
+      (opts.outputTrimming ?? true) ? execResult.stdout.trim() : execResult.stdout
     if (opts.shouldLog ?? false) {
       log(
         parsedResult,
@@ -113,15 +90,10 @@ export function exec(
     const fullCmd = `${resolvedCmd} ${
       options?.args ? options.args.map(maybeEscapeArg).join(' ') : ''
     }`
-    const parsedError =
-      typeof error === 'string'
-        ? error
-        : error instanceof Error
-        ? error.message
-        : `Failed executing shell command: "${resolvedCmd}"`
+    const parsedError = parseError(error, resolvedCmd)
 
     if (opts.shouldLog ?? false) {
-      log(opts.outputTrimming ?? true ? parsedError.trim() : parsedError, 'error', fullCmd)
+      log((opts.outputTrimming ?? true) ? parsedError.trim() : parsedError, 'error', fullCmd)
     }
 
     // will show up only in the Debug console during development
@@ -140,43 +112,26 @@ export function exec(
  * // Equivalent to running `rad self --alias` in the shell, but without using a shell
  * ```
  *
- * @param {string[]} [args=[]] The arguments with which we want to call the rad binary.
- * Special string characters don't need to be escaped as one would do with a
- * shell command and there should be no exposure to shell injection attacks.
- *
- * @returns An object with either the stdout of the command, if executed successfully, or
- * the errorCode that node.js or the rad binary returned, along with any stderr and stdout
- * outputs.
+ * @param args - Arguments passed to the `rad` binary. Special shell characters don't need
+ * escaping and there is no risk of shell injection.
+ * @param options - Optional configuration.
+ * @param options.shouldLog - Whether to log the command output to the Output panel. If `false`
+ * and an error occurs, the error is still logged to the Debug console (only visible during
+ * development). Defaults to `false`.
+ * @param options.timeout - Maximum time in ms before the command is forcefully terminated.
+ * Set to `0` to disable. Defaults to `30_000`.
+ * @param options.cwd - Working directory for the command. Pass `'$workspaceDir'` to use the
+ * VS Code workspace folder. Defaults to `undefined`.
+ * @param options.env - Additional environment variables to merge into the child process env.
+ * @returns An object with either the `stdout` of the command if successful, or the `errorCode`
+ * that Node.js or the rad binary returned, along with any `stderr` and `stdout` outputs.
  */
 export function execRad(
   args: string[] = [],
   options?: {
-    /**
-     * Specifies whether the output of the shell command should be logged in the Output panel
-     * or not. If set to `false` and a command execution error occurs, then the error will be
-     * logged in the Debug panel regardless (only visible during development).
-     *
-     * @default false
-     */
     shouldLog?: boolean
-    /**
-     * Specifies the maximum amount of time (in milliseconds) that the shell command is
-     * allowed to run before it is automatically terminated. If the command takes longer than
-     * the specified timeout, it will be forcefully terminated and an error will be thrown.
-     *
-     * Setting it to `0` will disable the timeout.
-     *
-     * @default 30_000
-     */
     timeout?: number
-    /**
-     * Specifies the current working directory in which the shell command will be executed.
-     * Can be either a string representing a specific directory path or the string
-     * literal `'$workspaceDir'` indicating that the VS Code workspace should be used.
-     *
-     * @default undefined
-     * */
-    cwd?: (string & {}) | '$workspaceDir' // eslint-disable-line @typescript-eslint/ban-types
+    cwd?: (string & {}) | '$workspaceDir'
     env?: ExecFileSyncOptionsWithStringEncoding['env']
   },
 ): XOR<{ stdout: string }, { errorCode: string | number; stdout?: string; stderr?: string }> {
@@ -250,6 +205,17 @@ export function execRad(
       errorCode: error.code || error.status,
     }
   }
+}
+
+function parseError(error: unknown, resolvedCmd: string): string {
+  if (typeof error === 'string') {
+    return error
+  }
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return `Failed executing shell command: "${resolvedCmd}"`
 }
 
 function maybeEscapeArg(cliArg: string): string {

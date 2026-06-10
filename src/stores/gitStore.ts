@@ -1,5 +1,5 @@
-import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { computed, ref } from '@vue/reactivity'
+import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { getCurrentGitBranch, getCurrentGitUpstreamBranch } from '../utils'
 
 setActivePinia(createPinia())

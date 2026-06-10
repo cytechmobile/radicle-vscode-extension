@@ -1,3 +1,4 @@
+import type { ArrayMinLength, Prettify } from '../types'
 import {
   type Disposable,
   type InputBoxOptions,
@@ -7,7 +8,6 @@ import {
   ThemeIcon,
   window,
 } from 'vscode'
-import type { ArrayMinLength, Prettify } from '../types'
 import { log } from './log'
 
 export type Question = Prettify<
@@ -97,13 +97,13 @@ export async function askUser<
     disposables.push(inputBox)
 
     function getInputBoxButtons(): QuickInputButton[] {
+      const passwordButtons = shouldRevealPassword
+        ? [buttonHidePassword]
+        : [buttonRevealPassword]
+
       return [
         ...(qIndex > 0 ? [QuickInputButtons.Back] : []),
-        ...(question.password
-          ? shouldRevealPassword
-            ? [buttonHidePassword]
-            : [buttonRevealPassword]
-          : []),
+        ...(question.password ? passwordButtons : []),
       ]
     }
 

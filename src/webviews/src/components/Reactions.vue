@@ -1,32 +1,34 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import type { Reaction } from '../../../types'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
+import { storeToRefs } from 'pinia'
 import { truncateDid } from 'extensionUtils/string'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
 defineProps<{ reactions: Reaction[] }>()
 
 const { localIdentity } = storeToRefs(usePatchDetailStore())
 
 function getNormalizedAuthorsWithoutDids(reaction: Reaction): (string | 'you')[] {
-  const normalizedAuthors = reaction.authors.map((author) =>
-    localIdentity.value?.id === author.id ? 'you' : (author.alias ?? truncateDid(author.id)),
-  )
+  return reaction.authors.map((author) => {
+    if (localIdentity.value?.id === author.id) {
+      return 'you' as const
+    }
 
-  return normalizedAuthors
+    return author.alias ?? truncateDid(author.id)
+  })
+}
+
+function getAuthorDisplayWithDid(author: Reaction['authors'][number]): string {
+  if (localIdentity.value?.id === author.id) {
+    return `you (${truncateDid(localIdentity.value.id)})`
+  }
+
+  return author.alias ? `${author.alias} (${truncateDid(author.id)})` : truncateDid(author.id)
 }
 
 function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
-  const normalizedAuthors = reaction.authors.map((author) =>
-    localIdentity.value?.id === author.id
-      ? `you (${truncateDid(localIdentity.value.id)})`
-      : author.alias
-        ? `${author.alias} (${truncateDid(author.id)})`
-        : truncateDid(author.id),
-  )
-
-  return normalizedAuthors
+  return reaction.authors.map(getAuthorDisplayWithDid)
 }
 </script>
 
@@ -55,8 +57,9 @@ function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
             :class="{
               'involves-local-identity': part.value === 'you',
             }"
-            >{{ part.value }}</span
           >
+            {{ part.value }}
+          </span>
           <template v-else-if="part.type === 'literal'">{{ part.value }}</template>
         </template>
       </template>
@@ -69,8 +72,9 @@ function getNormalizedAuthorsWithDids(reaction: Reaction): string[] {
               (author) => localIdentity?.id === author.id,
             ),
           }"
-          >{{ reaction.authors.length }}</span
         >
+          {{ reaction.authors.length }}
+        </span>
       </template>
     </span>
   </div>

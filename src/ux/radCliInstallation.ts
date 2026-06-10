@@ -1,4 +1,4 @@
-import { type QuickPickItem, Uri, env, window } from 'vscode'
+import { env, type QuickPickItem, Uri, window } from 'vscode'
 import {
   exec,
   getAbsolutePathToDefaultRadBinaryDirectory,
@@ -6,8 +6,8 @@ import {
   getRadCliVersion,
   setConfig,
 } from '../helpers'
-import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 import { useEnvStore } from '../stores'
+import { isRealFsPath, log, setWhenClauseContext } from '../utils'
 
 /**
  * Launches a branching flow of interactive steps helping the user troubleshoot their

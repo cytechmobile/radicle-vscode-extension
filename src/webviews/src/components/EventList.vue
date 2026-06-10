@@ -1,6 +1,6 @@
 <template>
   <ul
-    class="list-none m-0 p-0 grid gap-3"
+    class="m-0 grid list-none gap-3 p-0"
     style="grid-template-columns: max-content max-content minmax(0, 1fr)"
   >
     <slot></slot>

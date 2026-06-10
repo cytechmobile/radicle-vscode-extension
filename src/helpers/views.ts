@@ -1,8 +1,8 @@
-import { window } from 'vscode'
+import type { AugmentedPatch } from '../types'
 import { effect } from '@vue/reactivity'
+import { window } from 'vscode'
 import { usePatchStore } from '../stores'
 import { getTimeAgo } from '../utils'
-import type { AugmentedPatch } from '../types'
 import { patchesTreeDataProvider, patchesViewId } from '../ux'
 
 let patchesView: ReturnType<typeof registerPatchesView> | undefined
@@ -42,6 +42,17 @@ function registerPatchesView() {
   return patchesView
 }
 
+/**
+ * Switches VS Code views as necessary so that the given patch's entry is shown in
+ * the Patches view. By default, it will attempt to scroll the patch into view
+ * and select it.
+ * @param patch - The patch to be revealed in the Patches view.
+ * @param options - Optional options for how the patch should be revealed. To change this behavior, set as follows:
+ * - In order to not to select, set the option `select` to `false`.
+ * - In order to focus, set the option `focus` to `true`.
+ * - In order to expand the revealed element, set the option `expand` to `true`. To expand
+ * recursively set `expand` to the number of levels to expand (max `3`).
+ */
 export function revealPatch(
   patch: AugmentedPatch,
   options?: Parameters<NonNullable<typeof patchesView>['reveal']>['1'],

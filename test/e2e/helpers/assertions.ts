@@ -1,5 +1,5 @@
-import { browser } from '@wdio/globals'
 import type { Workbench } from 'wdio-vscode-service'
+import { browser } from '@wdio/globals'
 
 /**
  * Asserts that the CLI Commands and Patches sections are visible in the sidebar. This is

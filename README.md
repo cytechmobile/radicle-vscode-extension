@@ -33,19 +33,19 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 - Run common Radicle commands with dedicated buttons from within the main extension View
 
-    ![Buttons to execute Radicle commands in the main extension View](assets/for-md/rad-cmds-in-main-view.png)
+  ![Buttons to execute Radicle commands in the main extension View](assets/for-md/rad-cmds-in-main-view.png)
 
 - Run Radicle commands from within VS Code's Command Palette
 
-    ![Execute Radicle commands from within VS Code's Command Palette](assets/for-md/rad-cmds-in-palette.png)
+  ![Execute Radicle commands from within VS Code's Command Palette](assets/for-md/rad-cmds-in-palette.png)
 
 - Sync with the Radicle network with a dedicated button among the native Source Control View's title buttons (above commit message input)
 
-    ![Sync with the Radicle network with a dedicated button among the native Source Control View's title buttons (above commit message input)](assets/for-md/rad-cmds-in-scm-title.png)
+  ![Sync with the Radicle network with a dedicated button among the native Source Control View's title buttons (above commit message input)](assets/for-md/rad-cmds-in-scm-title.png)
 
 - Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu
 
-    ![Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
+  ![Find Radicle commands grouped as a "Radicle" submenu inside the native Source Control View's three-dot-menu](assets/for-md/rad-cmds-in-scm-3dot.png)
 
 ### Patches View
 
@@ -63,43 +63,43 @@ Inspect all details you'd want to know about a patch including discussions, deta
 
 - Create a new Radicle identity, if none exists in your configured Radicle home directory
 
-    ![Create new identity](assets/for-md/auth-create-id.png)
+  ![Create new identity](assets/for-md/auth-create-id.png)
 
 - Unlock an existing identity
 
-    ![Unlock existing identity](assets/for-md/auth-unlock-id.png)
+  ![Unlock existing identity](assets/for-md/auth-unlock-id.png)
 
 - De-authenticate your currently unlocked identity
 
-    ![de-authenticate identity](assets/for-md/auth-lock-id.png)
+  ![de-authenticate identity](assets/for-md/auth-lock-id.png)
 
 ### Cloning
 
 - Invoke the CLI's `rad clone` command from the Command Palette
 
-    ![rad clone listed in command palette](assets/for-md/rad-clone-palette.png)
+  ![rad clone listed in command palette](assets/for-md/rad-clone-palette.png)
 
 - Select from a filterable list of repos that your Radicle node is seeding
 
-    ![rad clone listed repos](assets/for-md/rad-clone-choose.png)
+  ![rad clone listed repos](assets/for-md/rad-clone-choose.png)
 
 - Open the newly cloned repo in another VS Code window with a single click
 
-    ![rad clone success](assets/for-md/rad-clone-success.png)
+  ![rad clone success](assets/for-md/rad-clone-success.png)
 
 ### Onboarding Flow
 
 - No folder opened in Workspace
 
-    ![no folder opened in Workspace](assets/for-md/no-folder-init-welcome-view.png)
+  ![no folder opened in Workspace](assets/for-md/no-folder-init-welcome-view.png)
 
 - Non-git-initialized folder opened in Workspace
 
-    ![Non-git-initialized folder opened in Workspace](assets/for-md/non-git-init-welcome-view.png)
+  ![Non-git-initialized folder opened in Workspace](assets/for-md/non-git-init-welcome-view.png)
 
 - Non-radicle-initialized repo opened in Workspace
 
-    ![Non-radicle-initialized repo opened in Workspace](assets/for-md/non-rad-init-welcome-view.png)
+  ![Non-radicle-initialized repo opened in Workspace](assets/for-md/non-rad-init-welcome-view.png)
 
 ### Troubleshooting Flow
 

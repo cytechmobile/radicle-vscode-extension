@@ -1,7 +1,7 @@
 let vscodeRef: ReturnType<typeof acquireVsCodeApi> | undefined
 
 /** Resolves a reference to the VS Code context auto-injected in a webview. */
-export function getVscodeRef<T>() {
+export function getVscodeRef<T>(): WebviewApi<T> {
   if (vscodeRef) {
     return vscodeRef as WebviewApi<T>
   }
@@ -25,14 +25,14 @@ export interface WebviewApi<StateType> {
    *
    * @param message Data to post. Must be JSON serializable.
    */
-  postMessage(message: unknown): void
+  postMessage: (message: unknown) => void
 
   /**
    * Get the persistent state stored for this webview.
    *
    * @return The current state or `undefined` if no state has been set.
    */
-  getState(): StateType | undefined
+  getState: () => StateType | undefined
 
   /**
    * Set the persistent state stored for this webview.
@@ -42,7 +42,7 @@ export interface WebviewApi<StateType> {
    *
    * @return The new state.
    */
-  setState<T extends StateType | undefined>(newState: T): T
+  setState: <T extends StateType | undefined>(newState: T) => T
 }
 
 declare global {

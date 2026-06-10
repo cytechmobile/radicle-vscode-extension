@@ -1,8 +1,5 @@
 import { access, constants } from 'node:fs'
 import { RelativePattern, Uri, workspace } from 'vscode'
-import { getRepoRoot, getWorkspaceFolderPaths, setWhenClauseContext } from '../utils'
-import { validateRadCliInstallation } from '../ux'
-import { useEnvStore, useGitStore } from '../stores'
 import {
   getAbsolutePathToDefaultRadBinaryDirectory,
   getConfig,
@@ -10,6 +7,9 @@ import {
   isRadCliInstalled,
   isRadInitialized,
 } from '.'
+import { useEnvStore, useGitStore } from '../stores'
+import { getRepoRoot, getWorkspaceFolderPaths, log, setWhenClauseContext } from '../utils'
+import { validateRadCliInstallation } from '../ux'
 
 interface FileWatcherConfig {
   glob:
@@ -70,12 +70,19 @@ const notInWorkspaceFileWatchers = [
   // installation with package manager
   (() => {
     let pathToRadBinaryDirWithTrailingSlash: `${string}/` | undefined
+    // eslint-disable-next-line ts/switch-exhaustiveness-check -- obscure platforms have no known rad path; they fall through to `default` and rely on user config
     switch (process.platform) {
       case 'linux':
         pathToRadBinaryDirWithTrailingSlash = '/usr/bin/'
         break
       case 'darwin':
         pathToRadBinaryDirWithTrailingSlash = '~/.cargo/bin/'
+        break
+      default:
+        log(
+          `Unsupported platform "${process.platform}" for automatic detection of rad binary.`,
+          'warn',
+        )
         break
     }
 
@@ -124,7 +131,7 @@ export function registerAllFileWatchers() {
       const glob = fileWatcherConfig.glob
       const resolvedGlob = typeof glob === 'function' ? glob() : glob
 
-      if (resolvedGlob.pattern.match(/rad$/)) {
+      if (resolvedGlob.pattern.endsWith('rad')) {
         const pathToRadBinary = `${resolvedGlob.baseUri.path}${resolvedGlob.pattern}`
 
         setTimeout(() => {

@@ -1,8 +1,7 @@
-import vscode, { type ExtensionContext } from 'vscode'
-import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { type ShallowRef, computed, ref, shallowRef } from '@vue/reactivity'
 import type { DId } from '../types'
-import { convertLocaleFromLibcToBcp47, log } from '../utils'
+import { computed, ref, type ShallowRef, shallowRef } from '@vue/reactivity'
+import { createPinia, defineStore, setActivePinia } from 'pinia'
+import vscode, { type ExtensionContext } from 'vscode'
 import {
   execRad,
   getAbsolutePathToDefaultRadBinaryLocation,
@@ -11,6 +10,7 @@ import {
   getLocalRadicleIdentity,
   getValidatedPathToRadBinaryWhenAliased,
 } from '../helpers'
+import { convertLocaleFromLibcToBcp47, log } from '../utils'
 
 setActivePinia(createPinia())
 

@@ -6,6 +6,5 @@ allowBuilds:
   unrs-resolver: true
   vue-demi: true
 
-# Skip pnpm 11's release-age gate for our own ESLint config; we vet our own releases.
 minimumReleaseAgeExclude:
   - '@maninak/eslint-config'

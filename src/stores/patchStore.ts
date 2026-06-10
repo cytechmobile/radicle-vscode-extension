@@ -1,9 +1,9 @@
-import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { computed, effect, ref, unref } from '@vue/reactivity'
-import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
-import { fetchFromHttpd } from '../helpers'
 import type { AugmentedPatch, Patch } from '../types'
+import { computed, effect, ref, unref } from '@vue/reactivity'
+import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { useEnvStore, useGitStore, useWebviewStore } from '.'
+import { fetchFromHttpd } from '../helpers'
+import { rerenderAllItemsInPatchesView, rerenderSomeItemsInPatchesView } from '../ux'
 
 setActivePinia(createPinia())
 
@@ -14,17 +14,15 @@ export const usePatchStore = defineStore('patch', () => {
       ? rerenderSomeItemsInPatchesView(patches.value)
       : rerenderAllItemsInPatchesView()
   })
-  effect(
-    () => {
-      // Patches view items should be recalculated when any of those change
-      // so we import them, even if unused, to bind them as dependencies to `effect`.
-      const { currentRepoId, currentRepoInfo, localIdentity } = useEnvStore()
-      void currentRepoInfo?.delegates
-      void localIdentity?.DID
+  effect(() => {
+    // Patches view items should be recalculated when any of those change
+    // so we import them, even if unused, to bind them as dependencies to `effect`.
+    const { currentRepoId, currentRepoInfo, localIdentity } = useEnvStore()
+    void currentRepoInfo?.delegates
+    void localIdentity?.DID
 
-      currentRepoId && resetAllPatches()
-    },
-  )
+    currentRepoId && resetAllPatches()
+  })
 
   // TODO: maninak do similar and use latest commit to resolve the currently checkout out revision?
   const prevCheckedOutPatch = ref<AugmentedPatch>()

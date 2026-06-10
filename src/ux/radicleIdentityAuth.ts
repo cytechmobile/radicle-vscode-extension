@@ -1,6 +1,4 @@
 import { InputBoxValidationSeverity, window } from 'vscode'
-import { askUser, log, showLog } from '../utils'
-import { useEnvStore } from '../stores'
 import {
   composeNodeHomePathMsg,
   exec,
@@ -8,10 +6,12 @@ import {
   getNodeSshKey,
   getResolvedPathToNodeHome,
   isRadCliInstalled,
-  isRadInitialized,
   isRadicleIdentityAuthed,
   isRadicleIdentityKeyEncrypted,
+  isRadInitialized,
 } from '../helpers'
+import { useEnvStore } from '../stores'
+import { askUser, log, showLog } from '../utils'
 
 function composeRadAuthSuccessMsg(
   didAction:

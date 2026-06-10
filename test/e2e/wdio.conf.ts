@@ -1,6 +1,7 @@
+import type { Options } from '@wdio/types'
 import path from 'node:path'
 import { $ } from 'zx'
-import type { Options } from '@wdio/types'
+
 import {
   backupNodeHomePath,
   e2eTestDirPath,
@@ -8,14 +9,14 @@ import {
   rootDirPath,
 } from './constants/config'
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+// eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-assignment, perfectionist/sort-imports
 const packageJson = require('../../package.json')
 
 if (!process.env['CI']) {
   throw new Error('E2E tests should only be run in CI')
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+// eslint-disable-next-line ts/no-unsafe-member-access
 const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
 
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it

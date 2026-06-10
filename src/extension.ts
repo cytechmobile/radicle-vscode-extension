@@ -1,5 +1,4 @@
 import type { ExtensionContext } from 'vscode'
-import { useEnvStore } from './stores'
 import {
   logExtensionActivated,
   registerAllCommands,
@@ -8,12 +7,13 @@ import {
   registerAllViews,
   registerAllWebviewRestorators,
 } from './helpers'
+import { useEnvStore } from './stores'
+import { setWhenClauseContext } from './utils'
 import {
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from './ux'
-import { setWhenClauseContext } from './utils'
 
 export function activate(ctx: ExtensionContext) {
   useEnvStore().setExtensionContext(ctx)

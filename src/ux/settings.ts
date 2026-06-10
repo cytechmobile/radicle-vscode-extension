@@ -1,5 +1,5 @@
 import { sep } from 'node:path'
-import { ConfigurationTarget, commands, workspace } from 'vscode'
+import { commands, ConfigurationTarget, workspace } from 'vscode'
 import { extTempDir } from '../constants'
 import { getConfig } from '../helpers'
 import { log } from '../utils'

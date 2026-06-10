@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
 import { storeToRefs } from 'pinia'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
+import { notifyExtension } from 'extensionUtils/webview-messaging'
 import Metadatum from '@/components/Metadatum.vue'
 import Reactions from '@/components/Reactions.vue'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 

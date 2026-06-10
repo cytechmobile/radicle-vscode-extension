@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { toRaw } from 'vue'
 import { storeToRefs } from 'pinia'
+import { toRaw } from 'vue'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
@@ -31,8 +31,9 @@ function revealPatch() {
     @click="refetchPatchData"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-refresh"></span>Refresh</vscode-button
-  >
+    <span slot="start" class="codicon codicon-refresh"></span>
+    Refresh
+  </vscode-button>
   <vscode-button
     v-if="!patch.isCheckedOut"
     class="self-center"
@@ -41,8 +42,9 @@ function revealPatch() {
     @click="checkOutPatchBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-check"></span>Check Out</vscode-button
-  >
+    <span slot="start" class="codicon codicon-check"></span>
+    Check Out
+  </vscode-button>
   <vscode-button
     v-else
     class="self-center"
@@ -51,7 +53,8 @@ function revealPatch() {
     @click="checkOutDefaultBranch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-home"></span>Check&nbsp;Out&ThickSpace;<wbr />
+    <span slot="start" class="codicon codicon-home"></span>
+    Check&nbsp;Out&ThickSpace;<wbr />
     <pre>{{ defaultBranch }} </pre>
   </vscode-button>
   <vscode-button
@@ -61,6 +64,7 @@ function revealPatch() {
     @click="revealPatch"
   >
     <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-    <span slot="start" class="codicon codicon-diff-single"></span>Browse Diff</vscode-button
-  >
+    <span slot="start" class="codicon codicon-diff-single"></span>
+    Browse Diff
+  </vscode-button>
 </template>

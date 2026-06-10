@@ -24,7 +24,7 @@ When filing an issue please:
 
 Code contributions are the best kind of contribution! Please make sure to read this document in its entirety to get up to speed with the various details.
 
->If you're interested in making a code ~~donation~~ contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
+> If you're interested in making a code ~~donation~~ contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
 
 ## Cloning the `radicle-vscode-repo` Repo Locally
 
@@ -51,7 +51,7 @@ After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) 
 - launch a new VS Code window with the extension running in it
 - show the console output, including any errors in a new terminal named `dev`
 
->Tip: Or just press `F5` to achieve the same thing.
+> Tip: Or just press `F5` to achieve the same thing.
 
 ## Dev Workflow
 
@@ -61,7 +61,7 @@ There's [no hot-module-reloading or automatic reload of the extension developmen
 
 For standard extension code (aka not code running in webviews a.k.a. mini websites), place stop points in the standard way next to the line counter and use the native debugger.
 
-For code running *inside* webviews use the command "Toggle Developer Tools" from the palette which will open the familiar chrome dev tools. You can now place stop points in there and inspect HTML and CSS just like in chrome; because it is chrome(ium).
+For code running _inside_ webviews use the command "Toggle Developer Tools" from the palette which will open the familiar chrome dev tools. You can now place stop points in there and inspect HTML and CSS just like in chrome; because it is chrome(ium).
 
 ## Recommended Extensions
 
@@ -106,7 +106,7 @@ If you notice anything fishy, annoying (red squiggle should be yellow, conflicti
 
 We use [`pnpm`](https://pnpm.io/motivation) for node package management (f you use npm or yarn by mistake, no worries, there are fail-safes in place to save you from breaking something).
 
->Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
+> Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
 
 #### Usage Without pnpm Globally Installed
 
@@ -131,7 +131,7 @@ Use custom wrapper `askUser()` instead of the native [InputBox API](https://code
 
 ### Copywriting
 
-- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case  (Wikipedia style)](https://titlecaseconverter.com)
+- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case (Wikipedia style)](https://titlecaseconverter.com)
 - Notifications should not contain a trailing fullstop unless multiple sentences are used.
 - Success and Warning notifications should begin with what happened first e.g. "Updated patch title successfully"
 - Error notifications should begin with "Failed" e.g. "Failed updating patch title"
@@ -148,4 +148,4 @@ After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) 
 npx vsce package --no-dependencies
 ```
 
-This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` +  "install vsix").
+This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` + "install vsix").

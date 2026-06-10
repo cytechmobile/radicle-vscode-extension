@@ -33,6 +33,7 @@ onUpdated(showLangTagOnCodeBlocks)
   <Markdown :source="source" :emoji="{ shortcuts: {} }" class="parsed-md" />
 </template>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style>
 :is(h1, h2, h3, h4, h5, h6) .parsed-md * {
   @apply m-0;

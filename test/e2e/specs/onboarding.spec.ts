@@ -1,13 +1,13 @@
+import type * as VsCode from 'vscode'
+import type { Workbench } from 'wdio-vscode-service'
 import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
-import type { Workbench } from 'wdio-vscode-service'
-import { $, cd } from 'zx'
-import type * as VsCode from 'vscode'
 import isEqual from 'lodash/isEqual'
-import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
-import { openRadicleViewContainer } from '../helpers/actions'
-import { getFirstWelcomeViewText } from '../helpers/queries'
+import { $, cd } from 'zx'
 import { backupNodeHomePath, e2eTestDirPath, nodeHomePath } from '../constants/config'
+import { openRadicleViewContainer } from '../helpers/actions'
+import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
+import { getFirstWelcomeViewText } from '../helpers/queries'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
