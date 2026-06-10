@@ -28,7 +28,8 @@
     "SCM Providers"
   ],
   "scripts": {
-    "preinstall": "node scripts/ensure-pnpm.ts",
+    "preinstall": "node scripts/ensure-pnpm.mjs",
+    "postinstall": "npx simple-git-hooks",
     "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
     "verify-deps": "npx npm-run-all -pl verify-deps:*",
     "verify-deps:extension": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
@@ -40,11 +41,11 @@
     "dev": "npm run verify-deps && run-s dev:*",
     "dev:webviews": "cd ./src/webviews && npm run dev",
     "dev:extension": "npm run compile:extension -- --sourcemap --watch",
-    "lint": "run-p lint:*",
-    "lint:extension": "eslint . --ext .vue,.ts,.tsx,.js,.jsx --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
-    "lint:webviews": "cd ./src/webviews && npm run lintfix",
+    "lint": "run-p -c lint:*",
+    "lint:extension": "eslint . --max-warnings 0 --no-warn-ignored --cache --cache-location node_modules/.cache/eslint",
+    "lint:webviews": "cd ./src/webviews && npm run lint",
     "test": "npm run test:typings && npm run test:unit",
-    "test:typings": "run-p test:typings:*",
+    "test:typings": "run-p -c test:typings:*",
     "test:typings:extension": "tsc --noEmit",
     "test:typings:webviews": "cd ./src/webviews && npm run type-check",
     "test:unit": "echo \"Unit testing not yet implemented.\"",
@@ -564,9 +565,6 @@
       }
     ]
   },
-  "lint-staged": {
-    "*.{vue,ts,tsx,js,jsx}": "eslint --fix --max-warnings 0 --cache --cache-location node_modules/.cache/eslint"
-  },
   "dependencies": {
     "@vue/reactivity": "^3.4.20",
     "javascript-time-ago": "^2.5.9",
@@ -575,7 +573,7 @@
     "pinia": "^2.1.7"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.8",
+    "@maninak/eslint-config": "^0.2.2",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/javascript-time-ago": "^2.0.8",
     "@types/lodash": "^4.17.6",
@@ -589,12 +587,8 @@
     "@wdio/spec-reporter": "^8.41.0",
     "@wdio/types": "^8.41.0",
     "esbuild": "^0.23.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-jasmine": "^4.2.2",
-    "eslint-plugin-prettier-vue": "^4.2.0",
-    "eslint-plugin-tailwindcss": "^3.14.3",
-    "eslint-plugin-vue-scoped-css": "^2.7.2",
+    "eslint": "^9.10.0",
+    "lint-staged": "^17.0.0",
     "npm-run-all": "^4.1.5",
     "simple-git-hooks": "^2.9.0",
     "ts-node": "^10.9.2",
@@ -605,7 +599,10 @@
     "zx": "^8.1.9"
   },
   "simple-git-hooks": {
-    "pre-commit": "npm run lint"
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix --max-warnings 0 --no-warn-ignored --cache --cache-location node_modules/.cache/eslint"
   },
   "private": true
 }

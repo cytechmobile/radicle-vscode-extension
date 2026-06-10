@@ -1,8 +1,5 @@
 allowBuilds:
-  edgedriver: true
   esbuild: true
-  geckodriver: true
-  simple-git-hooks: true
   unrs-resolver: true
   vue-demi: true
 

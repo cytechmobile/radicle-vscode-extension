@@ -17,6 +17,6 @@
     "tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
     "types": ["node"],
   },
-  "include": ["src/**/*", "scripts/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/webviews", ".vscode-test"],
 }

@@ -24,7 +24,6 @@ export const usePatchStore = defineStore('patch', () => {
 
       currentRepoId && resetAllPatches()
     },
-    { lazy: true },
   )
 
   // TODO: maninak do similar and use latest commit to resolve the currently checkout out revision?

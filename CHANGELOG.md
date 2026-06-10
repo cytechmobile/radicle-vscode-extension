@@ -4,11 +4,14 @@
 
 ### 🏡 Chores
 
-- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
-- **build:** upgrade transpilation target to es2022 (latest supported by VS Code)
+- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install ESLint 10 flat-config preset bundling rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities.
+- **lint:** resolves (finally...) IDE inline-with-code linting, formatting and auto-fix-on-save for all files under `src/webviews/`, a nested workspace
+- **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and add a `postinstall` script so git hooks (re-)install themselves on every `pnpm install`
+- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
+- **build:** increase transpilation target to es2022 (latest supported by VS Code)
 - **dev, ci:** migrate to Node.js 24, pnpm 11
 - **ts:** migrate to v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
-- **deps:** upgrade minimum VS Code version requirement to 1.112.0
+- **deps:** increase minimum VS Code version requirement to 1.112.0
 
 ### 🤖 CI
 
