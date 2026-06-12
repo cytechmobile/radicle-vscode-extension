@@ -2,15 +2,22 @@
 
 # _(WIP, yet unreleased version)_
 
+### ✨ Highlights
+
+ This release resolves serious technical debt arising from the maintenance gap resulting in dependency rot. Moreover it brings a powerful, new, completely e2e testing infrastructure and tests for it.
+
+ Both the revamped tooling and testing instrumentation establish a solid foundation for future development and a more comfortable and reassuring environment for new contributors.
+
 ### 🏡 Chores
 
-- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install ESLint 10 flat-config preset bundling rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities.
-- **lint:** resolves (finally...) IDE inline-with-code linting, formatting and auto-fix-on-save for all files under `src/webviews/`, a nested workspace
+- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install suite bundling linting rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities. Critically, both the extension and webviews workspaces are now linted with the exact same powerful ruleset.
+- **lint:** fix broken IDE inline-with-code linting, formatting and auto-fix-on-save for the extension workspace
+- **lint:** enable IDE inline linting for the (nested) webviews workspace together with the existing one for the root extension workspace (finally!)
 - **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and add a `postinstall` script so git hooks (re-)install themselves on every `pnpm install`
 - **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
 - **build:** increase transpilation target to es2022 (latest supported by VS Code)
 - **dev, ci:** migrate to Node.js 24, pnpm 11
-- **ts:** migrate to v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
+- **ts:** migrate to TypeScript v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
 - **deps:** increase minimum VS Code version requirement to 1.112.0
 
 ### 🤖 CI
