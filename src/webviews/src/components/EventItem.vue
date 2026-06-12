@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { defineProps } from 'vue'
 import { getFormattedDate, getTimeAgo } from 'extensionUtils/time'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 

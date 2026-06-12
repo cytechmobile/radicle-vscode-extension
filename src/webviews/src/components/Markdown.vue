@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { defineProps, nextTick, onMounted, onUpdated } from 'vue'
+import { nextTick, onMounted, onUpdated } from 'vue'
 import Markdown from 'vue3-markdown-it'
 import 'highlight.js/styles/vs2015.css'
 

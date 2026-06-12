@@ -7,7 +7,7 @@ import {
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
 import { storeToRefs } from 'pinia'
-import { computed, defineEmits, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 import {
   getDateInIsoWithZeroedTimezone,

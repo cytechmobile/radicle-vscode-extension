@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { defineProps, useSlots } from 'vue'
+import { useSlots } from 'vue'
 
 defineProps<{ label: string }>()
 const slots = useSlots()

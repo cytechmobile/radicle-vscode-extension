@@ -17,7 +17,6 @@
     "composite": true,
     "lib": ["ES2022", "DOM"],
     "noEmit": true,
-    "baseUrl": ".",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
