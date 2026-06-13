@@ -21,6 +21,7 @@ All of the above establish a solid foundation for future development and a more 
 - **dev, ci:** migrate to Node.js 24, pnpm 11
 - **ts:** migrate extension and webviews to TypeScript v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
 - **deps:** increase minimum VS Code version requirement to 1.112.0
+- **deps:** upgrade all extension and webview dependencies resolving all deprecation warnings and addressing all security alerts
 
 ### 🤖 CI
 
