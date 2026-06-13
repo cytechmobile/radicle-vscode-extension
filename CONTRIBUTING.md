@@ -47,7 +47,7 @@ You can find more info about `rad clone` in the [Radicle User Guide](https://rad
 After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) and opening it in VS Code, run the `Develop Extension` configuration from the "Run and Debug" View. This will:
 
 - ensure you have the required dependencies and auto-align as needed
-- start the task `npm: dev` to compile the source code
+- start the VS Code task `npm: dev` to compile the source code
 - launch a new VS Code window with the extension running in it
 - show the console output, including any errors in a new terminal named `dev`
 
@@ -55,7 +55,14 @@ After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) 
 
 ## Dev Workflow
 
-There's [no hot-module-reloading or automatic reload of the extension development host](https://stackoverflow.com/questions/75305144/how-to-restart-reload-vs-code-host-window-on-extension-source-code-file-changes). After making your changes have to close the host window and press [re-launch for development](#launching-for-local-development). Code like it's 1999.🕺
+While the `npm: dev` task is running you get a fast inner loop with no manual relaunches:
+
+- **Webview changes** (anything under `src/webviews`) hot-reload in place via the Vite dev server. Save a `.vue`, `.ts` or `.css` file and the open panel updates instantly, keeping its current state. No rebuild, no window reload.
+- **Extension host changes** (anything under `src`, outside `src/webviews`) are rebuilt by `esbuild --watch`, after which the host window reloads itself automatically within a second or so.
+
+The `npm: dev` task and its watchers stay alive after a debug session ends, on purpose. Re-pressing `F5` reuses them, skipping dependency verification and the initial build, so subsequent launches are nearly instant. Stop the task manually (trash can icon on its terminal) when you're done for the day or close VS Code.
+
+> The webview HMR path loads modules from the Vite dev server at `http://localhost:5173` and only kicks in when the extension runs in development mode. Production builds bundle the pre-built assets shipped inside the extension, exactly as before. HMR currently targets local development; remote scenarios (Remote-SSH, Codespaces) would need extra `asExternalUri` plumbing.
 
 ## Debugging
 

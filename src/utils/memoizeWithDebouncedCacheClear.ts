@@ -30,7 +30,7 @@ import memoize from 'lodash/memoize'
  * after the last time a cache clear was requested, before it actually happens
  * @returns The original function now memoized
  */
-// eslint-disable-next-line space-before-function-paren, ts/explicit-function-return-type
+// eslint-disable-next-line ts/explicit-function-return-type
 export function memoizeWithDebouncedCacheClear<T extends (...args: unknown[]) => unknown>(
   func: T,
   cacheTtlMs = 0,

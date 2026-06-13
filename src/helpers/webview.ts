@@ -1,5 +1,13 @@
 import type { Patch, PatchDetailWebviewInjectedState } from '../types'
-import { commands, Uri, ViewColumn, type Webview, type WebviewPanel, window } from 'vscode'
+import {
+  commands,
+  ExtensionMode,
+  Uri,
+  ViewColumn,
+  type Webview,
+  type WebviewPanel,
+  window,
+} from 'vscode'
 import { execPatchMutation, revealPatch } from '.'
 import {
   allWebviewIds,
@@ -343,11 +351,31 @@ function handleMessageFromWebviewPatchDetail(
   }
 }
 
+/**
+ * Origin of the Vite dev server used for webview HMR during local development.
+ * Must match `server.port` and `server.origin` in `vite.config.ts`.
+ */
+const WEBVIEW_DEV_SERVER_ORIGIN = 'http://localhost:5173'
+
 function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
-  const stylesUri = getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.css'])
-  const scriptUri = getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.js'])
+  const isDevMode = useEnvStore().extCtx.extensionMode === ExtensionMode.Development
   const allowedSource = webview.cspSource
   const nonce = getNonce()
+
+  const devServer = WEBVIEW_DEV_SERVER_ORIGIN
+
+  const cspConnectSrc = isDevMode ? `${devServer} ws://localhost:5173` : `'none'`
+  const cspStyleSrc = isDevMode
+    ? `${allowedSource} ${devServer} 'unsafe-inline'`
+    : `${allowedSource} 'unsafe-inline'`
+  const cspFontSrc = isDevMode ? `${allowedSource} ${devServer}` : allowedSource
+
+  const headTags = isDevMode
+    ? `<script type="module" src="${devServer}/@vite/client" nonce="${nonce}"></script>`
+    : `<link rel="stylesheet" type="text/css" href="${getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.css']).toString()}" nonce="${nonce}">`
+  const scriptSrc = isDevMode
+    ? `${devServer}/src/main.ts`
+    : getWebviewUri(webview, ['src', 'webviews', 'dist', 'assets', 'index.js']).toString()
 
   const html = `
     <!DOCTYPE html>
@@ -360,21 +388,22 @@ function getWebviewHtml<State extends object>(webview: Webview, state?: State) {
           default-src 'none';
           object-src 'none';
           base-uri 'none';
-          style-src ${allowedSource} 'unsafe-inline';
+          connect-src ${cspConnectSrc};
+          style-src ${cspStyleSrc};
           img-src ${allowedSource} https: data:;
           script-src 'strict-dynamic' 'nonce-${nonce}' 'unsafe-inline' https:;
-          font-src ${allowedSource};
+          font-src ${cspFontSrc};
         "
       >
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" type="text/css" href="${stylesUri.toString()}" nonce="${nonce}">
+      ${headTags}
       <script nonce="${nonce}">
         window.injectedWebviewState = ${JSON.stringify(state)}
       </script>
     </head>
     <body>
       <div id="app"></div>
-      <script type="module" src="${scriptUri.toString()}" nonce="${nonce}"></script>
+      <script type="module" src="${scriptSrc}" nonce="${nonce}"></script>
     </body>
     </html>
   `

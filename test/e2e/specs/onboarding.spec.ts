@@ -46,11 +46,9 @@ describe('Onboarding Flow', () => {
       const buttonTitles = await getFirstWelcomeViewButtonTitles(workbench)
 
       expect(welcomeText).toEqual([
-        /* eslint-disable max-len */
         'Failed resolving the Radicle CLI binary.',
         "Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.",
         "Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
-        /* eslint-enable max-len */
       ])
 
       expect(buttonTitles).toEqual(['Troubleshoot'])
@@ -67,11 +65,9 @@ describe('Onboarding Flow', () => {
 
         return (
           isEqual(welcomeText, [
-            /* eslint-disable max-len */
             'The folder currently opened in your workspace is not a Git code repository.',
             'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
             'To learn more about how to use Git and source control in VS Code read the docs.',
-            /* eslint-enable max-len */
           ]) &&
           isEqual(welcomeButtonTitles, [
             'Initialize Repository With Git',
@@ -94,13 +90,11 @@ describe('Onboarding Flow', () => {
         const welcomeText = await getFirstWelcomeViewText(workbench)
 
         return isEqual(welcomeText, [
-          /* eslint-disable max-len */
           'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
           'To use Radicle with it, please run `rad init` in your terminal.',
           'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',
           'During this reversible rad-initializing process you also get to choose whether your repo will be private or public, among other options.',
           'To learn more read the Radicle User Guide.',
-          /* eslint-enable max-len */
         ])
       })
     })

@@ -4,12 +4,13 @@
 
 ### ✨ Highlights
 
- This release resolves serious technical debt arising from the maintenance gap resulting in dependency rot. Moreover it brings a powerful, new, completely e2e testing infrastructure and tests for it.
+ This release resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully e2e testing infrastructure and tests for it as well as a drastically overhauled local development loop.
 
- Both the revamped tooling and testing instrumentation establish a solid foundation for future development and a more comfortable and reassuring environment for new contributors.
+All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for existing and new contributors.
 
 ### 🏡 Chores
 
+- **dev:** overhaul the local development inner loop. Webview changes now hot-reload in place via the Vite dev server, while extension host changes rebuild and reload the host window automatically. No more closing and relaunching the host window on every change and waiting for a ~7-10s build + launch after each CSS change. The dev watchers also persist across debug sessions, so re-launching with F5 after closing the host VS Code window is near-instant. This also means that the previous zombie process issues resulting in memory & CPU hogging, laptop thermal throttling and battery draining are finally gone too.
 - **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install suite bundling linting rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities. Critically, both the extension and webviews workspaces are now linted with the exact same powerful ruleset.
 - **lint:** fix broken IDE inline-with-code linting, formatting and auto-fix-on-save for the extension workspace
 - **lint:** enable IDE inline linting for the (nested) webviews workspace together with the existing one for the root extension workspace (finally!)

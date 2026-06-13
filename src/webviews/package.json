@@ -6,11 +6,11 @@
   "scripts": {
     "preinstall": "node ../../scripts/ensure-pnpm.mjs",
     "verify-deps": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
-    "dev": "npm run build-only --watch",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "dev": "vite",
+    "build": "run-p type-check build:bundle",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "build-only": "vite build",
+    "build:bundle": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --max-warnings 0 --no-warn-ignored --cache --cache-location node_modules/.cache/eslint"
   },
@@ -24,7 +24,7 @@
     "vue3-markdown-it": "^1.0.10"
   },
   "devDependencies": {
-    "@maninak/eslint-config": "^0.2.4",
+    "@maninak/eslint-config": "^0.2.5",
     "@tsconfig/node18": "^18.2.4",
     "@types/javascript-time-ago": "^2.0.8",
     "@types/jsdom": "^28.0.3",

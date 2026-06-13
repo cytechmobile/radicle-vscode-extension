@@ -38,9 +38,9 @@
     "build": "run-p -l build:*",
     "build:extension": "npm run compile:extension -- --minify",
     "build:webviews": "cd ./src/webviews && npm run build",
-    "dev": "npm run verify-deps && run-s dev:*",
-    "dev:webviews": "cd ./src/webviews && npm run dev",
+    "dev": "npm run verify-deps && run-p dev:*",
     "dev:extension": "npm run compile:extension -- --sourcemap --watch",
+    "dev:webviews": "cd ./src/webviews && npm run dev",
     "lint": "run-p -c lint:*",
     "lint:extension": "eslint . --max-warnings 0 --no-warn-ignored --cache --cache-location node_modules/.cache/eslint",
     "lint:webviews": "cd ./src/webviews && npm run lint",
@@ -574,7 +574,7 @@
     "vue": "^3.5.38"
   },
   "devDependencies": {
-    "@maninak/eslint-config": "^0.2.4",
+    "@maninak/eslint-config": "^0.2.5",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/javascript-time-ago": "^2.0.8",
     "@types/lodash": "^4.17.6",

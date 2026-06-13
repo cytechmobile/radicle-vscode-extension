@@ -29,4 +29,11 @@ export default defineConfig({
     },
   },
   base: '',
+  server: {
+    // must match WEBVIEW_DEV_SERVER_ORIGIN in the extension's webview helper
+    origin: 'http://localhost:5173',
+    port: 5173,
+    strictPort: true,
+    cors: true,
+  },
 })

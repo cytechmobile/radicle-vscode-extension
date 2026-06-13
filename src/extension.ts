@@ -6,6 +6,7 @@ import {
   registerAllFileWatchers,
   registerAllViews,
   registerAllWebviewRestorators,
+  registerExtensionHostAutoReload,
 } from './helpers'
 import { useEnvStore } from './stores'
 import { setWhenClauseContext } from './utils'
@@ -23,6 +24,7 @@ export function activate(ctx: ExtensionContext) {
   registerAllConfigWatchers()
   registerAllFileWatchers()
   registerAllWebviewRestorators()
+  registerExtensionHostAutoReload()
 
   logExtensionActivated()
   validateRadCliInstallation({ minimizeUserNotifications: true })
