@@ -69,7 +69,7 @@ export function setConfig<K extends keyof ExtensionConfig>(
 
 /**
  * Resolves the absolute path to the Radicle CLI binary's __expected__ **directory**
- * (not the full path to the binary!) as per the https://radicle.xyz/install script
+ * (not the full path to the binary!) as per the https://radicle.dev/install script
  *
  * @example
  * ```ts
@@ -84,7 +84,7 @@ export function getAbsolutePathToDefaultRadBinaryDirectory(): string {
 
 /**
  * Resolves the absolute path to the Radicle CLI binary's __expected__ location
- * as per the https://radicle.xyz/install script
+ * as per the https://radicle.dev/install script
  *
  * @example
  * ```ts
@@ -119,7 +119,7 @@ export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
  * as per the installation script.
  *
  * @returns The path if successfully resolved, otherwise `undefined`
- * @see https://radicle.xyz/install
+ * @see https://radicle.dev/install
  */
 export function getDefaultPathToNodeHome(): string {
   const defaultPath = `${homedir()}/.radicle`

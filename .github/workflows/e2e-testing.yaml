@@ -52,7 +52,7 @@ jobs:
 
     - name: Configure Radicle for Testing
       run: |
-        # Source: https://app.radicle.xyz/nodes/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5/tree/HACKING.md
+        # Source: https://app.radicle.at/nodes/seed.radicle.at/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5/tree/HACKING.md
         jq '.node.network = "test" | .preferredSeeds = [] | .node.connect = [] | .node.peers.type = "static"' ${RAD_HOME}/config.json > ${RAD_HOME}/config.json.tmp
         mv ${RAD_HOME}/config.json.tmp ${RAD_HOME}/config.json
 

@@ -130,7 +130,7 @@ async function initGitRepo() {
   cd(repoDirPath)
   await $`git config --global init.defaultBranch main`
   await $`git init .`
-  await $`git config --global user.email "test@radicle.xyz"`
+  await $`git config --global user.email "test@radicle.dev"`
   await $`git config --global user.name "Radicle Test"`
   await $`echo "# Basic Repo" > README.md`
   await $`git add README.md`

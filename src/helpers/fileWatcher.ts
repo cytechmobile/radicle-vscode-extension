@@ -59,7 +59,7 @@ const notInWorkspaceFileWatchers = [
     },
     immediate: true,
   },
-  // installation with script from https://radicle.xyz/install
+  // installation with script from https://radicle.dev/install
   {
     glob: new RelativePattern(
       Uri.file(`${getAbsolutePathToDefaultRadBinaryDirectory()}/`),

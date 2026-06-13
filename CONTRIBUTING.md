@@ -12,7 +12,7 @@ If there's anything you need to ask or share with the maintainers, we'd love to 
 
 ### Issues
 
-For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.xyz/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
+For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.dev/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
 
 When filing an issue please:
 
@@ -40,7 +40,7 @@ Open VS Code's Command Palette (`Ctrl/Cmd + Shift + P`) and type in `> rad clone
 rad clone rad:z3Makm6fsQQXmpSFE43DZqwupaEhk
 ```
 
-You can find more info about `rad clone` in the [Radicle User Guide](https://radicle.xyz/guides/user#the-basics-of-seeding-and-cloning).
+You can find more info about `rad clone` in the [Radicle User Guide](https://radicle.dev/guides/user#the-basics-of-seeding-and-cloning).
 
 ## Launching for Local Development
 

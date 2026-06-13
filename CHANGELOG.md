@@ -30,6 +30,10 @@ All of the above establish a solid foundation for future development and a more 
 
 - **onboarding:** cover various paths of the flow with e2e tests
 
+### 📖 Documentation
+
+- **repo:** repair all broken links and miscellaneous references to now moved radicle.xyz and app.radicle.xyz
+
 -----
 
 ## **v0.6.0** (November 9th, 2024)
@@ -494,7 +498,7 @@ All of the above establish a solid foundation for future development and a more 
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into patch item's context menu
 - **patch-list:** use smaller dot as separator between data in the description of a patch item
 - **sidebar:** the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
-- **onboarding:** add the new default path `~/.radicle/bin/rad` defined in https://radicle.xyz/install script to the list of watched paths previously defined for the legacy package-manager-based installers
+- **onboarding:** add the new default path `~/.radicle/bin/rad` defined in https://radicle.dev/install script to the list of watched paths previously defined for the legacy package-manager-based installers
 - **onboarding:** replace current standard views and an error notification shown when the Radicle CLI binary didn't get resolved succesfully, with a new dedicated Welcome View explaining the situation, setting user expectations accordingly and offering to launch the troubleshooting flow via a button.
 - **onboarding:** replace whichever Welcome View ends up randomly beeing shown for a split-second while the extension is acticating with an "Activating extension..." one
 - **commands:** add new command to launch Radicle CLI installation troubleshooter (available only when binary hasn't resolved)
@@ -663,7 +667,7 @@ All of the above establish a solid foundation for future development and a more 
 
 ### ✨ Highlights
 
-- ❤️🪵 Initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
+- ❤️🪵 Initial ["Heartwood"](https://app.radicle.at/nodes/seed.radicle.at//rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
 - 📥 Cloning of seeded Radicle projects
 - 🏗️ Improved development tooling and infrastructure for maintainers
