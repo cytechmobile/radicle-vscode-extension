@@ -21,7 +21,7 @@ jobs:
         RAD_HOME: ${{ github.workspace }}/.radicle
       run: |
         echo "Installing radicle-node..."
-        curl -sSf https://radicle.xyz/install | sh
+        curl -sSfL https://radicle.dev/install | sh
 
         echo "Installing radicle-httpd..."
 
@@ -38,7 +38,7 @@ jobs:
           fatal "Your operating system is currently unsupported. Sorry!" ;;
         esac
         echo $TARGET
-        curl -s https://files.radicle.xyz/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
+        curl -sSfL https://files.radicle.dev/releases/radicle-httpd/0.17.0/radicle-httpd-0.17.0-$TARGET.tar.xz | tar -xJ --strip-components=2
         mv radicle-httpd $RAD_HOME/bin/radicle-httpd
 
         # add to path
