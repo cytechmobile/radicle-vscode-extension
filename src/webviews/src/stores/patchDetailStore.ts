@@ -1,9 +1,9 @@
+import type { Patch, PatchDetailWebviewInjectedState, Revision } from '../../../types'
 import { useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, reactive, watchEffect } from 'vue'
-import { type notifyWebview } from 'extensionUtils/webview-messaging'
 import { getFirstAndLatestRevisions } from 'extensionHelpers/patch'
-import type { Patch, PatchDetailWebviewInjectedState, Revision } from '../../../types'
+import type { notifyWebview } from 'extensionUtils/webview-messaging'
 import { getVscodeRef } from '@/utils/getVscodeRef'
 
 type SavedPanelState = Omit<PatchDetailWebviewInjectedState, 'id'> & typeof initialExtraState
@@ -13,6 +13,7 @@ const vscode = getVscodeRef<SavedPanelState>()
 const initialExtraState = {
   injectedStateIds: [] as number[],
   patchEditForm: { title: '', descr: '', status: 'off' as FormStatus },
+  // eslint-disable-next-line ts/consistent-type-assertions -- empty object cast is idiomatic for a typed default state
   patchCommentForm: {} as Record<Revision['id'], { comment: string; status: FormStatus }>,
 }
 
@@ -36,10 +37,13 @@ export const usePatchDetailStore = defineStore('patch-detail', () => {
     patch.value.revisions
       .map((rev) => rev.author)
       .reduce(
-        (uniqueAuthors, maybeUniqueAuthor) =>
-          uniqueAuthors.find((uniqueAuthor) => uniqueAuthor.id === maybeUniqueAuthor.id)
-            ? uniqueAuthors
-            : [...uniqueAuthors, maybeUniqueAuthor],
+        (uniqueAuthors, maybeUniqueAuthor) => {
+          if (uniqueAuthors.some((uniqueAuthor) => uniqueAuthor.id === maybeUniqueAuthor.id)) {
+            return uniqueAuthors
+          }
+
+          return [...uniqueAuthors, maybeUniqueAuthor]
+        },
         [] as Patch['author'][],
       ),
   )

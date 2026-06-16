@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import type { Revision } from '../../../types'
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
   vsCodeDropdown,
   vsCodeOption,
 } from '@vscode/webview-ui-toolkit'
-import { computed, defineEmits, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { computed, ref } from 'vue'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
 import {
   getDateInIsoWithZeroedTimezone,
@@ -14,16 +15,15 @@ import {
   getTimeAgo,
 } from 'extensionUtils/time'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
-import type { Revision } from '../../../types'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import Markdown from '@/components/Markdown.vue'
 import Metadatum from '@/components/Metadatum.vue'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import Reactions from './Reactions.vue'
 
-provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
-
-defineEmits<{ showCreateCommentForm: [targetRevision: Revision] }>()
 defineProps<{ showHeading: boolean }>()
+defineEmits<{ showCreateCommentForm: [targetRevision: Revision] }>()
+
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption())
 
 const { patch, authors, firstRevision, latestRevision, mergedRevision, timeLocale } =
   storeToRefs(usePatchDetailStore())
@@ -52,9 +52,11 @@ const selectedRevision = computed(() => {
 
   return fallbackSelRev
 })
+
 function selectRevision(revision: Revision) {
   selectedRevisionOption.value = assembleRevisionOptionLabel(revision)
 }
+
 function assembleRevisionOptionLabel(revision: Revision): string {
   const id = shortenHash(revision.id)
   const timeAgo = getTimeAgo(revision.timestamp, 'mini')
@@ -65,7 +67,7 @@ function assembleRevisionOptionLabel(revision: Revision): string {
     revision.reviews.find((review) => review.verdict === 'reject') && 'rejected',
     patch.value.revisions.length >= 2 && revision.id === firstRevision.value.id && 'first',
     patch.value.revisions.length >= 2 && revision.id === latestRevision.value.id && 'latest',
-    patch.value.revisions.length == 1 && 'sole',
+    patch.value.revisions.length === 1 && 'sole',
   ].filter(Boolean)
   const parsedState = state.length ? ` [${state.join(', ')}]` : ''
   const author = authors.value.length >= 2 ? ` ${getIdentityAliasOrId(revision.author)}` : ''
@@ -90,28 +92,30 @@ defineExpose({ selectedRevision, selectRevision })
 
 <template>
   <section>
-    <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-3">Revision</h2>
+    <h2 v-if="showHeading" class="mb-3 mt-0 text-lg font-normal">Revision</h2>
     <div class="mb-3 flex flex-wrap gap-2">
       <vscode-dropdown
-        @change="(ev: CustomEvent) => (selectedRevisionOption = ev.detail._value)"
         :value="selectedRevisionOption"
         title="Select a Patch Revision to See More Info About It"
-        class="max-w-full font-mono rounded-none"
+        class="max-w-full rounded-none font-mono"
+        @change="(ev: CustomEvent) => (selectedRevisionOption = ev.detail._value)"
       >
         <vscode-option
           v-for="revisionOption in revisionOptionsMap.keys()"
           :key="revisionOption"
           class="font-mono"
-          >{{ revisionOption }}</vscode-option
         >
+          {{ revisionOption }}
+        </vscode-option>
       </vscode-dropdown>
       <div class="flex gap-x-1">
         <vscode-button
           appearance="secondary"
           title="Begin Authoring a Comment on the Selected Revision"
           @click="$emit('showCreateCommentForm', selectedRevision)"
-          >Comment</vscode-button
         >
+          Comment
+        </vscode-button>
       </div>
     </div>
     <Metadatum label="Id">
@@ -167,8 +171,9 @@ defineExpose({ selectedRevision, selectRevision })
       <span
         :title="getDateInIsoWithZeroedTimezone(selectedRevision.timestamp)"
         class="font-mono"
-        >{{ getFormattedDate(selectedRevision.timestamp, timeLocale) }}</span
       >
+        {{ getFormattedDate(selectedRevision.timestamp, timeLocale) }}
+      </span>
     </Metadatum>
     <Metadatum label="Latest commit">
       <pre :title="selectedRevision.oid">{{ shortenHash(selectedRevision.oid) }}</pre>

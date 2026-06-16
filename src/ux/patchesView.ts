@@ -1,5 +1,5 @@
-import Path, { sep } from 'node:path'
 import * as fs from 'node:fs/promises'
+import Path, { sep } from 'node:path'
 import {
   EventEmitter,
   MarkdownString,
@@ -12,19 +12,19 @@ import {
   Uri,
 } from 'vscode'
 import { extTempDir } from '../constants'
-import { useEnvStore, usePatchStore } from '../stores'
 import {
   fetchFromHttpd,
   getFirstAndLatestRevisions,
   isLocalIdAuthedToEditPatchStatus,
 } from '../helpers'
+import { useEnvStore, usePatchStore } from '../stores'
 import {
   type AugmentedPatch,
-  type Patch,
-  type Unarray,
   isCopiedOrMovedFilechangeWithDiff,
   isMovedFilechangeWithoutDiff,
   isPatch,
+  type Patch,
+  type Unarray,
 } from '../types'
 import {
   assertUnreachable,
@@ -288,8 +288,8 @@ export const patchesTreeDataProvider: TreeDataProvider<
               const filechangeTreeItem: TreeItem = {
                 id: `${patch.id} ${oldVersionCommitSha}..${newVersionCommitSha} ${filePath}`,
                 contextValue:
-                  (filechange as FilechangeWithDiff).diff ??
-                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
+                  ((filechange as FilechangeWithDiff).diff ??
+                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current)
                     ? `filechange:${filechange.status}`
                     : undefined,
                 label: filename,
@@ -303,8 +303,8 @@ export const patchesTreeDataProvider: TreeDataProvider<
                 } ${dot} ${capitalizeFirstLetter(filechange.status)}`,
                 resourceUri: Uri.file(filePath),
                 command:
-                  (filechange as FilechangeWithDiff).diff ??
-                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current
+                  ((filechange as FilechangeWithDiff).diff ??
+                  (filechange as FilechangeWithoutDiffButDiffViewerRegardless).current)
                     ? {
                         command: 'radicle.openDiff',
                         title: `Open changes`,
@@ -494,5 +494,5 @@ function getHtmlIconForPatch<P extends Patch>(patch: P): string {
 
 function getCssColor(themeColor: ThemeColor | undefined): string {
   // @ts-expect-error id is set as private but there's no other API currently https://github.com/microsoft/vscode/issues/34411#issuecomment-329741042
-  return `var(--vscode-${(themeColor.id as string).replace('.', '-')})`
+  return `var(--vscode-${themeColor.id.replace('.', '-')})`
 }

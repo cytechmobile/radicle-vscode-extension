@@ -3,6 +3,6 @@
   "exclude": [],
   "compilerOptions": {
     "composite": true,
-    "types": ["node", "jsdom"]
-  }
+    "types": ["node", "jsdom"],
+  },
 }

@@ -1,5 +1,4 @@
 import type { ExtensionContext } from 'vscode'
-import { useEnvStore } from './stores'
 import {
   logExtensionActivated,
   registerAllCommands,
@@ -7,13 +6,15 @@ import {
   registerAllFileWatchers,
   registerAllViews,
   registerAllWebviewRestorators,
+  registerExtensionHostAutoReload,
 } from './helpers'
+import { useEnvStore } from './stores'
+import { setWhenClauseContext } from './utils'
 import {
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from './ux'
-import { setWhenClauseContext } from './utils'
 
 export function activate(ctx: ExtensionContext) {
   useEnvStore().setExtensionContext(ctx)
@@ -23,6 +24,7 @@ export function activate(ctx: ExtensionContext) {
   registerAllConfigWatchers()
   registerAllFileWatchers()
   registerAllWebviewRestorators()
+  registerExtensionHostAutoReload()
 
   logExtensionActivated()
   validateRadCliInstallation({ minimizeUserNotifications: true })

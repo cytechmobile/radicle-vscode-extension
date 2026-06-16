@@ -1,6 +1,6 @@
-import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import type { XOR } from 'ts-xor'
 import type { DiffResponse, HttpdRoot, Patch, PatchStatus, Repo } from '../types'
+import { type $Fetch, FetchError, type FetchOptions, type FetchResponse, ofetch } from 'ofetch'
 import { log, removeTrailingSlashes } from '../utils'
 import { getConfig } from './config'
 
@@ -97,7 +97,8 @@ export async function fetchFromHttpd(
 export async function fetchFromHttpd(
   path: '/',
   options?: FetchOptions<'json'> & { method?: 'GET' },
-): FetchFromHttpdReturn<HttpdRoot> // eslint-disable-next-line padding-line-between-statements
+): FetchFromHttpdReturn<HttpdRoot>
+// eslint-disable-next-line padding-line-between-statements, jsdoc/require-jsdoc
 export async function fetchFromHttpd<Data extends object>(
   path: string,
   options?: FetchOptions<'json'>,
@@ -112,7 +113,7 @@ export async function fetchFromHttpd<Data extends object>(
       {
         ...(path === '/'
           ? { ...(options ?? {}), query: { perPage: undefined } } // unset `perPage` for '/'
-          : options ?? {}),
+          : (options ?? {})),
       },
     )
 
@@ -121,7 +122,7 @@ export async function fetchFromHttpd<Data extends object>(
     if (error instanceof FetchError) {
       log(error.message, 'error')
 
-      return { error }
+      return { error: error as FetchError<Data> }
     }
 
     throw error // should be `throw new Error('Unhandled error in "fetchFromHttpd()"', { cause: error })` but TS ain't supporting it yet

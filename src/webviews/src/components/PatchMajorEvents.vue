@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { computedWithControl } from '@vueuse/core'
 import type { Revision } from '../../../types'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import { getTimeAgo, getFormattedDate } from 'extensionUtils/time'
+import { computedWithControl } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { getIdentityAliasOrId, shortenHash } from 'extensionUtils/string'
+import { getFormattedDate, getTimeAgo } from 'extensionUtils/time'
 import { getRevisionHoverTitle } from '@/helpers/patchDetail'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
 defineEmits<{ showRevision: [revision: Revision] }>()
 
@@ -46,16 +46,17 @@ setInterval(() => {
       <pre :title="latestMerge.author.id">{{ getIdentityAliasOrId(latestMerge.author) }}</pre>
       using revision
       <pre
-        @click="latestMergeRevision && $emit('showRevision', latestMergeRevision)"
         :title="
           latestMergeRevision
             ? getRevisionHoverTitle(latestMergeRevision?.description)
             : latestMerge.revision
         "
         class="hover:cursor-pointer"
+        @click="latestMergeRevision && $emit('showRevision', latestMergeRevision)"
         >{{ shortenHash(latestMerge.revision) }}</pre
       >
-      &ensp;<wbr /><pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
+      &ensp;<wbr />
+      <pre :title="getFormattedDate(latestMerge.timestamp, timeLocale)">{{
         mergedTimeAgo
       }}</pre>
     </div>
@@ -66,17 +67,21 @@ setInterval(() => {
       }}</pre>
       with revision
       <pre
-        @click="$emit('showRevision', latestRevision)"
         :title="getRevisionHoverTitle(latestRevision.description)"
         class="hover:cursor-pointer"
+        @click="$emit('showRevision', latestRevision)"
         >{{ shortenHash(latestRevision.id) }}</pre
-      >&ensp;<wbr /><pre :title="getFormattedDate(latestRevision.timestamp, timeLocale)">{{
+      >
+      &ensp;<wbr />
+      <pre :title="getFormattedDate(latestRevision.timestamp, timeLocale)">{{
         updatedTimeAgo
       }}</pre>
     </div>
     <div class="leading-tight">
-      Created by <pre :title="patch.author.id">{{ getIdentityAliasOrId(patch.author) }}</pre
-      >&ensp;<wbr /><pre :title="getFormattedDate(firstRevision.timestamp, timeLocale)">{{
+      Created by
+      <pre :title="patch.author.id">{{ getIdentityAliasOrId(patch.author) }}</pre>
+      &ensp;<wbr />
+      <pre :title="getFormattedDate(firstRevision.timestamp, timeLocale)">{{
         createdTimeAgo
       }}</pre>
     </div>

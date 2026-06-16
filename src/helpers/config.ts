@@ -1,7 +1,7 @@
 import { homedir } from 'node:os'
 import { ConfigurationTarget, workspace } from 'vscode'
-import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
 import { exec } from '.'
+import { assertUnreachable, isRealFsPath, removeTrailingSlashes } from '../utils'
 
 /**
  * Lists they keys of configuration options available to the user along with
@@ -34,9 +34,11 @@ export function getConfig<K extends keyof ExtensionConfig>(
     case 'radicle.advanced.pathToNodeHome':
     case 'radicle.advanced.httpApiEndpoint':
       // if the config has the value of the empty string (default) then return `undefined`
-      // @ts-expect-error
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-      return config.get<ExtensionConfig[K]>(configKey)?.trim() || undefined
+      // @ts-expect-error -- config.get() returns `any` for generic config key types
+      // eslint-disable-next-line ts/no-unsafe-call
+      return (config.get<ExtensionConfig[K]>(configKey)?.trim() || undefined) as
+        | ExtensionConfig[K]
+        | undefined
     case 'radicle.hideTempFiles':
       return config.get<ExtensionConfig[K]>(configKey)
     default:
@@ -67,7 +69,7 @@ export function setConfig<K extends keyof ExtensionConfig>(
 
 /**
  * Resolves the absolute path to the Radicle CLI binary's __expected__ **directory**
- * (not the full path to the binary!) as per the https://radicle.xyz/install script
+ * (not the full path to the binary!) as per the https://radicle.dev/install script
  *
  * @example
  * ```ts
@@ -82,7 +84,7 @@ export function getAbsolutePathToDefaultRadBinaryDirectory(): string {
 
 /**
  * Resolves the absolute path to the Radicle CLI binary's __expected__ location
- * as per the https://radicle.xyz/install script
+ * as per the https://radicle.dev/install script
  *
  * @example
  * ```ts
@@ -117,7 +119,7 @@ export function getValidatedPathToRadBinaryWhenAliased(): string | undefined {
  * as per the installation script.
  *
  * @returns The path if successfully resolved, otherwise `undefined`
- * @see https://radicle.xyz/install
+ * @see https://radicle.dev/install
  */
 export function getDefaultPathToNodeHome(): string {
   const defaultPath = `${homedir()}/.radicle`

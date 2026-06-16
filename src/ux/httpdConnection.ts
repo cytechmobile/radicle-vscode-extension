@@ -1,5 +1,5 @@
-import { window } from 'vscode'
 import { FetchError } from 'ofetch'
+import { window } from 'vscode'
 import { fetchFromHttpd } from '../helpers'
 import { log, showLog } from '../utils'
 import { openSettingsFocusedAtConfig } from './settings'

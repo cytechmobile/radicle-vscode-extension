@@ -1,35 +1,36 @@
 <script setup lang="ts">
+import type { Comment, Revision } from '../../../types'
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { computed, toRaw, watchEffect, useTemplateRef } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useEventListener } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { computed, toRaw, useTemplateRef, watchEffect } from 'vue'
 import {
   getIdentityAliasOrId,
+  maxCharsForUntruncatedMdText,
   shortenHash,
   truncateMarkdown,
-  maxCharsForUntruncatedMdText,
 } from 'extensionUtils/string'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
-import type { Comment, Revision } from '../../../types'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
-import Markdown from '@/components/Markdown.vue'
-import EventList from '@/components/EventList.vue'
 import EventItem from '@/components/EventItem.vue'
+import EventList from '@/components/EventList.vue'
+import Markdown from '@/components/Markdown.vue'
 import Reactions from '@/components/Reactions.vue'
 import { getRevisionHoverTitle } from '@/helpers/patchDetail'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
+import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
 
-provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
-
-defineEmits<{ showRevision: [revision: Revision] }>()
 const { selectedRevision } = defineProps<{
   showHeading: boolean
   selectedRevision: Revision
 }>()
+
+defineEmits<{ showRevision: [revision: Revision] }>()
+
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
 const { patch, firstRevision, patchCommentForm } = storeToRefs(usePatchDetailStore())
 
@@ -177,7 +178,7 @@ function togglePreviewMarkdown() {
 <template>
   <section>
     <!-- TODO: add button to expand/collapse all -->
-    <h2 v-if="showHeading" class="text-lg font-normal mt-0 mb-4">Activity</h2>
+    <h2 v-if="showHeading" class="mb-4 mt-0 text-lg font-normal">Activity</h2>
     <EventList>
       <EventItem
         v-if="
@@ -188,10 +189,9 @@ function togglePreviewMarkdown() {
         codicon="codicon-comment"
       >
         <form
-          @submit.prevent
           ref="formRef"
           name="Edit patch title and description"
-          class="font-mono text-sm leading-[unset] pb-2 flex flex-col gap-y-3 outline-none"
+          class="flex flex-col gap-y-3 pb-2 font-mono text-sm leading-[unset] outline-none"
           :class="{ 'w-fit': patchCommentForm[selectedRevision.id]?.status !== 'previewing' }"
           style="
             min-width: min(
@@ -199,23 +199,24 @@ function togglePreviewMarkdown() {
               68ch
             ); /* results in allowing 65 chars before resizing to be wider */
           "
+          @submit.prevent
         >
           <vscode-text-area
             v-if="patchCommentForm[selectedRevision.id]?.status === 'editing'"
             ref="commentTextAreaRef"
             :value="patchCommentForm[selectedRevision.id]?.comment"
-            @input="updatePatchCommentFormComment"
             placeholder="Share your kind thoughts…"
             name="patch comment"
             resize="vertical"
             maxlength="50000"
+            @input="updatePatchCommentFormComment"
           >
             New Patch Comment:
           </vscode-text-area>
 
           <div
             v-if="patchCommentForm[selectedRevision.id]?.status === 'previewing'"
-            class="p-1 border border-dashed border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))] max-w-fit flex flex-col gap-y-4 group"
+            class="group flex max-w-fit flex-col gap-y-4 border border-dashed border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))] p-1"
           >
             <Markdown
               :source="patchCommentForm[selectedRevision.id]?.comment || ''"
@@ -223,33 +224,34 @@ function togglePreviewMarkdown() {
             />
           </div>
 
-          <div class="reset-font opacity-[0.65]"
-            >Target Revision: <pre class="ml-1">{{ shortenHash(selectedRevision.id) }}</pre>
+          <div class="reset-font opacity-65">
+            Target Revision:
+            <pre class="ml-1">{{ shortenHash(selectedRevision.id) }}</pre>
           </div>
 
-          <div class="w-full flex flex-row-reverse justify-between">
+          <div class="flex w-full flex-row-reverse justify-between">
             <div class="flex flex-row-reverse justify-start gap-x-2">
               <vscode-button
-                @click="submitPatchCommentForm"
                 appearance="primary"
                 title="Save New Comment to Radicle"
+                @click="submitPatchCommentForm"
               >
                 <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
                 <span slot="start" class="codicon codicon-save"></span>
                 Comment
               </vscode-button>
               <vscode-button
-                @click="pausePatchCommenting"
                 appearance="secondary"
                 title="Pause Editing, Preserving Current Changes for Later (Escape)"
+                @click="pausePatchCommenting"
               >
                 <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
                 <span class="codicon codicon-coffee"></span>
               </vscode-button>
               <vscode-button
-                @click="discardPatchCommentForm"
                 appearance="secondary"
                 title="Stop Editing and Discard Current Changes"
+                @click="discardPatchCommentForm"
               >
                 <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
                 <span slot="start" class="codicon codicon-discard"></span>
@@ -258,7 +260,6 @@ function togglePreviewMarkdown() {
             </div>
             <div class="flex flex-row-reverse justify-start gap-x-2">
               <vscode-button
-                @click="togglePreviewMarkdown"
                 :appearance="
                   patchCommentForm[selectedRevision.id]?.status === 'previewing'
                     ? 'primary'
@@ -270,10 +271,11 @@ function togglePreviewMarkdown() {
                     : 'Preview Changes as Rendered Markdown (Alt + P)'
                 "
                 class="self-center"
+                @click="togglePreviewMarkdown"
               >
                 <span
+                  class="codicon"
                   :class="[
-                    'codicon',
                     patchCommentForm[selectedRevision.id]?.status === 'previewing'
                       ? 'codicon-edit'
                       : 'codicon-markdown',
@@ -285,7 +287,7 @@ function togglePreviewMarkdown() {
         </form>
       </EventItem>
       <!-- TODO: list committer's email as tooltip -->
-      <!--<div class="grid grid-cols-subgrid gap-x-3 items-center">
+      <!-- <div class="grid grid-cols-subgrid gap-x-3 items-center">
         <span
           title="Git commit"
           class="px-[2px] no-underline before:bg-vscode-editor-background codicon codicon-git-commit"
@@ -313,15 +315,16 @@ function togglePreviewMarkdown() {
         >
           {{ event.revision.id === firstRevision.id ? 'Patch and revision' : 'Revision' }}
           <span
-            @click="$emit('showRevision', event.revision)"
             :title="getRevisionHoverTitle(event.revision.description)"
             class="font-mono hover:cursor-pointer"
-            >{{ shortenHash(event.revision.id) }}</span
+            @click="$emit('showRevision', event.revision)"
           >
+            {{ shortenHash(event.revision.id) }}
+          </span>
           created by
-          <span :title="event.revision.author.id" class="font-mono">{{
-            getIdentityAliasOrId(event.revision.author)
-          }}</span>
+          <span :title="event.revision.author.id" class="font-mono">
+            {{ getIdentityAliasOrId(event.revision.author) }}
+          </span>
         </EventItem>
         <EventItem
           v-else-if="event.kind === 'review'"
@@ -342,77 +345,85 @@ function togglePreviewMarkdown() {
           <template v-if="patch.revisions.length > 1">
             revision
             <span
-              @click="$emit('showRevision', event.revision)"
               :title="getRevisionHoverTitle(event.revision.description)"
               class="font-mono hover:cursor-pointer"
-              >{{ shortenHash(event.revision.id) }}</span
+              @click="$emit('showRevision', event.revision)"
             >
+              {{ shortenHash(event.revision.id) }}
+            </span>
           </template>
           <template v-else> patch</template>
           posted
           <span v-if="event.review.inline?.length">with code-inlined comments</span>
           by
-          <span :title="event.revision.author.id" class="font-mono">{{
-            getIdentityAliasOrId(event.review.author)
-          }}</span>
+          <span :title="event.revision.author.id" class="font-mono">
+            {{ getIdentityAliasOrId(event.review.author) }}
+          </span>
           <template v-if="event.review.summary">
             <details v-if="event.review.summary && event.review.comment">
               <summary
                 title="Click to Expand/Collapse"
-                class="mt-1 max-w-prose break-words text-sm font-mono"
-                >{{ event.review.summary }}</summary
+                class="mt-1 max-w-prose break-words font-mono text-sm"
               >
+                {{ event.review.summary }}
+              </summary>
               <Markdown :source="event.review.comment" class="mt-[0.25em] text-sm" />
             </details>
             <p
               v-else-if="event.review.summary && !event.review.comment"
-              class="mt-1 -mb-[0.2em] max-w-prose break-words text-sm font-mono"
-              >{{ event.review.summary }}</p
+              class="mb-[-0.2em] mt-1 max-w-prose break-words font-mono text-sm"
             >
+              {{ event.review.summary }}
+            </p>
           </template>
         </EventItem>
         <EventItem
           v-else-if="event.kind === 'discussion'"
-          ref="commentRefs"
           :id="event.discussion.id"
+          ref="commentRefs"
           :when="event.ts"
           :codicon="
             event.discussion.resolved ? 'codicon-comment' : 'codicon-comment-unresolved'
           "
         >
           Comment
-          <span v-if="!event.discussion.resolved"
-            >(<span class="font-mono">unresolved</span>)</span
-          >
+          <span v-if="!event.discussion.resolved">
+            (
+            <span class="font-mono">unresolved</span>
+            )
+          </span>
           posted
           <template v-if="patch.revisions.length > 1">
             on revision
             <span
-              @click="$emit('showRevision', event.revision)"
               :title="getRevisionHoverTitle(event.revision.description)"
               class="font-mono hover:cursor-pointer"
-              >{{ shortenHash(event.revision.id) }}</span
+              @click="$emit('showRevision', event.revision)"
             >
+              {{ shortenHash(event.revision.id) }}
+            </span>
           </template>
           by
-          <span :title="event.discussion.author.id" class="font-mono">{{
-            getIdentityAliasOrId(event.discussion.author)
-          }}</span>
+          <span :title="event.discussion.author.id" class="font-mono">
+            {{ getIdentityAliasOrId(event.discussion.author) }}
+          </span>
           <span v-if="event.discussion.replyTo">
             in reply to
             <span
-              @click="scrollToComment(event.discussion.replyTo)"
               title="Click to Show Parent Comment"
               class="font-mono hover:cursor-pointer"
-              >another</span
-            ></span
-          >
+              @click="scrollToComment(event.discussion.replyTo)"
+            >
+              another
+            </span>
+          </span>
           <details v-if="event.discussion.body.length > maxCharsForUntruncatedMdText">
             <summary
               title="Click to Expand/Collapse"
-              class="mt-1 max-w-prose text-sm font-mono"
-              >{{ truncateMarkdown(event.discussion.body) }}</summary
+              class="mt-1 max-w-prose font-mono text-sm"
             >
+              {{ truncateMarkdown(event.discussion.body) }}
+            </summary>
             <Markdown :source="event.discussion.body" class="mt-[0.25em] text-sm" />
           </details>
           <Markdown v-else :source="event.discussion.body" class="mt-[0.25em] text-sm" />
@@ -428,18 +439,19 @@ function togglePreviewMarkdown() {
           codicon="codicon-git-merge"
         >
           Patch merged by
-          <span :title="event.merge.author.id" class="font-mono">{{
-            getIdentityAliasOrId(event.merge.author)
-          }}</span>
+          <span :title="event.merge.author.id" class="font-mono">
+            {{ getIdentityAliasOrId(event.merge.author) }}
+          </span>
           <template v-if="patch.revisions.length > 1">
             using revision
             <span
               v-if="event.revision"
-              @click="$emit('showRevision', event.revision)"
               :title="getRevisionHoverTitle(event.revision.description)"
               class="font-mono hover:cursor-pointer"
-              >{{ shortenHash(event.revision.id) }}</span
+              @click="$emit('showRevision', event.revision)"
             >
+              {{ shortenHash(event.revision.id) }}
+            </span>
             <span v-else class="font-mono">{{ shortenHash(event.merge.revision) }}</span>
           </template>
         </EventItem>
@@ -454,6 +466,7 @@ function togglePreviewMarkdown() {
   font-size: var(--vscode-font-size);
 }
 
+/* eslint-disable vue-scoped-css/require-selector-used-inside */
 vscode-text-field::part(control),
 vscode-text-area::part(control) {
   @apply font-mono text-sm;
@@ -506,4 +519,5 @@ vscode-text-area::part(label) {
     animation: outline-pulse-static 1000ms ease-in-out forwards;
   }
 }
+/* eslint-enable vue-scoped-css/require-selector-used-inside */
 </style>

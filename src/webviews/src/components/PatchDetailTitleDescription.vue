@@ -4,13 +4,13 @@ import {
   vsCodeButton,
   vsCodeTextArea,
 } from '@vscode/webview-ui-toolkit'
-import { watchEffect, computed, useTemplateRef } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { computed, useTemplateRef, watchEffect } from 'vue'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import PatchMetadata from '@/components/PatchMetadata.vue'
 import Markdown from '@/components/Markdown.vue'
+import PatchMetadata from '@/components/PatchMetadata.vue'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeTextArea())
 
@@ -123,9 +123,9 @@ const isAuthedToEditTitleAndDescr = computed(() => {
   <section class="flex flex-col gap-y-4" style="grid-area: section-patch">
     <PatchMetadata />
     <div class="flex flex-col gap-y-4">
-      <div v-if="patchEditForm.status === 'off'" class="max-w-fit flex flex-col gap-y-4 group">
+      <div v-if="patchEditForm.status === 'off'" class="group flex max-w-fit flex-col gap-y-4">
         <div class="flex gap-x-2">
-          <h1 class="my-0 text-3xl font-mono"><Markdown :source="patch.title" /></h1>
+          <h1 class="my-0 font-mono text-3xl"><Markdown :source="patch.title" /></h1>
           <vscode-button
             v-if="isAuthedToEditTitleAndDescr && patchEditForm.status === 'off'"
             appearance="icon"
@@ -145,19 +145,17 @@ const isAuthedToEditTitleAndDescr = computed(() => {
       </div>
       <form
         v-if="patchEditForm.status === 'editing' || patchEditForm.status === 'previewing'"
-        @submit.prevent
         ref="formRef"
         name="Edit patch title and description"
-        class="pb-2 flex flex-col gap-y-3 outline-none"
+        class="flex flex-col gap-y-3 pb-2 outline-none"
+        @submit.prevent
       >
         <div
           v-if="patchEditForm.status === 'previewing'"
-          :class="[
-            'max-w-fit flex flex-col gap-y-4 group',
-            { 'preview-container': patchEditForm.status === 'previewing' },
-          ]"
+          class="group flex max-w-fit flex-col gap-y-4"
+          :class="[{ 'preview-container': patchEditForm.status === 'previewing' }]"
         >
-          <h1 class="my-0 text-3xl font-mono"><Markdown :source="patchEditForm.title" /></h1>
+          <h1 class="my-0 font-mono text-3xl"><Markdown :source="patchEditForm.title" /></h1>
           <Markdown :source="patchEditForm.descr" class="text-sm" />
         </div>
 
@@ -165,26 +163,28 @@ const isAuthedToEditTitleAndDescr = computed(() => {
           v-show="patchEditForm.status === 'editing'"
           ref="titleTextAreaRef"
           :value="patchEditForm.title"
-          @input="(ev: VscodeTextAreaEvent) => (patchEditForm.title = ev.target._value)"
           placeholder="What does this patch do, in a nutshell?"
           name="patch title"
           resize="vertical"
           maxlength="400"
-          >Patch Title:</vscode-text-area
+          @input="(ev: VscodeTextAreaEvent) => (patchEditForm.title = ev.target._value)"
         >
+          Patch Title:
+        </vscode-text-area>
         <vscode-text-area
           v-show="patchEditForm.status === 'editing'"
           ref="descrTextAreaRef"
           :value="patchEditForm.descr"
-          @input="(ev: VscodeTextAreaEvent) => (patchEditForm.descr = ev.target._value)"
           placeholder="Describe the patch in more detail…"
           name="patch description"
           resize="vertical"
           maxlength="500000"
-          >Patch Description:</vscode-text-area
+          @input="(ev: VscodeTextAreaEvent) => (patchEditForm.descr = ev.target._value)"
         >
+          Patch Description:
+        </vscode-text-area>
 
-        <div class="w-full flex flex-row-reverse justify-between">
+        <div class="flex w-full flex-row-reverse justify-between">
           <div class="flex flex-row-reverse justify-start gap-x-2">
             <vscode-button
               appearance="primary"
@@ -225,8 +225,8 @@ const isAuthedToEditTitleAndDescr = computed(() => {
               @click="togglePreviewMarkdown"
             >
               <span
+                class="codicon"
                 :class="[
-                  'codicon',
                   patchEditForm.status === 'previewing' ? 'codicon-edit' : 'codicon-markdown',
                 ]"
               ></span>
@@ -240,7 +240,8 @@ const isAuthedToEditTitleAndDescr = computed(() => {
 
 <style scoped>
 .preview-container {
-  @apply p-1 border border-dashed border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))];
+  @apply p-1 border border-dashed;
+  @apply border-[var(--vscode-focusBorder,var(--vscode-commandCenter-debuggingBackground))];
 }
 
 form {

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { computed, nextTick, ref, toRaw, useTemplateRef, watchEffect } from 'vue'
 import {
   provideVSCodeDesignSystem,
   vsCodeButton,
-  vsCodeRadioGroup,
   vsCodeRadio,
+  vsCodeRadioGroup,
 } from '@vscode/webview-ui-toolkit'
-import { usePatchDetailStore } from '@/stores/patchDetailStore'
-import PatchStatusIcon from './PatchStatusIcon.vue'
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, ref, toRaw, useTemplateRef, watchEffect } from 'vue'
+import { isLocalIdAuthedToEditPatchStatus } from 'extensionHelpers/patch'
 import { assertUnreachable } from 'extensionUtils/assertions'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
-import { isLocalIdAuthedToEditPatchStatus } from 'extensionHelpers/patch'
+import { usePatchDetailStore } from '@/stores/patchDetailStore'
+import PatchStatusIcon from './PatchStatusIcon.vue'
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeRadioGroup(), vsCodeRadio())
 
@@ -99,23 +99,23 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
 <template>
   <div class="contents">
     <span
-      class="relative rounded-full px-[0.75em] py-[0.25em] inline-flex items-center w-fit text-vscode-editor-background gap-[0.5em] group"
+      class="group relative inline-flex w-fit items-center gap-[0.5em] rounded-full px-[0.75em] py-[0.25em] text-vscode-editor-background"
       :style="`background: color-mix(in srgb-linear, var(--vscode-patch-${status}), var(--vscode-editor-foreground) 5%);`"
     >
       <span
-        class="-mb-[0.125em]"
+        class="mb-[-0.125em]"
         :class="{
-          'group-hover:invisible group-focus-within:invisible': isAuthedToEditStatus,
-          invisible: isEditingStatus,
+          'group-focus-within:invisible group-hover:invisible': isAuthedToEditStatus,
+          'invisible': isEditingStatus,
         }"
       >
         <PatchStatusIcon :status="status" />
       </span>
       <span
-        class="-mb-[0.125em] capitalize font-mono"
+        class="mb-[-0.125em] font-mono capitalize"
         :class="{
-          'group-hover:invisible group-focus-within:invisible': isAuthedToEditStatus,
-          invisible: isEditingStatus,
+          'group-focus-within:invisible group-hover:invisible': isAuthedToEditStatus,
+          'invisible': isEditingStatus,
         }"
       >
         {{ status }}
@@ -124,25 +124,25 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
       <vscode-button
         v-if="isAuthedToEditStatus && !isEditingStatus"
         ref="btnStartEditingRef"
-        @click="toggleStatusEditing"
         appearance="icon"
         title="Change Patch Status"
-        class="absolute left-0 w-full h-full opacity-0 focus:opacity-100 text-vscode-editor-background group-hover:opacity-100"
+        class="absolute left-0 size-full text-vscode-editor-background opacity-0 focus:opacity-100 group-hover:opacity-100"
+        @click="toggleStatusEditing"
       >
         <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-        <span class="codicon codicon-edit" slot="start"></span>
+        <span slot="start" class="codicon codicon-edit"></span>
         Edit
       </vscode-button>
       <vscode-button
         v-if="isEditingStatus"
         ref="btnStopEditingRef"
-        @click="toggleStatusEditing"
         appearance="icon"
         title="Stop Editing Patch Status"
-        class="absolute left-0 w-full h-full text-vscode-editor-background"
+        class="absolute left-0 size-full text-vscode-editor-background"
+        @click="toggleStatusEditing"
       >
         <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
-        <span class="codicon codicon-close" slot="start"></span>
+        <span slot="start" class="codicon codicon-close"></span>
         Close
       </vscode-button>
     </span>
@@ -154,13 +154,13 @@ function onRadioChanged(ev: CustomEvent & { srcElement: HTMLInputElement }) {
     >
       <!-- eslint-disable-next-line vue/no-deprecated-slot-attribute -->
       <label slot="label">Status:</label>
-      <vscode-radio ref="radioDraftRef" @change="onRadioChanged" value="draft">
+      <vscode-radio ref="radioDraftRef" value="draft" @change="onRadioChanged">
         Draft
       </vscode-radio>
-      <vscode-radio ref="radioOpenRef" @change="onRadioChanged" value="open"
-        >Open</vscode-radio
-      >
-      <vscode-radio ref="radioArchivedRef" @change="onRadioChanged" value="archived">
+      <vscode-radio ref="radioOpenRef" value="open" @change="onRadioChanged">
+        Open
+      </vscode-radio>
+      <vscode-radio ref="radioArchivedRef" value="archived" @change="onRadioChanged">
         Archived
       </vscode-radio>
     </vscode-radio-group>

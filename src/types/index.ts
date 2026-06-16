@@ -1,5 +1,5 @@
 export * from './array'
-export * from './httpd-augmented'
 export * from './httpd'
+export * from './httpd-augmented'
 export * from './prettify'
 export * from './webviewInjectedState'

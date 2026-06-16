@@ -9,7 +9,7 @@
     "../utils/assertions.ts",
     "../utils/string.ts",
     "../utils/time.ts",
-    "../utils/webview-messaging.ts"
+    "../utils/webview-messaging.ts",
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
@@ -17,7 +17,6 @@
     "composite": true,
     "lib": ["ES2022", "DOM"],
     "noEmit": true,
-    "baseUrl": ".",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
@@ -28,7 +27,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "extensionHelpers/*": ["../helpers/*"],
-      "extensionUtils/*": ["../utils/*"]
-    }
-  }
+      "extensionUtils/*": ["../utils/*"],
+    },
+  },
 }

@@ -1,5 +1,5 @@
-import { browser } from '@wdio/globals'
 import type { Workbench } from 'wdio-vscode-service'
+import { browser } from '@wdio/globals'
 
 /**
  * Asserts that the CLI Commands and Patches sections are visible in the sidebar. This is
@@ -7,11 +7,10 @@ import type { Workbench } from 'wdio-vscode-service'
  * repository.
  */
 export async function expectStandardSidebarViewsToBeVisible(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
   await browser.waitUntil(
     async () => {
+      const sidebarView = workbench.getSideBar().getContent()
+
       try {
         await Promise.all([
           sidebarView.getSection('CLI COMMANDS'),

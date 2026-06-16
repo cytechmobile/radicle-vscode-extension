@@ -1,19 +1,19 @@
-import { type TextDocumentShowOptions, Uri, commands, window } from 'vscode'
+import type { AugmentedPatch, Patch, PatchStatus } from '../types'
+import { commands, type TextDocumentShowOptions, Uri, window } from 'vscode'
+import { createOrReuseWebviewPanel, execPatchMutation, execRad } from '.'
 import { useEnvStore, usePatchStore } from '../stores'
 import { assert, assertUnreachable, log, showLog } from '../utils'
 import {
-  type FilechangeNode,
   checkOutDefaultBranch,
   checkOutPatch,
   copyToClipboardAndNotify,
   deAuthCurrentRadicleIdentity,
+  type FilechangeNode,
   launchAuthenticationFlow,
   mutatePatch,
   selectAndCloneRadicleRepo,
   troubleshootRadCliInstallation,
 } from '../ux'
-import type { AugmentedPatch, Patch, PatchStatus } from '../types'
-import { createOrReuseWebviewPanel, execPatchMutation, execRad } from '.'
 
 interface RadCliCmdMappedToVscodeCmdId {
   /**
@@ -61,14 +61,14 @@ function registerSimpleRadCliCmdsAsVsCodeCmds(
           isAuthed &&
           (await window.withProgress(
             { location: { viewId: 'cli-commands' } },
-            // eslint-disable-next-line require-await, @typescript-eslint/require-await
+            // eslint-disable-next-line require-await
             async () => {
               const { errorCode } = execRad(cmdConfig.radCliCmdParams, {
                 cwd: '$workspaceDir',
                 shouldLog: true,
               })
 
-              return !errorCode
+              return errorCode === undefined
             },
           ))
 

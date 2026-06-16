@@ -2,13 +2,41 @@
 
 # _(WIP, yet unreleased version)_
 
+### ✨ Highlights
+
+ This is primarily a maintenance release. It resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully e2e testing infrastructure and tests for it as well as a drastically overhauled local development loop.
+
+All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for current and new contributors.
+
+### 🏡 Chores
+
+- **dev:** overhaul the local development inner loop. Webview changes now hot-reload in place via the Vite dev server, while extension host changes rebuild and reload the host window automatically. No more closing and relaunching the host window on every change and waiting for a >10s build + launch after each CSS change. The dev watchers also persist and get reused across debug sessions, so re-launching with F5 after closing the host VS Code window is instant; no building. This also means that the previous zombie process issues resulting in memory & CPU hogging, eventual laptop thermal throttling and battery draining are finally gone too.
+- **dev:** extension's esbuild errors will be detected by the `dev` Task runner which in turn will automatically switch to the associated terminal panel, auto-revealing the runner's tab and marking its title text in red and with an X next to it
+- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install suite bundling linting rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities. Critically, both the extension and webviews workspaces are now linted with an identical and powerful ruleset.
+- **lint:** fix broken IDE inline-with-code linting, formatting and auto-fix-on-save for the extension workspace
+- **lint:** enable IDE inline linting for the (nested) webviews workspace together with the existing one for the root extension workspace (finally!)
+- **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and ensure git hooks remain installed with a `postinstall` script
+- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-step experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
+- **build:** increase transpilation target to es2022 (latest supported by VS Code)
+- **dev, ci:** migrate to Node.js 24, pnpm 11
+- **ts:** migrate extension and webviews to TypeScript v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
+- **deps:** increase minimum VS Code version requirement to 1.112.0
+- **deps:** upgrade all extension and webview dependencies resolving all deprecation warnings and addressing all security alerts
+
 ### 🤖 CI
 
-- **e2e:** set up new infrastructure and a related CI workflow capable of automated completely end-to-end testing. It uses a real Radicle node, which powers the latest extension build, which is running in an actual VS Code. Tests can assert behavior and state even as deep as extension webviews.
+- **e2e:** set up new infrastructure capable of automated completely end-to-end testing. It uses the official script to install a real Radicle node, powering the latest extension build, which is running in an actual VS Code. The test runner can manipulate VS Code as a real user would and can assert behavior and state even as deep as extension webviews.
+- **e2e:** implement a workflow to test in CI
+- **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
+- **e2e:** support testing in both Linux and MacOS environments
 
 ### ☑️ Tests
 
 - **onboarding:** cover various paths of the flow with e2e tests
+
+### 📖 Documentation
+
+- **repo:** repair all broken links and miscellaneous references to now moved radicle.xyz and app.radicle.xyz
 
 -----
 
@@ -474,7 +502,7 @@
 - **patch-list:** move button for command "Copy Patch Identifier to Clipboard" into patch item's context menu
 - **patch-list:** use smaller dot as separator between data in the description of a patch item
 - **sidebar:** the initial height of the Patches view (e.g. for new projects) will now be 4x that of the CLI Commands view, instead of having the area allocation split 50:50 which resulted in wasted empty space allocated to the later view while the former may have the need for more area to show more content. Subsequent adjustments by the user will be respected and not get overwritten by the initial size.
-- **onboarding:** add the new default path `~/.radicle/bin/rad` defined in https://radicle.xyz/install script to the list of watched paths previously defined for the legacy package-manager-based installers
+- **onboarding:** add the new default path `~/.radicle/bin/rad` defined in https://radicle.dev/install script to the list of watched paths previously defined for the legacy package-manager-based installers
 - **onboarding:** replace current standard views and an error notification shown when the Radicle CLI binary didn't get resolved succesfully, with a new dedicated Welcome View explaining the situation, setting user expectations accordingly and offering to launch the troubleshooting flow via a button.
 - **onboarding:** replace whichever Welcome View ends up randomly beeing shown for a split-second while the extension is acticating with an "Activating extension..." one
 - **commands:** add new command to launch Radicle CLI installation troubleshooter (available only when binary hasn't resolved)
@@ -643,7 +671,7 @@
 
 ### ✨ Highlights
 
-- ❤️🪵 Initial ["Heartwood"](https://app.radicle.xyz/seeds/seed.radicle.xyz/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
+- ❤️🪵 Initial ["Heartwood"](https://app.radicle.at/nodes/seed.radicle.at//rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5) support
 - 🔐 Integrated authentication
 - 📥 Cloning of seeded Radicle projects
 - 🏗️ Improved development tooling and infrastructure for maintainers

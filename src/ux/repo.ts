@@ -1,5 +1,5 @@
 import { sep } from 'node:path'
-import { ProgressLocation, type QuickPickItem, Uri, commands, window } from 'vscode'
+import { commands, ProgressLocation, type QuickPickItem, Uri, window } from 'vscode'
 import { execRad, fetchFromHttpd } from '../helpers'
 import { getRepoRoot, log, showLog } from '../utils'
 import { notifyUserAboutFetchError } from './httpdConnection'
@@ -73,7 +73,7 @@ export async function selectAndCloneRadicleRepo(): Promise<void> {
       location: ProgressLocation.Window,
       title: `‎$(radicle-logo) Cloning ${msgSuffix}…`,
     },
-    // eslint-disable-next-line require-await, @typescript-eslint/require-await
+    // eslint-disable-next-line require-await
     async () => {
       const { errorCode } = execRad(['clone', 'selectedRid', '--no-confirm'], {
         cwd: cloneTargetDir.fsPath,

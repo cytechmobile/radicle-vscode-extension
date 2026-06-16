@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { defineProps, nextTick, onMounted, onUpdated } from 'vue'
+import { nextTick, onMounted, onUpdated } from 'vue'
 import Markdown from 'vue3-markdown-it'
 import 'highlight.js/styles/vs2015.css'
 
@@ -33,6 +33,7 @@ onUpdated(showLangTagOnCodeBlocks)
   <Markdown :source="source" :emoji="{ shortcuts: {} }" class="parsed-md" />
 </template>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style>
 :is(h1, h2, h3, h4, h5, h6) .parsed-md * {
   @apply m-0;

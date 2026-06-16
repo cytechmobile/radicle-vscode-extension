@@ -55,7 +55,6 @@ export function truncateMarkdown(str: string): string {
  * Truncates a string, if needed, replacing its middle chars with an ellipses (`…`).
  *
  * @param {string} str The string to potentialy truncate
- * @default 12
  * @param {number} maxTotalCharsToShow The count of maximmum total chars
  * that`str` can have (excluding the ellipses). If `str` is longer than that number,
  * it will be truncated.

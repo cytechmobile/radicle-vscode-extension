@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import type { Revision } from '../../../types'
 import {
   provideVSCodeDesignSystem,
   vsCodePanels,
   vsCodePanelTab,
   vsCodePanelView,
 } from '@vscode/webview-ui-toolkit'
-import { ref, useTemplateRef } from 'vue'
 import {
   breakpointsTailwind,
   useBreakpoints,
@@ -13,15 +13,15 @@ import {
   useThrottleFn,
 } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import type { Revision } from '../../../types'
+import { ref, useTemplateRef } from 'vue'
+import PatchDetailActivity from '@/components/PatchDetailActivity.vue'
+import PatchDetailButtons from '@/components/PatchDetailButtons.vue'
+import PatchDetailRevision from '@/components/PatchDetailRevision.vue'
+import PatchDetailTitleDescription from '@/components/PatchDetailTitleDescription.vue'
+import PatchMajorEvents from '@/components/PatchMajorEvents.vue'
+import PatchStatusBadge from '@/components/PatchStatusBadge.vue'
 import { usePatchDetailStore } from '@/stores/patchDetailStore'
 import { scrollToTemplateRef } from '@/utils/scrollToTemplateRef'
-import PatchStatusBadge from '@/components/PatchStatusBadge.vue'
-import PatchMajorEvents from '@/components/PatchMajorEvents.vue'
-import PatchDetailButtons from '@/components/PatchDetailButtons.vue'
-import PatchDetailTitleDescription from '@/components/PatchDetailTitleDescription.vue'
-import PatchDetailActivity from '@/components/PatchDetailActivity.vue'
-import PatchDetailRevision from '@/components/PatchDetailRevision.vue'
 
 provideVSCodeDesignSystem().register(vsCodePanels(), vsCodePanelTab(), vsCodePanelView())
 
@@ -35,8 +35,9 @@ const patchDetailRevisionRef = useTemplateRef<InstanceType<typeof PatchDetailRev
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isWindowNarrowerThanSm = ref<boolean>()
-const recalcIsWindowNarrowerThanSm = () =>
-  (isWindowNarrowerThanSm.value = breakpoints.isSmaller('sm'))
+function recalcIsWindowNarrowerThanSm() {
+  return (isWindowNarrowerThanSm.value = breakpoints.isSmaller('sm'))
+}
 recalcIsWindowNarrowerThanSm()
 useEventListener('resize', useThrottleFn(recalcIsWindowNarrowerThanSm, 50))
 
@@ -57,19 +58,19 @@ function showCreateCommentForm(targetRevision: Revision) {
 
 <template>
   <article
-    class="grid grid-cols-1 sm:grid-cols-[minmax(calc(50cqw_+_80px),_1fr)_minmax(95px,_1fr)] xl:grid-cols-2 grid-areas-patch gap-x-9 gap-y-12"
+    class="grid-areas-patch grid grid-cols-1 gap-x-9 gap-y-12 sm:grid-cols-[minmax(calc(50cqw_+_80px),_1fr)_minmax(95px,_1fr)] xl:grid-cols-2"
   >
-    <header class="flex gap-4 justify-between" style="grid-area: header">
-      <div class="flex flex-wrap gap-4 items-center">
+    <header class="flex justify-between gap-4" style="grid-area: header">
+      <div class="flex flex-wrap items-center gap-4">
         <PatchStatusBadge class="text-sm" />
         <PatchMajorEvents @show-revision="showRevision" />
       </div>
-      <aside class="flex flex-col gap-2 shrink-0 *:w-full">
+      <aside class="flex shrink-0 flex-col gap-2 *:w-full">
         <PatchDetailButtons />
       </aside>
     </header>
     <main
-      class="grid grid-rows-subgrid grid-cols-subgrid row-span-3 sm:row-span-2 sm:col-span-2"
+      class="row-span-3 grid grid-cols-subgrid grid-rows-subgrid sm:col-span-2 sm:row-span-2"
     >
       <PatchDetailTitleDescription />
 
@@ -93,37 +94,37 @@ function showCreateCommentForm(targetRevision: Revision) {
         >
           Revision
         </vscode-panel-tab>
-        <vscode-panel-view class="pt-5 px-0 pb-0">
+        <vscode-panel-view class="px-0 pb-0 pt-5">
           <PatchDetailActivity
             v-if="patchDetailRevisionRef?.selectedRevision"
             :show-heading="false"
             :selected-revision="patchDetailRevisionRef?.selectedRevision"
           />
         </vscode-panel-view>
-        <vscode-panel-view class="pt-5 px-0 pb-0">
+        <vscode-panel-view class="px-0 pb-0 pt-5">
           <PatchDetailRevision
             ref="patchDetailRevisionRef"
-            @show-create-comment-form="showCreateCommentForm"
             :show-heading="false"
             class="h-fit"
+            @show-create-comment-form="showCreateCommentForm"
           />
         </vscode-panel-view>
       </vscode-panels>
 
       <PatchDetailActivity
         v-if="!isWindowNarrowerThanSm && patchDetailRevisionRef?.selectedRevision"
-        @show-revision="showRevision"
         show-heading
         :selected-revision="patchDetailRevisionRef?.selectedRevision"
         style="grid-area: section-primary"
+        @show-revision="showRevision"
       />
       <PatchDetailRevision
         v-if="!isWindowNarrowerThanSm"
         ref="patchDetailRevisionRef"
-        @show-create-comment-form="showCreateCommentForm"
         show-heading
-        class="hidden sm:block h-fit"
+        class="hidden h-fit sm:block"
         style="grid-area: section-secondary"
+        @show-create-comment-form="showCreateCommentForm"
       />
     </main>
   </article>

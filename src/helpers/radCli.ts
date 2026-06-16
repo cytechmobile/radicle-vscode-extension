@@ -1,5 +1,5 @@
-import { assertUnreachable, isRealFsPath } from '../utils'
 import { exec, execRad, getResolvedPathToNodeHome } from '.'
+import { assertUnreachable, isRealFsPath } from '../utils'
 
 /**
  * Resolves the version of the resolved Radicle CLI binary, if possible in semver format.
@@ -8,7 +8,7 @@ import { exec, execRad, getResolvedPathToNodeHome } from '.'
  */
 export function getRadCliVersion(): string | undefined {
   const { stdout: version } = execRad(['--version'])
-  const semverRegex = /\d+\.\d+\S*/g // https://regexr.com/7bevi
+  const semverRegex = /\d+\.\d\S*/g // https://regexr.com/7bevi
   const semver = version?.match(semverRegex)?.[0]
 
   return semver ?? version

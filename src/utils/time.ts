@@ -13,8 +13,8 @@ const timeAgo = new TimeAgo('en-US')
  *
  * See implementation for more explicit information on behaviour.
  *
- * @default 'long'
- * @param {('long' | 'short' | 'narrow' | 'mini' | 'now')} labelStyle the preferred style in which the output will be
+ * @param unixTimestamp - The Unix timestamp (in seconds) from which to measure elapsed time.
+ * @param labelStyle - The preferred style in which the output will be formatted.
  * @see https://github.com/catamphetamine/javascript-time-ago/tree/master/locale-more-styles
  */
 export function getTimeAgo(
@@ -88,7 +88,7 @@ export function convertLocaleFromLibcToBcp47(
   //
   // The proper (but complicated) way of doing this right is described in
   // https://wikinew.openoffice.org/wiki/LocaleMapping
-  return libc?.replace(/(\.|@).*/, '').replace('_', '-')
+  return libc?.replace(/(?:\.|@).*/, '').replace('_', '-')
 }
 
 /**

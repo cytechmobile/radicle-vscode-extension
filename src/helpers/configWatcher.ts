@@ -1,12 +1,12 @@
 import { workspace } from 'vscode'
+import { type ExtensionConfig, resetHttpdConnection } from '.'
+import { useEnvStore, usePatchStore } from '../stores'
 import {
   validateHideTempFilesConfigAlignment,
   validateHttpdConnection,
   validateRadCliInstallation,
   validateRadicleIdentityAuthentication,
 } from '../ux/'
-import { useEnvStore, usePatchStore } from '../stores'
-import { type ExtensionConfig, resetHttpdConnection } from '.'
 
 function onConfigChange(
   configKey: keyof ExtensionConfig,

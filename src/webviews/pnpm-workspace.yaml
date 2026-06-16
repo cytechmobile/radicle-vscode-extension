@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+  vue-demi: true
+
+minimumReleaseAgeExclude:
+  - '@maninak/eslint-config'

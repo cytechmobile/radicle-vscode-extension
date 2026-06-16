@@ -12,7 +12,7 @@ If there's anything you need to ask or share with the maintainers, we'd love to 
 
 ### Issues
 
-For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.xyz/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
+For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.dev/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
 
 When filing an issue please:
 
@@ -24,7 +24,7 @@ When filing an issue please:
 
 Code contributions are the best kind of contribution! Please make sure to read this document in its entirety to get up to speed with the various details.
 
->If you're interested in making a code ~~donation~~ contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
+> If you're interested in making a code ~~donation~~ contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
 
 ## Cloning the `radicle-vscode-repo` Repo Locally
 
@@ -40,28 +40,35 @@ Open VS Code's Command Palette (`Ctrl/Cmd + Shift + P`) and type in `> rad clone
 rad clone rad:z3Makm6fsQQXmpSFE43DZqwupaEhk
 ```
 
-You can find more info about `rad clone` in the [Radicle User Guide](https://radicle.xyz/guides/user#the-basics-of-seeding-and-cloning).
+You can find more info about `rad clone` in the [Radicle User Guide](https://radicle.dev/guides/user#the-basics-of-seeding-and-cloning).
 
 ## Launching for Local Development
 
 After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) and opening it in VS Code, run the `Develop Extension` configuration from the "Run and Debug" View. This will:
 
 - ensure you have the required dependencies and auto-align as needed
-- start the task `npm: dev` to compile the source code
+- start the VS Code task `npm: dev` to compile the source code
 - launch a new VS Code window with the extension running in it
 - show the console output, including any errors in a new terminal named `dev`
 
->Tip: Or just press `F5` to achieve the same thing.
+> Tip: Or just press `F5` to achieve the same thing.
 
 ## Dev Workflow
 
-There's [no hot-module-reloading or automatic reload of the extension development host](https://stackoverflow.com/questions/75305144/how-to-restart-reload-vs-code-host-window-on-extension-source-code-file-changes). After making your changes have to close the host window and press [re-launch for development](#launching-for-local-development). Code like it's 1999.🕺
+While the `npm: dev` task is running you get a fast inner loop with no manual relaunches:
+
+- **Webview changes** (anything under `src/webviews`) hot-reload in place via the Vite dev server. Save a `.vue`, `.ts` or `.css` file and the open panel updates instantly, keeping its current state. No rebuild, no window reload.
+- **Extension host changes** (anything under `src`, outside `src/webviews`) are rebuilt by `esbuild --watch`, after which the host window reloads itself automatically within a second or so.
+
+The `npm: dev` task and its watchers stay alive after a debug session ends, on purpose. Re-pressing `F5` reuses them, skipping dependency verification and the initial build, so subsequent launches are nearly instant. Stop the task manually (trash can icon on its terminal) when you're done for the day or close VS Code.
+
+> The webview HMR path loads modules from the Vite dev server at `http://localhost:5173` and only kicks in when the extension runs in development mode. Production builds bundle the pre-built assets shipped inside the extension, exactly as before. HMR currently targets local development; remote scenarios (Remote-SSH, Codespaces) would need extra `asExternalUri` plumbing.
 
 ## Debugging
 
 For standard extension code (aka not code running in webviews a.k.a. mini websites), place stop points in the standard way next to the line counter and use the native debugger.
 
-For code running *inside* webviews use the command "Toggle Developer Tools" from the palette which will open the familiar chrome dev tools. You can now place stop points in there and inspect HTML and CSS just like in chrome; because it is chrome(ium).
+For code running _inside_ webviews use the command "Toggle Developer Tools" from the palette which will open the familiar chrome dev tools. You can now place stop points in there and inspect HTML and CSS just like in chrome; because it is chrome(ium).
 
 ## Recommended Extensions
 
@@ -106,7 +113,7 @@ If you notice anything fishy, annoying (red squiggle should be yellow, conflicti
 
 We use [`pnpm`](https://pnpm.io/motivation) for node package management (f you use npm or yarn by mistake, no worries, there are fail-safes in place to save you from breaking something).
 
->Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
+> Tip: Check out [`ni`](https://github.com/antfu/ni) to never think again about which package manager to use in which repo.
 
 #### Usage Without pnpm Globally Installed
 
@@ -131,7 +138,7 @@ Use custom wrapper `askUser()` instead of the native [InputBox API](https://code
 
 ### Copywriting
 
-- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case  (Wikipedia style)](https://titlecaseconverter.com)
+- All user facing controls and UI e.g. buttons, tooltips, etc should use [Title Case (Wikipedia style)](https://titlecaseconverter.com)
 - Notifications should not contain a trailing fullstop unless multiple sentences are used.
 - Success and Warning notifications should begin with what happened first e.g. "Updated patch title successfully"
 - Error notifications should begin with "Failed" e.g. "Failed updating patch title"
@@ -148,4 +155,4 @@ After [cloning the repo locally](#cloning-the-radicle-vscode-repo-repo-locally) 
 npx vsce package --no-dependencies
 ```
 
-This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` +  "install vsix").
+This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` + "install vsix").

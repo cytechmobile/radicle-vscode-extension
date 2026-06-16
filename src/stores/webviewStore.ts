@@ -1,9 +1,9 @@
 import type { WebviewPanel } from 'vscode'
-import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { type ReactiveEffectRunner, effect, reactive } from '@vue/reactivity'
-import { assertUnreachable } from '../utils'
 import type { Patch } from '../types'
+import { effect, reactive, type ReactiveEffectRunner } from '@vue/reactivity'
+import { createPinia, defineStore, setActivePinia } from 'pinia'
 import { alignUiWithWebviewPatchDetailState, getStateForWebview } from '../helpers'
+import { assertUnreachable } from '../utils'
 
 setActivePinia(createPinia())
 
@@ -67,8 +67,7 @@ export const useWebviewStore = defineStore('webviewStore', () => {
 
 function isPanelDisposed(panel: WebviewPanel) {
   try {
-    // eslint-disable-next-line no-unused-expressions
-    panel.webview // getter will throw if panel is disposed
+    void panel.webview // getter will throw if panel is disposed
 
     return false
   } catch {

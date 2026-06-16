@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useCounterStore } from '@/stores/counter'
-import { storeToRefs } from 'pinia'
 import { provideVSCodeDesignSystem, vsCodeButton } from '@vscode/webview-ui-toolkit'
+import { storeToRefs } from 'pinia'
 import { notifyExtension } from 'extensionUtils/webview-messaging'
+import { useCounterStore } from '@/stores/counter'
 
 provideVSCodeDesignSystem().register(vsCodeButton())
 
