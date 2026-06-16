@@ -3,17 +3,14 @@ import { delimiter, join } from 'node:path'
 
 export const testingWorkspacePath = join(tmpdir(), 'radicle-vscode-extension-e2e-workspace')
 
-export const rootDirPath = join(__dirname, '../../..')
+export const rootDir = join(__dirname, '../../..')
 
 /** The path to a disposable directory used as `$HOME` for the entire e2e run. */
 export const emulatedHomePath = join(tmpdir(), 'radicle-vscode-extension-e2e-home')
-
 export const nodeHomePath = join(emulatedHomePath, '.radicle')
-
 export const radicleBinPath = join(nodeHomePath, 'bin')
 export const radCliPath = join(radicleBinPath, 'rad')
 export const httpdPath = join(radicleBinPath, 'radicle-httpd')
-
 /** Where the Radicle CLI binary is moved to in order to emulate it being uninstalled. */
 export const backupRadCliPath = `${radCliPath}.uninstalled`
 
@@ -31,14 +28,12 @@ export const supportedVscodeVersion =
   // eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-member-access
   (require('../../../package.json').engines.vscode as string).replace(/^\^/, '')
 
-/** Cache dir for the provisioned Chrome-for-Testing chromedriver, reused across runs. */
-export const chromedriverDirPath = join(rootDirPath, 'node_modules', '.cache', 'chromedriver')
-
-/** The chromedriver binary wdio drives VS Code's bundled Electron with. */
+export const wdioCachePath = join(rootDir, 'node_modules', '.cache', 'wdio')
 export const chromedriverPath = join(
-  chromedriverDirPath,
+  wdioCachePath,
   platform() === 'win32' ? 'chromedriver.exe' : 'chromedriver',
 )
+export const wdioVideoPath = join(rootDir, 'node_modules', '.wdio-video')
 
 export function resolveReleaseTargetTriple(): string {
   const osArch = `${platform()}/${arch()}`

@@ -2,10 +2,10 @@ import fs from 'node:fs'
 import { join } from 'node:path'
 import { $ } from 'zx'
 import {
-  chromedriverDirPath,
   chromedriverPath,
   resolveChromeForTestingPlatform,
   supportedVscodeVersion,
+  wdioCachePath,
 } from '../constants/config'
 
 const vscodeCgManifestUrl = `https://raw.githubusercontent.com/microsoft/vscode/${supportedVscodeVersion}/cgmanifest.json`
@@ -67,30 +67,29 @@ async function fetchChromedriverUrl(chromiumMajor: string): Promise<string> {
 }
 
 /**
- * Ensures a chromedriver matching VS Code's bundled Chromium is available at `chromedriverPath`,
+ * Ensures a chrome driver matching VS Code's bundled Chromium is available at `chromedriverPath`,
  * downloading it from Chrome for Testing on the first run and reusing the cached binary after.
  *
  * wdio-vscode-service's own driver download is unreliable for recent VS Code builds: it reports
  * success without placing the binary at the path it then tries to launch. So the suite
  * provisions the driver itself and points `wdio:chromedriverOptions.binary` at this path.
  */
-export async function provisionChromedriver(): Promise<void> {
+export async function provisionChromeDriver(): Promise<void> {
   if (fs.existsSync(chromedriverPath)) {
     return
   }
 
   const chromiumMajor = await fetchChromiumMajor()
   const url = await fetchChromedriverUrl(chromiumMajor)
-  const zipPath = join(chromedriverDirPath, 'chromedriver.zip')
-  const extractDirPath = join(chromedriverDirPath, 'extracted')
-  // Chrome for Testing nests the binary under e.g. `chromedriver-linux64/chromedriver`.
+  const zipPath = join(wdioCachePath, 'chromedriver.zip')
+  const extractDirPath = join(wdioCachePath, 'extracted')
   const extractedBinaryPath = join(
     extractDirPath,
     `chromedriver-${resolveChromeForTestingPlatform()}`,
     chromedriverPath.endsWith('.exe') ? 'chromedriver.exe' : 'chromedriver',
   )
 
-  fs.mkdirSync(chromedriverDirPath, { recursive: true })
+  fs.mkdirSync(wdioCachePath, { recursive: true })
   await $`rm -rf ${extractDirPath}`
   await $`curl -sSLf -o ${zipPath} ${url}`
   await $`unzip -q ${zipPath} -d ${extractDirPath}`
