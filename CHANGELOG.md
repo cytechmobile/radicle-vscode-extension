@@ -29,9 +29,9 @@ All of the above establish a solid foundation for future development and a more 
 - **e2e:** implement a workflow to test in CI
 - **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
 - **e2e:** support testing in both Linux and MacOS environments
-- **e2e:** take photos of test runs and videos of failed ones and when on CI upload it to artifacts
+- **e2e:** take photos and videos of failed test runs and, when on CI, upload them to artifacts
 - **ci:** cache node_modules for subsequent runs
-  **ci:** update all workflows and their actions to use at least Node.js v24
+- **ci:** update all workflows and their actions to use at least Node.js v24
 
 ### ☑️ Tests
 
