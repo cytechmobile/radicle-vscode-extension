@@ -9,7 +9,6 @@ yarn-error.log*
 debug.log*
 
 # unknown, inherited from starter template
-.vscode-test/
 *.vsix
 
 # git / radicle
