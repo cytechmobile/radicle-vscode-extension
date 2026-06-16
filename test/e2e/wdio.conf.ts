@@ -1,14 +1,15 @@
 import type { Options } from '@wdio/types'
-import path from 'node:path'
 import {
   chromedriverPath,
   emulatedHomePath,
-  rootDirPath,
+  rootDir,
   sandboxedPath,
   supportedVscodeVersion,
   testingWorkspacePath,
+  wdioCachePath,
+  wdioVideoPath,
 } from './constants/config'
-import { provisionChromedriver } from './helpers/chromedriver'
+import { provisionChromeDriver } from './helpers/chromedriver'
 import {
   emulateRadCliUninstalled,
   setupTestSandbox,
@@ -56,7 +57,7 @@ export const config: Options.Testrunner = {
       'browserName': 'vscode',
       'browserVersion': supportedVscodeVersion,
       'wdio:vscodeOptions': {
-        extensionPath: rootDirPath,
+        extensionPath: rootDir,
         workspacePath: testingWorkspacePath,
         userSettings: {
           'extensions.autoCheckUpdates': false,
@@ -74,16 +75,16 @@ export const config: Options.Testrunner = {
   ],
   logLevel: 'warn',
   waitforTimeout: 10000,
-  services: [['vscode', { cachePath: path.join(rootDirPath, 'node_modules/.cache/wdio') }]],
+  services: [['vscode', { cachePath: wdioCachePath }]],
   framework: 'mocha',
-  reporters: ['spec'],
+  reporters: ['spec', ['video', { outputDir: wdioVideoPath }]],
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,
   },
   onPrepare: async () => {
     try {
-      await provisionChromedriver()
+      await provisionChromeDriver()
       await setupTestSandbox()
     } catch (error) {
       // wdio does not reliably abort the run when onPrepare rejects, which leaves workers

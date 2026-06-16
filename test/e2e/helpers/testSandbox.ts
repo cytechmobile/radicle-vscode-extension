@@ -20,6 +20,8 @@ import {
   radicleBinPath,
   resolveReleaseTargetTriple,
   testingWorkspacePath,
+  wdioCachePath,
+  wdioVideoPath,
 } from '../constants/config'
 
 function spawnDaemon(
@@ -257,6 +259,8 @@ export async function teardownTestSandbox(): Promise<void> {
 export async function setupTestSandbox(): Promise<void> {
   try {
     await teardownTestSandbox()
+    await $`mkdir -p ${wdioCachePath}`
+    await $`mkdir -p ${wdioVideoPath}`
     await $`mkdir -p ${nodeHomePath}`
     await $`mkdir -p ${testingWorkspacePath}`
     await installRadCli()

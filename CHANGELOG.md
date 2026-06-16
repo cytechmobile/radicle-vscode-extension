@@ -18,9 +18,9 @@ All of the above establish a solid foundation for future development and a more 
 - **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and ensure git hooks remain installed with a `postinstall` script
 - **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-step experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
 - **build:** increase transpilation target to es2022 (latest supported by VS Code)
-- **dev, ci:** migrate to Node.js 24, pnpm 11
+- **dev:** migrate to Node.js v24, pnpm v11
 - **ts:** migrate extension and webviews to TypeScript v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
-- **deps:** increase minimum VS Code version requirement to 1.112.0
+- **deps:** increase minimum VS Code version requirement to v1.112.0
 - **deps:** upgrade all extension and webview dependencies resolving all deprecation warnings and addressing all security alerts
 
 ### 🤖 CI
@@ -29,6 +29,9 @@ All of the above establish a solid foundation for future development and a more 
 - **e2e:** implement a workflow to test in CI
 - **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
 - **e2e:** support testing in both Linux and MacOS environments
+- **e2e:** take photos of test runs and videos of failed ones and when on CI upload it to artifacts
+- **ci:** cache node_modules for subsequent runs
+  **ci:** update all workflows and their actions to use at least Node.js v24
 
 ### ☑️ Tests
 

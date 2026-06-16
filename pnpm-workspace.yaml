@@ -1,10 +1,18 @@
 allowBuilds:
+  '@ffmpeg-installer/darwin-arm64': true
+  '@ffmpeg-installer/darwin-x64': true
+  '@ffmpeg-installer/linux-x64': true
   edgedriver: true
   esbuild: true
   geckodriver: true
   simple-git-hooks: true
   unrs-resolver: true
   vue-demi: true
+
+packageExtensions:
+  npm-run-all@*:
+    dependencies:
+      shell-quote: '*'
 
 minimumReleaseAgeExclude:
   - '@maninak/eslint-config'
