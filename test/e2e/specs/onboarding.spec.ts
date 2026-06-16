@@ -1,27 +1,26 @@
 import type * as VsCode from 'vscode'
 import type { Workbench } from 'wdio-vscode-service'
-import path from 'node:path'
 import { browser, expect } from '@wdio/globals'
 import isEqual from 'lodash/isEqual'
 import { $, cd } from 'zx'
-import { backupNodeHomePath, e2eTestDirPath, nodeHomePath } from '../constants/config'
+import { testingWorkspacePath } from '../constants/config'
 import { openRadicleViewContainer } from '../helpers/actions'
 import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
-import { getFirstWelcomeViewText } from '../helpers/queries'
+import { getFirstWelcomeViewButtonTitles, getFirstWelcomeViewText } from '../helpers/queries'
+import {
+  assertExtensionResolvedTestSandbox,
+  emulateRadCliInstalled,
+} from '../helpers/testSandbox'
 
 describe('Onboarding Flow', () => {
   let workbench: Workbench
 
   before(async () => {
     workbench = await browser.getWorkbench()
+    await assertExtensionResolvedTestSandbox()
   })
 
   describe('VS Code, *before* Radicle is installed,', () => {
-    after(async () => {
-      await $`mv ${backupNodeHomePath} ${nodeHomePath}`
-      await workbench.executeCommand('Developer: Reload Window')
-    })
-
     it('has our Radicle extension installed and available', async () => {
       const extensions = await browser.executeWorkbench(
         (vscode: typeof VsCode) => vscode.extensions.all,
@@ -55,7 +54,11 @@ describe('Onboarding Flow', () => {
     })
   })
 
-  describe('VS Code, *before* the workspace is git-initialized,', () => {
+  describe('Radicle, *before* the open directory is git-initialized,', () => {
+    before(async () => {
+      await emulateRadCliInstalled()
+    })
+
     it('guides the user on how to git-initialize their workspace', async () => {
       await openRadicleViewContainer(workbench)
 
@@ -78,7 +81,7 @@ describe('Onboarding Flow', () => {
     })
   })
 
-  describe('VS Code, *before* the workspace is rad-initialized,', () => {
+  describe('Radicle, *before* the open repository is rad-initialized,', () => {
     before(async () => {
       await initGitRepo()
     })
@@ -100,10 +103,9 @@ describe('Onboarding Flow', () => {
     })
   })
 
-  describe('VS Code, *after* the workspace is rad-initialized,', () => {
+  describe('Radicle, *after* the open repository is rad-initialized,', () => {
     before(async () => {
-      await $`rad init --private --default-branch main --name "A_test_blog" --description "Some repo" --no-confirm --verbose`
-      await workbench.executeCommand('Developer: Reload Window')
+      await $`rad init --private --default-branch master --name "Repo" --description "Test repo" --no-confirm --verbose`
     })
 
     it('hides the non rad-initialized guide', async () => {
@@ -115,38 +117,18 @@ describe('Onboarding Flow', () => {
     })
 
     it('shows the standard sidebar views', async () => {
-      const sidebarView = workbench.getSideBar().getContent()
-      await sidebarView.wait()
-
       await expectStandardSidebarViewsToBeVisible(workbench)
     })
   })
 })
 
 async function initGitRepo() {
-  const repoDirPath = path.join(e2eTestDirPath, 'fixtures/workspaces/basic')
-
-  await $`mkdir -p ${repoDirPath}`
-  cd(repoDirPath)
-  await $`git config --global init.defaultBranch main`
-  await $`git init .`
-  await $`git config --global user.email "test@radicle.dev"`
-  await $`git config --global user.name "Radicle Test"`
+  await $`mkdir -p ${testingWorkspacePath}`
+  cd(testingWorkspacePath)
+  await $`git init -b master .`
+  await $`git config --local user.email "test@radicle.dev"`
+  await $`git config --local user.name "Radicle Test"`
   await $`echo "# Basic Repo" > README.md`
   await $`git add README.md`
   await $`git commit -m 'adds readme' --no-gpg-sign`
-}
-
-async function getFirstWelcomeViewButtonTitles(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
-  const buttons =
-    (await (await (await sidebarView.getSections())[0]?.findWelcomeContent())?.getButtons()) ??
-    []
-  const buttonTitles = await Promise.all(
-    buttons.map(async (button) => await button.getTitle()),
-  )
-
-  return buttonTitles
 }

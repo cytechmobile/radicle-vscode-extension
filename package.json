@@ -30,7 +30,7 @@
   "scripts": {
     "preinstall": "node scripts/ensure-pnpm.mjs",
     "postinstall": "npx simple-git-hooks",
-    "vscode:prepublish": "npm run verify-deps && npm run lint && npm run test && npm run build",
+    "vscode:prepublish": "npm run verify-deps && npm run lint && npm run build && npm run test && npm run test:e2e",
     "verify-deps": "npx npm-run-all -pl verify-deps:*",
     "verify-deps:extension": "npx --yes pnpm@latest i --frozen-lockfile --prefer-offline",
     "verify-deps:webviews": "cd ./src/webviews && npm run verify-deps",

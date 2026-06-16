@@ -1,26 +1,45 @@
 import type { Options } from '@wdio/types'
 import path from 'node:path'
-import { $ } from 'zx'
-
 import {
-  backupNodeHomePath,
-  e2eTestDirPath,
-  nodeHomePath,
+  chromedriverPath,
+  emulatedHomePath,
   rootDirPath,
+  sandboxedPath,
+  supportedVscodeVersion,
+  testingWorkspacePath,
 } from './constants/config'
+import { provisionChromedriver } from './helpers/chromedriver'
+import {
+  emulateRadCliUninstalled,
+  setupTestSandbox,
+  teardownTestSandbox,
+} from './helpers/testSandbox'
 
-// eslint-disable-next-line ts/no-require-imports, ts/no-unsafe-assignment, perfectionist/sort-imports
-const packageJson = require('../../package.json')
+// Done at module scope so every process loading this config (launcher, workers,
+// and in turn VS Code + the extension host) inherits the emulated environment.
+process.env['HOME'] = emulatedHomePath
+process.env['USERPROFILE'] = emulatedHomePath
+delete process.env['RAD_HOME']
+// Sever any link to the user's real ssh-agent: the extension shells out to `ssh-add`
+// (including `ssh-add -D`, which removes keys), which must never reach the real agent.
+delete process.env['SSH_AUTH_SOCK']
+// Unencrypted throwaway key, usable non-interactively without an ssh-agent.
+process.env['RAD_PASSPHRASE'] = ''
+process.env['PATH'] = sandboxedPath
 
-if (!process.env['CI']) {
-  throw new Error('E2E tests should only be run in CI')
+let isTearingDown = false
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.once(signal, () => {
+    if (isTearingDown) {
+      return
+    }
+    isTearingDown = true
+    void teardownTestSandbox().finally(() => process.exit(signal === 'SIGINT' ? 130 : 143))
+  })
 }
 
-// eslint-disable-next-line ts/no-unsafe-member-access
-const vscodeVersion = (packageJson.engines.vscode as string).replace(/^\^/, '')
-
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
-// Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/130
+// Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/159
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
 export const config: Options.Testrunner = {
   runner: 'local',
@@ -31,14 +50,14 @@ export const config: Options.Testrunner = {
     },
   },
   specs: ['./specs/**/*.ts'],
-  maxInstances: 10,
+  maxInstances: 1,
   capabilities: [
     {
       'browserName': 'vscode',
-      'browserVersion': vscodeVersion,
+      'browserVersion': supportedVscodeVersion,
       'wdio:vscodeOptions': {
         extensionPath: rootDirPath,
-        workspacePath: path.join(e2eTestDirPath, 'fixtures/workspaces/basic'),
+        workspacePath: testingWorkspacePath,
         userSettings: {
           'extensions.autoCheckUpdates': false,
           'extensions.autoUpdate': false,
@@ -47,6 +66,9 @@ export const config: Options.Testrunner = {
           'disable-extensions': true,
           'disable-workspace-trust': true,
         },
+      },
+      'wdio:chromedriverOptions': {
+        binary: chromedriverPath,
       },
     },
   ],
@@ -60,11 +82,24 @@ export const config: Options.Testrunner = {
     timeout: 60000,
   },
   onPrepare: async () => {
-    await $`mkdir -p ${path.join(rootDirPath, 'node_modules/.cache/wdio')}`
+    try {
+      await provisionChromedriver()
+      await setupTestSandbox()
+    } catch (error) {
+      // wdio does not reliably abort the run when onPrepare rejects, which leaves workers
+      // hanging against a missing sandbox. Report and hard-stop instead.
+      process.stderr.write(
+        `\n[e2e] Test sandbox setup failed; aborting run.\n${String(error)}\n`,
+      )
+      process.exit(1)
+    }
+  },
+  onComplete: async () => {
+    await teardownTestSandbox()
   },
   onWorkerStart: async (_cid, _caps, specs) => {
     if (specs.some((spec) => spec.includes('onboarding.spec.ts'))) {
-      await $`mv ${nodeHomePath} ${backupNodeHomePath}`
+      await emulateRadCliUninstalled()
     }
   },
 }

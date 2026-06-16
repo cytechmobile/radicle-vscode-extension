@@ -7,11 +7,10 @@ import { browser } from '@wdio/globals'
  * repository.
  */
 export async function expectStandardSidebarViewsToBeVisible(workbench: Workbench) {
-  const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
-
   await browser.waitUntil(
     async () => {
+      const sidebarView = workbench.getSideBar().getContent()
+
       try {
         await Promise.all([
           sidebarView.getSection('CLI COMMANDS'),

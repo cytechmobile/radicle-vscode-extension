@@ -4,19 +4,19 @@
 
 ### ✨ Highlights
 
- This release resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully e2e testing infrastructure and tests for it as well as a drastically overhauled local development loop.
+ This is primarily a maintenance release. It resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully e2e testing infrastructure and tests for it as well as a drastically overhauled local development loop.
 
-All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for existing and new contributors.
+All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for current and new contributors.
 
 ### 🏡 Chores
 
-- **dev:** overhaul the local development inner loop. Webview changes now hot-reload in place via the Vite dev server, while extension host changes rebuild and reload the host window automatically. No more closing and relaunching the host window on every change and waiting for a ~7-10s build + launch after each CSS change. The dev watchers also persist across debug sessions, so re-launching with F5 after closing the host VS Code window is near-instant. This also means that the previous zombie process issues resulting in memory & CPU hogging, laptop thermal throttling and battery draining are finally gone too.
-- **dev:** extension's esbuild errors will be detected by the `dev` Task runner which will automatically switch to the terminal panel, with the runner's tab auto-revealed and it's title text shown in red and an X next to it
-- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install suite bundling linting rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities. Critically, both the extension and webviews workspaces are now linted with the exact same powerful ruleset.
+- **dev:** overhaul the local development inner loop. Webview changes now hot-reload in place via the Vite dev server, while extension host changes rebuild and reload the host window automatically. No more closing and relaunching the host window on every change and waiting for a >10s build + launch after each CSS change. The dev watchers also persist and get reused across debug sessions, so re-launching with F5 after closing the host VS Code window is instant; no building. This also means that the previous zombie process issues resulting in memory & CPU hogging, eventual laptop thermal throttling and battery draining are finally gone too.
+- **dev:** extension's esbuild errors will be detected by the `dev` Task runner which in turn will automatically switch to the associated terminal panel, auto-revealing the runner's tab and marking its title text in red and with an X next to it
+- **lint:** migrate the extension and its webviews to [`@maninak/eslint-config`](https://npmjs.com/package/@maninak/eslint-config), a single-install suite bundling linting rules and formatting for TS, Vue, JSON, YAML, Markdown and more. Allows dropping the bespoke >400-line config and numerous associated dependencies we had, while bringing in new and improved capabilities. Critically, both the extension and webviews workspaces are now linted with an identical and powerful ruleset.
 - **lint:** fix broken IDE inline-with-code linting, formatting and auto-fix-on-save for the extension workspace
 - **lint:** enable IDE inline linting for the (nested) webviews workspace together with the existing one for the root extension workspace (finally!)
-- **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and add a `postinstall` script so git hooks (re-)install themselves on every `pnpm install`
-- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-friction experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
+- **lint:** wire `lint-staged` to actually run on `git commit` (previously the configured hook re-linted the whole repo on every commit instead of just staged files), leverage caching when linting changes, and ensure git hooks remain installed with a `postinstall` script
+- **dev:** replace deprecated guard used to ensure only pnpm is used for dependency management, effectively also fixing the broken dev script issue. New contributors can now again enjoy the zero-step experience of just opening the repo in VS Code after a fresh git-clone and hitting F5 to start developing
 - **build:** increase transpilation target to es2022 (latest supported by VS Code)
 - **dev, ci:** migrate to Node.js 24, pnpm 11
 - **ts:** migrate extension and webviews to TypeScript v6, modernize tsconfigs, detangle inheritance and clean-up interdependent configs
@@ -25,7 +25,10 @@ All of the above establish a solid foundation for future development and a more 
 
 ### 🤖 CI
 
-- **e2e:** set up new infrastructure and a related CI workflow capable of automated completely end-to-end testing. It uses a real Radicle node, which powers the latest extension build, which is running in an actual VS Code. Tests can assert behavior and state even as deep as extension webviews.
+- **e2e:** set up new infrastructure capable of automated completely end-to-end testing. It uses the official script to install a real Radicle node, powering the latest extension build, which is running in an actual VS Code. The test runner can manipulate VS Code as a real user would and can assert behavior and state even as deep as extension webviews.
+- **e2e:** implement a workflow to test in CI
+- **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
+- **e2e:** support testing in both Linux and MacOS environments
 
 ### ☑️ Tests
 
