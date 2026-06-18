@@ -2,17 +2,23 @@
 
 If you are interested in contributing to the development of the Radicle VS Code Extension keep reading for information and instructions.
 
+## Contributing With Sponsorship
+
+Code, issues and spreading the word are all valuable. So is helping fund the time that goes into this project. If you would like to chip in, [recurring micro-donations on Liberapay](https://liberapay.com/maninak/donate) are much appreciated and help keep this extension maintained and available for everyone for free. Only sponsor if you can comfortably spare it.
+
+[![Sponsor maninak on Liberapay](https://img.shields.io/badge/Liberapay-Donate-F6C915?logo=liberapay&logoColor=black)](https://liberapay.com/maninak/donate)
+
 ## Contributing With Feedback, Questions and Ideas
 
 Please always be respectful to the maintainers and all other community members. Here's how to reach out:
 
 ### Chat
 
-If there's anything you need to ask or share with the maintainers, we'd love to hear from you on our [Zulip channel](https://radicle.zulipchat.com/#narrow/stream/380896-integrations). Create a new topic prefixed with `[vscode]` e.g. `[vscode] <your topic's subject here>` and anything you want to say. Somebody will get back to you ASAP.
+If there's anything you need to ask or share with the maintainers, we'd love to hear from you on the community's [Zulip channel](https://radicle.zulipchat.com/#narrow/stream/380896-integrations). Create a new topic prefixed with [vscode] e.g. `[vscode] <your topic's subject here>` and anything you want to say. Somebody will get back to you ASAP.
 
 ### Issues
 
-For more concrete issues like specced out features and bug reports you could also file an issue against our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk). To do that you can [use the Web UI](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk/issues) or the [CLI](https://radicle.dev/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
+For more concrete issues like specced out features and bug reports you could also file an issue in our [repo](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk) with the [CLI](https://radicle.dev/guides/user#working-with-issues). Make sure to [clone the `radicle-vscode-extension` repo](#cloning-the-radicle-vscode-repo-repo-locally) if you haven't already.
 
 When filing an issue please:
 
@@ -24,7 +30,7 @@ When filing an issue please:
 
 Code contributions are the best kind of contribution! Please make sure to read this document in its entirety to get up to speed with the various details.
 
-> If you're interested in making a code ~~donation~~ contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
+> If you're interested in making a code contribution, especially if it's your first time for this repo, we strongly advise that you go with a small, if not trivial changes, and definitely ensure that they don't affect the application, its existing features, UX and general direction in a major way. When in doubt it's always best to consult with the maintainers before investing too much of your time.
 
 ## Cloning the `radicle-vscode-repo` Repo Locally
 
