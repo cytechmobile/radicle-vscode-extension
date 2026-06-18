@@ -39,6 +39,11 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   })
 }
 
+const shouldRecordVideo = Boolean(process.env['CI']) || Boolean(process.env['RECORD_VIDEO'])
+const reporters: Options.Testrunner['reporters'] = shouldRecordVideo
+  ? ['spec', ['video', { outputDir: wdioVideoPath }]]
+  : ['spec']
+
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
 // Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/159
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
@@ -50,7 +55,7 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  specs: ['./specs/**/*.ts'],
+  specs: ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'],
   maxInstances: 1,
   capabilities: [
     {
@@ -77,7 +82,7 @@ export const config: Options.Testrunner = {
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: wdioCachePath }]],
   framework: 'mocha',
-  reporters: ['spec', ['video', { outputDir: wdioVideoPath }]],
+  reporters,
   mochaOpts: {
     ui: 'bdd',
     timeout: 60000,

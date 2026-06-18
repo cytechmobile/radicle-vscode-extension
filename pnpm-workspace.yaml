@@ -9,10 +9,5 @@ allowBuilds:
   unrs-resolver: true
   vue-demi: true
 
-packageExtensions:
-  npm-run-all@*:
-    dependencies:
-      shell-quote: '*'
-
 minimumReleaseAgeExclude:
   - '@maninak/eslint-config'

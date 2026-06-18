@@ -3,7 +3,6 @@ import type { Workbench } from 'wdio-vscode-service'
 /** The welcome content of the sidebar's first (topmost) section, if any is shown. */
 async function getFirstWelcomeContent(workbench: Workbench) {
   const sidebarView = workbench.getSideBar().getContent()
-  await sidebarView.wait()
   const firstSection = (await sidebarView.getSections())[0]
 
   return await firstSection?.findWelcomeContent()

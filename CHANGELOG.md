@@ -8,6 +8,11 @@
 
 All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for current and new contributors.
 
+### 🩹 Fixes
+
+- **config:** re-point the file watchers when `pathToRadBinary` or `pathToNodeHome` changes, and keep polling for a CLI binary or identity at the configured location, so one placed there after the setting was set is recognized too, instead of the extension silently keeping its old state until the next window reload
+- **config:** correctly report the resolved Radicle identity when `pathToNodeHome` points at a home that holds no identity (or whose identity has not been created yet). Previously the extension could either misreport the Radicle CLI as not installed or surface the CLI's error output as if it were a valid identity, rather than reporting that no identity is stored there
+
 ### 🏡 Chores
 
 - **dev:** overhaul the local development inner loop. Webview changes now hot-reload in place via the Vite dev server, while extension host changes rebuild and reload the host window automatically. No more closing and relaunching the host window on every change and waiting for a >10s build + launch after each CSS change. The dev watchers also persist and get reused across debug sessions, so re-launching with F5 after closing the host VS Code window is instant; no building. This also means that the previous zombie process issues resulting in memory & CPU hogging, eventual laptop thermal throttling and battery draining are finally gone too.
@@ -36,6 +41,7 @@ All of the above establish a solid foundation for future development and a more 
 ### ☑️ Tests
 
 - **onboarding:** cover various paths of the flow with e2e tests
+- **settings:** cover the advanced settings with e2e tests: resolving the Radicle CLI from `pathToRadBinary`, the identity from `pathToNodeHome` (including each being created at the configured location after the fact), and the HTTP API connection from `httpApiEndpoint`
 
 ### 📖 Documentation
 

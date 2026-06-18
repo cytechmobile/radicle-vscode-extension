@@ -1,11 +1,13 @@
 import type * as VsCode from 'vscode'
 import type { Workbench } from 'wdio-vscode-service'
 import { browser, expect } from '@wdio/globals'
-import isEqual from 'lodash/isEqual'
 import { $, cd } from 'zx'
 import { testingWorkspacePath } from '../constants/config'
 import { openRadicleViewContainer } from '../helpers/actions'
-import { expectStandardSidebarViewsToBeVisible } from '../helpers/assertions'
+import {
+  areStringArraysEqual,
+  expectStandardSidebarViewsToBeVisible,
+} from '../helpers/assertions'
 import { getFirstWelcomeViewButtonTitles, getFirstWelcomeViewText } from '../helpers/queries'
 import {
   assertExtensionResolvedTestSandbox,
@@ -41,16 +43,18 @@ describe('Onboarding Flow', () => {
     it('instructs the user to install radicle', async () => {
       await openRadicleViewContainer(workbench)
 
-      const welcomeText = await getFirstWelcomeViewText(workbench)
-      const buttonTitles = await getFirstWelcomeViewButtonTitles(workbench)
+      await browser.waitUntil(async () => {
+        const welcomeText = await getFirstWelcomeViewText(workbench)
+        const buttonTitles = await getFirstWelcomeViewButtonTitles(workbench)
 
-      expect(welcomeText).toEqual([
-        'Failed resolving the Radicle CLI binary.',
-        "Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.",
-        "Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
-      ])
-
-      expect(buttonTitles).toEqual(['Troubleshoot'])
+        return (
+          areStringArraysEqual(welcomeText, [
+            'Failed resolving the Radicle CLI binary.',
+            "Please ensure it is installed on your machine and either that it is globally accessible in the shell as `rad` or that its path is correctly defined in the extension's settings.",
+            "Please expect the extention's capabilities to remain severely limited until this issue is resolved.",
+          ]) && areStringArraysEqual(buttonTitles, ['Troubleshoot'])
+        )
+      })
     })
   })
 
@@ -67,12 +71,12 @@ describe('Onboarding Flow', () => {
         const welcomeButtonTitles = await getFirstWelcomeViewButtonTitles(workbench)
 
         return (
-          isEqual(welcomeText, [
+          areStringArraysEqual(welcomeText, [
             'The folder currently opened in your workspace is not a Git code repository.',
             'In order to use Radicle with it, this folder must first be initialized as a Git code repository.',
             'To learn more about how to use Git and source control in VS Code read the docs.',
           ]) &&
-          isEqual(welcomeButtonTitles, [
+          areStringArraysEqual(welcomeButtonTitles, [
             'Initialize Repository With Git',
             'Choose a Different Folder',
           ])
@@ -92,7 +96,7 @@ describe('Onboarding Flow', () => {
       await browser.waitUntil(async () => {
         const welcomeText = await getFirstWelcomeViewText(workbench)
 
-        return isEqual(welcomeText, [
+        return areStringArraysEqual(welcomeText, [
           'The Git repository currently opened in your workspace is not yet initialized with Radicle.',
           'To use Radicle with it, please run `rad init` in your terminal.',
           'Once rad-initialized, this repo will have access to advanced source control, collaboration and project management capabilities powered by both Git and Radicle.',

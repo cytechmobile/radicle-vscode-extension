@@ -1,5 +1,5 @@
 import { workspace } from 'vscode'
-import { type ExtensionConfig, resetHttpdConnection } from '.'
+import { type ExtensionConfig, registerAllFileWatchers, resetHttpdConnection } from '.'
 import { useEnvStore, usePatchStore } from '../stores'
 import {
   validateHideTempFilesConfigAlignment,
@@ -33,6 +33,7 @@ const configWatchers = [
     configKey: 'radicle.advanced.pathToRadBinary',
     onConfigChange: () => {
       useEnvStore().refreshResolvedAbsolutePathToRadBinary()
+      registerAllFileWatchers()
       validateRadCliInstallation()
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
     },
@@ -41,6 +42,7 @@ const configWatchers = [
     configKey: 'radicle.advanced.pathToNodeHome',
     onConfigChange: () => {
       useEnvStore().refreshLocalIdentity()
+      registerAllFileWatchers()
       // no need to notify since we check AND notify on rad command execution
       validateRadicleIdentityAuthentication({ minimizeUserNotifications: true })
       usePatchStore().resetAllPatches()
