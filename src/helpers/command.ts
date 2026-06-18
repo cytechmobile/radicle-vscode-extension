@@ -11,7 +11,7 @@ import {
   type FilechangeNode,
   launchAuthenticationFlow,
   mutatePatch,
-  selectAndCloneRadicleRepo,
+  pickAndCloneRadicleRepo,
   troubleshootRadCliInstallation,
 } from '../ux'
 
@@ -98,7 +98,7 @@ export function registerAllCommands(): void {
   registerVsCodeCmd('radicle.troubleshootRadCliInstallation', troubleshootRadCliInstallation)
   registerVsCodeCmd('radicle.showExtensionLog', showLog)
   registerVsCodeCmd('radicle.deAuthCurrentIdentity', deAuthCurrentRadicleIdentity)
-  registerVsCodeCmd('radicle.clone', selectAndCloneRadicleRepo)
+  registerVsCodeCmd('radicle.clone', pickAndCloneRadicleRepo)
   registerVsCodeCmd('radicle.collapsePatches', () => {
     commands.executeCommand('workbench.actions.treeView.patches-view.collapseAll')
   })

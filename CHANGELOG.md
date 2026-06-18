@@ -10,6 +10,9 @@ All of the above establish a solid foundation for future development and a more 
 
 ### 🩹 Fixes
 
+- **commands:** fix `radicle.clone` [needlessly](https://app.radicle.xyz/nodes/seed.radicle.garden/rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5/patches/897efc90af30a24856dc81c0bd2539bf32a3385f) requiring authentication
+- **commands:** fix `radicle.clone` outright not doing anything when selecting a repo to clone
+- **commands:** fix items listed in `radicle.clone`'s' list missing repo title and description
 - **config:** re-point the file watchers when `pathToRadBinary` or `pathToNodeHome` changes, and keep polling for a CLI binary or identity at the configured location, so one placed there after the setting was set is recognized too, instead of the extension silently keeping its old state until the next window reload
 - **config:** correctly report the resolved Radicle identity when `pathToNodeHome` points at a home that holds no identity (or whose identity has not been created yet). Previously the extension could either misreport the Radicle CLI as not installed or surface the CLI's error output as if it were a valid identity, rather than reporting that no identity is stored there
 
