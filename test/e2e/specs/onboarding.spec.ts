@@ -2,7 +2,6 @@ import type * as VsCode from 'vscode'
 import type { Workbench } from 'wdio-vscode-service'
 import { browser, expect } from '@wdio/globals'
 import { $, cd } from 'zx'
-import { testingWorkspacePath } from '../constants/config'
 import { openRadicleViewContainer } from '../helpers/actions'
 import {
   areStringArraysEqual,
@@ -127,8 +126,9 @@ describe('Onboarding Flow', () => {
 })
 
 async function initGitRepo() {
-  await $`mkdir -p ${testingWorkspacePath}`
-  cd(testingWorkspacePath)
+  const workspacePath = process.env['RAD_E2E_WORKSPACE'] ?? ''
+  await $`mkdir -p ${workspacePath}`
+  cd(workspacePath)
   await $`git init -b master .`
   await $`git config --local user.email "test@radicle.dev"`
   await $`git config --local user.name "Radicle Test"`

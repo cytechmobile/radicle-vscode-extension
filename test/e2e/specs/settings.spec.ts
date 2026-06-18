@@ -2,7 +2,7 @@ import type * as VsCode from 'vscode'
 import type { Workbench } from 'wdio-vscode-service'
 import { browser } from '@wdio/globals'
 import { $, cd } from 'zx'
-import { httpdHost, httpdPort, nodeHomePath, testingWorkspacePath } from '../constants/config'
+import { httpdHost, httpdPort } from '../constants/config'
 import { openRadicleViewContainer } from '../helpers/actions'
 import {
   areStringArraysEqual,
@@ -10,8 +10,11 @@ import {
 } from '../helpers/assertions'
 import { getFirstWelcomeViewText } from '../helpers/queries'
 
-// A valid alternative node home, copied from the sandbox home on demand.
-const altNodeHomePath = `${nodeHomePath}.alt`
+// This worker's own node home and a valid alternative copied from it on demand. Both are
+// resolved in `before` from the per-worker env injected by the harness.
+let workerNodeHomePath: string
+let workerWorkspacePath: string
+let altNodeHomePath: string
 
 const reachableHttpApiEndpoint = `http://${httpdHost}:${httpdPort}`
 const unreachableHttpApiEndpoint = 'http://127.0.0.1:6174'
@@ -29,6 +32,9 @@ describe('Settings', () => {
 
   before(async () => {
     workbench = await browser.getWorkbench()
+    workerNodeHomePath = process.env['RAD_E2E_NODE_HOME'] ?? ''
+    workerWorkspacePath = process.env['RAD_E2E_WORKSPACE'] ?? ''
+    altNodeHomePath = `${workerNodeHomePath}.alt`
     await ensureWorkspaceIsRadInitialized()
     identityDid = (await $`rad self --did`).stdout.trim()
   })
@@ -121,7 +127,7 @@ describe('Settings', () => {
  * (e.g. the onboarding suite did not run before it), initializes one. Idempotent.
  */
 async function ensureWorkspaceIsRadInitialized() {
-  cd(testingWorkspacePath)
+  cd(workerWorkspacePath)
   const isRadInitialized = await $`rad inspect --rid`.quiet().then(
     () => true,
     () => false,
@@ -142,10 +148,10 @@ async function ensureWorkspaceIsRadInitialized() {
 /** Copies the sandbox identity into `altNodeHomePath`. */
 async function createAltNodeHome() {
   await $`mkdir -p ${altNodeHomePath}/keys`
-  await $`cp -r ${nodeHomePath}/bin ${altNodeHomePath}/bin`
-  await $`cp ${nodeHomePath}/config.json ${altNodeHomePath}/config.json`
+  await $`cp -r ${workerNodeHomePath}/bin ${altNodeHomePath}/bin`
+  await $`cp ${workerNodeHomePath}/config.json ${altNodeHomePath}/config.json`
   // Copy the key files into `keys/`, preserving the secret key's permissions
-  await $`cp -p ${nodeHomePath}/keys/radicle ${nodeHomePath}/keys/radicle.pub ${altNodeHomePath}/keys/`
+  await $`cp -p ${workerNodeHomePath}/keys/radicle ${workerNodeHomePath}/keys/radicle.pub ${altNodeHomePath}/keys/`
 }
 
 async function removeAltNodeHome() {

@@ -1,13 +1,17 @@
+import type * as VsCode from 'vscode'
 import { execFileSync, spawn } from 'node:child_process'
 import fs from 'node:fs'
 import net from 'node:net'
+import { tmpdir } from 'node:os'
 import { delimiter, join, resolve } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { browser } from '@wdio/globals'
 import { $ } from 'zx'
 import {
-  backupRadCliPath,
   emulatedHomePath,
+  getWorkerHomePath,
+  getWorkerNodeHomePath,
+  getWorkerWorkspacePath,
   httpdHost,
   httpdPath,
   httpdPidFilePath,
@@ -22,6 +26,8 @@ import {
   testingWorkspacePath,
   wdioCachePath,
   wdioVideoPath,
+  workerHomeNamePattern,
+  workerWorkspaceNamePattern,
 } from '../constants/config'
 
 function spawnDaemon(
@@ -249,7 +255,39 @@ export async function teardownTestSandbox(): Promise<void> {
   } catch {
     /* ignore */
   }
+
+  try {
+    for (const entry of fs.readdirSync(tmpdir())) {
+      if (workerHomeNamePattern.test(entry) || workerWorkspaceNamePattern.test(entry)) {
+        fs.rmSync(join(tmpdir(), entry), { recursive: true, force: true })
+      }
+    }
+  } catch {
+    /* ignore */
+  }
   resetTestingWorkspace()
+}
+
+/**
+ * Copies the shared sandbox identity (its `bin`, `config.json`, and keys, but not the running
+ * node's runtime state) into a worker's own home, so each worker resolves its own isolated
+ * Radicle CLI and identity. Mirrors the layout `rad` expects at `$HOME/.radicle`.
+ */
+export async function setupWorkerSandbox(workerIndex: number): Promise<void> {
+  const workerNodeHome = getWorkerNodeHomePath(workerIndex)
+  const workerKeysDir = join(workerNodeHome, 'keys')
+  await $`mkdir -p ${workerKeysDir}`
+  await $`cp -r ${join(nodeHomePath, 'bin')} ${join(workerNodeHome, 'bin')}`
+  await $`cp ${join(nodeHomePath, 'config.json')} ${join(workerNodeHome, 'config.json')}`
+  // `-p` preserves the secret key's permissions, which rad requires.
+  await $`cp -p ${join(nodeHomePath, 'keys', 'radicle')} ${join(nodeHomePath, 'keys', 'radicle.pub')} ${workerKeysDir}`
+  await $`mkdir -p ${getWorkerWorkspacePath(workerIndex)}`
+}
+
+/** Removes a worker's home and workspace. Idempotent, never throws. */
+export function teardownWorkerSandbox(workerIndex: number): void {
+  fs.rmSync(getWorkerHomePath(workerIndex), { recursive: true, force: true })
+  fs.rmSync(getWorkerWorkspacePath(workerIndex), { recursive: true, force: true })
 }
 
 /**
@@ -277,21 +315,34 @@ export async function setupTestSandbox(): Promise<void> {
 const radCliUninstalledStub =
   '#!/bin/sh\n# e2e test stub: emulates an unresolvable Radicle CLI by failing with no output.\nexit 1\n'
 
+/** Resolves the calling worker's own Radicle CLI paths from the per-worker env. */
+function getWorkerRadCliPaths(): { radCli: string; backup: string } {
+  const workerNodeHome = process.env['RAD_E2E_NODE_HOME']
+  if (!workerNodeHome) {
+    throw new Error('RAD_E2E_NODE_HOME is unset; the per-worker sandbox env was not injected.')
+  }
+  const radCli = join(workerNodeHome, 'bin', 'rad')
+
+  return { radCli, backup: `${radCli}.uninstalled` }
+}
+
 /**
  * Makes the Radicle CLI appear unresolvable to the extension, emulating a "not installed"
  * state. Call `emulateRadCliInstalled` to restore.
  */
 export async function emulateRadCliUninstalled(): Promise<void> {
+  const { radCli, backup } = getWorkerRadCliPaths()
   // A stub that resolves-but-fails (rather than a missing binary) is needed: otherwise the
   // extension's `which rad` lookup would find a real `rad` elsewhere on the user's PATH.
-  await $`mv ${radCliPath} ${backupRadCliPath}`
-  fs.writeFileSync(radCliPath, radCliUninstalledStub, { mode: 0o755 })
+  await $`mv ${radCli} ${backup}`
+  fs.writeFileSync(radCli, radCliUninstalledStub, { mode: 0o755 })
 }
 
 /** Restores the Radicle CLI after a call to `emulateRadCliUninstalled`. */
 export async function emulateRadCliInstalled(): Promise<void> {
-  fs.rmSync(radCliPath, { force: true })
-  await $`mv ${backupRadCliPath} ${radCliPath}`
+  const { radCli, backup } = getWorkerRadCliPaths()
+  fs.rmSync(radCli, { force: true })
+  await $`mv ${backup} ${radCli}`
 }
 
 /**
@@ -305,13 +356,25 @@ export async function assertExtensionResolvedTestSandbox(): Promise<void> {
     userProfile: process.env['USERPROFILE'],
     radHome: process.env['RAD_HOME'],
     path: process.env['PATH'],
+    workerId: process.env['RAD_E2E_WORKER_ID'],
   }))
 
-  const resolvedHome = extHostEnv.home ?? extHostEnv.userProfile
-  if (!resolvedHome || !resolve(resolvedHome).startsWith(resolve(emulatedHomePath))) {
+  if (!extHostEnv.workerId) {
     throw new Error(
-      `Extension host HOME ("${resolvedHome ?? 'unset'}") is not the emulated home ` +
-        `("${emulatedHomePath}"). Aborting to avoid touching the real Radicle home.`,
+      'Extension host did not inherit RAD_E2E_WORKER_ID set in `beforeSession`, so per-worker ' +
+        'env does not reach the launched VS Code. Per-worker sandbox isolation depends on it.',
+    )
+  }
+
+  const workerHome = process.env['RAD_E2E_HOME']
+  const workerNodeHome = process.env['RAD_E2E_NODE_HOME']
+  const workerBin = workerNodeHome ? join(workerNodeHome, 'bin') : undefined
+
+  const resolvedHome = extHostEnv.home ?? extHostEnv.userProfile
+  if (!resolvedHome || !workerHome || !resolve(resolvedHome).startsWith(resolve(workerHome))) {
+    throw new Error(
+      `Extension host HOME ("${resolvedHome ?? 'unset'}") is not this worker's emulated home ` +
+        `("${workerHome ?? 'unset'}"). Aborting to avoid touching the real Radicle home.`,
     )
   }
   if (extHostEnv.radHome) {
@@ -320,10 +383,25 @@ export async function assertExtensionResolvedTestSandbox(): Promise<void> {
         `default $HOME/.radicle path is exercised.`,
     )
   }
-  if (!extHostEnv.path?.split(delimiter).includes(radicleBinPath)) {
+  if (!workerBin || !extHostEnv.path?.split(delimiter).includes(workerBin)) {
     throw new Error(
-      `Extension host PATH does not contain the emulated bin dir ("${radicleBinPath}"); ` +
+      `Extension host PATH does not contain this worker's bin dir ("${workerBin ?? 'unset'}"); ` +
         `\`which rad\` would not resolve to the emulated Radicle CLI. Aborting.`,
+    )
+  }
+
+  const openedWorkspace = await browser.executeWorkbench(
+    (vscode: typeof VsCode) => vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
+  )
+  const workerWorkspace = process.env['RAD_E2E_WORKSPACE']
+  if (
+    !openedWorkspace ||
+    !workerWorkspace ||
+    resolve(openedWorkspace) !== resolve(workerWorkspace)
+  ) {
+    throw new Error(
+      `Extension host opened workspace ("${openedWorkspace ?? 'none'}") is not this worker's ` +
+        `workspace ("${workerWorkspace ?? 'unset'}"). Parallel workers must each open their own.`,
     )
   }
 }

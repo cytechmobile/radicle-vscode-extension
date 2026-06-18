@@ -1,11 +1,16 @@
 import type { Options } from '@wdio/types'
+import { delimiter } from 'node:path'
 import {
   chromedriverPath,
   emulatedHomePath,
+  getWorkerHomePath,
+  getWorkerNodeHomePath,
+  getWorkerRadicleBinPath,
+  getWorkerWorkspacePath,
+  radicleBinPath,
   rootDir,
   sandboxedPath,
   supportedVscodeVersion,
-  testingWorkspacePath,
   wdioCachePath,
   wdioVideoPath,
 } from './constants/config'
@@ -13,7 +18,9 @@ import { provisionChromeDriver } from './helpers/chromedriver'
 import {
   emulateRadCliUninstalled,
   setupTestSandbox,
+  setupWorkerSandbox,
   teardownTestSandbox,
+  teardownWorkerSandbox,
 } from './helpers/testSandbox'
 
 // Done at module scope so every process loading this config (launcher, workers,
@@ -44,6 +51,16 @@ const reporters: Options.Testrunner['reporters'] = shouldRecordVideo
   ? ['spec', ['video', { outputDir: wdioVideoPath }]]
   : ['spec']
 
+const e2eSpecs = ['./specs/onboarding.spec.ts', './specs/settings.spec.ts']
+
+function getWorkerIndexFromSpecs(specs: string[]): number {
+  const matchedIndex = e2eSpecs.findIndex((spec) =>
+    specs.some((runningSpec) => runningSpec.endsWith(spec.slice(1))),
+  )
+
+  return matchedIndex >= 0 ? matchedIndex : 0
+}
+
 // TODO: Bump webdriverio to v9 once wdio-vscode-service supports it
 // Relevant PR: https://github.com/webdriverio-community/wdio-vscode-service/pull/159
 // Relevant Issue: https://github.com/webdriverio-community/wdio-vscode-service/issues/140
@@ -55,29 +72,29 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  specs: ['./specs/onboarding.spec.ts', './specs/settings.spec.ts'],
-  maxInstances: 1,
-  capabilities: [
-    {
-      'browserName': 'vscode',
-      'browserVersion': supportedVscodeVersion,
-      'wdio:vscodeOptions': {
-        extensionPath: rootDir,
-        workspacePath: testingWorkspacePath,
-        userSettings: {
-          'extensions.autoCheckUpdates': false,
-          'extensions.autoUpdate': false,
-        },
-        vscodeArgs: {
-          'disable-extensions': true,
-          'disable-workspace-trust': true,
-        },
+  capabilities: e2eSpecs.map((spec, workerIndex) => ({
+    'browserName': 'vscode',
+    'browserVersion': supportedVscodeVersion,
+    'wdio:vscodeOptions': {
+      extensionPath: rootDir,
+      workspacePath: getWorkerWorkspacePath(workerIndex),
+      userSettings: {
+        'extensions.autoCheckUpdates': false,
+        'extensions.autoUpdate': false,
       },
-      'wdio:chromedriverOptions': {
-        binary: chromedriverPath,
+      vscodeArgs: {
+        'disable-extensions': true,
+        'disable-workspace-trust': true,
+        'disable-renderer-backgrounding': true,
+        'disable-backgrounding-occluded-windows': true,
+        'disable-background-timer-throttling': true,
       },
     },
-  ],
+    'wdio:chromedriverOptions': {
+      binary: chromedriverPath,
+    },
+    'specs': [spec],
+  })),
   logLevel: 'warn',
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: wdioCachePath }]],
@@ -103,9 +120,31 @@ export const config: Options.Testrunner = {
   onComplete: async () => {
     await teardownTestSandbox()
   },
-  onWorkerStart: async (_cid, _caps, specs) => {
+  beforeSession: async (_config, _capabilities, specs, cid) => {
+    const workerIndex = getWorkerIndexFromSpecs(specs)
+    await setupWorkerSandbox(workerIndex)
+
+    const workerHome = getWorkerHomePath(workerIndex)
+    const workerBin = getWorkerRadicleBinPath(workerIndex)
+    const pathWithoutSandboxBins = (process.env['PATH'] ?? '')
+      .split(delimiter)
+      .filter((segment) => segment !== radicleBinPath && segment !== workerBin)
+      .join(delimiter)
+
+    process.env['HOME'] = workerHome
+    process.env['USERPROFILE'] = workerHome
+    delete process.env['RAD_HOME']
+    process.env['PATH'] = `${workerBin}${delimiter}${pathWithoutSandboxBins}`
+    process.env['RAD_E2E_WORKER_ID'] = cid
+    process.env['RAD_E2E_HOME'] = workerHome
+    process.env['RAD_E2E_NODE_HOME'] = getWorkerNodeHomePath(workerIndex)
+    process.env['RAD_E2E_WORKSPACE'] = getWorkerWorkspacePath(workerIndex)
+
     if (specs.some((spec) => spec.includes('onboarding.spec.ts'))) {
       await emulateRadCliUninstalled()
     }
+  },
+  afterSession: (_config, _capabilities, specs) => {
+    teardownWorkerSandbox(getWorkerIndexFromSpecs(specs))
   },
 }
