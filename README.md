@@ -2,18 +2,20 @@
 
 # Radicle VS Code Extension
 
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/radicle-ide-plugins-team.radicle?include_prereleases&style=flat&logo=radicle&logoColor=FFFFFF&color=7FBA00&cacheSeconds=64800)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
-[![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/radicle-ide-plugins-team.radicle?style=flat&logo=microsoft&logoColor=FFFFFF&label=VS%20Marketplace%20Downloads&color=66B3FF&cacheSeconds=64800)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
+[![Sponsor maninak on Liberapay](https://img.shields.io/badge/Liberapay-Donate-F6C915?logo=liberapay&logoColor=black)](https://liberapay.com/maninak/donate)
+
+[![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version-short/radicle-ide-plugins-team.radicle.svg?color=6EA900&label=version)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
+[![Visual Studio Marketplace Downloads](https://vsmarketplacebadges.dev/downloads-short/radicle-ide-plugins-team.radicle.svg?color=55A2EE&label=VS%20Marketplace%20Downloads)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/radicle-ide-plugins-team/radicle?style=flat&logo=openvsx&logoColor=FFFFFF&label=Open%20VSX%20Downloads&color=C160EF&cacheSeconds=64800)](https://open-vsx.org/extension/radicle-ide-plugins-team/radicle)
-[![rad: - z3Makm6fsQQXmpSFE43DZqwupaEhk](https://img.shields.io/static/v1?label=rad%3A&message=z3Makm6fsQQXmpSFE43DZqwupaEhk&color=6666FF&logo=radicle&logoColor=FFFFFF&cacheSeconds=64800)](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
+[![rad: - z3Makm6fsQQXmpSFE43DZqwupaEhk](https://img.shields.io/static/v1?label=rad%3A&message=z3Makm6fsQQXmpSFE43DZqwupaEhk&color=6666FF&cacheSeconds=64800)](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
 
 A VS Code extension bringing support for the Radicle network to your IDE.
 
-[Radicle](https://radicle.dev/) is a GitHub alternative bringing familiar features like Pull Requests, Issues, etc, via a peer-to-peer, free and open-source network built on top of Git.
+[Radicle](https://radicle.dev/) is a GitHub alternative with familiar features like Pull Requests, Issues, etc, via a peer-to-peer, free and open-source network built on top of Git.
 
-> **NOTE:** The extension currently offers partial support for the latest version of the Radicle CLI (codename "Heartwood"). Support for Radicle Patches is [under active development](https://github.com/cytechmobile/radicle-vscode-extension/milestone/6) and further features like Issues are next on the pipeline.
+> **NOTE:** Requires [Radicle HTTP Daemon](https://radicle.dev/download#radicle-httpd-release-name) >=0.17.0
 
-> **NOTE:** Requires [Radicle HTTP Daemon](https://radicle.dev/download) 0.17.0
+> **NOTE:** The extension currently offers a limited feature set. Removal of HTTPD as a dependency is next up. Beyond that comes deeper integration of Patches and then Issues are next up.
 
 ## Features
 
@@ -118,3 +120,15 @@ Set environment variables for the Radicle CLI and more from VS Code's settings
 ## Contributing
 
 Please see the [Contribution Guide](./CONTRIBUTING.md).
+
+## Support
+
+If this extension saves you time, or you would like to see it keep getting better, here are a few ways to appreciate prior and support further development:
+
+- 🌱 Star this repo on [GitHub](https://github.com/cytechmobile/radicle-vscode-extension) and seed it on [Radicle](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
+- 🗣️ Share it with colleagues, or leave a rating on the [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle) or [Open VSX](https://open-vsx.org/extension/radicle-ide-plugins-team/radicle)
+- 💛 Chip in a recurring micro-donation on Liberapay, if you can comfortably spare it.
+
+[![Sponsor maninak on Liberapay](https://img.shields.io/badge/Liberapay-Donate-F6C915?logo=liberapay&logoColor=black)](https://liberapay.com/maninak/donate)
+
+Every bit, a kind message included, makes maintaining this and my other open-source tools more sustainable. Thank you!
