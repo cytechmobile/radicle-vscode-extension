@@ -35,6 +35,30 @@ export const chromedriverPath = join(
 )
 export const wdioVideoPath = join(rootDir, 'node_modules', '.wdio-video')
 
+/** The disposable `$HOME` for a single worker, isolated from every other worker's. */
+export function getWorkerHomePath(workerIndex: number): string {
+  return join(tmpdir(), `radicle-vscode-extension-e2e-home-${workerIndex}`)
+}
+
+export function getWorkerNodeHomePath(workerIndex: number): string {
+  return join(getWorkerHomePath(workerIndex), '.radicle')
+}
+
+export function getWorkerRadicleBinPath(workerIndex: number): string {
+  return join(getWorkerNodeHomePath(workerIndex), 'bin')
+}
+
+/** The disposable workspace a single worker's VS Code opens, isolated from every other's. */
+export function getWorkerWorkspacePath(workerIndex: number): string {
+  return join(tmpdir(), `radicle-vscode-extension-e2e-workspace-${workerIndex}`)
+}
+
+/** Matches every per-worker home, so a crashed run's leftovers get swept on the next setup. */
+export const workerHomeNamePattern = /^radicle-vscode-extension-e2e-home-\d+$/
+
+/** Matches every per-worker workspace, swept alongside the homes. */
+export const workerWorkspaceNamePattern = /^radicle-vscode-extension-e2e-workspace-\d+$/
+
 export function resolveReleaseTargetTriple(): string {
   const osArch = `${platform()}/${arch()}`
 

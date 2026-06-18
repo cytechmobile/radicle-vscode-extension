@@ -21,7 +21,9 @@ export function getRadCliVersion(): string | undefined {
  * @returns `true` if found, otherwise `false`.
  */
 export function isRadCliInstalled(): boolean {
-  const { stdout } = execRad()
+  // `--version` runs regardless of `RAD_HOME`, whereas bare `rad` emits nothing on stdout when
+  // the resolved node home holds no valid profile, which would misreport the CLI as missing.
+  const { stdout } = execRad(['--version'])
 
   return Boolean(stdout)
 }
@@ -123,10 +125,12 @@ export function getLocalRadicleIdentity(format: 'DID' | 'NID') {
       assertUnreachable(format)
   }
 
-  const { stdout: id } = execRad(['self', flag])
-  const { stdout: alias } = execRad(['self', '--alias'])
+  // A failed `rad self` (e.g. no profile at the configured home) still emits its error text on
+  // stdout, so the `errorCode` must gate it. Otherwise that text gets mistaken for an identity.
+  const { stdout: id, errorCode: idErrorCode } = execRad(['self', flag])
+  const { stdout: alias, errorCode: aliasErrorCode } = execRad(['self', '--alias'])
 
-  if (!id || !alias) {
+  if (idErrorCode || aliasErrorCode || !id || !alias) {
     // assumes each local Radicle identity always comes with an associated alias
     return undefined
   }

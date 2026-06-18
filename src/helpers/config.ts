@@ -83,6 +83,12 @@ export function getAbsolutePathToDefaultRadBinaryDirectory(): string {
 }
 
 /**
+ * The filename of the Radicle CLI binary on the host OS. It is `rad.exe` on Windows (where
+ * Radicle is built from source) and `rad` everywhere else.
+ */
+export const radBinaryFilename = process.platform === 'win32' ? 'rad.exe' : 'rad'
+
+/**
  * Resolves the absolute path to the Radicle CLI binary's __expected__ location
  * as per the https://radicle.dev/install script
  *
@@ -92,9 +98,28 @@ export function getAbsolutePathToDefaultRadBinaryDirectory(): string {
  * ```
  */
 export function getAbsolutePathToDefaultRadBinaryLocation(): string {
-  const defaultPath = `${getAbsolutePathToDefaultRadBinaryDirectory()}/rad`
+  const defaultPath = `${getAbsolutePathToDefaultRadBinaryDirectory()}/${radBinaryFilename}`
 
   return defaultPath
+}
+
+/**
+ * Resolves the absolute path where the Radicle CLI binary _is expected to be located_,
+ * prioritizing user-defined configuration. The configured value may be either the binary
+ * itself or its containing directory.
+ *
+ * @returns The resolved absolute path to the `rad` binary.
+ */
+export function getResolvedPathToRadBinary(): string {
+  const configuredPath = getConfig('radicle.advanced.pathToRadBinary')
+  if (!configuredPath) {
+    return getAbsolutePathToDefaultRadBinaryLocation()
+  }
+
+  const trimmedPath = removeTrailingSlashes(configuredPath)
+  const isPathToBinaryItself = trimmedPath.endsWith(radBinaryFilename)
+
+  return isPathToBinaryItself ? trimmedPath : `${trimmedPath}/${radBinaryFilename}`
 }
 
 /**
