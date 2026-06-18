@@ -38,35 +38,38 @@ export async function pickAndCloneRadicleRepo(): Promise<void> {
       return qPickItem
     })
 
-  const repoSelection = await window.showQuickPick(qPickItems, {
+  const selectedRepo = await window.showQuickPick(qPickItems, {
     placeHolder: 'Choose a Radicle repo to clone locally',
     ignoreFocusOut: true,
     matchOnDescription: true,
     matchOnDetail: true,
   })
-  if (!repoSelection) {
+  if (!selectedRepo) {
     return
   }
 
-  const selectedRid = repoSelection.rid
+  const selectedRid = selectedRepo.rid
+  const repoName = selectedRepo.label
 
   const repoRoot = getRepoRoot()
   const oneFolderUpFromRepoRoot = repoRoot?.split(sep).slice(0, -1).join(sep)
-  const cloneTargetDir = (
+  const cloneParentDir = (
     await window.showOpenDialog({
-      title: `Choose a folder to clone ${repoSelection.label} into`,
-      openLabel: 'Select as Destination',
+      title: `Choose a folder to clone "${repoName}" into`,
+      openLabel: 'Select Repository Location',
       canSelectMany: false,
       canSelectFiles: false,
       canSelectFolders: true,
       defaultUri: oneFolderUpFromRepoRoot ? Uri.file(oneFolderUpFromRepoRoot) : undefined,
     })
   )?.[0]
-  if (!cloneTargetDir) {
+  if (!cloneParentDir) {
     return
   }
 
-  const msgSuffix = `repo "${repoSelection.label}" with id "${selectedRid}" into "${cloneTargetDir.fsPath}"`
+  const cloneTargetDir = Uri.joinPath(cloneParentDir, repoName)
+
+  const msgSuffix = `repo "${repoName}" with id "${selectedRid}" into "${cloneTargetDir.fsPath}"`
   const didClone = await window.withProgress(
     {
       location: ProgressLocation.Window,
@@ -75,11 +78,14 @@ export async function pickAndCloneRadicleRepo(): Promise<void> {
     // eslint-disable-next-line require-await
     async () => {
       // TODO: maninak make rad clone non-blocking
-      const { errorCode } = execRad(['clone', selectedRid, '--no-confirm'], {
-        cwd: cloneTargetDir.fsPath,
-        timeout: 120_000,
-        shouldLog: true,
-      })
+      const { errorCode } = execRad(
+        ['clone', selectedRid, cloneTargetDir.fsPath, '--no-confirm'],
+        {
+          cwd: cloneParentDir.fsPath,
+          timeout: 120_000,
+          shouldLog: true,
+        },
+      )
 
       return !errorCode
     },
@@ -101,9 +107,5 @@ export async function pickAndCloneRadicleRepo(): Promise<void> {
   const buttonOpenInVscode = 'Open in new window'
   const shouldOpenInNewWindow = await window.showInformationMessage(msg, buttonOpenInVscode)
   shouldOpenInNewWindow &&
-    commands.executeCommand(
-      'vscode.openFolder',
-      Uri.file(`${cloneTargetDir.fsPath}${sep}${repoSelection.label}`),
-      { forceNewWindow: true },
-    )
+    commands.executeCommand('vscode.openFolder', cloneTargetDir, { forceNewWindow: true })
 }
