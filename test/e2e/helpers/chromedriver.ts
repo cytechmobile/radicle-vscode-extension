@@ -1,12 +1,27 @@
 import fs from 'node:fs'
+import { arch, platform } from 'node:os'
 import { join } from 'node:path'
 import { $ } from 'zx'
-import {
-  chromedriverPath,
-  resolveChromeForTestingPlatform,
-  supportedVscodeVersion,
-  wdioCachePath,
-} from '../constants/config'
+import { chromedriverPath, supportedVscodeVersion, wdioCachePath } from '../constants'
+
+/** Maps the host OS/arch to the Chrome-for-Testing platform segment used in download URLs. */
+function resolveChromeForTestingPlatform(): string {
+  const osArch = `${platform()}/${arch()}`
+
+  switch (osArch) {
+    case 'darwin/arm64':
+      return 'mac-arm64'
+    case 'darwin/x64':
+      return 'mac-x64'
+    case 'linux/x64':
+      return 'linux64'
+    default:
+      throw new Error(
+        `Unsupported OS/arch for chromedriver: "${osArch}". ` +
+          `Chrome for Testing publishes builds for macOS (arm64/x64) and Linux (x64).`,
+      )
+  }
+}
 
 const vscodeCgManifestUrl = `https://raw.githubusercontent.com/microsoft/vscode/${supportedVscodeVersion}/cgmanifest.json`
 const chromeForTestingMilestonesUrl =

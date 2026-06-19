@@ -9,6 +9,7 @@
     "lint",
     "git",
     "ci",
+    "unit",
     "e2e",
     "env",
     "deps",
@@ -35,7 +36,7 @@
     "cli",
     "webview",
     "markdown",
-    "exec"
+    "exec",
   ],
   "conventionalCommits.gitmoji": false,
   "conventionalCommits.lineBreak": "\\n",

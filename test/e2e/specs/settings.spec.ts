@@ -2,10 +2,11 @@ import type * as VsCode from 'vscode'
 import type { Workbench } from 'wdio-vscode-service'
 import { browser } from '@wdio/globals'
 import { $, cd } from 'zx'
-import { httpdHost, httpdPort } from '../constants/config'
+import { httpdHost, httpdPort } from '../constants'
 import { openRadicleViewContainer } from '../helpers/actions'
 import {
   areStringArraysEqual,
+  expectNotificationToContain,
   expectStandardSidebarViewsToBeVisible,
 } from '../helpers/assertions'
 import { getFirstWelcomeViewText } from '../helpers/queries'
@@ -226,38 +227,6 @@ async function expectRadicleLogToContain(...requiredSubstrings: string[]) {
     throw new Error(
       `expected the Radicle output to contain "${requiredSubstrings.join('" and "')}", ` +
         `but the channel held:\n${logText}`,
-    )
-  }
-}
-
-/** Waits until some currently shown notification contains all the given substrings. */
-async function expectNotificationToContain(
-  workbench: Workbench,
-  ...requiredSubstrings: string[]
-) {
-  let shownMessages: string[] = []
-  try {
-    await browser.waitUntil(async () => {
-      try {
-        const notifications = await workbench.getNotifications()
-        shownMessages = await Promise.all(
-          notifications.map(async (notification) => await notification.getMessage()),
-        )
-      } catch {
-        // Notifications flicker and re-render, which can invalidate elements mid-read. Treat
-        // that as "not matched yet" and let waitUntil retry.
-        return false
-      }
-      const hasMatchingNotification = shownMessages.some((message) =>
-        requiredSubstrings.every((substring) => message.includes(substring)),
-      )
-
-      return hasMatchingNotification
-    })
-  } catch {
-    throw new Error(
-      `expected a notification containing "${requiredSubstrings.join('" and "')}", ` +
-        `but the shown notifications were:\n${shownMessages.join('\n')}`,
     )
   }
 }

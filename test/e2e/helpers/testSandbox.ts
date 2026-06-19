@@ -2,16 +2,13 @@ import type * as VsCode from 'vscode'
 import { execFileSync, spawn } from 'node:child_process'
 import fs from 'node:fs'
 import net from 'node:net'
-import { tmpdir } from 'node:os'
+import { arch, platform, tmpdir } from 'node:os'
 import { delimiter, join, resolve } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { browser } from '@wdio/globals'
 import { $ } from 'zx'
 import {
   emulatedHomePath,
-  getWorkerHomePath,
-  getWorkerNodeHomePath,
-  getWorkerWorkspacePath,
   httpdHost,
   httpdPath,
   httpdPidFilePath,
@@ -22,13 +19,40 @@ import {
   radCliPath,
   radCliVersion,
   radicleBinPath,
-  resolveReleaseTargetTriple,
   testingWorkspacePath,
   wdioCachePath,
   wdioVideoPath,
   workerHomeNamePattern,
   workerWorkspaceNamePattern,
-} from '../constants/config'
+} from '../constants'
+import {
+  getWorkerHomePath,
+  getWorkerHttpdPidFilePath,
+  getWorkerNodeHomePath,
+  getWorkerNodePidFilePath,
+  getWorkerRadicleBinPath,
+  getWorkerWorkspacePath,
+} from './paths'
+
+function resolveReleaseTargetTriple(): string {
+  const osArch = `${platform()}/${arch()}`
+
+  switch (osArch) {
+    case 'darwin/arm64':
+      return 'aarch64-apple-darwin'
+    case 'darwin/x64':
+      return 'x86_64-apple-darwin'
+    case 'linux/arm64':
+      return 'aarch64-unknown-linux-musl'
+    case 'linux/x64':
+      return 'x86_64-unknown-linux-musl'
+    default:
+      throw new Error(
+        `Unsupported OS/arch for e2e tests: "${osArch}". ` +
+          `Supported: macOS (arm64/x64) and Linux (arm64/x64).`,
+      )
+  }
+}
 
 function spawnDaemon(
   command: string,
@@ -288,6 +312,124 @@ export async function setupWorkerSandbox(workerIndex: number): Promise<void> {
 export function teardownWorkerSandbox(workerIndex: number): void {
   fs.rmSync(getWorkerHomePath(workerIndex), { recursive: true, force: true })
   fs.rmSync(getWorkerWorkspacePath(workerIndex), { recursive: true, force: true })
+}
+
+/**
+ * Starts a Radicle node + httpd dedicated to one worker, on its own httpd port, so a
+ * network-mutating spec (e.g. clone) can seed and serve repos without touching the shared,
+ * read-only node. The worker home and its isolated `test`-network config were already
+ * provisioned by `setupWorkerSandbox`. Pair every call with `stopWorkerNodeAndHttpd`.
+ */
+export async function startWorkerNodeAndHttpd(
+  workerIndex: number,
+  httpApiPort: number,
+): Promise<void> {
+  const workerHome = getWorkerHomePath(workerIndex)
+  const radCli = join(getWorkerRadicleBinPath(workerIndex), 'rad')
+  const httpd = join(getWorkerRadicleBinPath(workerIndex), 'radicle-httpd')
+
+  spawnDaemon(radCli, ['node', 'start', '--foreground'], {
+    pidFilePath: getWorkerNodePidFilePath(workerIndex),
+    logFilePath: join(workerHome, 'radicle-node.log'),
+  })
+  await waitUntil(
+    async () => {
+      try {
+        await $`rad node status`.timeout('5s')
+
+        return true
+      } catch {
+        return false
+      }
+    },
+    { timeoutMs: 30_000, label: `worker ${workerIndex}'s Radicle node to report running` },
+  )
+
+  await assertPortIsFree(httpdHost, httpApiPort)
+  spawnDaemon(httpd, ['--listen', `${httpdHost}:${httpApiPort}`], {
+    pidFilePath: getWorkerHttpdPidFilePath(workerIndex),
+    logFilePath: join(workerHome, 'radicle-httpd.log'),
+  })
+  await waitUntil(
+    async () =>
+      await new Promise<boolean>((res) => {
+        const socket = net
+          .connect({ host: httpdHost, port: httpApiPort })
+          .once('connect', () => {
+            socket.destroy()
+            res(true)
+          })
+          .once('error', () => {
+            socket.destroy()
+            res(false)
+          })
+      }),
+    {
+      timeoutMs: 30_000,
+      label: `worker ${workerIndex}'s httpd to listen on ${httpdHost}:${httpApiPort}`,
+    },
+  )
+}
+
+/**
+ * Stops a worker's node + httpd. Idempotent, never throws. `killByPidFile` confirms each PID
+ * still is one of our sandbox daemons before signalling; a worker home path starts with
+ * `emulatedHomePath`, so that confirmation matches a worker daemon's command line too.
+ */
+export function stopWorkerNodeAndHttpd(workerIndex: number): void {
+  killByPidFile(getWorkerNodePidFilePath(workerIndex))
+  killByPidFile(getWorkerHttpdPidFilePath(workerIndex))
+}
+
+/**
+ * Creates a git repo in the worker's home and `rad init`s it as a public repo, so the worker's
+ * httpd serves it from `/repos` and the extension can clone it. Returns the new repo's RID.
+ * The worker's node must already be running (see `startWorkerNodeAndHttpd`).
+ */
+export function seedPublicRepo(
+  workerIndex: number,
+  { name, description }: { name: string; description: string },
+): string {
+  const repoDir = join(getWorkerHomePath(workerIndex), 'seed-repo')
+  const radCli = join(getWorkerRadicleBinPath(workerIndex), 'rad')
+  fs.mkdirSync(repoDir, { recursive: true })
+
+  function runGit(args: string[]): void {
+    execFileSync('git', args, { cwd: repoDir, stdio: 'ignore' })
+  }
+  runGit(['init', '-b', 'main', '.'])
+  runGit(['config', 'user.email', 'e2e@radicle.test'])
+  runGit(['config', 'user.name', 'Radicle E2E'])
+  fs.writeFileSync(join(repoDir, 'README.md'), `# ${name}\n`)
+  runGit(['add', '.'])
+  runGit(['commit', '-m', 'adds readme', '--no-gpg-sign'])
+
+  execFileSync(
+    radCli,
+    [
+      'init',
+      '--public',
+      '--default-branch',
+      'main',
+      '--name',
+      name,
+      '--description',
+      description,
+      '--no-confirm',
+    ],
+    { cwd: repoDir, stdio: 'ignore' },
+  )
+  const rid = execFileSync(radCli, ['inspect', '--rid'], {
+    cwd: repoDir,
+    encoding: 'utf-8',
+  }).trim()
+  if (!rid.startsWith('rad:')) {
+    throw new Error(
+      `Failed to seed a public repo for worker ${workerIndex}; got rid "${rid}".`,
+    )
+  }
+
+  return rid
 }
 
 /**

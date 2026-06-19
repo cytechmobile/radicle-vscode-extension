@@ -30,3 +30,35 @@ export async function expectStandardSidebarViewsToBeVisible(workbench: Workbench
     { timeoutMsg: 'expected the standard sidebar views to be visible' },
   )
 }
+
+/** Waits until some currently shown notification contains all the given substrings. */
+export async function expectNotificationToContain(
+  workbench: Workbench,
+  ...requiredSubstrings: string[]
+) {
+  let shownMessages: string[] = []
+  try {
+    await browser.waitUntil(async () => {
+      try {
+        const notifications = await workbench.getNotifications()
+        shownMessages = await Promise.all(
+          notifications.map(async (notification) => await notification.getMessage()),
+        )
+      } catch {
+        // Notifications flicker and re-render, which can invalidate elements mid-read. Treat
+        // that as "not matched yet" and let waitUntil retry.
+        return false
+      }
+      const hasMatchingNotification = shownMessages.some((message) =>
+        requiredSubstrings.every((substring) => message.includes(substring)),
+      )
+
+      return hasMatchingNotification
+    })
+  } catch {
+    throw new Error(
+      `expected a notification containing "${requiredSubstrings.join('" and "')}", ` +
+        `but the shown notifications were:\n${shownMessages.join('\n')}`,
+    )
+  }
+}

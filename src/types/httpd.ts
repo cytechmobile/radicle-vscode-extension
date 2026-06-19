@@ -32,15 +32,27 @@ export interface HttpdRoot {
 
 export interface Repo {
   rid: string
-  name: string
-  description: string
-  defaultBranch: string
+  payloads: {
+    'xyz.radicle.project'?: RepoPayload
+  }
   delegates: RadicleIdentity[]
-  head: string
-  patches: { [K in PatchStatus]: number }
-  issues: { open: number; closed: number }
+  threshold: number
   seeding: number
   visibility: { type: 'public' | 'private' }
+  refs: { tags: Record<string, string>; refs: Record<string, string> }
+}
+
+export interface RepoPayload {
+  data: {
+    name: string
+    description: string
+    defaultBranch: string
+  }
+  meta: {
+    head: string
+    patches: { [K in PatchStatus]: number }
+    issues: { open: number; closed: number }
+  }
 }
 
 export interface Merge {

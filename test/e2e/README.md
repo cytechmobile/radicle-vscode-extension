@@ -14,15 +14,15 @@ No other setup needed, beyond having `curl`, `tar`, and `unzip` on `PATH`. The f
 
 Every run provisions a self-contained Radicle environment and wipes it on completion. Specs run in parallel, one worker per spec, and each worker gets its own disposable slice, all kept off our real state:
 
-- A **shared template home** in the OS temp dir (`os.tmpdir()/radicle-vscode-extension-e2e-home/`), built once before any spec runs. It holds the installed Radicle CLI, node, and httpd, the test identity, and the node config. The node and httpd run here, on a fixed port, for the whole run.
-- A **per-worker `$HOME`** (`.../radicle-vscode-extension-e2e-home-N/`), copied from the template (its `bin`, `config.json`, and keys, but not the running node's live state). The whole directory is used as that worker's `$HOME`, so `os.homedir()` inside the worker's processes resolves it and no read or write ever reaches our computer's real `~/.radicle`.
-- A **per-worker workspace** (`.../radicle-vscode-extension-e2e-workspace-N/`), which that worker's VS Code opens as the project under test. It is kept outside this repo on purpose (see [Known gotchas](#known-gotchas)).
+- A **shared template home** in the OS temp dir (`os.tmpdir()/rad-e2e-home/`), built once before any spec runs. It holds the installed Radicle CLI, node, and httpd, the test identity, and the node config. The node and httpd run here, on a fixed port, for the whole run. These dir names are kept short on purpose: a node's control socket is `<home>/.radicle/node/control.sock`, and macOS caps unix-domain socket paths at 104 bytes, so under macOS's long `os.tmpdir()` a verbose name pushes the socket over the limit and `rad` can no longer reach the node.
+- A **per-worker `$HOME`** (`.../rad-e2e-home-N/`), copied from the template (its `bin`, `config.json`, and keys, but not the running node's live state). The whole directory is used as that worker's `$HOME`, so `os.homedir()` inside the worker's processes resolves it and no read or write ever reaches our computer's real `~/.radicle`.
+- A **per-worker workspace** (`.../rad-e2e-workspace-N/`), which that worker's VS Code opens as the project under test. It is kept outside this repo on purpose (see [Known gotchas](#known-gotchas)).
 
 Every part lives in the OS temp dir and is wiped at the start of the next run, so nothing persists across runs or reboots.
 
 ```
 $TMPDIR/
-  radicle-vscode-extension-e2e-home/          <-- shared template; runs the node + httpd
+  rad-e2e-home/          <-- shared template; runs the node + httpd
     .radicle/
       bin/
         rad                                   <-- installed Radicle CLI
@@ -34,10 +34,10 @@ $TMPDIR/
     radicle-httpd.pid                         <-- PID of the running httpd
     radicle-node.log                          <-- node daemon output
     radicle-httpd.log                         <-- httpd daemon output
-  radicle-vscode-extension-e2e-home-0/        <-- worker 0's $HOME (copied from the template)
+  rad-e2e-home-0/        <-- worker 0's $HOME (copied from the template)
     .radicle/
       bin/  config.json  keys/
-  radicle-vscode-extension-e2e-workspace-0/   <-- worker 0's workspace (project under test)
+  rad-e2e-workspace-0/   <-- worker 0's workspace (project under test)
   ...                                         <-- one home-N and workspace-N per worker
 ```
 
@@ -85,7 +85,7 @@ Never read, write, or mutate any real state on the machine running the tests (`~
 The node and httpd daemons write to `radicle-node.log` and `radicle-httpd.log` inside the shared template home (see [The Test Sandbox](#the-test-sandbox)). Tail them during a run to diagnose startup or connection issues:
 
 ```sh
-tail -f $TMPDIR/radicle-vscode-extension-e2e-home/radicle-node.log $TMPDIR/radicle-vscode-extension-e2e-home/radicle-httpd.log
+tail -f $TMPDIR/rad-e2e-home/radicle-node.log $TMPDIR/rad-e2e-home/radicle-httpd.log
 ```
 
 ### WebdriverIO logs
