@@ -4,8 +4,8 @@
 
 [![Sponsor maninak on Liberapay](https://img.shields.io/badge/Liberapay-Donate-F6C915?logo=liberapay&logoColor=black)](https://liberapay.com/maninak/donate)
 
-[![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version-short/radicle-ide-plugins-team.radicle.svg?color=6EA900&label=version)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
-[![Visual Studio Marketplace Downloads](https://vsmarketplacebadges.dev/downloads-short/radicle-ide-plugins-team.radicle.svg?color=55A2EE&label=VS%20Marketplace%20Downloads)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
+[![Visual Studio Marketplace Version](https://flat.badgen.net/vs-marketplace/v/radicle-ide-plugins-team.radicle?color=6EA900&label=version)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
+[![Visual Studio Marketplace Downloads](https://flat.badgen.net/vs-marketplace/d/radicle-ide-plugins-team.radicle?color=55A2EE&label=VS%20Marketplace%20Downloads)](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle)
 [![Open VSX Downloads](https://img.shields.io/open-vsx/dt/radicle-ide-plugins-team/radicle?style=flat&logo=openvsx&logoColor=FFFFFF&label=Open%20VSX%20Downloads&color=C160EF&cacheSeconds=64800)](https://open-vsx.org/extension/radicle-ide-plugins-team/radicle)
 [![rad: - z3Makm6fsQQXmpSFE43DZqwupaEhk](https://img.shields.io/static/v1?label=rad%3A&message=z3Makm6fsQQXmpSFE43DZqwupaEhk&color=6666FF&cacheSeconds=64800)](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk)
 
