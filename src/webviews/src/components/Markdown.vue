@@ -1,10 +1,15 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-import { nextTick, onMounted, onUpdated } from 'vue'
-import Markdown from 'vue3-markdown-it'
+import { type Component, nextTick, onMounted, onUpdated } from 'vue'
+import * as vue3MarkdownItModule from 'vue3-markdown-it'
+import { resolveDefaultExport } from '@/utils/resolveDefaultExport'
 import 'highlight.js/styles/vs2015.css'
 
 defineProps<{ source: string }>()
+
+// `vue3-markdown-it` ships only a UMD build, so depending on the bundler a default
+// import can resolve to the module namespace instead of the component.
+const markdownComponent = resolveDefaultExport(vue3MarkdownItModule) as Component
 // TODO: add control to toggle raw/parsed markdown
 
 function showLangTagOnCodeBlocks() {
@@ -30,7 +35,12 @@ onUpdated(showLangTagOnCodeBlocks)
 </script>
 
 <template>
-  <Markdown :source="source" :emoji="{ shortcuts: {} }" class="parsed-md" />
+  <component
+    :is="markdownComponent"
+    :source="source"
+    :emoji="{ shortcuts: {} }"
+    class="parsed-md"
+  />
 </template>
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
