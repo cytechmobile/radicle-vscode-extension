@@ -102,6 +102,7 @@ describe('pickAndCloneRadicleRepo()', () => {
     // Run the wrapped task so the progress wrapper is transparent to the assertions.
     withProgressMock.mockImplementation((_options: unknown, task: () => unknown) => task())
     getRepoRootMock.mockReturnValue(undefined)
+    delete process.env['RAD_E2E_CLONE_PARENT_DIR']
   })
 
   describe('The repo list', () => {
@@ -233,6 +234,38 @@ describe('pickAndCloneRadicleRepo()', () => {
       await pickAndCloneRadicleRepo()
 
       expect(showLogMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('The e2e clone-destination seam', () => {
+    beforeEach(() => {
+      resolveRepos([heartwood])
+      showQuickPickMock.mockResolvedValue({
+        rid: 'rad:zHEART',
+        label: 'heartwood',
+        description: '',
+      })
+      execRadMock.mockReturnValue({ stdout: '' })
+      showInformationMessageMock.mockResolvedValue(undefined)
+    })
+
+    it('clones into the env-provided folder without opening the native picker', async () => {
+      process.env['RAD_E2E_CLONE_PARENT_DIR'] = '/tmp/e2e-clones'
+
+      await pickAndCloneRadicleRepo()
+      const [args, options] = execRadMock.mock.calls[0]!
+
+      expect(showOpenDialogMock).not.toHaveBeenCalled()
+      expect(args[2]).toBe('/tmp/e2e-clones/heartwood')
+      expect(options.cwd).toBe('/tmp/e2e-clones')
+    })
+
+    it('falls back to the native picker when the env var is unset', async () => {
+      showOpenDialogMock.mockResolvedValue(undefined)
+
+      await pickAndCloneRadicleRepo()
+
+      expect(showOpenDialogMock).toHaveBeenCalled()
     })
   })
 })

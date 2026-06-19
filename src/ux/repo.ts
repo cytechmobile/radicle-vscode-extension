@@ -53,16 +53,21 @@ export async function pickAndCloneRadicleRepo(): Promise<void> {
 
   const repoRoot = getRepoRoot()
   const oneFolderUpFromRepoRoot = repoRoot?.split(sep).slice(0, -1).join(sep)
-  const cloneParentDir = (
-    await window.showOpenDialog({
-      title: `Choose a folder to clone "${repoName}" into`,
-      openLabel: 'Select Repository Location',
-      canSelectMany: false,
-      canSelectFiles: false,
-      canSelectFolders: true,
-      defaultUri: oneFolderUpFromRepoRoot ? Uri.file(oneFolderUpFromRepoRoot) : undefined,
-    })
-  )?.[0]
+  // Test seam: e2e runs cannot drive the native folder picker, so the e2e harness injects the
+  // clone destination through this env var. It is never set in normal use.
+  const e2eCloneParentDirPath = process.env['RAD_E2E_CLONE_PARENT_DIR']
+  const cloneParentDir = e2eCloneParentDirPath
+    ? Uri.file(e2eCloneParentDirPath)
+    : (
+        await window.showOpenDialog({
+          title: `Choose a folder to clone "${repoName}" into`,
+          openLabel: 'Select Repository Location',
+          canSelectMany: false,
+          canSelectFiles: false,
+          canSelectFolders: true,
+          defaultUri: oneFolderUpFromRepoRoot ? Uri.file(oneFolderUpFromRepoRoot) : undefined,
+        })
+      )?.[0]
   if (!cloneParentDir) {
     return
   }

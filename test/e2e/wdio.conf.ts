@@ -1,20 +1,24 @@
 import type { Options } from '@wdio/types'
-import { delimiter } from 'node:path'
+import { delimiter, join } from 'node:path'
 import {
   chromedriverPath,
   emulatedHomePath,
-  getWorkerHomePath,
-  getWorkerNodeHomePath,
-  getWorkerRadicleBinPath,
-  getWorkerWorkspacePath,
+  httpdHost,
   radicleBinPath,
   rootDir,
   sandboxedPath,
   supportedVscodeVersion,
   wdioCachePath,
   wdioVideoPath,
-} from './constants/config'
+} from './constants'
 import { provisionChromeDriver } from './helpers/chromedriver'
+import {
+  getWorkerHomePath,
+  getWorkerHttpdPort,
+  getWorkerNodeHomePath,
+  getWorkerRadicleBinPath,
+  getWorkerWorkspacePath,
+} from './helpers/paths'
 import {
   emulateRadCliUninstalled,
   setupTestSandbox,
@@ -51,7 +55,11 @@ const reporters: Options.Testrunner['reporters'] = shouldRecordVideo
   ? ['spec', ['video', { outputDir: wdioVideoPath }]]
   : ['spec']
 
-const e2eSpecs = ['./specs/onboarding.spec.ts', './specs/settings.spec.ts']
+const e2eSpecs = [
+  './specs/onboarding.spec.ts',
+  './specs/settings.spec.ts',
+  './specs/clone.spec.ts',
+]
 
 function getWorkerIndexFromSpecs(specs: string[]): number {
   const matchedIndex = e2eSpecs.findIndex((spec) =>
@@ -72,29 +80,50 @@ export const config: Options.Testrunner = {
       transpileOnly: true,
     },
   },
-  capabilities: e2eSpecs.map((spec, workerIndex) => ({
-    'browserName': 'vscode',
-    'browserVersion': supportedVscodeVersion,
-    'wdio:vscodeOptions': {
-      extensionPath: rootDir,
-      workspacePath: getWorkerWorkspacePath(workerIndex),
-      userSettings: {
-        'extensions.autoCheckUpdates': false,
-        'extensions.autoUpdate': false,
+  capabilities: e2eSpecs.map((spec, workerIndex) => {
+    const userSettings: Record<string, string | number | boolean | object> = {
+      'extensions.autoCheckUpdates': false,
+      'extensions.autoUpdate': false,
+    }
+    // The clone spec mutates the network, so it talks to its own worker-httpd (brought up in
+    // the spec's `before`) rather than the shared read-only one. Set at launch so the
+    // extension resolves it during activation, instead of depending on a runtime config
+    // change landing.
+    if (spec.endsWith('clone.spec.ts')) {
+      userSettings['radicle.advanced.httpApiEndpoint'] =
+        `http://${httpdHost}:${getWorkerHttpdPort(workerIndex)}`
+      // The extension runs `rad clone` in the extension host, whose PATH and HOME are
+      // platform-dependent: on macOS, VS Code resolves the login shell's environment, which
+      // omits the sandbox bin dir, so `rad` is not found and the default node home is wrong.
+      // Pin the binary and node home so the clone uses this worker's running, seeded node.
+      userSettings['radicle.advanced.pathToRadBinary'] = join(
+        getWorkerRadicleBinPath(workerIndex),
+        'rad',
+      )
+      userSettings['radicle.advanced.pathToNodeHome'] = getWorkerNodeHomePath(workerIndex)
+    }
+
+    return {
+      'browserName': 'vscode',
+      'browserVersion': supportedVscodeVersion,
+      'wdio:vscodeOptions': {
+        extensionPath: rootDir,
+        workspacePath: getWorkerWorkspacePath(workerIndex),
+        userSettings,
+        vscodeArgs: {
+          'disable-extensions': true,
+          'disable-workspace-trust': true,
+          'disable-renderer-backgrounding': true,
+          'disable-backgrounding-occluded-windows': true,
+          'disable-background-timer-throttling': true,
+        },
       },
-      vscodeArgs: {
-        'disable-extensions': true,
-        'disable-workspace-trust': true,
-        'disable-renderer-backgrounding': true,
-        'disable-backgrounding-occluded-windows': true,
-        'disable-background-timer-throttling': true,
+      'wdio:chromedriverOptions': {
+        binary: chromedriverPath,
       },
-    },
-    'wdio:chromedriverOptions': {
-      binary: chromedriverPath,
-    },
-    'specs': [spec],
-  })),
+      'specs': [spec],
+    }
+  }),
   logLevel: 'warn',
   waitforTimeout: 10000,
   services: [['vscode', { cachePath: wdioCachePath }]],
@@ -136,6 +165,7 @@ export const config: Options.Testrunner = {
     delete process.env['RAD_HOME']
     process.env['PATH'] = `${workerBin}${delimiter}${pathWithoutSandboxBins}`
     process.env['RAD_E2E_WORKER_ID'] = cid
+    process.env['RAD_E2E_WORKER_INDEX'] = String(workerIndex)
     process.env['RAD_E2E_HOME'] = workerHome
     process.env['RAD_E2E_NODE_HOME'] = getWorkerNodeHomePath(workerIndex)
     process.env['RAD_E2E_WORKSPACE'] = getWorkerWorkspacePath(workerIndex)

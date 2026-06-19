@@ -4,7 +4,7 @@
 
 ### ✨ Highlights
 
- This is primarily a maintenance release. It resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully e2e testing infrastructure and tests for it as well as a drastically overhauled local development loop.
+ This is primarily a maintenance release. It resolves serious technical debt arising partially from the maintenance gap which resulted in dependency rot. Moreover it brings a powerful, new, fully end-to-end testing infrastructure, a new unit testing infrastructure and tests for them as well as a drastically overhauled local development loop.
 
 All of the above establish a solid foundation for future development and a more comfortable and reassuring environment for current and new contributors.
 
@@ -46,9 +46,10 @@ All of the above establish a solid foundation for future development and a more 
 - **e2e:** support multiple isolated test suits running concurrently, each with their own `RAD_HOME`, `rad`, storage, `httpd`, etc
 - **e2e:** support testing in both Linux and MacOS environments
 - **e2e:** take photos and videos of failed test runs and, when on CI, upload them to artifacts
-- **settings:** cover the advanced settings with e2e tests: resolving the Radicle CLI from `pathToRadBinary`, the identity from `pathToNodeHome` (including each being created at the configured location after the fact), and the HTTP API connection from `httpApiEndpoint`
+- **settings:** cover the extension's advanced settings with e2e tests: resolving the Radicle CLI from `pathToRadBinary`, the identity from `pathToNodeHome` (including each being created at the configured location after the fact), and the HTTP API connection from `httpApiEndpoint`
 - **unit:** set up new infrastructure for unit testing the extension's logic
 - **commands:** cover `radicle.clone` with unit tests
+- **commands:** cover `radicle.clone` flow with e2e tests
 
 ### 📖 Documentation
 
