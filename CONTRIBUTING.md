@@ -162,3 +162,29 @@ npx vsce package --no-dependencies
 ```
 
 This should generate a .vsix file which you can then import into VS Code (`Ctrl + Shift + P` + "install vsix").
+
+## Publishing
+
+### Microsoft Marketplace
+
+Get a [Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#_get-a-personal-access-token) and login with it:
+
+```sh
+npx vsce login radicle-ide-plugins-team
+```
+
+Make sure you have checked out the correct branch, choose if you want to increment patch, minor or major version and run:
+
+```sh
+npx vsce publish patch --no-dependencies
+```
+
+### Open VSX Registry
+
+After having completed the above you should have a packaged version of the extension at the repo root directory named like "radicle-0.6.1.vsix". If not, [repackage](#packaging-locally-from-source).
+
+Then get an [Open VSX access](https://github.com/eclipse-openvsx/openvsx/wiki/Publishing-Extensions#3-create-an-access-token) token.
+
+```sh
+npx publish radicle-[x.y.z].vsix -p my-openvsx-token
+```
