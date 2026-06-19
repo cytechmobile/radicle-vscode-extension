@@ -35,3 +35,7 @@ jobs:
 
     - name: Test Typings
       run: pnpm run test:typings
+
+    - name: Test Unit
+      run: pnpm run test:unit
+

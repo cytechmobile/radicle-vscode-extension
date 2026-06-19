@@ -34,19 +34,21 @@ All of the above establish a solid foundation for future development and a more 
 
 ### 🤖 CI
 
-- **e2e:** set up new infrastructure capable of automated completely end-to-end testing. It uses the official script to install a real Radicle node, powering the latest extension build, which is running in an actual VS Code. The test runner can manipulate VS Code as a real user would and can assert behavior and state even as deep as extension webviews.
 - **e2e:** implement a workflow to test in CI
-- **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
-- **e2e:** all of the above, but with multiple tests suits running concurrently, each with their own `RAD_HOME`, `rad`, storage, `httpd`, etc
-- **e2e:** support testing in both Linux and MacOS environments
-- **e2e:** take photos and videos of failed test runs and, when on CI, upload them to artifacts
-- **ci:** cache node_modules for subsequent runs
+- **ci:** cache node_modules, including the large fetched chromium drivers for subsequent e2e runs
 - **ci:** update all workflows and their actions to use at least Node.js v24
 
 ### ☑️ Tests
 
+- **e2e:** set up new infrastructure capable of automated completely end-to-end testing. It uses the official script to install a real Radicle node, powering the latest extension build, which is running in an actual VS Code. The test runner can manipulate VS Code as a real user would and can assert behavior and state even as deep as extension webviews.
+- **e2e:** support running the tests locally too, beyond just on CI. Without the option to use containerization given the rendering and OS constraints, a bespoke e2e harness was architected in such a way that a maintainer's existing Radicle installation and storage would remain unaffected and protected while emulating the necessary environment for the testing fixtures (where we un-/install radicle, rad-initialize repos, create patches, etc). More info in the [e2e Readme](./test/e2e/README.md).
 - **onboarding:** cover various paths of the flow with e2e tests
+- **e2e:** support multiple isolated test suits running concurrently, each with their own `RAD_HOME`, `rad`, storage, `httpd`, etc
+- **e2e:** support testing in both Linux and MacOS environments
+- **e2e:** take photos and videos of failed test runs and, when on CI, upload them to artifacts
 - **settings:** cover the advanced settings with e2e tests: resolving the Radicle CLI from `pathToRadBinary`, the identity from `pathToNodeHome` (including each being created at the configured location after the fact), and the HTTP API connection from `httpApiEndpoint`
+- **unit:** set up new infrastructure for unit testing the extension's logic
+- **commands:** cover `radicle.clone` with unit tests
 
 ### 📖 Documentation
 
