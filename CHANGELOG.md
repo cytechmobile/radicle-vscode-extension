@@ -1,4 +1,4 @@
-# Radicle VS Code Extension Change Log-
+# Radicle VS Code Extension Change Log
 
 ## **v0.6.1** (January 19th, 2026)
 
