@@ -5,10 +5,16 @@
 ### 🩹 Fixes
 
 - **markdown:** render patch titles, descriptions and comments again. All markdown rendering regressed due to last release's Vite upgrade not liking the outdated UMD module system used by `vue3-markdown-it`, which itself has been abandoned by its devs.
+- **config:** support resolving and validating the Radicle CLI binary on Windows. `pathToRadBinary` now accepts Windows drive-letter paths such as `C:\Users\me\.cargo\bin\rad.exe` (forward slashes work too), instead of flagging them as invalid and refusing a real `rad.exe`. Aliased resolution uses `where` on Windows in place of the POSIX-only `which`, and keeps the first match when several copies of `rad` are on `PATH`, so a `rad.exe` already available in the shell is recognized
 
 ### ☑️ Tests
 
 - **markdown:** add regression tests ensuring markdown rendering in webviews remains fixed
+- **config:** cover the `pathToRadBinary` validation pattern with unit tests
+
+### ❤️ Code Contributors
+
+- justarandomgeek (`did:key:z6Mkum88mKcX2sARx8R18RZUmAdakPFbXtdHzn8JNVEDqkxj`)
 
 ---
 
