@@ -1,5 +1,17 @@
 # Radicle VS Code Extension Change Log
 
+# _(WIP, yet unreleased version)_
+
+### 🩹 Fixes
+
+- **markdown:** render patch titles, descriptions and comments again. All markdown rendering regressed due to last release's Vite upgrade not liking the outdated UMD module system used by `vue3-markdown-it`, which itself has been abandoned by its devs.
+
+### ☑️ Tests
+
+- **markdown:** add regression tests ensuring markdown rendering in webviews remains fixed
+
+---
+
 ## **v0.6.1** (June 19th, 2026)
 
 ### ✨ Highlights
@@ -55,7 +67,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - **repo:** repair all broken links and miscellaneous references to now moved radicle.xyz and app.radicle.xyz
 
------
+---
 
 ## **v0.6.0** (November 9th, 2024)
 
@@ -127,7 +139,7 @@ All of the above establish a solid foundation for future development and a more 
 - **readme:** add badge advertising that we're co-publishing in Open VSX and the count of downloads in that registry
 - **readme:** use cached queries to shields.io to reduce the chance of of hitting the API query limits
 
------
+---
 
 ## **v0.5.0** (July 22nd, 2024)
 
@@ -264,7 +276,7 @@ All of the above establish a solid foundation for future development and a more 
 - **contributing:** add new "Copywriting" section under "Conventions" with the directives followed when writing user-facing copy for this repo
 - **readme:** show correct RID of the Radicle VS Code repo in the rad badge
 
------
+---
 
 ## **v0.4.1** (May 1st, 2024)
 
@@ -326,7 +338,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - Lorenz Leutgeb (`lorenz`, `did:key:z6MkkPvBfjP4bQmco5Dm7UGsX2ruDBieEHi8n9DVJWX5sTEz`)
 
------
+---
 
 ## **v0.4.0** (Feb 28th, 2024)
 
@@ -558,7 +570,7 @@ All of the above establish a solid foundation for future development and a more 
 - **contributing:** document recommended extensions for development with VS Code in [.vscode/extensions.json](.vscode/extensions.json) and add related section in the repo's contribution guide.
 - update all references using the now deprecated term "track" to the new term "seed" aross our docs
 
------
+---
 
 ## **v0.3.2** (Nov 29th, 2023)
 
@@ -586,7 +598,7 @@ All of the above establish a solid foundation for future development and a more 
 - **contributing:** document how to package locally from source and import into VS Code
 - fix some screenshots that were getting stretched to incorrect ratios
 
------
+---
 
 ## **v0.3.1** (Oct 3rd, 2023)
 
@@ -594,7 +606,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - **cli:** migrate to using the new flag for sourcing the current Project's RID, which handles the breaking Radicle CLI change, resulting in Patches View getting stuck with `Unable to fetch Radicle patches for non-Radicle-initialized workspace`. ([#90](https://github.com/cytechmobile/radicle-vscode-extension/issues/90))
 
------
+---
 
 ## **v0.3.0** (Oct 2nd, 2023)
 
@@ -640,7 +652,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - **readme:** use up-to-date screenshots for Integrated Authentication features ([#67](https://github.com/cytechmobile/radicle-vscode-extension/issues/67))
 
------
+---
 
 ## **v0.2.2** (July 29th, 2023)
 
@@ -664,7 +676,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - **readme:** update screenshots to show the UI updated with the new branding ([#56](https://github.com/cytechmobile/radicle-vscode-extension/issues/56))
 
------
+---
 
 ## **v0.2.1** (June 29th, 2023)
 
@@ -682,7 +694,7 @@ All of the above establish a solid foundation for future development and a more 
 
 - **readme:** use up-to-date screenshot of "non-rad-initialized repo" Welcome View in Onboarding examples ([#52](https://github.com/cytechmobile/radicle-vscode-extension/issues/52))
 
------
+---
 
 ## **v0.2.0** (June 28th, 2023)
 
@@ -742,7 +754,7 @@ All of the above establish a solid foundation for future development and a more 
 - **changelog:** add release date to title of each version and separators above them ([#28](https://github.com/cytechmobile/radicle-vscode-extension/issues/28))
 - **changelog:** reference related PRs/commits for each change ([#48](https://github.com/cytechmobile/radicle-vscode-extension/issues/48))
 
------
+---
 
 ## **v0.1.2** (April 25th, 2023)
 
@@ -761,7 +773,7 @@ All of the above establish a solid foundation for future development and a more 
 - **readme:** fix broken reference to image showcasing integrated logging feature
 - **changelog:** prefix changes with context and remove quotations formatting
 
------
+---
 
 ## **v0.1.1** (April 5th, 2023)
 
@@ -775,7 +787,7 @@ All of the above establish a solid foundation for future development and a more 
 - **readme:** revamp with simpler feature list, visual examples of each and a short definition of the Radicle network
 - **changelog:** polishing of enhancements list of v0.0.1
 
------
+---
 
 ## **v0.1.0** (April 5th, 2023)
 
@@ -793,7 +805,7 @@ Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as
 
 - **readme:** update and partially extract content to CONTRIBUTING
 
------
+---
 
 ## **v0.0.2** (April 5th, 2023)
 
@@ -805,7 +817,7 @@ Please refer to [v0.0.1](#v001) for the shiny features list ✨ (bear with us as
 
 - **changelog:** introduce Changelog
 
------
+---
 
 ## **v0.0.1** (April 5th, 2023)
 
