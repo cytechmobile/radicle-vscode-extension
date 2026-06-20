@@ -1,10 +1,10 @@
 # Radicle VS Code Extension Change Log
 
-# _(WIP, yet unreleased version)_
+## **v0.6.2** (June 20th, 2026)
 
 ### 🩹 Fixes
 
-- **markdown:** render patch titles, descriptions and comments again. All markdown rendering regressed due to last release's Vite upgrade not liking the outdated UMD module system used by `vue3-markdown-it`, which itself has been abandoned by its devs.
+- **markdown:** restore rendering of patch titles, descriptions, and comments. A recent Vite upgrade broke markdown rendering because it is incompatible with the old UMD module format used by `vue3-markdown-it`, which is no longer maintained.
 - **config:** support resolving and validating the Radicle CLI binary on Windows. `pathToRadBinary` now accepts Windows drive-letter paths such as `C:\Users\me\.cargo\bin\rad.exe` (forward slashes work too), instead of flagging them as invalid and refusing a real `rad.exe`. Aliased resolution uses `where` on Windows in place of the POSIX-only `which`, and keeps the first match when several copies of `rad` are on `PATH`, so a `rad.exe` already available in the shell is recognized
 
 ### ☑️ Tests
