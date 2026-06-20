@@ -15,7 +15,7 @@ A VS Code extension bringing support for the Radicle network to your IDE.
 
 > **NOTE:** Requires [Radicle HTTP Daemon](https://radicle.dev/download#radicle-httpd-release-name) >=0.17.0
 
-> **NOTE:** The extension currently offers a limited feature set. Removal of HTTPD as a dependency is next up. Beyond that comes deeper integration of Patches and then Issues are next up.
+> **NOTE:** The extension currently offers a limited feature set. Removal of HTTPD as a dependency is next up. Beyond that, deeper integration of Patches and then Issues is planned.
 
 ## Features
 
@@ -127,7 +127,7 @@ If this extension saves you time, or you would like to see it keep getting bette
 
 - 🌱 Seed this repo on [Radicle](https://app.radicle.at/nodes/seed.radicle.at/rad:z3Makm6fsQQXmpSFE43DZqwupaEhk) and star it on [GitHub](https://github.com/cytechmobile/radicle-vscode-extension)
 - 📣 Share it with colleagues, or leave a rating on the [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=radicle-ide-plugins-team.radicle) or [Open VSX](https://open-vsx.org/extension/radicle-ide-plugins-team/radicle)
-- 💛 Chip in a recurring micro-donation on Liberapay, if you can comfortably spare it.
+- 💛 Chip in on Liberapay with a micro-donation, if you can comfortably spare it.
 
 [![Sponsor maninak on Liberapay](https://img.shields.io/badge/Liberapay-Donate-F6C915?logo=liberapay&logoColor=black)](https://liberapay.com/maninak/donate)
 
